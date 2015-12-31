@@ -119,16 +119,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define KILLER_PATTERN_LENGTH		32
 #define EXT_ACCESS_BURST_LENGTH		8
 
-#define IS_ACTIVE(if_mask , if_id) \
-	((if_mask) & (1 << (if_id)))
+#define IS_ACTIVE(mask, id) \
+	((mask) & (1 << (id)))
+
 #define VALIDATE_ACTIVE(mask, id)		\
 	{					\
 	if (IS_ACTIVE(mask, id) == 0)		\
 		continue;			\
 	}
 
+#define IS_IF_ACTIVE(if_mask, if_id) \
+	((if_mask) & (1 << (if_id)))
+
+#define VALIDATE_IF_ACTIVE(mask, id)		\
+	{					\
+	if (IS_IF_ACTIVE(mask, id) == 0)	\
+		continue;			\
+	}
+
 #define GET_TOPOLOGY_NUM_OF_BUSES() \
 	(ddr3_get_topology_map()->num_of_bus_per_interface)
+
+#define IS_BUS_ACTIVE(if_mask , if_id) \
+	(((if_mask) >> (if_id)) & 1)
+
+#define VALIDATE_BUS_ACTIVE(mask, id)		\
+	{					\
+	if (IS_BUS_ACTIVE(mask, id) == 0)	\
+		continue;			\
+	}
 
 #define DDR3_IS_ECC_PUP3_MODE(if_mask) \
 	(((if_mask) == 0xb) ? 1 : 0)

@@ -436,7 +436,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 		/* Mask disabled buses */
 		for (pup_id = 0; pup_id < tm->num_of_bus_per_interface;
 		     pup_id++) {
-			if (IS_ACTIVE(tm->bus_act_mask, pup_id) == 1)
+			if (IS_BUS_ACTIVE(tm->bus_act_mask, pup_id) == 1)
 				continue;
 
 			for (index_cnt = (mask_dq_num_of_regs - pup_id * 8);
@@ -485,8 +485,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 
 	/* Training "Done ?" */
 	for (index_cnt = 0; index_cnt < MAX_INTERFACE_NUM; index_cnt++) {
-		if (IS_ACTIVE(tm->if_act_mask, index_cnt) == 0)
-			continue;
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, index_cnt);
 
 		if (interface_mask & (1 << index_cnt)) {
 			/* need to check results for this Dunit */
@@ -523,8 +522,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 	/* Training "Done ?" */
 	/* Training "Pass ?" */
 	for (index_cnt = 0; index_cnt < MAX_INTERFACE_NUM; index_cnt++) {
-		if (IS_ACTIVE(tm->if_act_mask, index_cnt) == 0)
-			continue;
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, index_cnt);
 
 		if (interface_mask & (1 << index_cnt)) {
 			/* need to check results for this Dunit */
@@ -735,7 +733,7 @@ int ddr3_tip_read_training_result(u32 dev_num, u32 if_id,
 	}
 
 	for (pup_cnt = start_pup; pup_cnt <= end_pup; pup_cnt++) {
-		VALIDATE_ACTIVE(tm->bus_act_mask, pup_cnt);
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup_cnt);
 		DEBUG_TRAINING_IP_ENGINE(
 			DEBUG_LEVEL_TRACE,
 			("if_id %d start_pup %d end_pup %d pup_cnt %d\n",
@@ -832,12 +830,12 @@ int ddr3_tip_load_all_pattern_to_mem(u32 dev_num)
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		training_result[training_stage][if_id] = TEST_SUCCESS;
 	}
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		/* enable single cs */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
@@ -921,8 +919,7 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 				      pattern_table[pattern].start_addr);
 
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
-		if (IS_ACTIVE(tm->if_act_mask, if_id) == 0)
-			continue;
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1498,
@@ -937,7 +934,7 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 	mdelay(1);
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		CHECK_STATUS(is_odpg_access_done(dev_num, if_id));
 	}
 
@@ -1060,7 +1057,7 @@ int ddr3_tip_ip_training_wrapper_int(u32 dev_num,
 
 		for (interface_num = start_if; interface_num <= end_if;
 		     interface_num++) {
-			VALIDATE_ACTIVE(tm->if_act_mask, interface_num);
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, interface_num);
 			cs_num = 0;
 			CHECK_STATUS(ddr3_tip_read_training_result
 				     (dev_num, interface_num, pup_access_type,
@@ -1127,10 +1124,10 @@ int ddr3_tip_ip_training_wrapper(u32 dev_num, enum hws_access_type access_type,
 
 	for (interface_cnt = start_if; interface_cnt <= end_if;
 	     interface_cnt++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, interface_cnt);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, interface_cnt);
 		for (pup_id = 0;
 		     pup_id <= (tm->num_of_bus_per_interface - 1); pup_id++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, pup_id);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup_id);
 			if (result_type == RESULT_PER_BIT)
 				bit_end = BUS_WIDTH_IN_BITS - 1;
 			else
@@ -1200,7 +1197,7 @@ int ddr3_tip_ip_training_wrapper(u32 dev_num, enum hws_access_type access_type,
 			for (pup_id = 0;
 			     pup_id <= (tm->num_of_bus_per_interface - 1);
 			     pup_id++) {
-				VALIDATE_ACTIVE(tm->bus_act_mask, pup_id);
+				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup_id);
 
 				if (bit_bit_mask[pup_id] == 0)
 					continue;
@@ -1235,7 +1232,7 @@ int ddr3_tip_ip_training_wrapper(u32 dev_num, enum hws_access_type access_type,
 			for (pup_id = 0;
 			     pup_id <= (tm->num_of_bus_per_interface - 1);
 			     pup_id++) {
-				VALIDATE_ACTIVE(tm->bus_act_mask, pup_id);
+				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup_id);
 
 				if (bit_bit_mask[pup_id] == 0)
 					continue;
@@ -1270,10 +1267,10 @@ int ddr3_tip_load_phy_values(int b_load)
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (bus_cnt = 0; bus_cnt < GET_TOPOLOGY_NUM_OF_BUSES();
 		     bus_cnt++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, bus_cnt);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
 			if (b_load == 1) {
 				CHECK_STATUS(ddr3_tip_bus_read
 					     (dev_num, if_id,
@@ -1371,11 +1368,11 @@ int ddr3_tip_training_ip_test(u32 dev_num, enum hws_training_result result_type,
 
 			for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1;
 			     if_id++) {
-				VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+				VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 				for (pup_id = 0; pup_id <
 					     tm->num_of_bus_per_interface;
 				     pup_id++) {
-					VALIDATE_ACTIVE(tm->bus_act_mask,
+					VALIDATE_BUS_ACTIVE(tm->bus_act_mask,
 							pup_id);
 					CHECK_STATUS
 						(ddr3_tip_read_training_result

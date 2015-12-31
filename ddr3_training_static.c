@@ -202,10 +202,10 @@ int ddr3_tip_static_round_trip_arr_build(u32 dev_num,
 	bus_per_interface = GET_TOPOLOGY_NUM_OF_BUSES();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (bus_index = 0; bus_index < bus_per_interface;
 		     bus_index++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, bus_index);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
 			global_bus = (if_id * bus_per_interface) + bus_index;
 
 			/* calculate total trip delay (package and board) */
@@ -259,7 +259,7 @@ int ddr3_tip_write_leveling_static_config(u32 dev_num, u32 if_id,
 	bus_start_index = if_id * bus_per_interface;
 	for (bus_index = bus_start_index;
 	     bus_index < (bus_start_index + bus_per_interface); bus_index++) {
-		VALIDATE_ACTIVE(tm->bus_act_mask, bus_index);
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
 		phase = round_trip_delay_arr[bus_index] / (32 * adll_period);
 		adll = (round_trip_delay_arr[bus_index] -
 			(phase * 32 * adll_period)) / adll_period;
@@ -343,7 +343,7 @@ int ddr3_tip_read_leveling_static_config(u32 dev_num,
 	for (bus_index = bus_start_index;
 	     bus_index < (bus_start_index + bus_per_interface);
 	     bus_index += 2) {
-		VALIDATE_ACTIVE(tm->bus_act_mask, bus_index);
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
 		cs = chip_select_map[
 			tm->interface_params[if_id].as_bus_params[
 				(bus_index % 4)].cs_bitmask].cs_num;
@@ -407,7 +407,7 @@ int ddr3_tip_read_leveling_static_config(u32 dev_num,
 	}
 
 	for (bus_index = 0; bus_index < bus_per_interface; bus_index++) {
-		VALIDATE_ACTIVE(tm->bus_act_mask, bus_index);
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
 		CHECK_STATUS(ddr3_tip_bus_read_modify_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
 			      bus_index, DDR_PHY_DATA, 0x3, data3, 0x1f));
@@ -466,7 +466,7 @@ int ddr3_tip_run_static_alg(u32 dev_num, enum hws_ddr_freq freq)
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		/* check if the interface is enabled */
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		/*
 		 * Static frequency is defined according to init-frequency
 		 * (not target)
@@ -599,12 +599,12 @@ int ddr3_tip_configure_phy(u32 dev_num)
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		/* check if the interface is enabled */
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 
 		for (phy_id = 0;
 		     phy_id < tm->num_of_bus_per_interface;
 		     phy_id++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, phy_id);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, phy_id);
 			/* Vref & clamp */
 			CHECK_STATUS(ddr3_tip_bus_read_modify_write
 				     (dev_num, ACCESS_TYPE_UNICAST,

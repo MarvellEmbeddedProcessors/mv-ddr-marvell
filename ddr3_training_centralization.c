@@ -173,7 +173,7 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 	u8 cons_tap = (mode == CENTRAL_TX) ? (64) : (0);
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		/* save current cs enable reg val */
 		CHECK_STATUS(ddr3_tip_if_read
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
@@ -196,10 +196,10 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 
 	/* DB initialization */
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (bus_id = 0;
 		     bus_id < tm->num_of_bus_per_interface; bus_id++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, bus_id);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 			centralization_state[if_id][bus_id] = 0;
 			bus_end_window[mode][if_id][bus_id] =
 				(max_win_size - 1) + cons_tap;
@@ -225,11 +225,11 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 					     PARAM_NOT_CARE, training_result);
 
 		for (if_id = start_if; if_id <= end_if; if_id++) {
-			VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			for (bus_id = 0;
 			     bus_id <= tm->num_of_bus_per_interface - 1;
 			     bus_id++) {
-				VALIDATE_ACTIVE(tm->bus_act_mask, bus_id);
+				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 
 				for (search_dir_id = HWS_LOW2HIGH;
 				     search_dir_id <= HWS_HIGH2LOW;
@@ -437,15 +437,14 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 	}			/* pattern */
 
 	for (if_id = start_if; if_id <= end_if; if_id++) {
-		if (IS_ACTIVE(tm->if_act_mask, if_id) == 0)
-			continue;
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 
 		is_if_fail = 0;
 		flow_result[if_id] = TEST_SUCCESS;
 
 		for (bus_id = 0;
 		     bus_id <= (tm->num_of_bus_per_interface - 1); bus_id++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, bus_id);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 
 			/* continue only if lock */
 			if (centralization_state[if_id][bus_id] != 1) {
@@ -572,7 +571,7 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		/* restore cs enable value */
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST,
 					       if_id, CS_ENABLE_REG,
 					       cs_enable_reg_val[if_id],
@@ -608,7 +607,7 @@ int ddr3_tip_special_rx(u32 dev_num)
 	ddr3_tip_special_rx_run_once_flag = 1;
 
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		/* save current cs enable reg val */
 		CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST,
 					      if_id, CS_ENABLE_REG,
@@ -636,10 +635,10 @@ int ddr3_tip_special_rx(u32 dev_num)
 				     PARAM_NOT_CARE, training_result);
 
 	for (if_id = start_if; if_id <= end_if; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (pup_id = 0;
 		     pup_id <= tm->num_of_bus_per_interface; pup_id++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, pup_id);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup_id);
 
 			for (search_dir_id = HWS_LOW2HIGH;
 			     search_dir_id <= HWS_HIGH2LOW;
@@ -793,10 +792,10 @@ int ddr3_tip_print_centralization_result(u32 dev_num)
 	printf("Centralization Results\n");
 	printf("I/F0 Result[0 - success 1-fail 2 - state_2 3 - state_3] ...\n");
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (bus_id = 0; bus_id < tm->num_of_bus_per_interface;
 		     bus_id++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, bus_id);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 			printf("%d ,\n", centralization_state[if_id][bus_id]);
 		}
 	}

@@ -361,7 +361,7 @@ static int calc_cs_num(u32 dev_num, u32 if_id, u32 *cs_num)
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (bus_cnt = 0; bus_cnt < GET_TOPOLOGY_NUM_OF_BUSES(); bus_cnt++) {
-		VALIDATE_ACTIVE(tm->bus_act_mask, bus_cnt);
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
 		cs_count = 0;
 		cs_bitmask = tm->interface_params[if_id].
 			as_bus_params[bus_cnt].cs_bitmask;
@@ -417,14 +417,14 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 
 	if (generic_init_controller == 1) {
 		for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-			VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE,
 					  ("active IF %d\n", if_id));
 			mem_mask = 0;
 			for (bus_index = 0;
 			     bus_index < GET_TOPOLOGY_NUM_OF_BUSES();
 			     bus_index++) {
-				VALIDATE_ACTIVE(tm->bus_act_mask, bus_index);
+				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
 				mem_mask |=
 					tm->interface_params[if_id].
 					as_bus_params[bus_index].mirror_enable_bitmask;
@@ -558,7 +558,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 			for (bus_cnt = 0;
 			     bus_cnt < GET_TOPOLOGY_NUM_OF_BUSES();
 			     bus_cnt++) {
-				VALIDATE_ACTIVE(tm->bus_act_mask, bus_cnt);
+				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
 				cs_mask |=
 					tm->interface_params[if_id].
 					as_bus_params[bus_cnt].cs_bitmask;
@@ -723,7 +723,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 	}
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		CHECK_STATUS(ddr3_tip_rank_control(dev_num, if_id));
 
 		if (init_cntr_prm->do_mrs_phy) {
@@ -774,7 +774,7 @@ int hws_ddr3_tip_load_topology_map(u32 dev_num, struct hws_topology_map *tm)
 	 * according to speedbin tables
 	 */
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		speed_bin_index =
 			tm->interface_params[if_id].speed_bin_index;
 		/* TBD memory frequency of interface 0 only is used ! */
@@ -811,7 +811,7 @@ static int ddr3_tip_rank_control(u32 dev_num, u32 if_id)
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (bus_cnt = 1; bus_cnt < GET_TOPOLOGY_NUM_OF_BUSES(); bus_cnt++) {
-		VALIDATE_ACTIVE(tm->bus_act_mask, bus_cnt);
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
 		if ((tm->interface_params[if_id].
 		     as_bus_params[0].cs_bitmask !=
 		     tm->interface_params[if_id].
@@ -846,7 +846,7 @@ static int ddr3_tip_pad_inv(u32 dev_num, u32 if_id)
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (bus_cnt = 0; bus_cnt < GET_TOPOLOGY_NUM_OF_BUSES(); bus_cnt++) {
-		VALIDATE_ACTIVE(tm->bus_act_mask, bus_cnt);
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
 		if (tm->interface_params[if_id].
 		    as_bus_params[bus_cnt].is_dqs_swap == 1) {
 			/* dqs swap */
@@ -1034,7 +1034,7 @@ int ddr3_tip_if_polling(u32 dev_num, enum hws_access_type access_type,
 
 	for (interface_num = start_if; interface_num <= end_if; interface_num++) {
 		/* polling bit 3 for n times */
-		VALIDATE_ACTIVE(tm->if_act_mask, interface_num);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, interface_num);
 
 		is_if_fail = 0;
 		for (poll_cnt = 0; poll_cnt < poll_tries; poll_cnt++) {
@@ -1077,7 +1077,7 @@ int ddr3_tip_bus_read(u32 dev_num, u32 if_id,
 	if (phy_access == ACCESS_TYPE_MULTICAST) {
 		for (bus_index = 0; bus_index < GET_TOPOLOGY_NUM_OF_BUSES();
 		     bus_index++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, bus_index);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
 			CHECK_STATUS(ddr3_tip_bus_access
 				     (dev_num, ACCESS_TYPE_UNICAST,
 				      if_id, ACCESS_TYPE_UNICAST,
@@ -1158,7 +1158,7 @@ static int ddr3_tip_bus_access(u32 dev_num, enum hws_access_type interface_acces
 
 	/* polling for read/write execution done */
 	for (if_id = start_if; if_id <= end_if; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		CHECK_STATUS(is_bus_access_done
 			     (dev_num, if_id, PHY_REG_FILE_ACCESS, 31));
 	}
@@ -1219,7 +1219,7 @@ int ddr3_tip_bus_read_modify_write(u32 dev_num, enum hws_access_type access_type
 	}
 
 	for (if_id = start_if; if_id <= end_if; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		CHECK_STATUS(ddr3_tip_bus_read
 			     (dev_num, if_id, ACCESS_TYPE_UNICAST, phy_id,
 			      phy_type, reg_addr, &data_val));
@@ -1263,7 +1263,7 @@ int adll_calibration(u32 dev_num, enum hws_access_type access_type,
 	}
 
 	for (bus_cnt = 0; bus_cnt < GET_TOPOLOGY_NUM_OF_BUSES(); bus_cnt++) {
-		VALIDATE_ACTIVE(tm->bus_act_mask, bus_cnt);
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
 		CHECK_STATUS(ddr3_tip_bus_read_modify_write
 			     (dev_num, access_type, if_id, bus_cnt,
 			      DDR_PHY_DATA, BW_PHY_REG,
@@ -1337,7 +1337,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 	/* speed bin can be different for each interface */
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		/* cs enable is active low */
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		cs_mask[if_id] = CS_BIT_MASK;
 		training_result[training_stage][if_id] = TEST_SUCCESS;
 		ddr3_tip_calc_cs_mask(dev_num, if_id, effective_cs,
@@ -1350,8 +1350,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 	 * and loop the unicast access functions
 	 */
 	for (if_id = start_if; if_id <= end_if; if_id++) {
-		if (IS_ACTIVE(tm->if_act_mask, if_id) == 0)
-			continue;
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 
 		flow_result[if_id] = TEST_SUCCESS;
 		speed_bin_index =
@@ -1386,7 +1385,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		mem_mask = 0;
 		for (bus_index = 0; bus_index < GET_TOPOLOGY_NUM_OF_BUSES();
 		     bus_index++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, bus_index);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
 			mem_mask |=
 				tm->interface_params[if_id].
 				as_bus_params[bus_index].mirror_enable_bitmask;
@@ -1515,7 +1514,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		/* TBD check milo5 using device ID ? */
 		for (bus_cnt = 0; bus_cnt < GET_TOPOLOGY_NUM_OF_BUSES();
 		     bus_cnt++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, bus_cnt);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
 			CHECK_STATUS(ddr3_tip_bus_read_modify_write
 				     (dev_num, ACCESS_TYPE_UNICAST,
 				      if_id, bus_cnt, DDR_PHY_DATA,
@@ -1835,7 +1834,7 @@ int ddr3_tip_get_first_active_if(u8 dev_num, u32 interface_mask,
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		if (interface_mask & (1 << if_id)) {
 			*interface_id = if_id;
 			break;
@@ -1854,10 +1853,10 @@ int ddr3_tip_write_cs_result(u32 dev_num, u32 offset)
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (bus_num = 0; bus_num < tm->num_of_bus_per_interface;
 		     bus_num++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, bus_num);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_num);
 			cs_bitmask =
 				tm->interface_params[if_id].
 				as_bus_params[bus_num].cs_bitmask;
@@ -1897,7 +1896,7 @@ int ddr3_tip_write_mrs_cmd(u32 dev_num, u32 *cs_mask_arr, u32 cmd,
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST,
 				       PARAM_NOT_CARE, reg, data, mask));
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
 			      SDRAM_OPERATION_REG,
@@ -1905,7 +1904,7 @@ int ddr3_tip_write_mrs_cmd(u32 dev_num, u32 *cs_mask_arr, u32 cmd,
 	}
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0,
 					0x1f, SDRAM_OPERATION_REG,
 					MAX_POLLING_ITERATIONS) != MV_OK) {
@@ -1965,10 +1964,10 @@ int ddr3_tip_ddr3_reset_phy_regs(u32 dev_num)
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (phy_id = 0; phy_id < tm->num_of_bus_per_interface;
 		     phy_id++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, phy_id);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, phy_id);
 			CHECK_STATUS(ddr3_tip_bus_write
 				     (dev_num, ACCESS_TYPE_UNICAST,
 				      if_id, ACCESS_TYPE_UNICAST,
@@ -2064,7 +2063,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	freq = init_freq;
 	if (is_pll_before_init != 0) {
 		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
-			VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			config_func_info[dev_num].tip_set_freq_divider_func(
 				(u8)dev_num, if_id, freq);
 		}
@@ -2524,7 +2523,7 @@ int ddr3_tip_enable_init_sequence(u32 dev_num)
 				       SDRAM_INIT_CONTROL_REG, 0x1, 0x1));
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 
 		if (ddr3_tip_if_polling
 		    (dev_num, ACCESS_TYPE_UNICAST, if_id, 0, 0x1,
@@ -2540,7 +2539,7 @@ int ddr3_tip_enable_init_sequence(u32 dev_num)
 		mem_mask = 0;
 		for (bus_index = 0; bus_index < GET_TOPOLOGY_NUM_OF_BUSES();
 		     bus_index++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, bus_index);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
 			mem_mask |=
 				tm->interface_params[if_id].
 				as_bus_params[bus_index].mirror_enable_bitmask;

@@ -276,7 +276,7 @@ int ddr3_tip_vref(u32 dev_num)
 
 	/* init params */
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (pup = 0;
 		     pup < tm->num_of_bus_per_interface; pup++) {
 			current_vref[pup][if_id] = 0;
@@ -325,13 +325,13 @@ int ddr3_tip_vref(u32 dev_num)
 
 			/* Read Valid window results only for non converge pups */
 			for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
-				VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+				VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 				if (interface_state[if_id] != 4) {
 					get_valid_win_rx(dev_num, if_id, res);
 					for (pup = 0;
 					     pup < tm->num_of_bus_per_interface;
 					     pup++) {
-						VALIDATE_ACTIVE
+						VALIDATE_BUS_ACTIVE
 							(tm->bus_act_mask, pup);
 						if (pup_st[pup]
 						    [if_id] ==
@@ -349,14 +349,14 @@ int ddr3_tip_vref(u32 dev_num)
 		}
 
 		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
-			VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			DEBUG_TRAINING_HW_ALG(
 				DEBUG_LEVEL_TRACE,
 				("current_valid_window: IF[ %d ] - ", if_id));
 
 			for (pup = 0;
 			     pup < tm->num_of_bus_per_interface; pup++) {
-				VALIDATE_ACTIVE(tm->bus_act_mask, pup);
+				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup);
 				DEBUG_TRAINING_HW_ALG(DEBUG_LEVEL_TRACE,
 						      ("%d ",
 						       current_valid_window
@@ -367,10 +367,10 @@ int ddr3_tip_vref(u32 dev_num)
 
 		/* Compare results and respond as function of state */
 		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
-			VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			for (pup = 0;
 			     pup < tm->num_of_bus_per_interface; pup++) {
-				VALIDATE_ACTIVE(tm->bus_act_mask, pup);
+				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup);
 				DEBUG_TRAINING_HW_ALG(DEBUG_LEVEL_TRACE,
 						      ("I/F[ %d ], pup[ %d ] STATE #%d (%d)\n",
 						       if_id, pup,
@@ -695,10 +695,10 @@ int ddr3_tip_vref(u32 dev_num)
 	}
 
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (pup = 0;
 		     pup < tm->num_of_bus_per_interface; pup++) {
-			VALIDATE_ACTIVE(tm->bus_act_mask, pup);
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup);
 			CHECK_STATUS(ddr3_tip_bus_read
 				     (dev_num, if_id,
 				      ACCESS_TYPE_UNICAST, pup,
@@ -746,7 +746,7 @@ int ddr3_tip_cmd_addr_init_delay(u32 dev_num, u32 adll_tap)
 	}
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, if_id);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		/* Calc delay ps in ADLL tap */
 		if (tm->interface_params[if_id].bus_width ==
 		    BUS_WIDTH_16)

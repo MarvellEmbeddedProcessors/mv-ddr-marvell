@@ -177,7 +177,7 @@ int ddr3_tip_bist_activate(u32 dev_num, enum hws_pattern pattern,
 			}
 
 			for (i = start_if; i <= end_if; i++) {
-				VALIDATE_ACTIVE(tm->
+				VALIDATE_IF_ACTIVE(tm->
 						   if_act_mask, i);
 
 				for (poll_cnt = 0; poll_cnt < max_poll;
@@ -235,7 +235,7 @@ int ddr3_tip_bist_read_result(u32 dev_num, u32 if_id,
 	u32 read_data[MAX_INTERFACE_NUM];
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
-	if (IS_ACTIVE(tm->if_act_mask, if_id) == 0)
+	if (IS_IF_ACTIVE(tm->if_act_mask, if_id) == 0)
 		return MV_NOT_SUPPORTED;
 	DEBUG_TRAINING_BIST_ENGINE(DEBUG_LEVEL_TRACE,
 				   ("ddr3_tip_bist_read_result if_id %d\n",
@@ -282,7 +282,7 @@ int hws_ddr3_run_bist(u32 dev_num, enum hws_pattern pattern, u32 *result,
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (i = 0; i < MAX_INTERFACE_NUM; i++) {
-		VALIDATE_ACTIVE(tm->if_act_mask, i);
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, i);
 		hws_ddr3_cs_base_adr_calc(i, cs_num, &win_base);
 		ret = ddr3_tip_bist_activate(dev_num, pattern,
 					     ACCESS_TYPE_UNICAST,
@@ -348,8 +348,7 @@ void ddr3_tip_print_bist_res(void)
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (i = 0; i < MAX_INTERFACE_NUM; i++) {
-		if (IS_ACTIVE(tm->if_act_mask, i) == 0)
-			continue;
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, i);
 
 		res = ddr3_tip_bist_read_result(dev_num, i, &st_bist_result[i]);
 		if (res != MV_OK) {
@@ -365,9 +364,7 @@ void ddr3_tip_print_bist_res(void)
 		("interface | error_cnt | fail_low | fail_high | fail_addr\n"));
 
 	for (i = 0; i < MAX_INTERFACE_NUM; i++) {
-		if (IS_ACTIVE(tm->if_act_mask, i) ==
-		    0)
-			continue;
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, i);
 
 		DEBUG_TRAINING_BIST_ENGINE(
 			DEBUG_LEVEL_INFO,
