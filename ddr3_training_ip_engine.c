@@ -283,9 +283,10 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
-	if (pup_num >= tm->num_of_bus_per_interface) {
+	if (pup_num >= octets_per_if_num) {
 		DEBUG_TRAINING_IP_ENGINE(DEBUG_LEVEL_ERROR,
 					 ("pup_num %d not valid\n", pup_num));
 	}
@@ -421,8 +422,8 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 		      reg_data | (init_value << 8),
 		      0xff | (0xffff << 8) | (0xf << 24) | (u32) (0xf << 28)));
 
-	mask_dq_num_of_regs = tm->num_of_bus_per_interface * BUS_WIDTH_IN_BITS;
-	mask_pup_num_of_regs = tm->num_of_bus_per_interface;
+	mask_dq_num_of_regs = octets_per_if_num * BUS_WIDTH_IN_BITS;
+	mask_pup_num_of_regs = octets_per_if_num;
 
 	if (result_type == RESULT_PER_BIT) {
 		for (index_cnt = 0; index_cnt < mask_dq_num_of_regs;
@@ -434,7 +435,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 		}
 
 		/* Mask disabled buses */
-		for (pup_id = 0; pup_id < tm->num_of_bus_per_interface;
+		for (pup_id = 0; pup_id < octets_per_if_num;
 		     pup_id++) {
 			if (IS_BUS_ACTIVE(tm->bus_act_mask, pup_id) == 1)
 				continue;
@@ -687,6 +688,7 @@ int ddr3_tip_read_training_result(u32 dev_num, u32 if_id,
 	u32 read_data[MAX_INTERFACE_NUM];
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	/*
@@ -711,7 +713,7 @@ int ddr3_tip_read_training_result(u32 dev_num, u32 if_id,
 					 ("ddr3_tip_read_training_result load_res = NULL"));
 		return MV_FAIL;
 	}
-	if (pup_num >= tm->num_of_bus_per_interface) {
+	if (pup_num >= octets_per_if_num) {
 		DEBUG_TRAINING_IP_ENGINE(DEBUG_LEVEL_ERROR,
 					 ("pup_num %d not valid\n", pup_num));
 	}
@@ -729,7 +731,7 @@ int ddr3_tip_read_training_result(u32 dev_num, u32 if_id,
 	} else {		/*pup_access_type == ACCESS_TYPE_MULTICAST) */
 
 		start_pup = 0;
-		end_pup = tm->num_of_bus_per_interface - 1;
+		end_pup = octets_per_if_num - 1;
 	}
 
 	for (pup_cnt = start_pup; pup_cnt <= end_pup; pup_cnt++) {
@@ -992,6 +994,7 @@ int ddr3_tip_ip_training_wrapper_int(u32 dev_num,
 	enum hws_search_dir search_dir_id, start_search, end_search;
 	enum hws_edge_compare edge_comp_used;
 	u8 cons_tap = (direction == OPER_WRITE) ? (64) : (0);
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	if (train_status == NULL) {
@@ -1007,7 +1010,7 @@ int ddr3_tip_ip_training_wrapper_int(u32 dev_num,
 	    (search_dir > HWS_HIGH2LOW) ||
 	    (control_element > HWS_CONTROL_ELEMENT_DQS_SKEW) ||
 	    (result_type > RESULT_PER_BYTE) ||
-	    (pup_num >= tm->num_of_bus_per_interface) ||
+	    (pup_num >= octets_per_if_num) ||
 	    (pup_access_type > ACCESS_TYPE_MULTICAST) ||
 	    (if_id > 11) || (access_type > ACCESS_TYPE_MULTICAST)) {
 		DEBUG_TRAINING_IP_ENGINE(
@@ -1095,9 +1098,10 @@ int ddr3_tip_ip_training_wrapper(u32 dev_num, enum hws_access_type access_type,
 	u8 cons_tap = (direction == OPER_WRITE) ? (64) : (0);
 	u8 bit_bit_mask[MAX_BUS_NUM] = { 0 }, bit_bit_mask_active = 0;
 	u8 pup_id;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
-	if (pup_num >= tm->num_of_bus_per_interface) {
+	if (pup_num >= octets_per_if_num) {
 		DEBUG_TRAINING_IP_ENGINE(DEBUG_LEVEL_ERROR,
 					 ("pup_num %d not valid\n", pup_num));
 	}
@@ -1126,7 +1130,7 @@ int ddr3_tip_ip_training_wrapper(u32 dev_num, enum hws_access_type access_type,
 	     interface_cnt++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, interface_cnt);
 		for (pup_id = 0;
-		     pup_id <= (tm->num_of_bus_per_interface - 1); pup_id++) {
+		     pup_id <= (octets_per_if_num - 1); pup_id++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup_id);
 			if (result_type == RESULT_PER_BIT)
 				bit_end = BUS_WIDTH_IN_BITS - 1;
@@ -1195,7 +1199,7 @@ int ddr3_tip_ip_training_wrapper(u32 dev_num, enum hws_access_type access_type,
 					     cs_num, train_status);
 
 			for (pup_id = 0;
-			     pup_id <= (tm->num_of_bus_per_interface - 1);
+			     pup_id <= (octets_per_if_num - 1);
 			     pup_id++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup_id);
 
@@ -1230,7 +1234,7 @@ int ddr3_tip_ip_training_wrapper(u32 dev_num, enum hws_access_type access_type,
 					     cs_num, train_status);
 
 			for (pup_id = 0;
-			     pup_id <= (tm->num_of_bus_per_interface - 1);
+			     pup_id <= (octets_per_if_num - 1);
 			     pup_id++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup_id);
 
@@ -1264,12 +1268,12 @@ int ddr3_tip_ip_training_wrapper(u32 dev_num, enum hws_access_type access_type,
 int ddr3_tip_load_phy_values(int b_load)
 {
 	u32 bus_cnt = 0, if_id, dev_num = 0;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		for (bus_cnt = 0; bus_cnt < GET_TOPOLOGY_NUM_OF_BUSES();
-		     bus_cnt++) {
+		for (bus_cnt = 0; bus_cnt < octets_per_if_num; bus_cnt++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
 			if (b_load == 1) {
 				CHECK_STATUS(ddr3_tip_bus_read
@@ -1346,6 +1350,7 @@ int ddr3_tip_training_ip_test(u32 dev_num, enum hws_training_result result_type,
 	enum hws_training_ip_stat train_status[MAX_INTERFACE_NUM];
 	u32 *res = NULL;
 	u32 search_state = 0;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	ddr3_tip_load_phy_values(1);
@@ -1370,7 +1375,7 @@ int ddr3_tip_training_ip_test(u32 dev_num, enum hws_training_result result_type,
 			     if_id++) {
 				VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 				for (pup_id = 0; pup_id <
-					     tm->num_of_bus_per_interface;
+					     octets_per_if_num;
 				     pup_id++) {
 					VALIDATE_BUS_ACTIVE(tm->bus_act_mask,
 							pup_id);

@@ -137,9 +137,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		continue;			\
 	}
 
-#define GET_TOPOLOGY_NUM_OF_BUSES() \
-	(ddr3_get_topology_map()->num_of_bus_per_interface)
-
 #define IS_BUS_ACTIVE(if_mask , if_id) \
 	(((if_mask) >> (if_id)) & 1)
 

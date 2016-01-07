@@ -163,6 +163,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 	u8 rl_values[NUM_OF_CS][MAX_BUS_NUM][MAX_INTERFACE_NUM];
 	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	if (rl_version == 0) {
@@ -417,7 +418,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 			/* check training done */
 			is_any_pup_fail = 0;
 			for (bus_num = 0;
-			     bus_num < tm->num_of_bus_per_interface;
+			     bus_num < octets_per_if_num;
 			     bus_num++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_num);
 				if (ddr3_tip_if_polling
@@ -483,7 +484,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 		for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			for (bus_num = 0;
-			     bus_num < tm->num_of_bus_per_interface;
+			     bus_num < octets_per_if_num;
 			     bus_num++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_num);
 				/* read result per pup from arry */
@@ -627,12 +628,13 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 	u32 data2_write[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (bus_num = 0;
-		     bus_num <= tm->num_of_bus_per_interface; bus_num++) {
+		     bus_num <= octets_per_if_num; bus_num++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_num);
 			per_bit_rl_pup_status[if_id][bus_num] = 0;
 			data2_write[if_id][bus_num] = 0;
@@ -815,7 +817,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			/* check training done */
 			for (bus_num = 0;
-			     bus_num < tm->num_of_bus_per_interface;
+			     bus_num < octets_per_if_num;
 			     bus_num++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_num);
 
@@ -889,7 +891,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 			     if_id++) {
 				VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 				for (bus_num = 0;
-				     bus_num < tm->num_of_bus_per_interface;
+				     bus_num < octets_per_if_num;
 				     bus_num++) {
 					VALIDATE_BUS_ACTIVE(tm->bus_act_mask,
 							bus_num);
@@ -921,7 +923,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		for (bus_num = 0; bus_num < tm->num_of_bus_per_interface;
+		for (bus_num = 0; bus_num < octets_per_if_num;
 		     bus_num++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_num);
 			if (per_bit_rl_pup_status[if_id][bus_num] == 1)
@@ -1010,6 +1012,7 @@ int ddr3_tip_calc_cs_mask(u32 dev_num, u32 if_id, u32 effective_cs,
 {
 	u32 all_bus_cs = 0, same_bus_cs;
 	u32 bus_cnt;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	*cs_mask = same_bus_cs = CS_BIT_MASK;
@@ -1023,7 +1026,7 @@ int ddr3_tip_calc_cs_mask(u32 dev_num, u32 if_id, u32 effective_cs,
 	 * If they are they are not the same then it's mixed mode so all CS
 	 * should be configured (when configuring the MRS)
 	 */
-	for (bus_cnt = 0; bus_cnt < tm->num_of_bus_per_interface; bus_cnt++) {
+	for (bus_cnt = 0; bus_cnt < octets_per_if_num; bus_cnt++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
 
 		all_bus_cs |= tm->interface_params[if_id].
@@ -1060,6 +1063,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u32 cs_mask0[MAX_INTERFACE_NUM] = { 0 };
 	u32 max_cs = hws_ddr3_tip_max_cs_get();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
@@ -1203,7 +1207,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 
 				/* check for training completion per bus */
 				for (bus_cnt = 0;
-				     bus_cnt < tm->num_of_bus_per_interface;
+				     bus_cnt < octets_per_if_num;
 				     bus_cnt++) {
 					VALIDATE_BUS_ACTIVE(tm->bus_act_mask,
 							bus_cnt);
@@ -1223,7 +1227,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 					if (reg_data == 0) {
 						res_values[
 							(if_id *
-							 tm->num_of_bus_per_interface)
+							 octets_per_if_num)
 							+ bus_cnt] = 1;
 					}
 					CHECK_STATUS(ddr3_tip_if_read
@@ -1281,13 +1285,13 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			test_res = 0;
 			for (bus_cnt = 0;
-			     bus_cnt < tm->num_of_bus_per_interface;
+			     bus_cnt < octets_per_if_num;
 			     bus_cnt++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
 				/* check if result == pass */
 				if (res_values
 				    [(if_id *
-				      tm->num_of_bus_per_interface) +
+				      octets_per_if_num) +
 				     bus_cnt] == 0) {
 					/*
 					 * read result control register
@@ -1398,14 +1402,14 @@ int ddr3_tip_dynamic_write_leveling_supp(u32 dev_num)
 	int adll_offset;
 	u32 if_id, bus_id, data, data_tmp;
 	int is_if_fail = 0;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		is_if_fail = 0;
 
-		for (bus_id = 0; bus_id < GET_TOPOLOGY_NUM_OF_BUSES();
-		     bus_id++) {
+		for (bus_id = 0; bus_id < octets_per_if_num; bus_id++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 			wr_supp_res[if_id][bus_id].is_pup_fail = 1;
 			CHECK_STATUS(ddr3_tip_bus_read
@@ -1754,6 +1758,7 @@ static int ddr3_tip_dynamic_write_leveling_seq(u32 dev_num)
 	u32 bus_id, dq_id;
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	CHECK_STATUS(ddr3_tip_if_write
@@ -1790,7 +1795,7 @@ static int ddr3_tip_dynamic_write_leveling_seq(u32 dev_num)
 	}
 
 	/* Mask all results */
-	for (bus_id = 0; bus_id < tm->num_of_bus_per_interface; bus_id++) {
+	for (bus_id = 0; bus_id < octets_per_if_num; bus_id++) {
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 			      mask_results_pup_reg_map[bus_id], 0x1 << 24,
@@ -1798,7 +1803,7 @@ static int ddr3_tip_dynamic_write_leveling_seq(u32 dev_num)
 	}
 
 	/* Unmask only wanted */
-	for (bus_id = 0; bus_id < tm->num_of_bus_per_interface; bus_id++) {
+	for (bus_id = 0; bus_id < octets_per_if_num; bus_id++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
@@ -1820,6 +1825,7 @@ static int ddr3_tip_dynamic_read_leveling_seq(u32 dev_num)
 	u32 bus_id, dq_id;
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	/* mask PBS */
@@ -1831,7 +1837,7 @@ static int ddr3_tip_dynamic_read_leveling_seq(u32 dev_num)
 	}
 
 	/* Mask all results */
-	for (bus_id = 0; bus_id < tm->num_of_bus_per_interface; bus_id++) {
+	for (bus_id = 0; bus_id < octets_per_if_num; bus_id++) {
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 			      mask_results_pup_reg_map[bus_id], 0x1 << 24,
@@ -1839,7 +1845,7 @@ static int ddr3_tip_dynamic_read_leveling_seq(u32 dev_num)
 	}
 
 	/* Unmask only wanted */
-	for (bus_id = 0; bus_id < tm->num_of_bus_per_interface; bus_id++) {
+	for (bus_id = 0; bus_id < octets_per_if_num; bus_id++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
@@ -1857,6 +1863,7 @@ static int ddr3_tip_dynamic_per_bit_read_leveling_seq(u32 dev_num)
 	u32 bus_id, dq_id;
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	/* mask PBS */
@@ -1868,7 +1875,7 @@ static int ddr3_tip_dynamic_per_bit_read_leveling_seq(u32 dev_num)
 	}
 
 	/* Mask all results */
-	for (bus_id = 0; bus_id < tm->num_of_bus_per_interface; bus_id++) {
+	for (bus_id = 0; bus_id < octets_per_if_num; bus_id++) {
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 			      mask_results_pup_reg_map[bus_id], 0x1 << 24,
@@ -1893,6 +1900,7 @@ static int ddr3_tip_dynamic_per_bit_read_leveling_seq(u32 dev_num)
 int ddr3_tip_print_wl_supp_result(u32 dev_num)
 {
 	u32 bus_id = 0, if_id = 0;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	DEBUG_LEVELING(DEBUG_LEVEL_INFO,
@@ -1900,7 +1908,7 @@ int ddr3_tip_print_wl_supp_result(u32 dev_num)
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		for (bus_id = 0; bus_id < tm->num_of_bus_per_interface;
+		for (bus_id = 0; bus_id < octets_per_if_num;
 		     bus_id++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 			DEBUG_LEVELING(DEBUG_LEVEL_INFO,
@@ -1914,7 +1922,7 @@ int ddr3_tip_print_wl_supp_result(u32 dev_num)
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		for (bus_id = 0; bus_id < tm->num_of_bus_per_interface;
+		for (bus_id = 0; bus_id < octets_per_if_num;
 		     bus_id++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 			DEBUG_LEVELING(DEBUG_LEVEL_INFO,

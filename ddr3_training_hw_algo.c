@@ -147,7 +147,7 @@ int ddr3_tip_write_additional_odt_setting(u32 dev_num, u32 if_id)
 	u32 pup_index;
 	int max_phase = MIN_VALUE, current_phase;
 	enum hws_access_type access_type = ACCESS_TYPE_UNICAST;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
 				       DUNIT_ODT_CONTROL_REG,
@@ -168,7 +168,7 @@ int ddr3_tip_write_additional_odt_setting(u32 dev_num, u32 if_id)
 				max_read_sample = read_sample[cs_num];
 
 			for (pup_index = 0;
-			     pup_index < tm->num_of_bus_per_interface;
+			     pup_index < octets_per_if_num;
 			     pup_index++) {
 				CHECK_STATUS(ddr3_tip_bus_read
 					     (dev_num, if_id,
@@ -262,6 +262,7 @@ int ddr3_tip_vref(u32 dev_num)
 	u32 copy_start_pattern, copy_end_pattern;
 	enum hws_result *flow_result = ddr3_tip_get_result_ptr(training_stage);
 	u8 res[4];
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	CHECK_STATUS(ddr3_tip_special_rx(dev_num));
@@ -278,7 +279,7 @@ int ddr3_tip_vref(u32 dev_num)
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (pup = 0;
-		     pup < tm->num_of_bus_per_interface; pup++) {
+		     pup < octets_per_if_num; pup++) {
 			current_vref[pup][if_id] = 0;
 			last_vref[pup][if_id] = 0;
 			lim_vref[pup][if_id] = 0;
@@ -314,7 +315,7 @@ int ddr3_tip_vref(u32 dev_num)
 	}
 
 	/* TODO: Set number of active interfaces */
-	num_pup = tm->num_of_bus_per_interface * MAX_INTERFACE_NUM;
+	num_pup = octets_per_if_num * MAX_INTERFACE_NUM;
 
 	while ((algo_run_flag <= num_pup) & (while_count < 10)) {
 		while_count++;
@@ -329,7 +330,7 @@ int ddr3_tip_vref(u32 dev_num)
 				if (interface_state[if_id] != 4) {
 					get_valid_win_rx(dev_num, if_id, res);
 					for (pup = 0;
-					     pup < tm->num_of_bus_per_interface;
+					     pup < octets_per_if_num;
 					     pup++) {
 						VALIDATE_BUS_ACTIVE
 							(tm->bus_act_mask, pup);
@@ -355,7 +356,7 @@ int ddr3_tip_vref(u32 dev_num)
 				("current_valid_window: IF[ %d ] - ", if_id));
 
 			for (pup = 0;
-			     pup < tm->num_of_bus_per_interface; pup++) {
+			     pup < octets_per_if_num; pup++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup);
 				DEBUG_TRAINING_HW_ALG(DEBUG_LEVEL_TRACE,
 						      ("%d ",
@@ -369,7 +370,7 @@ int ddr3_tip_vref(u32 dev_num)
 		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			for (pup = 0;
-			     pup < tm->num_of_bus_per_interface; pup++) {
+			     pup < octets_per_if_num; pup++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup);
 				DEBUG_TRAINING_HW_ALG(DEBUG_LEVEL_TRACE,
 						      ("I/F[ %d ], pup[ %d ] STATE #%d (%d)\n",
@@ -697,7 +698,7 @@ int ddr3_tip_vref(u32 dev_num)
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (pup = 0;
-		     pup < tm->num_of_bus_per_interface; pup++) {
+		     pup < octets_per_if_num; pup++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup);
 			CHECK_STATUS(ddr3_tip_bus_read
 				     (dev_num, if_id,

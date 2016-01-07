@@ -103,6 +103,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 
+/* Device attributes structures */
+enum mv_ddr_dev_attribute ddr_dev_attributes[HWS_MAX_DEVICE_NUM][MV_ATTR_LAST];
+int ddr_dev_attr_init_done[HWS_MAX_DEVICE_NUM] = { 0 };
+
 /* List of allowed frequency listed in order of enum hws_ddr_freq */
 u32 freq_val[DDR_FREQ_LIMIT] = {
 	0,			/*DDR_FREQ_LOW_FREQ */
@@ -740,4 +744,31 @@ inline u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 	}
 
 	return pattern;
+}
+
+/* Device attribute functions */
+void ddr3_tip_dev_attr_init(u32 dev_num)
+{
+	u32 attr_id;
+
+	for (attr_id = 0; attr_id < MV_ATTR_LAST; attr_id++)
+		ddr_dev_attributes[dev_num][attr_id] = 0xFF;
+
+	ddr_dev_attr_init_done[dev_num] = 1;
+}
+
+u32 ddr3_tip_dev_attr_get(u32 dev_num, enum mv_ddr_dev_attribute attr_id)
+{
+	if (ddr_dev_attr_init_done[dev_num] == 0)
+		ddr3_tip_dev_attr_init(dev_num);
+
+	return ddr_dev_attributes[dev_num][attr_id];
+}
+
+void ddr3_tip_dev_attr_set(u32 dev_num, enum mv_ddr_dev_attribute attr_id, u32 value)
+{
+	if (ddr_dev_attr_init_done[dev_num] == 0)
+		ddr3_tip_dev_attr_init(dev_num);
+
+	ddr_dev_attributes[dev_num][attr_id] = value;
 }

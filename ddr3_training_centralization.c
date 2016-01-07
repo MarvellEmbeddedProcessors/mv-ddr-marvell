@@ -157,6 +157,7 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 	u8 current_window[BUS_WIDTH_IN_BITS];
 	u8 opt_window, waste_window, start_window_skew, end_window_skew;
 	u8 final_pup_window[MAX_INTERFACE_NUM][BUS_WIDTH_IN_BITS];
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 	enum hws_training_result result_type = RESULT_PER_BIT;
 	enum hws_dir direction;
@@ -198,7 +199,7 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (bus_id = 0;
-		     bus_id < tm->num_of_bus_per_interface; bus_id++) {
+		     bus_id < octets_per_if_num; bus_id++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 			centralization_state[if_id][bus_id] = 0;
 			bus_end_window[mode][if_id][bus_id] =
@@ -227,7 +228,7 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 		for (if_id = start_if; if_id <= end_if; if_id++) {
 			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			for (bus_id = 0;
-			     bus_id <= tm->num_of_bus_per_interface - 1;
+			     bus_id <= octets_per_if_num - 1;
 			     bus_id++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 
@@ -443,7 +444,7 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 		flow_result[if_id] = TEST_SUCCESS;
 
 		for (bus_id = 0;
-		     bus_id <= (tm->num_of_bus_per_interface - 1); bus_id++) {
+		     bus_id <= (octets_per_if_num - 1); bus_id++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 
 			/* continue only if lock */
@@ -599,6 +600,7 @@ int ddr3_tip_special_rx(u32 dev_num)
 	u32 cs_enable_reg_val[MAX_INTERFACE_NUM];
 	u32 temp = 0;
 	int pad_num = 0;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	if (ddr3_tip_special_rx_run_once_flag != 0)
@@ -637,7 +639,7 @@ int ddr3_tip_special_rx(u32 dev_num)
 	for (if_id = start_if; if_id <= end_if; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		for (pup_id = 0;
-		     pup_id <= tm->num_of_bus_per_interface; pup_id++) {
+		     pup_id <= octets_per_if_num; pup_id++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup_id);
 
 			for (search_dir_id = HWS_LOW2HIGH;
@@ -711,8 +713,7 @@ int ddr3_tip_special_rx(u32 dev_num)
 							     BUS_WIDTH_IN_BITS +
 							     if_id *
 							     BUS_WIDTH_IN_BITS *
-							     tm->
-							     num_of_bus_per_interface];
+							     octets_per_if_num];
 					CHECK_STATUS(ddr3_tip_bus_read
 						     (dev_num, if_id,
 						      ACCESS_TYPE_UNICAST,
@@ -785,6 +786,7 @@ int ddr3_tip_special_rx(u32 dev_num)
 int ddr3_tip_print_centralization_result(u32 dev_num)
 {
 	u32 if_id = 0, bus_id = 0;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	dev_num = dev_num;
@@ -793,7 +795,7 @@ int ddr3_tip_print_centralization_result(u32 dev_num)
 	printf("I/F0 Result[0 - success 1-fail 2 - state_2 3 - state_3] ...\n");
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		for (bus_id = 0; bus_id < tm->num_of_bus_per_interface;
+		for (bus_id = 0; bus_id < octets_per_if_num;
 		     bus_id++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 			printf("%d ,\n", centralization_state[if_id][bus_id]);

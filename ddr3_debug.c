@@ -190,6 +190,7 @@ int ddr3_tip_reg_dump(u32 dev_num)
 {
 	u32 if_id, reg_addr, data_value, bus_id;
 	u32 read_data[MAX_INTERFACE_NUM];
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	printf("-- dunit registers --\n");
@@ -212,7 +213,7 @@ int ddr3_tip_reg_dump(u32 dev_num)
 		for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			for (bus_id = 0;
-			     bus_id < tm->num_of_bus_per_interface;
+			     bus_id < octets_per_if_num;
 			     bus_id++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 				CHECK_STATUS(ddr3_tip_bus_read
@@ -223,7 +224,7 @@ int ddr3_tip_reg_dump(u32 dev_num)
 				printf("0x%x ", data_value);
 			}
 			for (bus_id = 0;
-			     bus_id < tm->num_of_bus_per_interface;
+			     bus_id < octets_per_if_num;
 			     bus_id++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 				CHECK_STATUS(ddr3_tip_bus_read
@@ -767,6 +768,7 @@ int read_adll_value(u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
 	u32 data_value;
 	u32 if_id = 0, bus_id = 0;
 	u32 dev_num = 0;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	/*
@@ -775,7 +777,7 @@ int read_adll_value(u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
 	 */
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		for (bus_id = 0; bus_id < tm->num_of_bus_per_interface;
+		for (bus_id = 0; bus_id < octets_per_if_num;
 		     bus_id++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 			CHECK_STATUS(ddr3_tip_bus_read(dev_num, if_id,
@@ -784,7 +786,7 @@ int read_adll_value(u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
 						       DDR_PHY_DATA, reg_addr,
 						       &data_value));
 			pup_values[if_id *
-				   tm->num_of_bus_per_interface + bus_id] =
+				   octets_per_if_num + bus_id] =
 				data_value & mask;
 		}
 	}
@@ -800,6 +802,7 @@ int write_adll_value(u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
 {
 	u32 if_id = 0, bus_id = 0;
 	u32 dev_num = 0, data;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	/*
@@ -808,11 +811,11 @@ int write_adll_value(u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
 	 */
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		for (bus_id = 0; bus_id < tm->num_of_bus_per_interface;
+		for (bus_id = 0; bus_id < octets_per_if_num;
 		     bus_id++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
 			data = pup_values[if_id *
-					  tm->num_of_bus_per_interface +
+					  octets_per_if_num +
 					  bus_id];
 			CHECK_STATUS(ddr3_tip_bus_write(dev_num,
 							ACCESS_TYPE_UNICAST,
@@ -870,11 +873,12 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr);
 int ddr3_tip_print_adll(void)
 {
 	u32 bus_cnt = 0, if_id, data_p1, data_p2, ui_data3, dev_num = 0;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		for (bus_cnt = 0; bus_cnt < GET_TOPOLOGY_NUM_OF_BUSES();
+		for (bus_cnt = 0; bus_cnt < octets_per_if_num;
 		     bus_cnt++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
 			CHECK_STATUS(ddr3_tip_bus_read
@@ -1273,15 +1277,16 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 int print_adll(u32 dev_num, u32 adll[MAX_INTERFACE_NUM * MAX_BUS_NUM])
 {
 	u32 i, j;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	dev_num = dev_num;
 
-	for (j = 0; j < tm->num_of_bus_per_interface; j++) {
+	for (j = 0; j < octets_per_if_num; j++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, j);
 		for (i = 0; i < MAX_INTERFACE_NUM; i++) {
 			printf("%d ,",
-			       adll[i * tm->num_of_bus_per_interface + j]);
+			       adll[i * octets_per_if_num + j]);
 		}
 	}
 	printf("\n");
@@ -1405,6 +1410,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 	enum hws_access_type pup_access;
 	u32 cs;
 	u32 max_cs = hws_ddr3_tip_max_cs_get();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	repeat_num = repeat_num;
@@ -1412,7 +1418,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 	if (mode == 1) {
 		/* per pup */
 		start_pup = 0;
-		end_pup = tm->num_of_bus_per_interface - 1;
+		end_pup = octets_per_if_num - 1;
 		pup_access = ACCESS_TYPE_UNICAST;
 	} else {
 		start_pup = 0;
@@ -1478,7 +1484,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 							  reg + CS_REG_VALUE(cs),
 							  ctrl_adll[if_id *
 								    cs *
-								    tm->num_of_bus_per_interface
+								    octets_per_if_num
 								    + pup]));
 					}
 				}
@@ -1539,7 +1545,6 @@ void print_topology(struct hws_topology_map *topology_db)
 	u32 ui, uj;
 
 	printf("\tinterface_mask: 0x%x\n", topology_db->if_act_mask);
-	printf("\tNum Bus:  %d\n", topology_db->num_of_bus_per_interface);
 	printf("\tbus_act_mask: 0x%x\n", topology_db->bus_act_mask);
 
 	for (ui = 0; ui < MAX_INTERFACE_NUM; ui++) {

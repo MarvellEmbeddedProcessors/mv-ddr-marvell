@@ -184,9 +184,6 @@ struct hws_topology_map {
 	/* Controller configuration per interface */
 	struct if_params interface_params[MAX_INTERFACE_NUM];
 
-	/* BUS per interface (default is 4) */
-	u8 num_of_bus_per_interface;
-
 	/* Bit mask for active buses */
 	u8 bus_act_mask;
 };

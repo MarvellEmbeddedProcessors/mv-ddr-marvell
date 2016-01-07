@@ -104,7 +104,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 
-#define A38X_NUMBER_OF_INTERFACES	5
+#define DDR_INTERFACES_NUM		1
+#define DDR_INTERFACE_OCTETS_NUM	5
 
 #define SAR_DEV_ID_OFFS			27
 #define SAR_DEV_ID_MASK			0x7
@@ -459,12 +460,16 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 
 	ddr3_tip_register_dq_table(dev_num, dq_bit_map_2_phy_pin);
 
+	/* set device attributes*/
+	ddr3_tip_dev_attr_init(dev_num);
+	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_OCTET_PER_INTERFACE, DDR_INTERFACE_OCTETS_NUM);
+
 #ifdef STATIC_ALGO_SUPPORT
 	{
 		struct hws_tip_static_config_info static_config;
 		u32 board_offset =
-		    board_id * A38X_NUMBER_OF_INTERFACES *
-		    tm->num_of_bus_per_interface;
+		    board_id * DDR_INTERFACES_NUM *
+		    DDR_INTERFACE_OCTETS_NUM;
 
 		static_config.silicon_delay =
 			a38x_silicon_delay_offset[board_id];

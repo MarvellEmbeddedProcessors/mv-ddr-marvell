@@ -122,4 +122,26 @@ enum hws_pattern {
 	PATTERN_LIMIT
 };
 
+enum mv_ddr_dev_attribute {
+	MV_ATTR_TIP_REV,
+	MV_ATTR_PHY_EDGE,
+	MV_ATTR_OCTET_PER_INTERFACE,
+	MV_ATTR_PLL_BEFORE_INIT,
+	MV_ATTR_TUNE_MASK,
+	MV_ATTR_INIT_FREQ,
+	MV_ATTR_MID_FREQ,
+	MV_ATTR_DFS_LOW_FREQ,
+	MV_ATTR_DFS_LOW_PHY,
+	MV_ATTR_DELAY_ENABLE,
+	MV_ATTR_CK_DELAY,
+	MV_ATTR_CA_DELAY,
+	MV_ATTR_INTERLEAVE_WA,
+	MV_ATTR_LAST
+};
+
+/* Device attribute functions */
+void ddr3_tip_dev_attr_init(u32 dev_num);
+u32 ddr3_tip_dev_attr_get(u32 dev_num, enum mv_ddr_dev_attribute attr_id);
+void ddr3_tip_dev_attr_set(u32 dev_num, enum mv_ddr_dev_attribute attr_id, u32 value);
+
 #endif /* _DDR3_TRAINING_IP_DB_H_ */

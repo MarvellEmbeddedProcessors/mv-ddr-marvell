@@ -186,11 +186,11 @@ int ddr3_tip_static_round_trip_arr_build(u32 dev_num,
 {
 	u32 bus_index, global_bus;
 	u32 if_id;
-	u32 bus_per_interface;
 	int sign;
 	u32 temp;
 	u32 board_trace;
 	struct trip_delay_element *pkg_delay_ptr;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	/*
@@ -199,14 +199,12 @@ int ddr3_tip_static_round_trip_arr_build(u32 dev_num,
 	 */
 	sign = (is_wl) ? -1 : 1;
 
-	bus_per_interface = GET_TOPOLOGY_NUM_OF_BUSES();
-
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		for (bus_index = 0; bus_index < bus_per_interface;
+		for (bus_index = 0; bus_index < octets_per_if_num;
 		     bus_index++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
-			global_bus = (if_id * bus_per_interface) + bus_index;
+			global_bus = (if_id * octets_per_if_num) + bus_index;
 
 			/* calculate total trip delay (package and board) */
 			board_trace = (table_ptr[global_bus].dqs_delay * sign) +
@@ -243,10 +241,10 @@ int ddr3_tip_write_leveling_static_config(u32 dev_num, u32 if_id,
 {
 	u32 bus_index;		/* index to the bus loop */
 	u32 bus_start_index;
-	u32 bus_per_interface;
 	u32 phase = 0;
 	u32 adll = 0, adll_cen, adll_inv, adll_final;
 	u32 adll_period = MEGA / freq_val[frequency] / 64;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 
 	DEBUG_TRAINING_STATIC_IP(DEBUG_LEVEL_TRACE,
 				 ("ddr3_tip_write_leveling_static_config\n"));
@@ -255,10 +253,9 @@ int ddr3_tip_write_leveling_static_config(u32 dev_num, u32 if_id,
 		("dev_num 0x%x IF 0x%x freq %d (adll_period 0x%x)\n",
 		 dev_num, if_id, frequency, adll_period));
 
-	bus_per_interface = GET_TOPOLOGY_NUM_OF_BUSES();
-	bus_start_index = if_id * bus_per_interface;
+	bus_start_index = if_id * octets_per_if_num;
 	for (bus_index = bus_start_index;
-	     bus_index < (bus_start_index + bus_per_interface); bus_index++) {
+	     bus_index < (bus_start_index + octets_per_if_num); bus_index++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
 		phase = round_trip_delay_arr[bus_index] / (32 * adll_period);
 		adll = (round_trip_delay_arr[bus_index] -
@@ -312,7 +309,7 @@ int ddr3_tip_read_leveling_static_config(u32 dev_num,
 	enum hws_speed_bin speed_bin_index;
 	u32 rd_sample_dly[MAX_CS_NUM] = { 0 };
 	u32 rd_ready_del[MAX_CS_NUM] = { 0 };
-	u32 bus_per_interface = GET_TOPOLOGY_NUM_OF_BUSES();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	DEBUG_TRAINING_STATIC_IP(DEBUG_LEVEL_TRACE,
@@ -338,10 +335,10 @@ int ddr3_tip_read_leveling_static_config(u32 dev_num,
 					  cl_value, speed_bin_index));
 	}
 
-	bus_start_index = if_id * bus_per_interface;
+	bus_start_index = if_id * octets_per_if_num;
 
 	for (bus_index = bus_start_index;
-	     bus_index < (bus_start_index + bus_per_interface);
+	     bus_index < (bus_start_index + octets_per_if_num);
 	     bus_index += 2) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
 		cs = chip_select_map[
@@ -406,7 +403,7 @@ int ddr3_tip_read_leveling_static_config(u32 dev_num,
 			      PHY_READ_DELAY(cs), data1, 0x1df));
 	}
 
-	for (bus_index = 0; bus_index < bus_per_interface; bus_index++) {
+	for (bus_index = 0; bus_index < octets_per_if_num; bus_index++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
 		CHECK_STATUS(ddr3_tip_bus_read_modify_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
@@ -561,6 +558,7 @@ int ddr3_tip_static_phy_init_controller(u32 dev_num)
 int ddr3_tip_configure_phy(u32 dev_num)
 {
 	u32 if_id, phy_id;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	CHECK_STATUS(ddr3_tip_bus_write
@@ -602,7 +600,7 @@ int ddr3_tip_configure_phy(u32 dev_num)
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 
 		for (phy_id = 0;
-		     phy_id < tm->num_of_bus_per_interface;
+		     phy_id < octets_per_if_num;
 		     phy_id++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, phy_id);
 			/* Vref & clamp */
