@@ -372,7 +372,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PHASE_REG_OFFSET			32
 #define NUM_BYTES_IN_BURST			31
 #define NUM_OF_CS				4
-#define CS_REG_VALUE(cs_num)			(cs_mask_reg[cs_num])
+#define CS_BYTE_GAP(cs_num)			((cs_num) * 0x4)
+#define CS_PBS_GAP(cs_num)			((cs_num) * 0x10)
 #define ADLL_LENGTH				32
 
 struct write_supp_result {

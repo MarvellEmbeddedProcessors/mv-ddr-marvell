@@ -933,7 +933,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 						   ACCESS_TYPE_UNICAST,
 						   bus_num, DDR_PHY_DATA,
 						   RL_PHY_REG +
-						   CS_REG_VALUE(effective_cs),
+						   CS_BYTE_GAP(effective_cs),
 						   data2_write[if_id]
 						   [bus_num]);
 			else

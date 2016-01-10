@@ -1459,7 +1459,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 				CHECK_STATUS(ddr3_tip_bus_write
 					     (dev_num, ACCESS_TYPE_MULTICAST, 0,
 					      pup_access, pup, DDR_PHY_DATA,
-					      reg + CS_REG_VALUE(cs),
+					      reg + CS_BYTE_GAP(cs),
 					      adll_value));
 				hws_ddr3_run_bist(dev_num, sweep_pattern, res,
 						  cs);
@@ -1481,7 +1481,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 							  ACCESS_TYPE_UNICAST,
 							  pup,
 							  DDR_PHY_DATA,
-							  reg + CS_REG_VALUE(cs),
+							  reg + CS_BYTE_GAP(cs),
 							  ctrl_adll[if_id *
 								    cs *
 								    octets_per_if_num

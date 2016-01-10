@@ -1875,7 +1875,7 @@ int ddr3_tip_write_cs_result(u32 dev_num, u32 offset)
 						  ACCESS_TYPE_UNICAST, bus_num,
 						  DDR_PHY_DATA,
 						  offset +
-						  CS_REG_VALUE(effective_cs),
+						  CS_BYTE_GAP(effective_cs),
 						  &data_val);
 				ddr3_tip_bus_write(dev_num,
 						   ACCESS_TYPE_UNICAST,
@@ -1883,7 +1883,7 @@ int ddr3_tip_write_cs_result(u32 dev_num, u32 offset)
 						   ACCESS_TYPE_UNICAST,
 						   bus_num, DDR_PHY_DATA,
 						   offset +
-						   CS_REG_VALUE(cs_num),
+						   CS_BYTE_GAP(cs_num),
 						   data_val);
 			}
 		}
@@ -1983,23 +1983,23 @@ int ddr3_tip_ddr3_reset_phy_regs(u32 dev_num)
 				      if_id, ACCESS_TYPE_UNICAST,
 				      phy_id, DDR_PHY_DATA,
 				      WL_PHY_REG +
-				      CS_REG_VALUE(effective_cs),
+				      CS_BYTE_GAP(effective_cs),
 				      phy_reg0_val));
 			CHECK_STATUS(ddr3_tip_bus_write
 				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
 				      ACCESS_TYPE_UNICAST, phy_id, DDR_PHY_DATA,
-				      RL_PHY_REG + CS_REG_VALUE(effective_cs),
+				      RL_PHY_REG + CS_BYTE_GAP(effective_cs),
 				      phy_reg2_val));
 			CHECK_STATUS(ddr3_tip_bus_write
 				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
 				      ACCESS_TYPE_UNICAST, phy_id, DDR_PHY_DATA,
 				      READ_CENTRALIZATION_PHY_REG +
-				      CS_REG_VALUE(effective_cs), phy_reg3_val));
+				      CS_BYTE_GAP(effective_cs), phy_reg3_val));
 			CHECK_STATUS(ddr3_tip_bus_write
 				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
 				      ACCESS_TYPE_UNICAST, phy_id, DDR_PHY_DATA,
 				      WRITE_CENTRALIZATION_PHY_REG +
-				      CS_REG_VALUE(effective_cs), phy_reg3_val));
+				      CS_BYTE_GAP(effective_cs), phy_reg3_val));
 		}
 	}
 
