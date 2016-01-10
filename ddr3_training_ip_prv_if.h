@@ -187,6 +187,8 @@ struct hws_tip_config_func_db {
 	HWS_GET_CS_CONFIG_FUNC_PTR tip_get_cs_config_info;
 	HWS_TRAINING_IP_GET_TEMP tip_get_temperature;
 	HWS_TRAINING_IP_GET_RATIO tip_get_clock_ratio;
+	HWS_TRAINING_IP_EXTERNAL_READ_PTR tip_external_read;
+	HWS_TRAINING_IP_EXTERNAL_WRITE_PTR tip_external_write;
 };
 
 int ddr3_tip_init_config_func(u32 dev_num,
