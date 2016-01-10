@@ -129,16 +129,25 @@ static int ddr3_tip_xsb_compare_test(u32 dev_num, u32 if_id, u32 bus_id,
 static int ddr3_tip_wl_supp_one_clk_err_shift(u32 dev_num, u32 if_id,
 					      u32 bus_id, u32 bus_id_delta);
 
-u32 hws_ddr3_tip_max_cs_get(void)
+u32 ddr3_tip_max_cs_get(u32 dev_num)
 {
-	u32 c_cs;
+	u32 c_cs, if_id, bus_id;
 	static u32 max_cs;
 	struct hws_topology_map *tm = ddr3_get_topology_map();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 
 	if (!max_cs) {
+		CHECK_STATUS(ddr3_tip_get_first_active_if((u8)dev_num,
+							  tm->if_act_mask,
+							  &if_id));
+		for (bus_id = 0; bus_id < octets_per_if_num; bus_id++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
+			break;
+		}
+
 		for (c_cs = 0; c_cs < NUM_OF_CS; c_cs++) {
 			VALIDATE_ACTIVE(tm->
-					interface_params[0].as_bus_params[0].
+					interface_params[if_id].as_bus_params[bus_id].
 					cs_bitmask, c_cs);
 			max_cs++;
 		}
@@ -153,7 +162,7 @@ Dynamic read leveling
 int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 {
 	u32 data, mask;
-	u32 max_cs = hws_ddr3_tip_max_cs_get();
+	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
 	u32 bus_num, if_id, cl_val;
 	enum hws_speed_bin speed_bin_index;
 	/* save current CS value */
@@ -533,7 +542,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 int ddr3_tip_legacy_dynamic_write_leveling(u32 dev_num)
 {
 	u32 c_cs, if_id, cs_mask = 0;
-	u32 max_cs = hws_ddr3_tip_max_cs_get();
+	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	/*
@@ -574,7 +583,7 @@ int ddr3_tip_legacy_dynamic_write_leveling(u32 dev_num)
 int ddr3_tip_legacy_dynamic_read_leveling(u32 dev_num)
 {
 	u32 c_cs, if_id, cs_mask = 0;
-	u32 max_cs = hws_ddr3_tip_max_cs_get();
+	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	/*
@@ -1062,7 +1071,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 	u8 wl_values[NUM_OF_CS][MAX_BUS_NUM][MAX_INTERFACE_NUM];
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u32 cs_mask0[MAX_INTERFACE_NUM] = { 0 };
-	u32 max_cs = hws_ddr3_tip_max_cs_get();
+	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 

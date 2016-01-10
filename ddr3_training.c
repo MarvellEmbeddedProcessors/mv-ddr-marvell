@@ -2057,7 +2057,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	struct init_cntr_param init_cntr_prm;
 	int ret = MV_OK;
 	u32 if_id;
-	u32 max_cs = hws_ddr3_tip_max_cs_get();
+	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 #ifndef EXCLUDE_SWITCH_DEBUG
