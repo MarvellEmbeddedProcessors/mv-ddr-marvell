@@ -455,6 +455,7 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 	config_func.tip_set_freq_divider_func = ddr3_tip_a38x_set_divider;
 	config_func.tip_get_device_info_func = ddr3_tip_a38x_get_device_info;
 	config_func.tip_get_temperature = ddr3_ctrl_get_junc_temp;
+	config_func.tip_get_clock_ratio = ddr3_tip_clock_mode;
 
 	ddr3_tip_init_config_func(dev_num, &config_func);
 
@@ -772,6 +773,14 @@ static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 	}
 
 	return MV_OK;
+}
+
+u8 ddr3_tip_clock_mode(u32 frequency)
+{
+	if ((frequency == DDR_FREQ_LOW_FREQ) || (freq_val[frequency] <= 400))
+		return 1;
+
+	return 2;
 }
 
 /*

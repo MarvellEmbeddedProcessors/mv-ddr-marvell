@@ -414,6 +414,7 @@ int ddr3_tip_a38x_get_freq_config(u8 dev_num, enum hws_ddr_freq freq,
 int ddr3_a38x_update_topology_map(u32 dev_num,
 				  struct hws_topology_map *topology_map);
 int ddr3_tip_a38x_get_init_freq(int dev_num, enum hws_ddr_freq *freq);
+u8 ddr3_tip_clock_mode(u32 frequency);
 int ddr3_tip_a38x_get_medium_freq(int dev_num, enum hws_ddr_freq *freq);
 int ddr3_tip_a38x_if_read(u8 dev_num, enum hws_access_type interface_access,
 			  u32 if_id, u32 reg_addr, u32 *data, u32 mask);

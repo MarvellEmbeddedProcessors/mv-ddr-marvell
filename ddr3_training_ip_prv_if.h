@@ -175,6 +175,7 @@ typedef int (*HWS_TRAINING_IP_LOAD_TOPOLOGY)(u32 dev_num, u32 config_num);
 typedef int (*HWS_TRAINING_IP_READ_LEVELING)(u32 dev_num, u32 config_num);
 typedef int (*HWS_TRAINING_IP_WRITE_LEVELING)(u32 dev_num, u32 config_num);
 typedef u32 (*HWS_TRAINING_IP_GET_TEMP)(u8 dev_num);
+typedef u8 (*HWS_TRAINING_IP_GET_RATIO)(u32 freq);
 
 struct hws_tip_config_func_db {
 	HWS_TIP_DUNIT_MUX_SELECT_FUNC_PTR tip_dunit_mux_select_func;
@@ -185,6 +186,7 @@ struct hws_tip_config_func_db {
 	HWS_SET_FREQ_DIVIDER_FUNC_PTR tip_set_freq_divider_func;
 	HWS_GET_CS_CONFIG_FUNC_PTR tip_get_cs_config_info;
 	HWS_TRAINING_IP_GET_TEMP tip_get_temperature;
+	HWS_TRAINING_IP_GET_RATIO tip_get_clock_ratio;
 };
 
 int ddr3_tip_init_config_func(u32 dev_num,

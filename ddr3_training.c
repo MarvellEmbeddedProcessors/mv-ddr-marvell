@@ -1468,7 +1468,9 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		t_refi *= 1000;	/*psec */
 
 		/* HCLK in[ps] */
-		t_hclk = MEGA / (freq_val[frequency] / 2);
+		t_hclk = MEGA / (freq_val[frequency] /
+					config_func_info[dev_num].
+						tip_get_clock_ratio(frequency));
 		refresh_interval_cnt = t_refi / t_hclk;	/* no units */
 		val = 0x4000 | refresh_interval_cnt;
 		CHECK_STATUS(ddr3_tip_if_write
