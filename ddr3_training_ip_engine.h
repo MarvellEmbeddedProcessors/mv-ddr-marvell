@@ -129,8 +129,6 @@ int ddr3_tip_training_ip_test(u32 dev_num, enum hws_training_result result_type,
 			      u32 num_of_iterations, u32 start_pattern,
 			      u32 end_pattern);
 int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern);
-int ddr3_tip_load_pattern_to_mem_by_cpu(u32 dev_num, enum hws_pattern pattern,
-					u32 offset);
 int ddr3_tip_load_all_pattern_to_mem(u32 dev_num);
 int ddr3_tip_read_training_result(u32 dev_num, u32 if_id,
 				  enum hws_access_type pup_access_type,

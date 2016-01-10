@@ -969,16 +969,6 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 }
 
 /*
- * Load specific pattern to memory using CPU
- */
-int ddr3_tip_load_pattern_to_mem_by_cpu(u32 dev_num, enum hws_pattern pattern,
-					u32 offset)
-{
-	/* eranba - TBD */
-	return MV_OK;
-}
-
-/*
  * Training search routine
  */
 int ddr3_tip_ip_training_wrapper_int(u32 dev_num,
