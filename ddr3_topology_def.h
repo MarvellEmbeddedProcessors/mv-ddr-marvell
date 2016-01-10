@@ -145,7 +145,7 @@ enum hws_ddr_freq {
 	DDR_FREQ_900,
 	DDR_FREQ_360,
 	DDR_FREQ_1000,
-	DDR_FREQ_LIMIT
+	DDR_FREQ_LAST
 };
 
 enum speed_bin_table_elements {
@@ -161,7 +161,8 @@ enum speed_bin_table_elements {
 	SPEED_BIN_TWTR,
 	SPEED_BIN_TRTP,
 	SPEED_BIN_TWR,
-	SPEED_BIN_TMOD
+	SPEED_BIN_TMOD,
+	SPEED_BIN_TXPDLL
 };
 
 #endif /* _DDR3_TOPOLOGY_DEF_H */

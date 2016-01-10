@@ -680,7 +680,9 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 					     speed_bin_table(speed_bin_index,
 							     SPEED_BIN_TPD));
 			t_pd = TIME_2_CLOCK_CYCLES(t_pd, t_ckclk);
-			txpdll = GET_MAX_VALUE(t_ckclk * 10, 24);
+			txpdll = GET_MAX_VALUE(t_ckclk * 10,
+					       speed_bin_table(speed_bin_index,
+							       SPEED_BIN_TXPDLL));
 			txpdll = CEIL_DIVIDE((txpdll - 1), t_ckclk);
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
@@ -758,7 +760,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 int hws_ddr3_tip_load_topology_map(u32 dev_num, struct hws_topology_map *tm)
 {
 	enum hws_speed_bin speed_bin_index;
-	enum hws_ddr_freq freq = DDR_FREQ_LIMIT;
+	enum hws_ddr_freq freq = DDR_FREQ_LAST;
 	u32 if_id;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 
@@ -1382,7 +1384,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 				   dev_num, access_type, if_id,
 				   frequency, speed_bin_index));
 
-		for (cnt_id = 0; cnt_id < DDR_FREQ_LIMIT; cnt_id++) {
+		for (cnt_id = 0; cnt_id < DDR_FREQ_LAST; cnt_id++) {
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE,
 					  ("%d ",
 					   cas_latency_table[speed_bin_index].

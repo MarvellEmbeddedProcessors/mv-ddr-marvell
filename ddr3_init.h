@@ -305,7 +305,7 @@ extern int wl_debug_delay;
 extern u32 silicon_delay[HWS_MAX_DEVICE_NUM];
 extern u32 p_finger;
 extern u32 n_finger;
-extern u32 freq_val[DDR_FREQ_LIMIT];
+extern u32 freq_val[DDR_FREQ_LAST];
 extern u32 start_pattern, end_pattern;
 extern u32 phy_reg0_val;
 extern u32 phy_reg1_val;
@@ -330,7 +330,7 @@ extern u32 delay_enable;
 extern u32 ca_delay;
 extern u32 debug_dunit;
 extern u32 clamp_tbl[];
-extern u32 freq_mask[HWS_MAX_DEVICE_NUM][DDR_FREQ_LIMIT];
+extern u32 freq_mask[HWS_MAX_DEVICE_NUM][DDR_FREQ_LAST];
 extern u32 start_pattern, end_pattern;
 
 extern u32 maxt_poll_tries;
@@ -347,7 +347,7 @@ extern u8 debug_centralization;
 
 extern u32 delay_enable;
 extern u32 start_pattern, end_pattern;
-extern u32 freq_val[DDR_FREQ_LIMIT];
+extern u32 freq_val[DDR_FREQ_LAST];
 extern u8 debug_training_hw_alg;
 extern enum auto_tune_stage training_stage;
 

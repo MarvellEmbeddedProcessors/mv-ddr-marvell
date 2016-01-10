@@ -202,7 +202,7 @@ struct pattern_info {
 
 /* CL value for each frequency */
 struct cl_val_per_freq {
-	u8 cl_val[DDR_FREQ_LIMIT];
+	u8 cl_val[DDR_FREQ_LAST];
 };
 
 struct cs_element {

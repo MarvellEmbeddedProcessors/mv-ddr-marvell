@@ -108,7 +108,7 @@ enum mv_ddr_dev_attribute ddr_dev_attributes[HWS_MAX_DEVICE_NUM][MV_ATTR_LAST];
 int ddr_dev_attr_init_done[HWS_MAX_DEVICE_NUM] = { 0 };
 
 /* List of allowed frequency listed in order of enum hws_ddr_freq */
-u32 freq_val[DDR_FREQ_LIMIT] = {
+u32 freq_val[DDR_FREQ_LAST] = {
 	0,			/*DDR_FREQ_LOW_FREQ */
 	400,			/*DDR_FREQ_400, */
 	533,			/*DDR_FREQ_533, */
@@ -525,6 +525,9 @@ u32 speed_bin_table(u8 index, enum speed_bin_table_elements element)
 		break;
 	case SPEED_BIN_TMOD:
 		result = 15000;
+		break;
+	case SPEED_BIN_TXPDLL:
+		result = 24000;
 		break;
 	default:
 		break;

@@ -205,7 +205,7 @@ static int a38x_silicon_delay_offset[] = {
 };
 #endif
 
-static u8 a38x_bw_per_freq[DDR_FREQ_LIMIT] = {
+static u8 a38x_bw_per_freq[DDR_FREQ_LAST] = {
 	0x3,			/* DDR_FREQ_100 */
 	0x4,			/* DDR_FREQ_400 */
 	0x4,			/* DDR_FREQ_533 */
@@ -224,7 +224,7 @@ static u8 a38x_bw_per_freq[DDR_FREQ_LIMIT] = {
 	0x5			/* DDR_FREQ_1000 */
 };
 
-static u8 a38x_rate_per_freq[DDR_FREQ_LIMIT] = {
+static u8 a38x_rate_per_freq[DDR_FREQ_LAST] = {
 	 /*TBD*/ 0x1,		/* DDR_FREQ_100 */
 	0x2,			/* DDR_FREQ_400 */
 	0x2,			/* DDR_FREQ_533 */
