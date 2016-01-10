@@ -462,6 +462,7 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 
 	/* set device attributes*/
 	ddr3_tip_dev_attr_init(dev_num);
+	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_TIP_REV, MV_TIP_REV_4);
 	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_OCTET_PER_INTERFACE, DDR_INTERFACE_OCTETS_NUM);
 
 #ifdef STATIC_ALGO_SUPPORT

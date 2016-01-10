@@ -855,7 +855,7 @@ int ddr3_tip_load_all_pattern_to_mem(u32 dev_num)
  */
 int is_odpg_access_done(u32 dev_num, u32 if_id)
 {
-	u32 poll_cnt = 0, data_value;
+	u32 poll_cnt = 0, data_value, expected_val;
 	u32 read_data[MAX_INTERFACE_NUM];
 
 	for (poll_cnt = 0; poll_cnt < MAX_POLLING_ITERATIONS; poll_cnt++) {
@@ -863,15 +863,22 @@ int is_odpg_access_done(u32 dev_num, u32 if_id)
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
 			      ODPG_BIST_DONE, read_data, MASK_ALL_BITS));
 		data_value = read_data[if_id];
-		if (((data_value >> ODPG_BIST_DONE_BIT_OFFS) & 0x1) ==
-		    ODPG_BIST_DONE_BIT_VALUE) {
-				data_value = data_value & 0xfffffffe;
-				CHECK_STATUS(ddr3_tip_if_write
-					     (dev_num, ACCESS_TYPE_UNICAST,
-					      if_id, ODPG_BIST_DONE, data_value,
-					      MASK_ALL_BITS));
-				break;
-			}
+
+		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) < MV_TIP_REV_3)
+			expected_val = ODPG_BIST_DONE_BIT_VALUE_REV2;
+		else
+			expected_val = ODPG_BIST_DONE_BIT_VALUE_REV3;
+
+		if (((data_value >> ODPG_BIST_DONE_BIT_OFFS) & 0x1) == expected_val) {
+			data_value = data_value & 0xfffffffe;
+			CHECK_STATUS(ddr3_tip_if_write(dev_num,
+						       ACCESS_TYPE_UNICAST,
+						       if_id,
+						       ODPG_BIST_DONE,
+						       data_value,
+						       MASK_ALL_BITS));
+			break;
+		}
 	}
 
 	if (poll_cnt >= MAX_POLLING_ITERATIONS) {

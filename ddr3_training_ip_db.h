@@ -139,6 +139,15 @@ enum mv_ddr_dev_attribute {
 	MV_ATTR_LAST
 };
 
+enum mv_ddr_tip_revison {
+	MV_TIP_REV_NA,
+	MV_TIP_REV_1, /* NP5 */
+	MV_TIP_REV_2, /* BC2 */
+	MV_TIP_REV_3, /* AC3 */
+	MV_TIP_REV_4, /* A-380/A-390 */
+	MV_TIP_REV_LAST
+};
+
 /* Device attribute functions */
 void ddr3_tip_dev_attr_init(u32 dev_num);
 u32 ddr3_tip_dev_attr_get(u32 dev_num, enum mv_ddr_dev_attribute attr_id);
