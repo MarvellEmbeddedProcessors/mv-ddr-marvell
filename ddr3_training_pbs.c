@@ -169,7 +169,7 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 		 (effective_cs * CS_REGISTER_ADDR_OFFSET)) :
 		(WRITE_CENTRALIZATION_PHY_REG +
 		 (effective_cs * CS_REGISTER_ADDR_OFFSET));
-	read_adll_value(nominal_adll, reg_addr, MASK_ALL_BITS);
+	ddr3_tip_read_adll_value(dev_num, nominal_adll, reg_addr, MASK_ALL_BITS);
 
 	/* stage 1 shift ADLL */
 	ddr3_tip_ip_training(dev_num, ACCESS_TYPE_MULTICAST,
@@ -946,7 +946,7 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 	reg_addr = (pbs_mode == PBS_RX_MODE) ?
 		(READ_CENTRALIZATION_PHY_REG + effective_cs * 4) :
 		(WRITE_CENTRALIZATION_PHY_REG + effective_cs * 4);
-	write_adll_value(nominal_adll, reg_addr);
+	ddr3_tip_write_adll_value(dev_num, nominal_adll, reg_addr);
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		reg_addr = (pbs_mode == PBS_RX_MODE) ?

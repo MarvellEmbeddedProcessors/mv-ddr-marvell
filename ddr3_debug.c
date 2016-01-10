@@ -762,12 +762,11 @@ int ddr3_tip_register_xsb_info(u32 dev_num, struct hws_xsb_info *xsb_info_table)
 /*
  * Read ADLL Value
  */
-int read_adll_value(u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
+int ddr3_tip_read_adll_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
 		    int reg_addr, u32 mask)
 {
 	u32 data_value;
 	u32 if_id = 0, bus_id = 0;
-	u32 dev_num = 0;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
@@ -797,11 +796,11 @@ int read_adll_value(u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
 /*
  * Write ADLL Value
  */
-int write_adll_value(u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
+int ddr3_tip_write_adll_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
 		     int reg_addr)
 {
 	u32 if_id = 0, bus_id = 0;
-	u32 dev_num = 0, data;
+	u32 data;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
@@ -1444,9 +1443,9 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 		for (adll = 0; adll < (MAX_INTERFACE_NUM * MAX_BUS_NUM); adll++)
 			ctrl_adll[adll] = 0;
 		/* Save DQS value(after algorithm run) */
-		read_adll_value(ctrl_adll,
-				(reg + (cs * CS_REGISTER_ADDR_OFFSET)),
-				MASK_ALL_BITS);
+		ddr3_tip_read_adll_value(dev_num, ctrl_adll,
+					 (reg + (cs * CS_REGISTER_ADDR_OFFSET)),
+					 MASK_ALL_BITS);
 
 		/*
 		 * Sweep ADLL  from 0:31 on all I/F on all Pup and perform
@@ -1527,11 +1526,12 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 		 * Write back to the phy the Rx DQS value, we store in
 		 * the beginning.
 		 */
-		write_adll_value(ctrl_adll,
-				 (reg + cs * CS_REGISTER_ADDR_OFFSET));
+		ddr3_tip_write_adll_value(dev_num, ctrl_adll,
+					  (reg + cs * CS_REGISTER_ADDR_OFFSET));
 		/* print adll results */
-		read_adll_value(ctrl_adll, (reg + cs * CS_REGISTER_ADDR_OFFSET),
-				MASK_ALL_BITS);
+		ddr3_tip_read_adll_value(dev_num, ctrl_adll,
+					 (reg + cs * CS_REGISTER_ADDR_OFFSET),
+					 MASK_ALL_BITS);
 		printf("%s, DQS, ADLL,,,", (direction == 0) ? "Tx" : "Rx");
 		print_adll(dev_num, ctrl_adll);
 	}
