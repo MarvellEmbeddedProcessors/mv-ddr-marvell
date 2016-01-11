@@ -148,6 +148,11 @@ enum mv_ddr_tip_revison {
 	MV_TIP_REV_LAST
 };
 
+enum mv_ddr_phy_edge {
+	MV_DDR_PHY_EDGE_POSITIVE,
+	MV_DDR_PHY_EDGE_NEGATIVE
+};
+
 /* Device attribute functions */
 void ddr3_tip_dev_attr_init(u32 dev_num);
 u32 ddr3_tip_dev_attr_get(u32 dev_num, enum mv_ddr_dev_attribute attr_id);

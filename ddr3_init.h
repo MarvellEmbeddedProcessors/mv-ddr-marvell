@@ -246,25 +246,24 @@ enum log_level  {
 extern u8 debug_training;
 extern u8 is_reg_dump;
 extern u8 generic_init_controller;
-extern u32 freq_val[];
+/* list of allowed frequency listed in order of enum hws_ddr_freq */
+extern u32 freq_val[DDR_FREQ_LAST];
 extern u32 is_pll_old;
 extern struct cl_val_per_freq cas_latency_table[];
 extern struct pattern_info pattern_table[];
 extern struct cl_val_per_freq cas_write_latency_table[];
-extern u8 debug_training;
 extern u8 debug_centralization, debug_training_ip, debug_training_bist,
 	debug_pbs, debug_training_static, debug_leveling;
 extern u32 pipe_multicast_mask;
 extern struct hws_tip_config_func_db config_func_info[];
-extern u8 cs_mask_reg[];
 extern u8 twr_mask_table[];
 extern u8 cl_mask_table[];
 extern u8 cwl_mask_table[];
 extern u16 rfc_table[];
 extern u32 speed_bin_table_t_rc[];
 extern u32 speed_bin_table_t_rcd_t_rp[];
-extern u32 ck_delay, ck_delay_16;
 
+extern u32 vref_init_val;
 extern u32 g_zpri_data;
 extern u32 g_znri_data;
 extern u32 g_zpri_ctrl;
@@ -281,31 +280,21 @@ extern u8 debug_training_access;
 extern u8 debug_training_a38x;
 extern u32 first_active_if;
 extern enum hws_ddr_freq init_freq;
-extern u32 delay_enable, ck_delay, ck_delay_16, ca_delay;
+extern u32 delay_enable, ck_delay, ca_delay;
 extern u32 mask_tune_func;
 extern u32 rl_version;
 extern int rl_mid_freq_wa;
 extern u8 calibration_update_control; /* 2 external only, 1 is internal only */
 extern enum hws_ddr_freq medium_freq;
 
-extern u32 ck_delay, ck_delay_16;
 extern enum hws_result training_result[MAX_STAGE_LIMIT][MAX_INTERFACE_NUM];
-extern u32 first_active_if;
-extern u32 mask_tune_func;
-extern u32 freq_val[];
-extern enum hws_ddr_freq init_freq;
 extern enum hws_ddr_freq low_freq;
-extern enum hws_ddr_freq medium_freq;
-extern u8 generic_init_controller;
 extern enum auto_tune_stage training_stage;
 extern u32 is_pll_before_init;
 extern u32 is_adll_calib_before_init;
 extern u32 is_dfs_in_init;
 extern int wl_debug_delay;
 extern u32 silicon_delay[HWS_MAX_DEVICE_NUM];
-extern u32 p_finger;
-extern u32 n_finger;
-extern u32 freq_val[DDR_FREQ_LAST];
 extern u32 start_pattern, end_pattern;
 extern u32 phy_reg0_val;
 extern u32 phy_reg1_val;
@@ -318,7 +307,6 @@ extern u32 znri_data_phy_val;
 extern u32 zpri_data_phy_val;
 extern u32 znri_ctrl_phy_val;
 extern u32 zpri_ctrl_phy_val;
-extern u8 debug_training_access;
 extern u32 finger_test, p_finger_start, p_finger_end, n_finger_start,
 	n_finger_end, p_finger_step, n_finger_step;
 extern u32 mode2_t;
@@ -326,67 +314,27 @@ extern u32 xsb_validate_type;
 extern u32 xsb_validation_base_address;
 extern u32 odt_additional;
 extern u32 debug_mode;
-extern u32 delay_enable;
-extern u32 ca_delay;
 extern u32 debug_dunit;
 extern u32 clamp_tbl[];
 extern u32 freq_mask[HWS_MAX_DEVICE_NUM][DDR_FREQ_LAST];
-extern u32 start_pattern, end_pattern;
 
 extern u32 maxt_poll_tries;
 extern u32 is_bist_reset_bit;
-extern u8 debug_training_bist;
 
 extern u8 vref_window_size[MAX_INTERFACE_NUM][MAX_BUS_NUM];
-extern u32 debug_mode;
 extern u32 effective_cs;
 extern int ddr3_tip_centr_skip_min_win_check;
 extern u32 *dq_map_table;
-extern enum auto_tune_stage training_stage;
-extern u8 debug_centralization;
 
-extern u32 delay_enable;
-extern u32 start_pattern, end_pattern;
-extern u32 freq_val[DDR_FREQ_LAST];
 extern u8 debug_training_hw_alg;
-extern enum auto_tune_stage training_stage;
 
-extern u8 debug_training_ip;
-extern enum hws_result training_result[MAX_STAGE_LIMIT][MAX_INTERFACE_NUM];
-extern enum auto_tune_stage training_stage;
-extern u32 effective_cs;
-
-extern u8 debug_leveling;
-extern enum hws_result training_result[MAX_STAGE_LIMIT][MAX_INTERFACE_NUM];
-extern enum auto_tune_stage training_stage;
-extern u32 rl_version;
-extern struct cl_val_per_freq cas_latency_table[];
 extern u32 start_xsb_offset;
-extern u32 debug_mode;
 extern u32 odt_config;
-extern u32 effective_cs;
-extern u32 phy_reg1_val;
 
-extern u8 debug_pbs;
-extern u32 effective_cs;
 extern u16 mask_results_dq_reg_map[];
-extern enum hws_ddr_freq medium_freq;
-extern u32 freq_val[];
-extern enum hws_result training_result[MAX_STAGE_LIMIT][MAX_INTERFACE_NUM];
-extern enum auto_tune_stage training_stage;
-extern u32 debug_mode;
-extern u32 *dq_map_table;
 
-extern u32 vref;
-extern struct cl_val_per_freq cas_latency_table[];
 extern u32 target_freq;
-extern struct hws_tip_config_func_db config_func_info[HWS_MAX_DEVICE_NUM];
-extern u32 clamp_tbl[];
 extern u32 init_freq;
-/* list of allowed frequency listed in order of enum hws_ddr_freq */
-extern u32 freq_val[];
-extern u8 debug_training_static;
-extern u32 first_active_if;
 
 /* Prototypes */
 int ddr3_tip_enable_init_sequence(u32 dev_num);
@@ -423,7 +371,6 @@ int ddr3_tip_a38x_if_write(u8 dev_num, enum hws_access_type interface_access,
 int ddr3_tip_a38x_get_device_info(u8 dev_num,
 				  struct ddr3_device_info *info_ptr);
 
-int ddr3_tip_init_a38x(u32 dev_num, u32 board_id);
 
 int print_adll(u32 dev_num, u32 adll[MAX_INTERFACE_NUM * MAX_BUS_NUM]);
 int ddr3_tip_restore_dunit_regs(u32 dev_num);
@@ -443,10 +390,10 @@ int ddr3_fast_path_dynamic_cs_size_config(u32 cs_ena);
 void ddr3_fast_path_static_cs_size_config(u32 cs_ena);
 u32 ddr3_get_device_width(u32 cs);
 u32 mv_board_id_index_get(u32 board_id);
-u32 mv_board_id_get(void);
 u32 ddr3_get_bus_width(void);
 void ddr3_set_log_level(u32 n_log_level);
 int ddr3_calc_mem_cs_size(u32 cs, u32 *cs_size);
+int calc_cs_num(u32 dev_num, u32 if_id, u32 *cs_num);
 
 int hws_ddr3_cs_base_adr_calc(u32 if_id, u32 cs, u32 *cs_base_addr);
 

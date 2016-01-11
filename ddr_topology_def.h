@@ -191,10 +191,19 @@ struct hws_topology_map {
 /* DDR3 training global configuration parameters */
 struct tune_train_params {
 	u32 ck_delay;
-	u32 ck_delay_16;
-	u32 p_finger;
-	u32 n_finger;
 	u32 phy_reg3_val;
+	u32 g_zpri_data;
+	u32 g_znri_data;
+	u32 g_zpri_ctrl;
+	u32 g_znri_ctrl;
+	u32 g_zpodt_data;
+	u32 g_znodt_data;
+	u32 g_zpodt_ctrl;
+	u32 g_znodt_ctrl;
+	u32 g_dic;
+	u32 g_odt_config;
+	u32 g_rtt_nom;
+	u32 g_rtt_wr;
 };
 
 #endif /* _DDR_TOPOLOGY_DEF_H */

@@ -117,7 +117,7 @@ u32 window_mem_addr = 0;
 u32 phy_reg0_val = 0;
 u32 phy_reg1_val = 8;
 u32 phy_reg2_val = 0;
-u32 phy_reg3_val = 0xa;
+u32 phy_reg3_val = PARAM_UNDEFINED;
 enum hws_ddr_freq init_freq = DDR_FREQ_667;
 enum hws_ddr_freq low_freq = DDR_FREQ_LOW_FREQ;
 enum hws_ddr_freq medium_freq;
@@ -159,6 +159,25 @@ u32 delay_enable = 0;
 int rl_mid_freq_wa = 0;
 
 u32 effective_cs = 0;
+
+u32 vref_init_val = 0x4;
+u32 ck_delay = PARAM_UNDEFINED;
+
+/* Design guidelines parameters */
+u32 g_zpri_data = PARAM_UNDEFINED; /* controller data - P drive strength */
+u32 g_znri_data = PARAM_UNDEFINED; /* controller data - N drive strength */
+u32 g_zpri_ctrl = PARAM_UNDEFINED; /* controller C/A - P drive strength */
+u32 g_znri_ctrl = PARAM_UNDEFINED; /* controller C/A - N drive strength */
+
+u32 g_zpodt_data = PARAM_UNDEFINED; /* controller data - P ODT */
+u32 g_znodt_data = PARAM_UNDEFINED; /* controller data - N ODT */
+u32 g_zpodt_ctrl = PARAM_UNDEFINED; /* controller data - P ODT */
+u32 g_znodt_ctrl = PARAM_UNDEFINED; /* controller data - N ODT */
+
+u32 g_odt_config = PARAM_UNDEFINED;
+u32 g_rtt_nom = PARAM_UNDEFINED;
+u32 g_rtt_wr = PARAM_UNDEFINED;
+u32 g_dic = PARAM_UNDEFINED;
 
 u32 mask_tune_func = (SET_MEDIUM_FREQ_MASK_BIT |
 		      WRITE_LEVELING_MASK_BIT |
@@ -282,12 +301,112 @@ static int ddr3_tip_rank_control(u32 dev_num, u32 if_id);
 int ddr3_tip_tune_training_params(u32 dev_num,
 				  struct tune_train_params *params)
 {
-	if (params->ck_delay != -1)
+	if (params->ck_delay != PARAM_UNDEFINED)
 		ck_delay = params->ck_delay;
-	if (params->ck_delay_16 != -1)
-		ck_delay_16 = params->ck_delay_16;
-	if (params->phy_reg3_val != -1)
+	if (params->phy_reg3_val != PARAM_UNDEFINED)
 		phy_reg3_val = params->phy_reg3_val;
+	if (params->g_rtt_nom != PARAM_UNDEFINED)
+		g_rtt_nom = params->g_rtt_nom;
+	if (params->g_rtt_wr != PARAM_UNDEFINED)
+		g_rtt_wr = params->g_rtt_wr;
+	if (params->g_dic != PARAM_UNDEFINED)
+		g_dic = params->g_dic;
+	if (params->g_odt_config != PARAM_UNDEFINED)
+		g_odt_config = params->g_odt_config;
+	if (params->g_zpri_data != PARAM_UNDEFINED)
+		g_zpri_data = params->g_zpri_data;
+	if (params->g_znri_data != PARAM_UNDEFINED)
+		g_znri_data = params->g_znri_data;
+	if (params->g_zpri_ctrl != PARAM_UNDEFINED)
+		g_zpri_ctrl = params->g_zpri_ctrl;
+	if (params->g_znri_ctrl != PARAM_UNDEFINED)
+		g_znri_ctrl = params->g_znri_ctrl;
+	if (params->g_zpodt_data != PARAM_UNDEFINED)
+		g_zpodt_data = params->g_zpodt_data;
+	if (params->g_znodt_data != PARAM_UNDEFINED)
+		g_znodt_data = params->g_znodt_data;
+	if (params->g_zpodt_ctrl != PARAM_UNDEFINED)
+		g_zpodt_ctrl = params->g_zpodt_ctrl;
+	if (params->g_znodt_ctrl != PARAM_UNDEFINED)
+		g_znodt_ctrl = params->g_znodt_ctrl;
+
+	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
+			  ("DGL parameters: 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X\n",
+			   g_zpri_data, g_znri_data, g_zpri_ctrl, g_znri_ctrl, g_zpodt_data, g_znodt_data,
+			   g_zpodt_ctrl, g_znodt_ctrl, g_rtt_nom, g_dic, g_odt_config, g_rtt_wr));
+
+	return MV_OK;
+}
+
+int ddr3_tip_configure_phy(u32 dev_num)
+{
+	u32 if_id, phy_id;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+
+	CHECK_STATUS(ddr3_tip_bus_write
+		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
+		      PAD_ZRI_CALIB_PHY_REG,
+		      ((0x7f & g_zpri_data) << 7 | (0x7f & g_znri_data))));
+	CHECK_STATUS(ddr3_tip_bus_write
+		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_CONTROL,
+		      PAD_ZRI_CALIB_PHY_REG,
+		      ((0x7f & g_zpri_ctrl) << 7 | (0x7f & g_znri_ctrl))));
+	CHECK_STATUS(ddr3_tip_bus_write
+		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
+		      PAD_ODT_CALIB_PHY_REG,
+		      ((0x3f & g_zpodt_data) << 6 | (0x3f & g_znodt_data))));
+	CHECK_STATUS(ddr3_tip_bus_write
+		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_CONTROL,
+		      PAD_ODT_CALIB_PHY_REG,
+		      ((0x3f & g_zpodt_ctrl) << 6 | (0x3f & g_znodt_ctrl))));
+
+	CHECK_STATUS(ddr3_tip_bus_write
+		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
+		      PAD_PRE_DISABLE_PHY_REG, 0));
+	CHECK_STATUS(ddr3_tip_bus_write
+		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
+		      CMOS_CONFIG_PHY_REG, 0));
+	CHECK_STATUS(ddr3_tip_bus_write
+		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_CONTROL,
+		      CMOS_CONFIG_PHY_REG, 0));
+
+	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
+		/* check if the interface is enabled */
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+
+		for (phy_id = 0;
+		     phy_id < octets_per_if_num;
+		     phy_id++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, phy_id);
+			/* Vref & clamp */
+			CHECK_STATUS(ddr3_tip_bus_read_modify_write
+				     (dev_num, ACCESS_TYPE_UNICAST,
+				      if_id, phy_id, DDR_PHY_DATA,
+				      PAD_CONFIG_PHY_REG,
+				      ((clamp_tbl[if_id] << 4) | vref_init_val),
+				      ((0x7 << 4) | 0x7)));
+			/* clamp not relevant for control */
+			CHECK_STATUS(ddr3_tip_bus_read_modify_write
+				     (dev_num, ACCESS_TYPE_UNICAST,
+				      if_id, phy_id, DDR_PHY_CONTROL,
+				      PAD_CONFIG_PHY_REG, 0x4, 0x7));
+		}
+	}
+
+	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_PHY_EDGE) ==
+	    MV_DDR_PHY_EDGE_POSITIVE)
+		CHECK_STATUS(ddr3_tip_bus_write
+			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+			      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+			      DDR_PHY_DATA, 0x90, 0x6002));
 
 	return MV_OK;
 }
@@ -351,7 +470,7 @@ int ddr3_tip_configure_cs(u32 dev_num, u32 if_id, u32 cs_num, u32 enable)
 /*
  * Calculate number of CS
  */
-static int calc_cs_num(u32 dev_num, u32 if_id, u32 *cs_num)
+int calc_cs_num(u32 dev_num, u32 if_id, u32 *cs_num)
 {
 	u32 cs;
 	u32 bus_cnt;
@@ -946,8 +1065,12 @@ static int odt_test(u32 dev_num, enum hws_algo_type algo_type)
 				DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 						  ("pfinger_val %d nfinger_val %d\n",
 						   pfinger_val, nfinger_val));
-				p_finger = pfinger_val;
-				n_finger = nfinger_val;
+				/*
+				 * TODO: need to check the correctness
+				 * of the following two lines.
+				 */
+				g_zpodt_data = pfinger_val;
+				g_znodt_data = nfinger_val;
 			}
 
 			if (algo_type == ALGO_TYPE_DYNAMIC) {

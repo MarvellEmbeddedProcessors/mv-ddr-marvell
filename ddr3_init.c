@@ -853,13 +853,37 @@ static int ddr3_hws_tune_training_params(u8 dev_num)
 {
 	struct tune_train_params params;
 	int status;
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+	u32 if_id;
+	u32 cs_num;
+
+	CHECK_STATUS(ddr3_tip_get_first_active_if
+		     (dev_num, tm->if_act_mask,
+		      &if_id));
+
+	CHECK_STATUS(calc_cs_num(dev_num, if_id, &cs_num));
 
 	/* NOTE: do not remove any field initilization */
 	params.ck_delay = TUNE_TRAINING_PARAMS_CK_DELAY;
-	params.ck_delay_16 = TUNE_TRAINING_PARAMS_CK_DELAY_16;
-	params.p_finger = TUNE_TRAINING_PARAMS_PFINGER;
-	params.n_finger = TUNE_TRAINING_PARAMS_NFINGER;
 	params.phy_reg3_val = TUNE_TRAINING_PARAMS_PHYREG3VAL;
+	params.g_zpri_data = TUNE_TRAINING_PARAMS_PRI_DATA;
+	params.g_znri_data = TUNE_TRAINING_PARAMS_NRI_DATA;
+	params.g_zpri_ctrl = TUNE_TRAINING_PARAMS_PRI_CTRL;
+	params.g_znri_ctrl = TUNE_TRAINING_PARAMS_NRI_CTRL;
+	params.g_zpodt_data = TUNE_TRAINING_PARAMS_P_ODT_DATA;
+	params.g_znodt_data = TUNE_TRAINING_PARAMS_N_ODT_DATA;
+	params.g_zpodt_ctrl = TUNE_TRAINING_PARAMS_P_ODT_CTRL;
+	params.g_znodt_ctrl = TUNE_TRAINING_PARAMS_N_ODT_CTRL;
+	params.g_dic = TUNE_TRAINING_PARAMS_DIC;
+	params.g_rtt_nom = TUNE_TRAINING_PARAMS_RTT_NOM;
+
+	if (cs_num == 1) {
+		params.g_rtt_wr = TUNE_TRAINING_PARAMS_RTT_WR_1CS;
+		params.g_odt_config = TUNE_TRAINING_PARAMS_ODT_CONFIG_1CS;
+	} else {
+		params.g_rtt_wr = TUNE_TRAINING_PARAMS_RTT_WR_2CS;
+		params.g_odt_config = TUNE_TRAINING_PARAMS_ODT_CONFIG_2CS;
+	}
 
 	status = ddr3_tip_tune_training_params(dev_num, &params);
 	if (MV_OK != status) {

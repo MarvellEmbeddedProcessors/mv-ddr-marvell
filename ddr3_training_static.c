@@ -103,6 +103,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 
+#ifdef STATIC_ALGO_SUPPORT
+
 /* Design Guidelines parameters */
 u32 g_zpri_data = 123;		/* controller data - P drive strength */
 u32 g_znri_data = 123;		/* controller data - N drive strength */
@@ -115,8 +117,6 @@ u32 g_znodt_ctrl = 45;		/* controller data - N ODT */
 u32 g_odt_config = 0x120012;
 u32 g_rtt_nom = 0x44;
 u32 g_dic = 0x2;
-
-#ifdef STATIC_ALGO_SUPPORT
 
 #define PARAM_NOT_CARE		0
 #define MAX_STATIC_SEQ		48
@@ -551,77 +551,3 @@ int ddr3_tip_static_phy_init_controller(u32 dev_num)
 	return MV_OK;
 }
 #endif
-
-/*
- * Configure phy (called by static init controller) for static flow
- */
-int ddr3_tip_configure_phy(u32 dev_num)
-{
-	u32 if_id, phy_id;
-	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
-
-	CHECK_STATUS(ddr3_tip_bus_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
-		      PAD_ZRI_CALIB_PHY_REG,
-		      ((0x7f & g_zpri_data) << 7 | (0x7f & g_znri_data))));
-	CHECK_STATUS(ddr3_tip_bus_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_CONTROL,
-		      PAD_ZRI_CALIB_PHY_REG,
-		      ((0x7f & g_zpri_ctrl) << 7 | (0x7f & g_znri_ctrl))));
-	CHECK_STATUS(ddr3_tip_bus_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
-		      PAD_ODT_CALIB_PHY_REG,
-		      ((0x3f & g_zpodt_data) << 6 | (0x3f & g_znodt_data))));
-	CHECK_STATUS(ddr3_tip_bus_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_CONTROL,
-		      PAD_ODT_CALIB_PHY_REG,
-		      ((0x3f & g_zpodt_ctrl) << 6 | (0x3f & g_znodt_ctrl))));
-
-	CHECK_STATUS(ddr3_tip_bus_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
-		      PAD_PRE_DISABLE_PHY_REG, 0));
-	CHECK_STATUS(ddr3_tip_bus_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
-		      CMOS_CONFIG_PHY_REG, 0));
-	CHECK_STATUS(ddr3_tip_bus_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_CONTROL,
-		      CMOS_CONFIG_PHY_REG, 0));
-
-	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		/* check if the interface is enabled */
-		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-
-		for (phy_id = 0;
-		     phy_id < octets_per_if_num;
-		     phy_id++) {
-			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, phy_id);
-			/* Vref & clamp */
-			CHECK_STATUS(ddr3_tip_bus_read_modify_write
-				     (dev_num, ACCESS_TYPE_UNICAST,
-				      if_id, phy_id, DDR_PHY_DATA,
-				      PAD_CONFIG_PHY_REG,
-				      ((clamp_tbl[if_id] << 4) | vref),
-				      ((0x7 << 4) | 0x7)));
-			/* clamp not relevant for control */
-			CHECK_STATUS(ddr3_tip_bus_read_modify_write
-				     (dev_num, ACCESS_TYPE_UNICAST,
-				      if_id, phy_id, DDR_PHY_CONTROL,
-				      PAD_CONFIG_PHY_REG, 0x4, 0x7));
-		}
-	}
-
-	CHECK_STATUS(ddr3_tip_bus_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA, 0x90,
-		      0x6002));
-
-	return MV_OK;
-}

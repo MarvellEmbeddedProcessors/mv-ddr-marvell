@@ -110,7 +110,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MIN_VALUE			(-MAX_VALUE)
 #define GET_RD_SAMPLE_DELAY(data, cs)	((data >> rd_sample_mask[cs]) & 0xf)
 
-u32 ck_delay = (u32)-1, ck_delay_16 = (u32)-1;
 u32 ca_delay;
 int ddr3_tip_centr_skip_min_win_check = 0;
 u8 current_vref[MAX_BUS_NUM][MAX_INTERFACE_NUM];
@@ -740,22 +739,18 @@ int ddr3_tip_cmd_addr_init_delay(u32 dev_num, u32 adll_tap)
 	 */
 
 	/* Calc ADLL Tap */
-	if ((ck_delay == -1) || (ck_delay_16 == -1)) {
+	if (ck_delay == PARAM_UNDEFINED)
 		DEBUG_TRAINING_HW_ALG(
 			DEBUG_LEVEL_ERROR,
-			("ERROR: One of ck_delay values not initialized!!!\n"));
-	}
+			("ERROR: ck_delay is not initialized!\n"));
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		/* Calc delay ps in ADLL tap */
-		if (tm->interface_params[if_id].bus_width ==
-		    BUS_WIDTH_16)
-			ck_num_adll_tap = ck_delay_16 / adll_tap;
-		else
-			ck_num_adll_tap = ck_delay / adll_tap;
 
+		/* Calc delay ps in ADLL tap */
+		ck_num_adll_tap = ck_delay / adll_tap;
 		ca_num_adll_tap = ca_delay / adll_tap;
+
 		data = (ck_num_adll_tap & 0x3f) +
 			((ca_num_adll_tap & 0x3f) << 10);
 

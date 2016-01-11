@@ -492,7 +492,6 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 		return status;
 	}
 
-	rl_version = 1;
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
 			  LOAD_PATTERN_MASK_BIT |
 			  SET_MEDIUM_FREQ_MASK_BIT | WRITE_LEVELING_MASK_BIT |
@@ -529,10 +528,8 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 		mask_tune_func &= ~PBS_RX_MASK_BIT;
 	}
 
-	if (ck_delay == -1)
+	if (ck_delay == PARAM_UNDEFINED)
 		ck_delay = 160;
-	if (ck_delay_16 == -1)
-		ck_delay_16 = 160;
 	ca_delay = 0;
 	delay_enable = 1;
 
@@ -842,7 +839,11 @@ int ddr3_silicon_post_init(void)
 
 int ddr3_tip_a38x_get_device_info(u8 dev_num, struct ddr3_device_info *info_ptr)
 {
+#if defined(CONFIG_ARMADA_39X)
+	info_ptr->device_id = 0x6900;
+#else
 	info_ptr->device_id = 0x6800;
+#endif
 	info_ptr->ck_delay = ck_delay;
 
 	return MV_OK;

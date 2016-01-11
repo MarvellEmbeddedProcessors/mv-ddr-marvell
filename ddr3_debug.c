@@ -829,22 +829,17 @@ int ddr3_tip_write_adll_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MA
 }
 
 #ifndef EXCLUDE_SWITCH_DEBUG
-u32 rl_version = 1;		/* 0 - old RL machine */
 struct hws_tip_config_func_db config_func_info[HWS_MAX_DEVICE_NUM];
 u32 start_xsb_offset = 0;
 u8 is_rl_old = 0;
 u8 is_freq_old = 0;
 u8 is_dfs_disabled = 0;
 u32 default_centrlization_value = 0x12;
-u32 vref = 0x4;
 u32 activate_select_before_run_alg = 1, activate_deselect_after_run_alg = 1,
 	rl_test = 0, reset_read_fifo = 0;
 int debug_acc = 0;
 u32 ctrl_sweepres[ADLL_LENGTH][MAX_INTERFACE_NUM][MAX_BUS_NUM];
 u32 ctrl_adll[MAX_CS_NUM * MAX_INTERFACE_NUM * MAX_BUS_NUM];
-u8 cs_mask_reg[] = {
-	0, 4, 8, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
 
 u32 xsb_test_table[][8] = {
 	{0x00000000, 0x11111111, 0x22222222, 0x33333333, 0x44444444, 0x55555555,
@@ -953,10 +948,6 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		*ptr = (u32 *)&generic_init_controller;
 		break;
 
-	case 0x5:
-		*ptr = (u32 *)&rl_version;
-		break;
-
 	case 0x8:
 		*ptr = (u32 *)&start_xsb_offset;
 		break;
@@ -1014,11 +1005,11 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		break;
 
 	case 0x33:
-		*ptr = (u32 *)&p_finger;
+		*ptr = (u32 *)&g_zpodt_data;
 		break;
 
 	case 0x34:
-		*ptr = (u32 *)&n_finger;
+		*ptr = (u32 *)&g_znodt_data;
 		break;
 
 	case 0x35:
@@ -1110,7 +1101,7 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		break;
 
 	case 0x5d:
-		*ptr = (u32 *)&vref;
+		*ptr = (u32 *)&vref_init_val;
 		break;
 
 	case 0x5e:
@@ -1151,10 +1142,6 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 
 	case 0x73:
 		*ptr = (u32 *)&ck_delay;
-		break;
-
-	case 0x74:
-		*ptr = (u32 *)&ck_delay_16;
 		break;
 
 	case 0x75:
@@ -1631,12 +1618,7 @@ int run_xsb_test(u32 dev_num, u32 mem_addr, u32 write_type,
 
 #else /*EXCLUDE_SWITCH_DEBUG */
 
-u32 rl_version = 1;		/* 0 - old RL machine */
-u32 vref = 0x4;
 u32 start_xsb_offset = 0;
-u8 cs_mask_reg[] = {
-	0, 4, 8, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
 
 int run_xsb_test(u32 dev_num, u32 mem_addr, u32 write_type,
 		 u32 read_type, u32 burst_length)
