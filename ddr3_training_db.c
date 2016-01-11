@@ -584,6 +584,79 @@ static inline u32 pattern_table_get_sso_word(u8 sso, u8 index)
 		return 0xffffffff;
 }
 
+static inline u32 pattern_table_get_sso_full_xtalk_word(u8 bit, u8 index)
+{
+	u8 byte = (1 << bit);
+
+	if ((index & 1) == 1)
+		byte = ~byte;
+
+	return byte | (byte << 8) | (byte << 16) | (byte << 24);
+
+}
+
+static inline u32 pattern_table_get_sso_xtalk_free_word(u8 bit, u8 index)
+{
+	u8 byte = (1 << bit);
+
+	if ((index & 1) == 1)
+		byte = 0;
+
+	return byte | (byte << 8) | (byte << 16) | (byte << 24);
+}
+
+static inline u32 patter_table_get_isi_word(u8 index)
+{
+	u8 i0 = index % 32;
+	u8 i1 = index % 8;
+	u32 word;
+
+	if (i0 > 15)
+		word = ((i1 == 5) | (i1 == 7)) ? 0xffffffff : 0x0;
+	else
+		word = (i1 == 6) ? 0xffffffff : 0x0;
+
+	word = ((i0 % 16) > 7) ? ~word : word;
+
+	return word;
+}
+
+static inline u32 pattern_table_get_sso_full_xtalk_word_16(u8 bit, u8 index)
+{
+	u8 byte = (1 << bit);
+
+	if ((index & 1) == 1)
+		byte = ~byte;
+
+	return byte | (byte << 8) | ((~byte) << 16) | ((~byte) << 24);
+}
+
+static inline u32 pattern_table_get_sso_xtalk_free_word_16(u8 bit, u8 index)
+{
+	u8 byte = (1 << byte);
+
+	if ((index & 1) == 0)
+		return (byte << 16) | (byte << 24);
+	else
+		return byte | (byte << 8);
+}
+
+static inline u32 pattern_table_get_isi_word_16(u8 index)
+{
+	u8 i0 = index % 16;
+	u8 i1 = index % 4;
+	u32 word;
+
+	if (i0 > 7)
+		word = (i1 > 1) ? 0x0000ffff : 0x0;
+	else
+		word = (i1 == 3) ? 0xffff0000 : 0x0;
+
+	word = ((i0 % 8) > 3) ? ~word : word;
+
+	return word;
+}
+
 static inline u32 pattern_table_get_vref_word(u8 index)
 {
 	if (0 == ((pattern_vref_pattern_table_map[index / 8] >>
@@ -687,6 +760,31 @@ inline u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 		case PATTERN_VREF:
 			pattern = pattern_table_get_vref_word(index);
 			break;
+		case PATTERN_SSO_FULL_XTALK_DQ0:
+		case PATTERN_SSO_FULL_XTALK_DQ1:
+		case PATTERN_SSO_FULL_XTALK_DQ2:
+		case PATTERN_SSO_FULL_XTALK_DQ3:
+		case PATTERN_SSO_FULL_XTALK_DQ4:
+		case PATTERN_SSO_FULL_XTALK_DQ5:
+		case PATTERN_SSO_FULL_XTALK_DQ6:
+		case PATTERN_SSO_FULL_XTALK_DQ7:
+			pattern = pattern_table_get_sso_full_xtalk_word((u8)(type - PATTERN_SSO_FULL_XTALK_DQ0),
+									index);
+			break;
+		case PATTERN_SSO_XTALK_FREE_DQ0:
+		case PATTERN_SSO_XTALK_FREE_DQ1:
+		case PATTERN_SSO_XTALK_FREE_DQ2:
+		case PATTERN_SSO_XTALK_FREE_DQ3:
+		case PATTERN_SSO_XTALK_FREE_DQ4:
+		case PATTERN_SSO_XTALK_FREE_DQ5:
+		case PATTERN_SSO_XTALK_FREE_DQ6:
+		case PATTERN_SSO_XTALK_FREE_DQ7:
+			pattern = pattern_table_get_sso_xtalk_free_word((u8)(type - PATTERN_SSO_XTALK_FREE_DQ0),
+									index);
+			break;
+		case PATTERN_ISI_XTALK_FREE:
+			pattern = patter_table_get_isi_word(index);
+			break;
 		default:
 			pattern = 0;
 			break;
@@ -739,6 +837,31 @@ inline u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 			break;
 		case PATTERN_VREF:
 			pattern = pattern_table_get_vref_word16(index);
+			break;
+		case PATTERN_SSO_FULL_XTALK_DQ0:
+		case PATTERN_SSO_FULL_XTALK_DQ1:
+		case PATTERN_SSO_FULL_XTALK_DQ2:
+		case PATTERN_SSO_FULL_XTALK_DQ3:
+		case PATTERN_SSO_FULL_XTALK_DQ4:
+		case PATTERN_SSO_FULL_XTALK_DQ5:
+		case PATTERN_SSO_FULL_XTALK_DQ6:
+		case PATTERN_SSO_FULL_XTALK_DQ7:
+			pattern = pattern_table_get_sso_full_xtalk_word_16((u8)(type - PATTERN_SSO_FULL_XTALK_DQ0),
+									   index);
+			break;
+		case PATTERN_SSO_XTALK_FREE_DQ0:
+		case PATTERN_SSO_XTALK_FREE_DQ1:
+		case PATTERN_SSO_XTALK_FREE_DQ2:
+		case PATTERN_SSO_XTALK_FREE_DQ3:
+		case PATTERN_SSO_XTALK_FREE_DQ4:
+		case PATTERN_SSO_XTALK_FREE_DQ5:
+		case PATTERN_SSO_XTALK_FREE_DQ6:
+		case PATTERN_SSO_XTALK_FREE_DQ7:
+			pattern = pattern_table_get_sso_xtalk_free_word_16((u8)(type - PATTERN_SSO_XTALK_FREE_DQ0),
+									   index);
+			break;
+		case PATTERN_ISI_XTALK_FREE:
+			pattern = pattern_table_get_isi_word_16(index);
 			break;
 		default:
 			pattern = 0;

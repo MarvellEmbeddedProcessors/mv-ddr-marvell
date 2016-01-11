@@ -179,7 +179,10 @@ struct pattern_info pattern_table_16[] = {
 	 */
 	{1, 1, 2, 1, 0x0080, 2},	/* PATTERN_PBS1 */
 	{1, 1, 2, 1, 0x00c0, 2},	/* PATTERN_PBS2 */
+	{1, 1, 2, 1, 0x0380, 2},	/* PATTERN_PBS3 */
+	{1, 1, 2, 1, 0x0040, 2},	/* PATTERN_TEST */
 	{1, 1, 2, 1, 0x0100, 2},	/* PATTERN_RL */
+	{1, 1, 2, 1, 0x0000, 2},	/* PATTERN_RL2 */
 	{0xf, 0x7, 2, 0x7, 0x0140, 16},	/* PATTERN_STATIC_PBS */
 	{0xf, 0x7, 2, 0x7, 0x0190, 16},	/* PATTERN_KILLER_DQ0 */
 	{0xf, 0x7, 2, 0x7, 0x01d0, 16},	/* PATTERN_KILLER_DQ1 */
@@ -189,14 +192,28 @@ struct pattern_info pattern_table_16[] = {
 	{0xf, 0x7, 2, 0x7, 0x02d0, 16},	/* PATTERN_KILLER_DQ5 */
 	{0xf, 0x7, 2, 0x7, 0x0310, 16},	/* PATTERN_KILLER_DQ6 */
 	{0xf, 0x7, 2, 0x7, 0x0350, 16},	/* PATTERN_KILLER_DQ7 */
-	{1, 1, 2, 1, 0x0380, 2},	/* PATTERN_PBS3 */
-	{1, 1, 2, 1, 0x0000, 2},	/* PATTERN_RL2 */
-	{1, 1, 2, 1, 0x0040, 2},	/* PATTERN_TEST */
+	{0xf, 0x7, 2, 0x7, 0x04c0, 16},	/* PATTERN_VREF */
 	{0xf, 0x7, 2, 0x7, 0x03c0, 16},	/* PATTERN_FULL_SSO_1T */
 	{0xf, 0x7, 2, 0x7, 0x0400, 16},	/* PATTERN_FULL_SSO_2T */
 	{0xf, 0x7, 2, 0x7, 0x0440, 16},	/* PATTERN_FULL_SSO_3T */
 	{0xf, 0x7, 2, 0x7, 0x0480, 16},	/* PATTERN_FULL_SSO_4T */
-	{0xf, 0x7, 2, 0x7, 0x04c0, 16}	/* PATTERN_VREF */
+	{0xf, 7, 2, 7, 0x6280, 16},	/* PATTERN_SSO_FULL_XTALK_DQ1 */
+	{0xf, 7, 2, 7, 0x6680, 16},	/* PATTERN_SSO_FULL_XTALK_DQ1 */
+	{0xf, 7, 2, 7, 0x6A80, 16},	/* PATTERN_SSO_FULL_XTALK_DQ2 */
+	{0xf, 7, 2, 7, 0x6E80, 16},	/* PATTERN_SSO_FULL_XTALK_DQ3 */
+	{0xf, 7, 2, 7, 0x7280, 16},	/* PATTERN_SSO_FULL_XTALK_DQ4 */
+	{0xf, 7, 2, 7, 0x7680, 16},	/* PATTERN_SSO_FULL_XTALK_DQ5 */
+	{0xf, 7, 2, 7, 0x7A80, 16},	/* PATTERN_SSO_FULL_XTALK_DQ6 */
+	{0xf, 7, 2, 7, 0x7E80, 16},	/* PATTERN_SSO_FULL_XTALK_DQ7 */
+	{0xf, 7, 2, 7, 0x8280, 16},	/* PATTERN_SSO_XTALK_FREE_DQ0 */
+	{0xf, 7, 2, 7, 0x8680, 16},	/* PATTERN_SSO_XTALK_FREE_DQ1 */
+	{0xf, 7, 2, 7, 0x8A80, 16},	/* PATTERN_SSO_XTALK_FREE_DQ2 */
+	{0xf, 7, 2, 7, 0x8E80, 16},	/* PATTERN_SSO_XTALK_FREE_DQ3 */
+	{0xf, 7, 2, 7, 0x9280, 16},	/* PATTERN_SSO_XTALK_FREE_DQ4 */
+	{0xf, 7, 2, 7, 0x9680, 16},	/* PATTERN_SSO_XTALK_FREE_DQ5 */
+	{0xf, 7, 2, 7, 0x9A80, 16},	/* PATTERN_SSO_XTALK_FREE_DQ6 */
+	{0xf, 7, 2, 7, 0x9E80, 16},	/* PATTERN_SSO_XTALK_FREE_DQ7 */
+	{0xf, 7, 2, 7, 0xA280, 16}	/* PATTERN_ISI_XTALK_FREE */
 	/*Note: actual start_address is <<3 of defined addess */
 };
 
@@ -207,7 +224,10 @@ struct pattern_info pattern_table_32[] = {
 	 */
 	{3, 3, 2, 3, 0x0080, 4},	/* PATTERN_PBS1 */
 	{3, 3, 2, 3, 0x00c0, 4},	/* PATTERN_PBS2 */
+	{3, 3, 2, 3, 0x0380, 4},	/* PATTERN_PBS3 */
+	{3, 3, 2, 3, 0x0040, 4},	/* PATTERN_TEST */
 	{3, 3, 2, 3, 0x0100, 4},	/* PATTERN_RL */
+	{3, 3, 2, 3, 0x0000, 4},	/* PATTERN_RL2 */
 	{0x1f, 0xf, 2, 0xf, 0x0140, 32},	/* PATTERN_STATIC_PBS */
 	{0x1f, 0xf, 2, 0xf, 0x0190, 32},	/* PATTERN_KILLER_DQ0 */
 	{0x1f, 0xf, 2, 0xf, 0x01d0, 32},	/* PATTERN_KILLER_DQ1 */
@@ -217,14 +237,28 @@ struct pattern_info pattern_table_32[] = {
 	{0x1f, 0xf, 2, 0xf, 0x02d0, 32},	/* PATTERN_KILLER_DQ5 */
 	{0x1f, 0xf, 2, 0xf, 0x0310, 32},	/* PATTERN_KILLER_DQ6 */
 	{0x1f, 0xf, 2, 0xf, 0x0350, 32},	/* PATTERN_KILLER_DQ7 */
-	{3, 3, 2, 3, 0x0380, 4},	/* PATTERN_PBS3 */
-	{3, 3, 2, 3, 0x0000, 4},	/* PATTERN_RL2 */
-	{3, 3, 2, 3, 0x0040, 4},	/* PATTERN_TEST */
+	{0x1f, 0xf, 2, 0xf, 0x04c0, 32},	/* PATTERN_VREF */
 	{0x1f, 0xf, 2, 0xf, 0x03c0, 32},	/* PATTERN_FULL_SSO_1T */
 	{0x1f, 0xf, 2, 0xf, 0x0400, 32},	/* PATTERN_FULL_SSO_2T */
 	{0x1f, 0xf, 2, 0xf, 0x0440, 32},	/* PATTERN_FULL_SSO_3T */
 	{0x1f, 0xf, 2, 0xf, 0x0480, 32},	/* PATTERN_FULL_SSO_4T */
-	{0x1f, 0xf, 2, 0xf, 0x04c0, 32}	/* PATTERN_VREF */
+	{0x1f, 0xF, 2, 0xf, 0x6280, 32},	/* PATTERN_SSO_FULL_XTALK_DQ0 */
+	{0x1f, 0xF, 2, 0xf, 0x6680, 32},	/* PATTERN_SSO_FULL_XTALK_DQ1 */
+	{0x1f, 0xF, 2, 0xf, 0x6A80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ2 */
+	{0x1f, 0xF, 2, 0xf, 0x6E80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ3 */
+	{0x1f, 0xF, 2, 0xf, 0x7280, 32},	/* PATTERN_SSO_FULL_XTALK_DQ4 */
+	{0x1f, 0xF, 2, 0xf, 0x7680, 32},	/* PATTERN_SSO_FULL_XTALK_DQ5 */
+	{0x1f, 0xF, 2, 0xf, 0x7A80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ6 */
+	{0x1f, 0xF, 2, 0xf, 0x7E80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ7 */
+	{0x1f, 0xF, 2, 0xf, 0x8280, 32},	/* PATTERN_SSO_XTALK_FREE_DQ0 */
+	{0x1f, 0xF, 2, 0xf, 0x8680, 32},	/* PATTERN_SSO_XTALK_FREE_DQ1 */
+	{0x1f, 0xF, 2, 0xf, 0x8A80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ2 */
+	{0x1f, 0xF, 2, 0xf, 0x8E80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ3 */
+	{0x1f, 0xF, 2, 0xf, 0x9280, 32},	/* PATTERN_SSO_XTALK_FREE_DQ4 */
+	{0x1f, 0xF, 2, 0xf, 0x9680, 32},	/* PATTERN_SSO_XTALK_FREE_DQ5 */
+	{0x1f, 0xF, 2, 0xf, 0x9A80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ6 */
+	{0x1f, 0xF, 2, 0xf, 0x9E80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ7 */
+	{0x1f, 0xF, 2, 0xf, 0xA280, 32}		/* PATTERN_ISI_XTALK_FREE */
 	/*Note: actual start_address is <<3 of defined addess */
 };
 
@@ -844,7 +878,7 @@ int ddr3_tip_load_all_pattern_to_mem(u32 dev_num)
 			      CS_ENABLE_REG, (1 << 3), (1 << 3)));
 	}
 
-	for (pattern = 0; pattern < PATTERN_LIMIT; pattern++)
+	for (pattern = 0; pattern < PATTERN_LAST; pattern++)
 		ddr3_tip_load_pattern_to_mem(dev_num, pattern);
 
 	return MV_OK;
@@ -1002,7 +1036,7 @@ int ddr3_tip_ip_training_wrapper_int(u32 dev_num,
 
 	if ((train_cs_type > CS_NON_SINGLE) ||
 	    (edge_comp >= EDGE_PFP) ||
-	    (pattern >= PATTERN_LIMIT) ||
+	    (pattern >= PATTERN_LAST) ||
 	    (direction > OPER_WRITE_AND_READ) ||
 	    (search_dir > HWS_HIGH2LOW) ||
 	    (control_element > HWS_CONTROL_ELEMENT_DQS_SKEW) ||
