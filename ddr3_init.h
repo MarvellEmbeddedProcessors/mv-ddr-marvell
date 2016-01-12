@@ -336,6 +336,8 @@ extern u16 mask_results_dq_reg_map[];
 extern u32 target_freq;
 extern u32 init_freq;
 extern u32 dfs_low_freq;
+extern u32 mem_size[];
+
 
 /* Prototypes */
 int ddr3_tip_enable_init_sequence(u32 dev_num);

@@ -833,9 +833,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 	} else {
 #ifdef STATIC_ALGO_SUPPORT
 		CHECK_STATUS(ddr3_tip_static_init_controller(dev_num));
-#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
 		CHECK_STATUS(ddr3_tip_static_phy_init_controller(dev_num));
-#endif
 #endif /* STATIC_ALGO_SUPPORT */
 	}
 
@@ -2838,8 +2836,7 @@ int hws_ddr3_cs_base_adr_calc(u32 if_id, u32 cs, u32 *cs_base_addr)
 	 * is defined in topology mem size is defined by
 	 * DEVICE_MAX_DRAM_ADDRESS_SIZE
 	 */
-	physical_mem_size =
-		mv_hwsmem_size[tm->interface_params[0].memory_size];
+	physical_mem_size = mem_size[tm->interface_params[0].memory_size];
 
 	if (hws_ddr3_get_device_width(cs) == 16) {
 		/*
