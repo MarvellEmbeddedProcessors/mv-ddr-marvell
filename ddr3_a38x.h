@@ -101,6 +101,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAX_INTERFACE_NUM		1
 #define MAX_BUS_NUM			5
 
+#define DFS_LOW_FREQ_VALUE		120
+
 #include "ddr3_hws_hw_training_def.h"
 
 #define ECC_SUPPORT

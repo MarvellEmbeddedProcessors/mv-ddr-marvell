@@ -126,15 +126,9 @@ u32 odt_additional = 1;
 u32 *dq_map_table = NULL;
 u32 odt_config = 1;
 
-#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ALLEYCAT3) ||	\
-	defined(CONFIG_ARMADA_39X)
-u32 is_pll_before_init = 0, is_adll_calib_before_init = 0, is_dfs_in_init = 0;
-u32 dfs_low_freq = 130;
-#else
 u32 is_pll_before_init = 0, is_adll_calib_before_init = 1, is_dfs_in_init = 0;
-u32 dfs_low_freq = 100;
-#endif
-u32 g_rtt_nom_c_s0, g_rtt_nom_c_s1;
+u32 dfs_low_freq;
+
 u8 calibration_update_control;	/* 2 external only, 1 is internal only */
 
 enum hws_result training_result[MAX_STAGE_LIMIT][MAX_INTERFACE_NUM];
@@ -883,7 +877,6 @@ int hws_ddr3_tip_load_topology_map(u32 dev_num, struct hws_topology_map *tm)
 	u32 if_id;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 
-	freq_val[DDR_FREQ_LOW_FREQ] = dfs_low_freq;
 	tm = ddr3_get_topology_map();
 	CHECK_STATUS(ddr3_tip_get_first_active_if
 		     ((u8)dev_num, tm->if_act_mask,
@@ -2198,6 +2191,8 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	effective_cs = 0;
 
 	freq = init_freq;
+	freq_val[DDR_FREQ_LOW_FREQ] = dfs_low_freq;
+
 	if (is_pll_before_init != 0) {
 		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);

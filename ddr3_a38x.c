@@ -538,7 +538,7 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 		ck_delay = 160;
 	ca_delay = 0;
 	delay_enable = 1;
-
+	dfs_low_freq = DFS_LOW_FREQ_VALUE;
 	calibration_update_control = 1;
 
 	init_freq = tm->interface_params[first_active_if].memory_freq;

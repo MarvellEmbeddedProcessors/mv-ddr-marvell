@@ -633,7 +633,7 @@ static inline u32 pattern_table_get_sso_full_xtalk_word_16(u8 bit, u8 index)
 
 static inline u32 pattern_table_get_sso_xtalk_free_word_16(u8 bit, u8 index)
 {
-	u8 byte = (1 << byte);
+	u8 byte = (1 << bit);
 
 	if ((index & 1) == 0)
 		return (byte << 16) | (byte << 24);
