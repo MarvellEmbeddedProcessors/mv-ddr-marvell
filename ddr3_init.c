@@ -189,6 +189,7 @@ static u32 ddr3_get_static_ddr_mode(void);
 static int ddr3_hws_tune_training_params(u8 dev_num);
 
 /* device revision */
+#define DEV_ID_REG			0x18238
 #define DEV_VERSION_ID_REG		0x1823c
 #define REVISON_ID_OFFS			8
 #define REVISON_ID_MASK			0xf00
