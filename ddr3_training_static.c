@@ -121,9 +121,9 @@ u32 g_dic = 0x2;
 #define PARAM_NOT_CARE		0
 #define MAX_STATIC_SEQ		48
 
-u32 silicon_delay[HWS_MAX_DEVICE_NUM];
-struct hws_tip_static_config_info static_config[HWS_MAX_DEVICE_NUM];
-static reg_data *static_init_controller_config[HWS_MAX_DEVICE_NUM];
+u32 silicon_delay[MAX_DEVICE_NUM];
+struct hws_tip_static_config_info static_config[MAX_DEVICE_NUM];
+static reg_data *static_init_controller_config[MAX_DEVICE_NUM];
 
 /* debug delay in write leveling */
 int wl_debug_delay = 0;

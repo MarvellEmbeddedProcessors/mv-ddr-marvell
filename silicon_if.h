@@ -99,10 +99,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __silicon_if_H
 
 /* max number of devices supported by driver */
-#ifdef CO_CPU_RUN
-#define HWS_MAX_DEVICE_NUM (1)
-#else
-#define HWS_MAX_DEVICE_NUM (16)
-#endif
+#define MAX_DEVICE_NUM	1
 
 #endif /* __silicon_if_H */

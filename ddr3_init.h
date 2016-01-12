@@ -294,7 +294,7 @@ extern u32 is_pll_before_init;
 extern u32 is_adll_calib_before_init;
 extern u32 is_dfs_in_init;
 extern int wl_debug_delay;
-extern u32 silicon_delay[HWS_MAX_DEVICE_NUM];
+extern u32 silicon_delay[MAX_DEVICE_NUM];
 extern u32 start_pattern, end_pattern;
 extern u32 phy_reg0_val;
 extern u32 phy_reg1_val;
@@ -316,7 +316,7 @@ extern u32 odt_additional;
 extern u32 debug_mode;
 extern u32 debug_dunit;
 extern u32 clamp_tbl[];
-extern u32 freq_mask[HWS_MAX_DEVICE_NUM][DDR_FREQ_LAST];
+extern u32 freq_mask[MAX_DEVICE_NUM][DDR_FREQ_LAST];
 
 extern u32 maxt_poll_tries;
 extern u32 is_bist_reset_bit;

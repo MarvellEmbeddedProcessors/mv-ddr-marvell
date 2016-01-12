@@ -174,14 +174,14 @@ void ddr3_hws_set_log_level(enum ddr_lib_debug_block block, u8 level)
 }
 #endif
 
-struct hws_tip_config_func_db config_func_info[HWS_MAX_DEVICE_NUM];
+struct hws_tip_config_func_db config_func_info[MAX_DEVICE_NUM];
 u8 is_default_centralization = 0;
 u8 is_tune_result = 0;
 u8 is_validate_window_per_if = 0;
 u8 is_validate_window_per_pup = 0;
 u8 sweep_cnt = 1;
 u32 is_bist_reset_bit = 1;
-static struct hws_xsb_info xsb_info[HWS_MAX_DEVICE_NUM];
+static struct hws_xsb_info xsb_info[MAX_DEVICE_NUM];
 
 /*
  * Dump Dunit & Phy registers
@@ -829,7 +829,7 @@ int ddr3_tip_write_adll_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MA
 }
 
 #ifndef EXCLUDE_SWITCH_DEBUG
-struct hws_tip_config_func_db config_func_info[HWS_MAX_DEVICE_NUM];
+struct hws_tip_config_func_db config_func_info[MAX_DEVICE_NUM];
 u32 start_xsb_offset = 0;
 u8 is_rl_old = 0;
 u8 is_freq_old = 0;

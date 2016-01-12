@@ -104,8 +104,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_init.h"
 
 /* Device attributes structures */
-enum mv_ddr_dev_attribute ddr_dev_attributes[HWS_MAX_DEVICE_NUM][MV_ATTR_LAST];
-int ddr_dev_attr_init_done[HWS_MAX_DEVICE_NUM] = { 0 };
+enum mv_ddr_dev_attribute ddr_dev_attributes[MAX_DEVICE_NUM][MV_ATTR_LAST];
+int ddr_dev_attr_init_done[MAX_DEVICE_NUM] = { 0 };
 
 /* List of allowed frequency listed in order of enum hws_ddr_freq */
 u32 freq_val[DDR_FREQ_LAST] = {
