@@ -111,12 +111,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SAR_DEV_ID_MASK			0x7
 
 /* Termal Sensor Registers */
-#define TSEN_STATE_REG			0xe4070
-#define TSEN_STATE_OFFSET		31
-#define TSEN_STATE_MASK			(0x1 << TSEN_STATE_OFFSET)
-#define TSEN_CONF_REG			0xe4074
-#define TSEN_CONF_RST_OFFSET		8
-#define TSEN_CONF_RST_MASK		(0x1 << TSEN_CONF_RST_OFFSET)
+#define TSEN_CONTROL_LSB_REG		0xE4070
+#define TSEN_CONTROL_LSB_TC_TRIM_OFFSET	0
+#define TSEN_CONTROL_LSB_TC_TRIM_MASK	(0x7 << TSEN_CONTROL_LSB_TC_TRIM_OFFSET)
+#define TSEN_CONTROL_MSB_REG		0xE4074
+#define TSEN_CONTROL_MSB_RST_OFFSET	8
+#define TSEN_CONTROL_MSB_RST_MASK	(0x1 << TSEN_CONTROL_MSB_RST_OFFSET)
 #define TSEN_STATUS_REG			0xe4078
 #define TSEN_STATUS_READOUT_VALID_OFFSET	10
 #define TSEN_STATUS_READOUT_VALID_MASK	(0x1 <<				\
@@ -298,8 +298,14 @@ u32 ddr3_ctrl_get_junc_temp(u8 dev_num)
 	int reg = 0;
 
 	/* Initiates TSEN hardware reset once */
-	if ((reg_read(TSEN_CONF_REG) & TSEN_CONF_RST_MASK) == 0)
-		reg_bit_set(TSEN_CONF_REG, TSEN_CONF_RST_MASK);
+	if ((reg_read(TSEN_CONTROL_MSB_REG) & TSEN_CONTROL_MSB_RST_MASK) == 0) {
+		reg_bit_set(TSEN_CONTROL_MSB_REG, TSEN_CONTROL_MSB_RST_MASK);
+		/* set Tsen Tc Trim to correct default value (errata #132698) */
+		reg = reg_read(TSEN_CONTROL_LSB_REG);
+		reg &= ~TSEN_CONTROL_LSB_TC_TRIM_MASK;
+		reg |= 0x3 << TSEN_CONTROL_LSB_TC_TRIM_OFFSET;
+		reg_write(TSEN_CONTROL_LSB_REG, reg);
+	}
 	mdelay(10);
 
 	/* Check if the readout field is valid */
