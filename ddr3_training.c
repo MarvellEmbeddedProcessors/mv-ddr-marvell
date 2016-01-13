@@ -848,6 +848,16 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 				     (dev_num, ACCESS_TYPE_MULTICAST,
 				      PARAM_NOT_CARE, 0x1494, g_odt_config,
 				      MASK_ALL_BITS));
+
+			if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) == MV_TIP_REV_3) {
+				CHECK_STATUS(ddr3_tip_if_write
+					     (dev_num, access_type, if_id,
+					      0x14a8, 0x900, 0x900));
+				/* wa: controls control sub-phy outputs floating during self-refresh */
+				CHECK_STATUS(ddr3_tip_if_write
+					     (dev_num, access_type, if_id,
+					      0x16d0, 0, 0x8000));
+			}
 		}
 	} else {
 #ifdef STATIC_ALGO_SUPPORT
@@ -937,9 +947,63 @@ int hws_ddr3_tip_load_topology_map(u32 dev_num, struct hws_topology_map *tm)
 }
 
 /*
- * RANK Control Flow
+ * Rank Control Flow
  */
-static int ddr3_tip_rank_control(u32 dev_num, u32 if_id)
+static int ddr3_tip_rev2_rank_control(u32 dev_num, u32 if_id)
+{
+	u32 data_value = 0,  bus_cnt = 0;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+
+	for (bus_cnt = 0; bus_cnt < octets_per_if_num; bus_cnt++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
+		data_value |= tm->interface_params[if_id].as_bus_params[bus_cnt].
+			      cs_bitmask;
+
+		if (tm->interface_params[if_id].as_bus_params[bus_cnt].
+		    mirror_enable_bitmask == 1) {
+			/*
+			 * Check mirror_enable_bitmask
+			 * If it is enabled, CS + 4 bit in a word to be '1'
+			 */
+			if ((tm->interface_params[if_id].as_bus_params[bus_cnt].
+			     cs_bitmask & 0x1) != 0) {
+				data_value |= tm->interface_params[if_id].
+					      as_bus_params[bus_cnt].
+					      mirror_enable_bitmask << 4;
+			}
+
+			if ((tm->interface_params[if_id].as_bus_params[bus_cnt].
+			     cs_bitmask & 0x2) != 0) {
+				data_value |= tm->interface_params[if_id].
+					      as_bus_params[bus_cnt].
+					      mirror_enable_bitmask << 5;
+			}
+
+			if ((tm->interface_params[if_id].as_bus_params[bus_cnt].
+			     cs_bitmask & 0x4) != 0) {
+				data_value |= tm->interface_params[if_id].
+					      as_bus_params[bus_cnt].
+					      mirror_enable_bitmask << 6;
+			}
+
+			if ((tm->interface_params[if_id].as_bus_params[bus_cnt].
+			     cs_bitmask & 0x8) != 0) {
+				data_value |= tm->interface_params[if_id].
+					      as_bus_params[bus_cnt].
+					      mirror_enable_bitmask << 7;
+			}
+		}
+	}
+
+	CHECK_STATUS(ddr3_tip_if_write
+		     (dev_num, ACCESS_TYPE_UNICAST, if_id, RANK_CTRL_REG,
+		      data_value, 0xff));
+
+	return MV_OK;
+}
+
+static int ddr3_tip_rev3_rank_control(u32 dev_num, u32 if_id)
 {
 	u32 data_value = 0, bus_cnt;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
@@ -970,6 +1034,14 @@ static int ddr3_tip_rank_control(u32 dev_num, u32 if_id)
 		      data_value, 0xff));
 
 	return MV_OK;
+}
+
+static int ddr3_tip_rank_control(u32 dev_num, u32 if_id)
+{
+	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) == MV_TIP_REV_2)
+		return ddr3_tip_rev2_rank_control(dev_num, if_id);
+	else
+		return ddr3_tip_rev3_rank_control(dev_num, if_id);
 }
 
 /*
