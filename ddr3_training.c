@@ -2164,6 +2164,31 @@ int ddr3_tip_restore_dunit_regs(u32 dev_num)
 	return MV_OK;
 }
 
+int ddr3_tip_adll_regs_bypass(u32 dev_num, u32 reg_val1, u32 reg_val2)
+{
+	u32 if_id, phy_id;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+
+	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+		for (phy_id = 0; phy_id < octets_per_if_num; phy_id++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, phy_id);
+			CHECK_STATUS(ddr3_tip_bus_write
+				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+				     ACCESS_TYPE_UNICAST, phy_id, DDR_PHY_DATA,
+				     WRITE_CENTRALIZATION_PHY_REG +
+				     CS_BYTE_GAP(effective_cs), reg_val1));
+			CHECK_STATUS(ddr3_tip_bus_write
+				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+				     ACCESS_TYPE_UNICAST, phy_id, DDR_PHY_DATA,
+				     0x1F + CS_PBS_GAP(effective_cs), reg_val2));
+		}
+	}
+
+	return MV_OK;
+}
+
 /*
  * Auto tune main flow
  */
@@ -2172,6 +2197,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	enum hws_ddr_freq freq = init_freq;
 	struct init_cntr_param init_cntr_prm;
 	int ret = MV_OK;
+	int adll_bypass_flag = 0;
 	u32 if_id;
 	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
@@ -2249,6 +2275,13 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 
 	if (mask_tune_func & SET_LOW_FREQ_MASK_BIT) {
 		training_stage = SET_LOW_FREQ;
+
+		for (effective_cs = 0; effective_cs < max_cs; effective_cs++) {
+			ddr3_tip_adll_regs_bypass(dev_num, 0, 0x1f);
+			adll_bypass_flag = 1;
+		}
+		effective_cs = 0;
+
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 				  ("SET_LOW_FREQ_MASK_BIT %d\n",
 				   freq_val[low_freq]));
@@ -2282,6 +2315,14 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 			}
 		}
 	}
+
+	if (adll_bypass_flag == 1) {
+		for (effective_cs = 0; effective_cs < max_cs; effective_cs++) {
+			ddr3_tip_adll_regs_bypass(dev_num, phy_reg1_val, 0);
+			adll_bypass_flag = 0;
+		}
+	}
+
 	/* Set to 0 after each loop to avoid illegal value may be used */
 	effective_cs = 0;
 
