@@ -720,6 +720,10 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 						  ("cl_value 0x%x cwl_val 0x%x\n",
 						   cl_value, cwl_val));
 
+				t_wr = TIME_2_CLOCK_CYCLES(speed_bin_table
+							   (speed_bin_index,
+							    SPEED_BIN_TWR), t_ckclk);
+
 				data_value =
 					((cl_mask_table[cl_value] & 0x1) << 2) |
 					((cl_mask_table[cl_value] & 0xe) << 3);
@@ -1444,7 +1448,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		      u32 if_id, enum hws_ddr_freq frequency)
 {
 	u32 cl_value = 0, cwl_value = 0, mem_mask = 0, val = 0,
-		bus_cnt = 0, t_hclk = 0, t_wr = 0,
+		bus_cnt = 0, t_hclk = 0, t_wr = 0, t_ckclk = 0,
 		refresh_interval_cnt = 0, cnt_id;
 	u32 t_refi = 0, end_if, start_if;
 	u32 bus_index = 0;
@@ -1614,8 +1618,12 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, access_type, if_id, DFS_REG,
 			      (cwl_mask_table[cwl_value] << 12), 0x7000));
-		t_wr = speed_bin_table(speed_bin_index, SPEED_BIN_TWR);
-		t_wr = (t_wr / 1000);
+
+		t_ckclk = (MEGA / freq_val[frequency]);
+		t_wr = TIME_2_CLOCK_CYCLES(speed_bin_table
+					   (speed_bin_index,
+					    SPEED_BIN_TWR), t_ckclk);
+
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, access_type, if_id, DFS_REG,
 			      (twr_mask_table[t_wr + 1] << 16), 0x70000));
