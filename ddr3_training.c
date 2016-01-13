@@ -1091,7 +1091,7 @@ static int ddr3_tip_pad_inv(u32 dev_num, u32 if_id)
  */
 int hws_ddr3_tip_run_alg(u32 dev_num, enum hws_algo_type algo_type)
 {
-	int ret = MV_OK, ret_tune = MV_OK;
+	int ret = MV_OK;
 
 #ifdef ODT_TEST_SUPPORT
 	if (finger_test == 1)
@@ -1108,7 +1108,8 @@ int hws_ddr3_tip_run_alg(u32 dev_num, enum hws_algo_type algo_type)
 
 			/* add to mask */
 			if (is_adll_calib_before_init != 0) {
-				printf("with adll calib before init\n");
+				DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
+						  ("with adll calib before init\n"));
 				adll_calibration(dev_num, ACCESS_TYPE_MULTICAST,
 						 0, freq);
 			}
@@ -1124,7 +1125,8 @@ int hws_ddr3_tip_run_alg(u32 dev_num, enum hws_algo_type algo_type)
 
 	if (ret != MV_OK) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
-				  ("Run_alg: tuning failed %d\n", ret_tune));
+				  ("********   DRAM initialization Failed (res 0x%x)   ********\n",
+				   ret));
 	}
 
 	return ret;
@@ -2767,6 +2769,19 @@ static int ddr3_tip_ddr3_auto_tune(u32 dev_num)
 					  ("Auto Tune failed for IF %d\n",
 					   if_id));
 		}
+	}
+
+	if (((ret == MV_FAIL) && (is_auto_tune_fail == 0)) ||
+	    ((ret == MV_OK) && (is_auto_tune_fail == 1))) {
+		/*
+		 * If MainFlow result and trainingResult DB not in sync,
+		 * issue warning (caused by no update of trainingResult DB
+		 * when failed)
+		 */
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
+				  ("Warning: Algorithm return value and Result DB"
+				   "are not synced (ret 0x%x  result DB %d)\n",
+				   ret, is_auto_tune_fail));
 	}
 
 	if ((ret == MV_FAIL) || (is_auto_tune_fail == 1))
