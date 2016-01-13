@@ -756,6 +756,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 					((tm->interface_params[if_id].
 					  interface_temp ==
 					  HWS_TEMP_HIGH) ? (1 << 7) : 0);
+				data_value |= g_rtt_wr;
 				CHECK_STATUS(ddr3_tip_if_write
 					     (dev_num, access_type, if_id,
 					      MR2_REG, data_value,
@@ -1752,7 +1753,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 			     (dev_num, access_type, if_id, MR0_REG,
 			      val, (0x7 << 4) | (1 << 2)));
 		/* MR2:  CWL = 10 , Auto Self-Refresh - disable */
-		val = (cwl_mask_table[cwl_value] << 3);
+		val = (cwl_mask_table[cwl_value] << 3) | g_rtt_wr;
 		/*
 		 * nklein 24.10.13 - should not be here - leave value as set in
 		 * the init configuration val |= (1 << 9);
@@ -1762,7 +1763,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		/* nklein 24.10.13 - see above comment */
 		CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type,
 					       if_id, MR2_REG,
-					       val, (0x7 << 3)));
+					       val, (0x7 << 3) | (0x3 << 9)));
 
 		/* ODT TIMING */
 		val = ((cl_value - cwl_value + 1) << 4) |
@@ -1790,11 +1791,11 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 					       (0x7 << 4) | (1 << 2)));
 
 		/* re-write CWL */
-		val = (cwl_mask_table[cwl_value] << 3);
+		val = (cwl_mask_table[cwl_value] << 3) | g_rtt_wr;
 		CHECK_STATUS(ddr3_tip_write_mrs_cmd(dev_num, cs_mask, MRS2_CMD,
-						    val, (0x7 << 3)));
+						    val, (0x7 << 3) | (0x3 << 9)));
 		CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST,
-					       0, MR2_REG, val, (0x7 << 3)));
+					       0, MR2_REG, val, (0x7 << 3) | (0x3 << 9)));
 
 		if (mem_mask != 0) {
 			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type,
