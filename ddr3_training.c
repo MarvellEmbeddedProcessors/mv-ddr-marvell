@@ -630,6 +630,13 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
 				      CALIB_MACHINE_CTRL_REG, 0x1, 0x1));
+			if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) < MV_TIP_REV_3) {
+				/* DDR3 rank ctrl \96 part of the generic code */
+				/* CS1 mirroring enable + w/a for JIRA DUNIT-14581 */
+				CHECK_STATUS(ddr3_tip_if_write
+					     (dev_num, access_type, if_id,
+					      RANK_CTRL_REG, 0x27, MASK_ALL_BITS));
+			}
 
 			cs_mask = 0;
 			data_value = 0x7;
@@ -756,10 +763,17 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 					   cl_value, cwl_val);
 			ddr3_tip_set_timing(dev_num, access_type, if_id, freq);
 
-			CHECK_STATUS(ddr3_tip_if_write
-				     (dev_num, access_type, if_id,
-				      DUNIT_CONTROL_HIGH_REG, 0x177,
-				      0x1000177));
+			if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) < MV_TIP_REV_3) {
+				CHECK_STATUS(ddr3_tip_if_write
+					     (dev_num, access_type, if_id,
+					      DUNIT_CONTROL_HIGH_REG, 0x1000119,
+					      0x100017F));
+			} else {
+				CHECK_STATUS(ddr3_tip_if_write
+					     (dev_num, access_type, if_id,
+					      DUNIT_CONTROL_HIGH_REG, 0x177,
+					      0x1000177));
+			}
 
 			if (init_cntr_prm->is_ctrl64_bit) {
 				/* disable 0.25 cc delay */
