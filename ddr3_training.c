@@ -733,8 +733,8 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 					      (0x7 << 4) | (1 << 2)));
 				CHECK_STATUS(ddr3_tip_if_write
 					     (dev_num, access_type, if_id,
-					      MR0_REG, twr_mask_table[t_wr + 1],
-					      0xe00));
+					      MR0_REG, twr_mask_table[t_wr + 1] << 9,
+					      0x7 << 9));
 
 				/*
 				 * MR1: Set RTT and DIC Design GL values
