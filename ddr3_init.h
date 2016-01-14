@@ -309,7 +309,7 @@ extern u32 znri_ctrl_phy_val;
 extern u32 zpri_ctrl_phy_val;
 extern u32 finger_test, p_finger_start, p_finger_end, n_finger_start,
 	n_finger_end, p_finger_step, n_finger_step;
-extern u32 mode2_t;
+extern u32 mode_2t;
 extern u32 xsb_validate_type;
 extern u32 xsb_validation_base_address;
 extern u32 odt_additional;

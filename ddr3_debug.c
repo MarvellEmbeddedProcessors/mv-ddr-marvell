@@ -1105,7 +1105,7 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		break;
 
 	case 0x5e:
-		*ptr = (u32 *)&mode2_t;
+		*ptr = (u32 *)&mode_2t;
 		break;
 
 	case 0x5f:

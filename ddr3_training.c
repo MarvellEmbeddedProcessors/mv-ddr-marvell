@@ -139,7 +139,7 @@ u32 finger_test = 0, p_finger_start = 11, p_finger_end = 64,
 u32 clamp_tbl[] = { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 };
 
 /* Initiate to 0xff, this variable is define by user in debug mode */
-u32 mode2_t = 0xff;
+u32 mode_2t = 0xff;
 u32 xsb_validate_type = 0;
 u32 xsb_validation_base_address = 0xf000;
 u32 first_active_if = 0;
@@ -794,8 +794,8 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 				      DUNIT_CONTROL_HIGH_REG,
 				      (init_cntr_prm->msys_init << 7), (1 << 7)));
 
-			if (mode2_t != 0xff) {
-				t2t = mode2_t;
+			if (mode_2t != 0xff) {
+				t2t = mode_2t;
 			} else {
 				/* calculate number of CS (per interface) */
 				CHECK_STATUS(calc_cs_num
@@ -1592,6 +1592,8 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 	struct hws_tip_freq_config_info freq_config_info;
 	enum hws_result *flow_result = training_result[training_stage];
 	u32 adll_tap = 0;
+	u32 cs_num;
+	u32 t2t;
 	u32 cs_mask[MAX_INTERFACE_NUM];
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
@@ -1721,6 +1723,34 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
 					  ("Freq_set: DDR3 poll failed on SR entry\n"));
 		}
+
+		/* Calculate 2T mode */
+		if (mode_2t != 0xff) {
+			t2t = mode_2t;
+		} else {
+			/* Calculate number of CS per interface */
+			CHECK_STATUS(calc_cs_num(dev_num, if_id, &cs_num));
+			t2t = (cs_num == 1) ? 0 : 1;
+		}
+
+
+		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_INTERLEAVE_WA) == 1) {
+			/* Use 1T mode if 1:1 ratio configured */
+			if (config_func_info[dev_num].tip_get_clock_ratio(frequency) == 1) {
+				/* Low freq*/
+				CHECK_STATUS(ddr3_tip_if_write
+					     (dev_num, access_type, if_id,
+					      SDRAM_OPEN_PAGE_CONTROL_REG, 0x0, 0x3C0));
+				t2t = 0;
+			} else {
+				/* Middle or target freq */
+				CHECK_STATUS(ddr3_tip_if_write
+					     (dev_num, access_type, if_id,
+					      SDRAM_OPEN_PAGE_CONTROL_REG, 0x3C0, 0x3C0));
+			}
+		}
+		CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+					       DDR_CONTROL_LOW_REG, t2t << 3, 0x3 << 3));
 
 		/* PLL configuration */
 		config_func_info[dev_num].tip_set_freq_divider_func(dev_num, if_id,
