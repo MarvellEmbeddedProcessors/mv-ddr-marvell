@@ -1538,6 +1538,18 @@ int adll_calibration(u32 dev_num, enum hws_access_type access_type,
 			      freq_config_info.rate_per_freq, 0x7));
 	}
 
+	for (bus_cnt = 0; bus_cnt < octets_per_if_num; bus_cnt++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
+		CHECK_STATUS(ddr3_tip_bus_read_modify_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id, bus_cnt,
+			      DDR_PHY_CONTROL, BW_PHY_REG,
+			      freq_config_info.bw_per_freq << 8, 0x700));
+		CHECK_STATUS(ddr3_tip_bus_read_modify_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id, bus_cnt,
+			      DDR_PHY_CONTROL, RATE_PHY_REG,
+			      freq_config_info.rate_per_freq, 0x7));
+	}
+
 	/* DUnit to Phy drive post edge, ADLL reset assert de-assert */
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, access_type, if_id, DRAM_PHY_CONFIGURATION,
