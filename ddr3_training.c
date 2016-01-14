@@ -1868,7 +1868,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		/* Set proper timing params before existing Self-Refresh */
 		ddr3_tip_set_timing(dev_num, access_type, if_id, frequency);
 		if (delay_enable != 0) {
-			adll_tap = MEGA / (freq_val[frequency] * 64);
+			adll_tap = (is_dll_off == 1) ? 1000 : (MEGA / (freq_val[frequency] * 64));
 			ddr3_tip_cmd_addr_init_delay(dev_num, adll_tap);
 		}
 
