@@ -2026,6 +2026,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	t_rrd = GET_MAX_VALUE(t_ckclk * 4, t_rrd);
 	t_rtp =	GET_MAX_VALUE(t_ckclk * 4, speed_bin_table(speed_bin_index,
 							   SPEED_BIN_TRTP));
+	t_mod = GET_MAX_VALUE(t_ckclk * 12, 15000);
 	t_wtr = GET_MAX_VALUE(t_ckclk * 4, speed_bin_table(speed_bin_index,
 							   SPEED_BIN_TWTR));
 	t_ras = TIME_2_CLOCK_CYCLES(speed_bin_table(speed_bin_index,
@@ -2044,7 +2045,6 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	t_rrd = TIME_2_CLOCK_CYCLES(t_rrd, t_ckclk);
 	t_rtp = TIME_2_CLOCK_CYCLES(t_rtp, t_ckclk);
 	t_rfc = TIME_2_CLOCK_CYCLES(rfc_table[memory_size] * 1000, t_ckclk);
-	t_mod = GET_MAX_VALUE(t_ckclk * 24, 15000);
 	t_mod = TIME_2_CLOCK_CYCLES(t_mod, t_ckclk);
 
 	/* SDRAM Timing Low */
