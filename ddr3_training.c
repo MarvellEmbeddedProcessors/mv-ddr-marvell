@@ -1930,7 +1930,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type,
 					       if_id, ODT_TIMING_LOW,
 					       val, 0xffff0));
-		val = 0x71 | ((cwl_value - 1) << 8) | ((cwl_value + 5) << 12);
+		val = 0x91 | ((cwl_value - 1) << 8) | ((cwl_value + 5) << 12);
 		CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type,
 					       if_id, ODT_TIMING_HI_REG,
 					       val, 0xffff));
@@ -1982,7 +1982,7 @@ static int ddr3_tip_write_odt(u32 dev_num, enum hws_access_type access_type,
 
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
 				       ODT_TIMING_LOW, val, 0xffff0));
-	val = 0x71 | ((cwl_value - 1) << 8) | ((cwl_value + 5) << 12);
+	val = 0x91 | ((cwl_value - 1) << 8) | ((cwl_value + 5) << 12);
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
 				       ODT_TIMING_HI_REG, val, 0xffff));
 	if (odt_additional == 1) {
