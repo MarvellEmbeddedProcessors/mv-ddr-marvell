@@ -766,22 +766,15 @@ static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe4264, 0,
 		      0xff));
 
-	/* Dunit training clock + 1:1 mode */
-	if ((frequency == DDR_FREQ_LOW_FREQ) || (freq_val[frequency] <= 400)) {
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0x18488,
-			      (1 << 16), (1 << 16)));
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1524,
-			      (0 << 15), (1 << 15)));
-	} else {
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0x18488,
-			      0, (1 << 16)));
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1524,
-			      (1 << 15), (1 << 15)));
-	}
+	/* Dunit training clock + 1:1/2:1 mode */
+	CHECK_STATUS(ddr3_tip_a38x_if_write
+		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0x18488,
+		      ((ddr3_tip_clock_mode(frequency) & 0x1) << 16),
+		      (1 << 16)));
+	CHECK_STATUS(ddr3_tip_a38x_if_write
+		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1524,
+		      ((ddr3_tip_clock_mode(frequency) - 1) << 15),
+		      (1 << 15)));
 
 	return MV_OK;
 }
