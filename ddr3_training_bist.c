@@ -189,13 +189,27 @@ int ddr3_tip_bist_activate(u32 dev_num, enum hws_pattern pattern,
 						      read_data,
 						      MASK_ALL_BITS));
 					val = read_data[i];
-					if ((val & 0x1) == 0x0) {
+					if (ddr3_tip_dev_attr_get
+					    (dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
 						/*
-						 * In SOC type devices this bit
-						 * is self clear so, if it was
-						 * cleared all good
+						 * The bit is self-cleared in SoC devices.
+						 * So, if it is cleared, all is good.
 						 */
-						break;
+						if ((val & 0x1) == 0x0)
+							break;
+					} else {
+						if ((val & 0x1) == 0x1) {
+							if (is_bist_reset_bit != 0) {
+								CHECK_STATUS(ddr3_tip_if_write
+									     (dev_num,
+									      ACCESS_TYPE_UNICAST,
+									      if_num,
+									      ODPG_BIST_DONE,
+									      val & 0xFFFFFFFE,
+									      MASK_ALL_BITS));
+							}
+							break;
+						}
 					}
 				}
 
@@ -326,11 +340,23 @@ static int ddr3_tip_bist_operation(u32 dev_num,
 				   u32 if_id, enum hws_bist_operation oper_type)
 {
 	if (oper_type == BIST_STOP) {
-		CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-					       ODPG_BIST_DONE, 1 << 8, 1 << 8));
+		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
+			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+						       ODPG_BIST_DONE, 1 << 8, 1 << 8));
+		} else {
+			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+						       ODPG_DATA_CONTROL_REG,
+						       (u32)(1 << 30), (u32)(0x3 << 30)));
+		}
 	} else {
-		CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-					       ODPG_BIST_DONE, 1, 1));
+		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
+			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+						       ODPG_BIST_DONE, 1, 1));
+		} else {
+			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+						       ODPG_DATA_CONTROL_REG,
+						       (u32)(1 << 31), (u32)(0x1 << 31)));
+		}
 	}
 
 	return MV_OK;
