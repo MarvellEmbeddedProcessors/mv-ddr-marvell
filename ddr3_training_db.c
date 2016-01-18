@@ -452,13 +452,13 @@ u32 speed_bin_table(u8 index, enum speed_bin_table_elements element)
 		result = speed_bin_table_t_rcd_t_rp[index];
 		break;
 	case SPEED_BIN_TRAS:
-		if (index < 6)
+		if (index < SPEED_BIN_DDR_1066G)
 			result = 37500;
-		else if (index < 10)
+		else if (index < SPEED_BIN_DDR_1333J)
 			result = 36000;
-		else if (index < 14)
+		else if (index < SPEED_BIN_DDR_1600K)
 			result = 35000;
-		else if (index < 18)
+		else if (index < SPEED_BIN_DDR_1866M)
 			result = 34000;
 		else
 			result = 33000;
@@ -467,49 +467,49 @@ u32 speed_bin_table(u8 index, enum speed_bin_table_elements element)
 		result = speed_bin_table_t_rc[index];
 		break;
 	case SPEED_BIN_TRRD1K:
-		if (index < 3)
+		if (index < SPEED_BIN_DDR_800E)
 			result = 10000;
-		else if (index < 6)
-			result = 7005;
-		else if (index < 14)
+		else if (index < SPEED_BIN_DDR_1066G)
+			result = 7500;
+		else if (index < SPEED_BIN_DDR_1600K)
 			result = 6000;
 		else
 			result = 5000;
 		break;
 	case SPEED_BIN_TRRD2K:
-		if (index < 6)
+		if (index < SPEED_BIN_DDR_1066G)
 			result = 10000;
-		else if (index < 14)
-			result = 7005;
+		else if (index < SPEED_BIN_DDR_1600K)
+			result = 7500;
 		else
 			result = 6000;
 		break;
 	case SPEED_BIN_TPD:
-		if (index < 3)
+		if (index < SPEED_BIN_DDR_800E)
 			result = 7500;
-		else if (index < 10)
+		else if (index < SPEED_BIN_DDR_1333J)
 			result = 5625;
 		else
 			result = 5000;
 		break;
 	case SPEED_BIN_TFAW1K:
-		if (index < 3)
+		if (index < SPEED_BIN_DDR_800E)
 			result = 40000;
-		else if (index < 6)
+		else if (index < SPEED_BIN_DDR_1066G)
 			result = 37500;
-		else if (index < 14)
+		else if (index < SPEED_BIN_DDR_1600K)
 			result = 30000;
-		else if (index < 18)
+		else if (index < SPEED_BIN_DDR_1866M)
 			result = 27000;
 		else
 			result = 25000;
 		break;
 	case SPEED_BIN_TFAW2K:
-		if (index < 6)
+		if (index < SPEED_BIN_DDR_1066G)
 			result = 50000;
-		else if (index < 10)
+		else if (index < SPEED_BIN_DDR_1333J)
 			result = 45000;
-		else if (index < 14)
+		else if (index < SPEED_BIN_DDR_1600K)
 			result = 40000;
 		else
 			result = 35000;
@@ -824,7 +824,10 @@ inline u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 				pattern = PATTERN_01;
 			break;
 		case PATTERN_TEST:
-			pattern = PATTERN_0080;
+			if ((index == 0) || (index == 3))
+				pattern = 0x00000000;
+			else
+				pattern = 0xFFFFFFFF;
 			break;
 		case PATTERN_FULL_SSO0:
 			pattern = 0x0000ffff;
