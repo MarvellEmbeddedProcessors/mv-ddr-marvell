@@ -1095,9 +1095,11 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 					DEBUG_LEVEL_ERROR,
 					("WL: DDR3 poll (4) failed (Data: 0x%x)\n",
 					 reg_data));
-			}
-#if !defined(CONFIG_ARMADA_38X)	/*Disabled. JIRA #1498 */
-			else {
+			} else {
+#if defined(CONFIG_ARMADA_38X) /* JIRA #1498 for 16 bit with ECC */
+				if (tm->bus_act_mask == 0xb)
+					break;
+#endif
 				CHECK_STATUS(ddr3_tip_if_read
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id,
@@ -1110,7 +1112,6 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 						 if_id, reg_data));
 				}
 			}
-#endif
 		}
 
 		for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
@@ -1125,20 +1126,24 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 					("WL: DDR3 poll (4) failed (Data: 0x%x)\n",
 					 reg_data));
 			} else {
-#if !defined(CONFIG_ARMADA_38X)	/*Disabled. JIRA #1498 */
 				CHECK_STATUS(ddr3_tip_if_read
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id,
 					      ODPG_TRAINING_STATUS_REG,
 					      data_read, (1 << 2)));
 				reg_data = data_read[if_id];
+#if defined(CONFIG_ARMADA_38X) /* JIRA #1498 for 16 bit with ECC */
+				if (tm->bus_act_mask == 0xb) {
+					/* set to data to 0 to skip the check */
+					reg_data = 0;
+				}
+#endif
 				if (reg_data != 0) {
 					DEBUG_LEVELING(
 						DEBUG_LEVEL_ERROR,
 						("WL: WL failed IF %d reg_data=0x%x\n",
 						 if_id, reg_data));
 				}
-#endif
 
 				/* check for training completion per bus */
 				for (bus_cnt = 0;
