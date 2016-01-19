@@ -1205,6 +1205,57 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 		}
 
 		/*
+		 *     Phase 3.5: Validate result
+		 */
+		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+			for (bus_cnt = 0; bus_cnt < octets_per_if_num; bus_cnt++) {
+				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
+				/*
+				 * Read result control register according to subphy
+				 * "16" below is for a half-phase
+				 */
+				reg_data = wl_values[effective_cs][bus_cnt][if_id] + 16;
+				/*
+				 * Write to WL register: ADLL [4:0], Phase [8:6],
+				 * Centralization ADLL [15:10] + 0x10
+				 */
+				reg_data = (reg_data & 0x1f) |
+					   (((reg_data & 0xe0) >> 5) << 6) |
+					   (((reg_data & 0x1f) + phy_reg1_val) << 10);
+				/* Search with WL CS0 subphy reg */
+				ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
+						   ACCESS_TYPE_UNICAST, bus_cnt,
+						   DDR_PHY_DATA, WL_PHY_REG, reg_data);
+				/*
+				 * Check for change in data read from DRAM.
+				 * If changed, fix the result
+				 */
+				CHECK_STATUS(ddr3_tip_if_read
+					     (dev_num,
+					      ACCESS_TYPE_UNICAST,
+					      if_id,
+					      TRAINING_WRITE_LEVELING_REG,
+					      data_read, MASK_ALL_BITS));
+				if (((data_read[if_id] & (1 << (bus_cnt + 20))) >>
+				     (bus_cnt + 20)) == 0) {
+					DEBUG_LEVELING(
+						DEBUG_LEVEL_ERROR,
+						("WLValues was changed from 0x%X",
+						 wl_values[effective_cs]
+						 [bus_cnt][if_id]));
+					wl_values[effective_cs]
+					[bus_cnt][if_id] += 32;
+					DEBUG_LEVELING(
+						DEBUG_LEVEL_ERROR,
+						("to 0x%X",
+						 wl_values[effective_cs]
+						 [bus_cnt][if_id]));
+				}
+			}
+		}
+
+		/*
 		 *     Phase 4: Exit write leveling mode
 		 */
 
