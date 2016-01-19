@@ -104,8 +104,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_init.h"
 
 #define WL_ITERATION_NUM		10
-#define ONE_CLOCK_ERROR_SHIFT		2
-#define ALIGN_ERROR_SHIFT		-2
 
 static u32 pup_mask_table[] = {
 	0x000000ff,
@@ -119,15 +117,10 @@ static struct write_supp_result wr_supp_res[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 static int ddr3_tip_dynamic_write_leveling_seq(u32 dev_num);
 static int ddr3_tip_dynamic_read_leveling_seq(u32 dev_num);
 static int ddr3_tip_dynamic_per_bit_read_leveling_seq(u32 dev_num);
-static int ddr3_tip_wl_supp_align_err_shift(u32 dev_num, u32 if_id, u32 bus_id,
-					    u32 bus_id_delta);
 static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
-					      u32 bus_id, u32 offset,
-					      u32 bus_id_delta);
+					      u32 bus_id);
 static int ddr3_tip_xsb_compare_test(u32 dev_num, u32 if_id, u32 bus_id,
-				     u32 edge_offset, u32 bus_id_delta);
-static int ddr3_tip_wl_supp_one_clk_err_shift(u32 dev_num, u32 if_id,
-					      u32 bus_id, u32 bus_id_delta);
+				     u32 edge_offset);
 
 u32 ddr3_tip_max_cs_get(u32 dev_num)
 {
@@ -1158,13 +1151,13 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 						      if_id,
 						      mask_results_pup_reg_map
 						      [bus_cnt], data_read,
-						      (1 << 25)));
+						      MASK_ALL_BITS));
 					reg_data = data_read[if_id];
 					DEBUG_LEVELING(
 						DEBUG_LEVEL_TRACE,
 						("WL: IF %d BUS %d reg 0x%x\n",
 						 if_id, bus_cnt, reg_data));
-					if (reg_data == 0) {
+					if ((reg_data & (1 << 25)) == 0) {
 						res_values[
 							(if_id *
 							 octets_per_if_num)
@@ -1363,7 +1356,7 @@ int ddr3_tip_dynamic_write_leveling_supp(u32 dev_num)
 				("WL Supp: adll_offset=0 data delay = %d\n",
 				 data));
 			if (ddr3_tip_wl_supp_align_phase_shift
-			    (dev_num, if_id, bus_id, 0, 0) == MV_OK) {
+			    (dev_num, if_id, bus_id) == MV_OK) {
 				DEBUG_LEVELING(
 					DEBUG_LEVEL_TRACE,
 					("WL Supp: IF %d bus_id %d adll_offset=0 Success !\n",
@@ -1391,7 +1384,7 @@ int ddr3_tip_dynamic_write_leveling_supp(u32 dev_num)
 				 adll_offset, data_tmp));
 
 			if (ddr3_tip_wl_supp_align_phase_shift
-			    (dev_num, if_id, bus_id, adll_offset, 0) == MV_OK) {
+			    (dev_num, if_id, bus_id) == MV_OK) {
 				DEBUG_LEVELING(
 					DEBUG_LEVEL_TRACE,
 					("WL Supp: IF %d bus_id %d adll_offset= %d Success !\n",
@@ -1418,7 +1411,7 @@ int ddr3_tip_dynamic_write_leveling_supp(u32 dev_num)
 				("WL Supp: adll_offset= %d data delay = %d\n",
 				 adll_offset, data_tmp));
 			if (ddr3_tip_wl_supp_align_phase_shift
-			    (dev_num, if_id, bus_id, adll_offset, 0) == MV_OK) {
+			    (dev_num, if_id, bus_id) == MV_OK) {
 				DEBUG_LEVELING(
 					DEBUG_LEVEL_TRACE,
 					("WL Supp: IF %d bus_id %d adll_offset= %d Success !\n",
@@ -1458,87 +1451,131 @@ int ddr3_tip_dynamic_write_leveling_supp(u32 dev_num)
  * Phase Shift
  */
 static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
-					      u32 bus_id, u32 offset,
-					      u32 bus_id_delta)
+					      u32 bus_id)
 {
+	u32 original_phase;
+	u32 data, write_data;
+
 	wr_supp_res[if_id][bus_id].stage = PHASE_SHIFT;
-	if (ddr3_tip_xsb_compare_test(dev_num, if_id, bus_id,
-				      0, bus_id_delta) == MV_OK) {
-		wr_supp_res[if_id][bus_id].is_pup_fail = 0;
+	if (ddr3_tip_xsb_compare_test
+	    (dev_num, if_id, bus_id, 0) == MV_OK)
 		return MV_OK;
-	} else if (ddr3_tip_xsb_compare_test(dev_num, if_id, bus_id,
-					     ONE_CLOCK_ERROR_SHIFT,
-					     bus_id_delta) == MV_OK) {
-		/* 1 clock error */
-		wr_supp_res[if_id][bus_id].stage = CLOCK_SHIFT;
-		DEBUG_LEVELING(DEBUG_LEVEL_TRACE,
-			       ("Supp: 1 error clock for if %d pup %d with ofsset %d success\n",
-				if_id, bus_id, offset));
-		ddr3_tip_wl_supp_one_clk_err_shift(dev_num, if_id, bus_id, 0);
-		wr_supp_res[if_id][bus_id].is_pup_fail = 0;
-		return MV_OK;
-	} else if (ddr3_tip_xsb_compare_test(dev_num, if_id, bus_id,
-					     ALIGN_ERROR_SHIFT,
-					     bus_id_delta) == MV_OK) {
-		/* align error */
-		DEBUG_LEVELING(DEBUG_LEVEL_TRACE,
-			       ("Supp: align error for if %d pup %d with ofsset %d success\n",
-				if_id, bus_id, offset));
-		wr_supp_res[if_id][bus_id].stage = ALIGN_SHIFT;
-		ddr3_tip_wl_supp_align_err_shift(dev_num, if_id, bus_id, 0);
-		wr_supp_res[if_id][bus_id].is_pup_fail = 0;
-		return MV_OK;
-	} else {
-		wr_supp_res[if_id][bus_id].is_pup_fail = 1;
-		return MV_FAIL;
+
+	/* Read current phase */
+	CHECK_STATUS(ddr3_tip_bus_read
+		     (dev_num, if_id, ACCESS_TYPE_UNICAST, bus_id,
+		      DDR_PHY_DATA, WL_PHY_REG + effective_cs *
+		      CS_REGISTER_ADDR_OFFSET, &data));
+	original_phase = (data >> 6) & 0x7;
+
+	/* Set phase (0x0[6-8]) -2 */
+	if (original_phase >= 1) {
+		if (original_phase == 1)
+			write_data = data & ~0x1df;
+		else
+			write_data = (data & ~0x1c0) |
+				     ((original_phase - 2) << 6);
+		ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
+				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
+				   WL_PHY_REG + effective_cs *
+				   CS_REGISTER_ADDR_OFFSET, write_data);
+		CHECK_STATUS(ddr3_tip_xsb_compare_test(dev_num, if_id,
+						       bus_id, -2));
 	}
+
+	/* Set phase (0x0[6-8]) +2 */
+	if (original_phase <= 5) {
+		write_data = (data & ~0x1c0) |
+			     ((original_phase + 2) << 6);
+		ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
+				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
+				   WL_PHY_REG + effective_cs *
+				   CS_REGISTER_ADDR_OFFSET, write_data);
+		CHECK_STATUS(ddr3_tip_xsb_compare_test(dev_num, if_id,
+						       bus_id, 2));
+	}
+
+	/* Set phase (0x0[6-8]) +4 */
+	if (original_phase <= 3) {
+		write_data = (data & ~0x1c0) |
+			     ((original_phase + 4) << 6);
+		ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
+				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
+				   WL_PHY_REG + effective_cs *
+				   CS_REGISTER_ADDR_OFFSET, write_data);
+		CHECK_STATUS(ddr3_tip_xsb_compare_test(dev_num, if_id,
+						       bus_id, 4));
+	}
+
+	/* Set phase (0x0[6-8]) +6 */
+	if (original_phase <= 1) {
+		write_data = (data & ~0x1c0) |
+			     ((original_phase + 6) << 6);
+		ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
+				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
+				   WL_PHY_REG + effective_cs *
+				   CS_REGISTER_ADDR_OFFSET, write_data);
+		CHECK_STATUS(ddr3_tip_xsb_compare_test(dev_num, if_id,
+						       bus_id, 6));
+	}
+
+	/* Write original WL result back */
+	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
+			   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
+			   WL_PHY_REG + effective_cs *
+			   CS_REGISTER_ADDR_OFFSET, data);
+	wr_supp_res[if_id][bus_id].is_pup_fail = 1;
+
+	return MV_FAIL;
 }
 
 /*
  * Compare Test
  */
 static int ddr3_tip_xsb_compare_test(u32 dev_num, u32 if_id, u32 bus_id,
-				     u32 edge_offset, u32 bus_id_delta)
+				     u32 edge_offset)
 {
-	u32 num_of_succ_byte_compare, word_in_pattern, abs_offset;
-	u32 word_offset, i;
+	u32 num_of_succ_byte_compare, word_in_pattern;
+	u32 word_offset, i, num_of_word_mult;
 	u32 read_pattern[TEST_PATTERN_LENGTH * 2];
 	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
 	u32 pattern_test_pattern_table[8];
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+
+	/* 3 below for INTERFACE_BUS_MASK_16BIT */
+	num_of_word_mult = (tm->bus_act_mask == 3) ? 1 : 2;
 
 	for (i = 0; i < 8; i++) {
 		pattern_test_pattern_table[i] =
 			pattern_table_get_word(dev_num, PATTERN_TEST, (u8)i);
 	}
 
-	/* extern write, than read and compare */
-	CHECK_STATUS(ddr3_tip_ext_write
-		     (dev_num, if_id,
-		      (pattern_table[PATTERN_TEST].start_addr +
-		       ((SDRAM_CS_SIZE + 1) * effective_cs)), 1,
-		      pattern_test_pattern_table));
+	/* External write, read and compare */
+	CHECK_STATUS(ddr3_tip_load_pattern_to_mem(dev_num, PATTERN_TEST));
 
 	CHECK_STATUS(ddr3_tip_reset_fifo_ptr(dev_num));
 
 	CHECK_STATUS(ddr3_tip_ext_read
 		     (dev_num, if_id,
-		      (pattern_table[PATTERN_TEST].start_addr +
+		      ((pattern_table[PATTERN_TEST].start_addr << 3) +
 		       ((SDRAM_CS_SIZE + 1) * effective_cs)), 1, read_pattern));
 
 	DEBUG_LEVELING(
 		DEBUG_LEVEL_TRACE,
-		("XSB-compt: IF %d bus_id %d 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",
-		 if_id, bus_id, read_pattern[0], read_pattern[1],
-		 read_pattern[2], read_pattern[3], read_pattern[4],
-		 read_pattern[5], read_pattern[6], read_pattern[7]));
+		("XSB-compt CS#%d: IF %d bus_id %d 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",
+		 effective_cs, if_id, bus_id,
+		 read_pattern[0], read_pattern[1],
+		 read_pattern[2], read_pattern[3],
+		 read_pattern[4], read_pattern[5],
+		 read_pattern[6], read_pattern[7]));
 
 	/* compare byte per pup */
 	num_of_succ_byte_compare = 0;
 	for (word_in_pattern = start_xsb_offset;
-	     word_in_pattern < (TEST_PATTERN_LENGTH * 2); word_in_pattern++) {
-		word_offset = word_in_pattern + edge_offset;
-		if ((word_offset > (TEST_PATTERN_LENGTH * 2 - 1)) ||
-		    (word_offset < 0))
+	     word_in_pattern < (TEST_PATTERN_LENGTH * num_of_word_mult);
+	     word_in_pattern++) {
+		word_offset = word_in_pattern;
+		if ((word_offset > (TEST_PATTERN_LENGTH * 2 - 1)))
 			continue;
 
 		if ((read_pattern[word_in_pattern] & pup_mask_table[bus_id]) ==
@@ -1547,19 +1584,20 @@ static int ddr3_tip_xsb_compare_test(u32 dev_num, u32 if_id, u32 bus_id,
 			num_of_succ_byte_compare++;
 	}
 
-	abs_offset = (edge_offset > 0) ? edge_offset : -edge_offset;
-	if (num_of_succ_byte_compare == ((TEST_PATTERN_LENGTH * 2) -
-					 abs_offset - start_xsb_offset)) {
-		DEBUG_LEVELING(
-			DEBUG_LEVEL_TRACE,
-			("XSB-compt: IF %d bus_id %d num_of_succ_byte_compare %d - Success\n",
-			 if_id, bus_id, num_of_succ_byte_compare));
+	if ((TEST_PATTERN_LENGTH * num_of_word_mult - start_xsb_offset) ==
+	    num_of_succ_byte_compare) {
+		wr_supp_res[if_id][bus_id].stage = edge_offset;
+		DEBUG_LEVELING(DEBUG_LEVEL_TRACE,
+			       ("supplementary: shift to %d for if %d pup %d success\n",
+				edge_offset, if_id, bus_id));
+		wr_supp_res[if_id][bus_id].is_pup_fail = 0;
+
 		return MV_OK;
 	} else {
 		DEBUG_LEVELING(
 			DEBUG_LEVEL_TRACE,
-			("XSB-compt: IF %d bus_id %d num_of_succ_byte_compare %d - Fail !\n",
-			 if_id, bus_id, num_of_succ_byte_compare));
+			("XSB-compt CS#%d: IF %d bus_id %d num_of_succ_byte_compare %d - Fail!\n",
+			 effective_cs, if_id, bus_id, num_of_succ_byte_compare));
 
 		DEBUG_LEVELING(
 			DEBUG_LEVEL_TRACE,
@@ -1580,114 +1618,8 @@ static int ddr3_tip_xsb_compare_test(u32 dev_num, u32 if_id, u32 bus_id,
 			 read_pattern[4], read_pattern[5],
 			 read_pattern[6], read_pattern[7]));
 
-		DEBUG_LEVELING(
-			DEBUG_LEVEL_TRACE,
-			("XSB-compt: IF %d bus_id %d num_of_succ_byte_compare %d - Fail !\n",
-			 if_id, bus_id, num_of_succ_byte_compare));
-
 		return MV_FAIL;
 	}
-}
-
-/*
- * Clock error shift - function moves the write leveling delay 1cc forward
- */
-static int ddr3_tip_wl_supp_one_clk_err_shift(u32 dev_num, u32 if_id,
-					      u32 bus_id, u32 bus_id_delta)
-{
-	int phase, adll;
-	u32 data;
-	DEBUG_LEVELING(DEBUG_LEVEL_TRACE, ("One_clk_err_shift\n"));
-
-	CHECK_STATUS(ddr3_tip_bus_read
-		     (dev_num, if_id, ACCESS_TYPE_UNICAST, bus_id,
-		      DDR_PHY_DATA, WL_PHY_REG, &data));
-	phase = ((data >> 6) & 0x7);
-	adll = data & 0x1f;
-	DEBUG_LEVELING(DEBUG_LEVEL_TRACE,
-		       ("One_clk_err_shift: IF %d bus_id %d phase %d adll %d\n",
-			if_id, bus_id, phase, adll));
-
-	if ((phase == 0) || (phase == 1)) {
-		CHECK_STATUS(ddr3_tip_bus_read_modify_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id, bus_id,
-			      DDR_PHY_DATA, 0, (phase + 2), 0x1f));
-	} else if (phase == 2) {
-		if (adll < 6) {
-			data = (3 << 6) + (0x1f);
-			CHECK_STATUS(ddr3_tip_bus_read_modify_write
-				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-				      bus_id, DDR_PHY_DATA, 0, data,
-				      (0x7 << 6 | 0x1f)));
-			data = 0x2f;
-			CHECK_STATUS(ddr3_tip_bus_read_modify_write
-				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-				      bus_id, DDR_PHY_DATA, 1, data, 0x3f));
-		}
-	} else {
-		/* phase 3 */
-		return MV_FAIL;
-	}
-
-	return MV_OK;
-}
-
-/*
- * Align error shift
- */
-static int ddr3_tip_wl_supp_align_err_shift(u32 dev_num, u32 if_id,
-					    u32 bus_id, u32 bus_id_delta)
-{
-	int phase, adll;
-	u32 data;
-
-	/* Shift WL result 1 phase back */
-	CHECK_STATUS(ddr3_tip_bus_read(dev_num, if_id, ACCESS_TYPE_UNICAST,
-				       bus_id, DDR_PHY_DATA, WL_PHY_REG,
-				       &data));
-	phase = ((data >> 6) & 0x7);
-	adll = data & 0x1f;
-	DEBUG_LEVELING(
-		DEBUG_LEVEL_TRACE,
-		("Wl_supp_align_err_shift: IF %d bus_id %d phase %d adll %d\n",
-		 if_id, bus_id, phase, adll));
-
-	if (phase < 2) {
-		if (adll > 0x1a) {
-			if (phase == 0)
-				return MV_FAIL;
-
-			if (phase == 1) {
-				data = 0;
-				CHECK_STATUS(ddr3_tip_bus_read_modify_write
-					     (dev_num, ACCESS_TYPE_UNICAST,
-					      if_id, bus_id, DDR_PHY_DATA,
-					      0, data, (0x7 << 6 | 0x1f)));
-				data = 0xf;
-				CHECK_STATUS(ddr3_tip_bus_read_modify_write
-					     (dev_num, ACCESS_TYPE_UNICAST,
-					      if_id, bus_id, DDR_PHY_DATA,
-					      1, data, 0x1f));
-				return MV_OK;
-			}
-		} else {
-			return MV_FAIL;
-		}
-	} else if ((phase == 2) || (phase == 3)) {
-		phase = phase - 2;
-		data = (phase << 6) + (adll & 0x1f);
-		CHECK_STATUS(ddr3_tip_bus_read_modify_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id, bus_id,
-			      DDR_PHY_DATA, 0, data, (0x7 << 6 | 0x1f)));
-		return MV_OK;
-	} else {
-		DEBUG_LEVELING(DEBUG_LEVEL_ERROR,
-			       ("Wl_supp_align_err_shift: unexpected phase\n"));
-
-		return MV_FAIL;
-	}
-
-	return MV_OK;
 }
 
 /*
