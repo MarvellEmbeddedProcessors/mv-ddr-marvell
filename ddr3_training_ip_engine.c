@@ -309,7 +309,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 			 enum hws_training_ip_stat *train_status)
 {
 	u32 mask_dq_num_of_regs, mask_pup_num_of_regs, index_cnt, poll_cnt,
-		reg_data, pup_id;
+		reg_data, pup_id, trigger_reg_addr;
 	u32 tx_burst_size;
 	u32 delay_between_burst;
 	u32 rd_mode;
@@ -512,46 +512,53 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 	}
 
 	/* Start Training Trigger */
+	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3)
+		trigger_reg_addr = ODPG_TRAINING_TRIGGER_REG;
+	else
+		trigger_reg_addr = ODPG_TRAINING_STATUS_REG;
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, interface_num,
-				       ODPG_TRAINING_TRIGGER_REG, 1, 1));
+				       trigger_reg_addr, 1, 1));
+
 	/* wait for all RFU tests to finish (or timeout) */
 	/* WA for 16 bit mode, more investigation needed */
 	mdelay(1);
 
-	/* Training "Done ?" */
-	for (index_cnt = 0; index_cnt < MAX_INTERFACE_NUM; index_cnt++) {
-		VALIDATE_IF_ACTIVE(tm->if_act_mask, index_cnt);
+	/* Training "Done ?" for CPU controlled TIP */
+	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
+		for (index_cnt = 0; index_cnt < MAX_INTERFACE_NUM; index_cnt++) {
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, index_cnt);
 
-		if (interface_mask & (1 << index_cnt)) {
-			/* need to check results for this Dunit */
-			for (poll_cnt = 0; poll_cnt < max_polling_for_done;
-			     poll_cnt++) {
-				CHECK_STATUS(ddr3_tip_if_read
-					     (dev_num, ACCESS_TYPE_UNICAST,
-					      index_cnt,
-					      ODPG_TRAINING_STATUS_REG,
-					      &reg_data, MASK_ALL_BITS));
-				if ((reg_data & 0x2) != 0) {
-					/*done */
+			if (interface_mask & (1 << index_cnt)) {
+				/* need to check results for this Dunit */
+				for (poll_cnt = 0; poll_cnt < max_polling_for_done;
+				     poll_cnt++) {
+					CHECK_STATUS(ddr3_tip_if_read
+						     (dev_num, ACCESS_TYPE_UNICAST,
+						      index_cnt,
+						      ODPG_TRAINING_STATUS_REG,
+						      read_data, MASK_ALL_BITS));
+					if ((read_data[index_cnt] & 0x2) != 0) {
+						/*done */
+						train_status[index_cnt] =
+							HWS_TRAINING_IP_STATUS_SUCCESS;
+						break;
+					}
+				}
+
+				if (poll_cnt == max_polling_for_done) {
 					train_status[index_cnt] =
-						HWS_TRAINING_IP_STATUS_SUCCESS;
-					break;
+						HWS_TRAINING_IP_STATUS_TIMEOUT;
 				}
 			}
-
-			if (poll_cnt == max_polling_for_done) {
-				train_status[index_cnt] =
-					HWS_TRAINING_IP_STATUS_TIMEOUT;
-			}
+			/* Be sure that ODPG done */
+			CHECK_STATUS(is_odpg_access_done(dev_num, index_cnt));
 		}
-		/* Be sure that ODPG done */
-		CHECK_STATUS(is_odpg_access_done(dev_num, index_cnt));
-	}
 
-	/* Write ODPG done in Dunit */
-	CHECK_STATUS(ddr3_tip_if_write
+		/* Write ODPG done in Dunit */
+		CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		      ODPG_STATUS_DONE_REG, 0, 0x1));
+	}
 
 	/* wait for all Dunit tests to finish (or timeout) */
 	/* Training "Done ?" */
@@ -566,7 +573,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 				CHECK_STATUS(ddr3_tip_if_read
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      index_cnt,
-					      ODPG_TRAINING_TRIGGER_REG,
+					      trigger_reg_addr,
 					      read_data, MASK_ALL_BITS));
 				reg_data = read_data[index_cnt];
 				if ((reg_data & 0x2) != 0) {
@@ -961,19 +968,26 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 				      PARAM_NOT_CARE, pattern,
 				      pattern_table[pattern].start_addr);
 
-	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
-		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
+		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+
+			CHECK_STATUS(ddr3_tip_if_write
+				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+				      SDRAM_ODT_CONTROL_HIGH_REG,
+				      0x3, 0xf));
+		}
 
 		CHECK_STATUS(ddr3_tip_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1498,
-			      0x3, 0xf));
+			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+			      ODPG_ENABLE_REG, 0x1 << ODPG_ENABLE_OFFS,
+			      (0x1 << ODPG_ENABLE_OFFS)));
+	} else {
+		CHECK_STATUS(ddr3_tip_if_write
+			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+			      ODPG_DATA_CONTROL_REG, (u32)(0x1 << 31),
+			      (u32)(0x1 << 31)));
 	}
-
-	CHECK_STATUS(ddr3_tip_if_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_ENABLE_REG, 0x1 << ODPG_ENABLE_OFFS,
-		      (0x1 << ODPG_ENABLE_OFFS)));
-
 	mdelay(1);
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
@@ -991,11 +1005,12 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		      ODPG_DATA_CONTROL_REG, 0, MASK_ALL_BITS));
 
-	/* Disable odt0 for CS0 training - need to adjust for multy CS */
-	CHECK_STATUS(ddr3_tip_if_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, 0x1498,
-		      0x0, 0xf));
-
+	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
+		/* Disable odt0 for CS0 training - need to adjust for multy CS */
+		CHECK_STATUS(ddr3_tip_if_write
+			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+			      SDRAM_ODT_CONTROL_HIGH_REG, 0x0, 0xf));
+	}
 	/* temporary added */
 	mdelay(1);
 
