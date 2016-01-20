@@ -179,5 +179,6 @@ int mv_xor_ctrl_set(u32 chan, u32 xor_ctrl);
 int mv_xor_command_set(u32 chan, enum mv_command command);
 int mv_xor_override_set(u32 chan, enum xor_override_target target, u32 win_num,
 			int enable);
+int mv_xor_transfer(u32 chan, enum xor_type type, u32 xor_chain_ptr);
 
 #endif
