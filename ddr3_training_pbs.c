@@ -115,7 +115,7 @@ u8 max_pbs_per_pup[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 u8 min_pbs_per_pup[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 u8 max_adll_per_pup[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 u8 min_adll_per_pup[MAX_INTERFACE_NUM][MAX_BUS_NUM];
-u32 pbsdelay_per_pup[NUM_OF_PBS_MODES][MAX_INTERFACE_NUM][MAX_BUS_NUM];
+u32 pbsdelay_per_pup[NUM_OF_PBS_MODES][MAX_INTERFACE_NUM][MAX_BUS_NUM][MAX_CS_NUM];
 u8 adll_shift_lock[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 u8 adll_shift_val[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 enum hws_pattern pbs_pattern = PATTERN_VREF;
@@ -864,7 +864,7 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 				pad_num = dq_map_table[
 					bit + pup * BUS_WIDTH_IN_BITS +
 					if_id * BUS_WIDTH_IN_BITS *
-					octets_per_if_num];
+					MAX_BUS_NUM];
 				DEBUG_PBS_ENGINE(DEBUG_LEVEL_INFO,
 						 ("result_mat: %d ",
 						  result_mat[if_id][pup]
@@ -878,14 +878,18 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 					      DDR_PHY_DATA, reg_addr + pad_num,
 					      result_mat[if_id][pup][bit]));
 			}
-			pbsdelay_per_pup[pbs_mode][if_id][pup] =
-				(max_pbs_per_pup[if_id][pup] ==
-				 min_pbs_per_pup[if_id][pup]) ?
-				TYPICAL_PBS_VALUE :
-				((max_adll_per_pup[if_id][pup] -
-				  min_adll_per_pup[if_id][pup]) * adll_tap /
-				 (max_pbs_per_pup[if_id][pup] -
-				  min_pbs_per_pup[if_id][pup]));
+
+			if (max_pbs_per_pup[if_id][pup] == min_pbs_per_pup[if_id][pup]) {
+				temp = TYPICAL_PBS_VALUE;
+			} else {
+				temp = ((max_adll_per_pup[if_id][pup] -
+					 min_adll_per_pup[if_id][pup]) *
+					adll_tap /
+					(max_pbs_per_pup[if_id][pup] -
+					 min_pbs_per_pup[if_id][pup]));
+			}
+			pbsdelay_per_pup[pbs_mode]
+			[if_id][pup][effective_cs] = temp;
 
 			/* RX results ready, write RX also */
 			if (pbs_mode == PBS_TX_MODE) {
@@ -935,10 +939,10 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 			DEBUG_PBS_ENGINE(
 				DEBUG_LEVEL_INFO,
 				(", PBS tap=%d [psec] ==> skew observed = %d\n",
-				 pbsdelay_per_pup[pbs_mode][if_id][pup],
+				 temp,
 				 ((max_pbs_per_pup[if_id][pup] -
 				   min_pbs_per_pup[if_id][pup]) *
-				  pbsdelay_per_pup[pbs_mode][if_id][pup])));
+				 temp)));
 		}
 	}
 
@@ -969,13 +973,18 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		      ODPG_WRITE_READ_MODE_ENABLE_REG, 0xffff, MASK_ALL_BITS));
+
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		/*
-		 * meaning that there is no VW exist at all (No lock at
-		 * the EBA ADLL shift at EBS)
-		 */
-		if (pup_state[if_id][pup] == 1)
-			return MV_FAIL;
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+		for (pup = 0; pup < octets_per_if_num; pup++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup);
+			/*
+			 * no valid window found
+			 * (no lock at EBA ADLL shift at EBS)
+			 */
+			if (pup_state[if_id][pup] == 1)
+				return MV_FAIL;
+		}
 	}
 
 	return MV_OK;
@@ -1034,6 +1043,17 @@ int ddr3_tip_print_pbs_result(u32 dev_num, u32 cs_num, enum pbs_dir pbs_mode)
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
+	printf("%s,CS%d,PBS,ADLLRATIO,,,",
+	       (pbs_mode == PBS_RX_MODE) ? "Rx" : "Tx", cs_num);
+
+	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+		for (pup = 0; pup < octets_per_if_num; pup++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup);
+			printf("%d,",
+			       pbsdelay_per_pup[pbs_mode][if_id][pup][cs_num]);
+		}
+	}
 	printf("CS%d, %s ,PBS\n", cs_num,
 	       (pbs_mode == PBS_RX_MODE) ? "Rx" : "Tx");
 
