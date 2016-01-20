@@ -513,36 +513,26 @@ int ddr3_tip_static_init_controller(u32 dev_num)
 
 int ddr3_tip_static_phy_init_controller(u32 dev_num)
 {
-	DEBUG_TRAINING_STATIC_IP(DEBUG_LEVEL_TRACE,
-				 ("Phy Init Controller 2\n"));
 	CHECK_STATUS(ddr3_tip_bus_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA, 0xa4,
 		      0x3dfe));
 
-	DEBUG_TRAINING_STATIC_IP(DEBUG_LEVEL_TRACE,
-				 ("Phy Init Controller 3\n"));
 	CHECK_STATUS(ddr3_tip_bus_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA, 0xa6,
 		      0xcb2));
 
-	DEBUG_TRAINING_STATIC_IP(DEBUG_LEVEL_TRACE,
-				 ("Phy Init Controller 4\n"));
 	CHECK_STATUS(ddr3_tip_bus_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA, 0xa9,
 		      0));
 
-	DEBUG_TRAINING_STATIC_IP(DEBUG_LEVEL_TRACE,
-				 ("Static Receiver Calibration\n"));
 	CHECK_STATUS(ddr3_tip_bus_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA, 0xd0,
 		      0x1f));
 
-	DEBUG_TRAINING_STATIC_IP(DEBUG_LEVEL_TRACE,
-				 ("Static V-REF Calibration\n"));
 	CHECK_STATUS(ddr3_tip_bus_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA, 0xa8,
