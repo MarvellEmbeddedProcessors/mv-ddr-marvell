@@ -564,7 +564,6 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
 			  LOAD_PATTERN_MASK_BIT |
 			  SET_MEDIUM_FREQ_MASK_BIT | WRITE_LEVELING_MASK_BIT |
-			  /* LOAD_PATTERN_2_MASK_BIT | */
 			  WRITE_LEVELING_SUPP_MASK_BIT |
 			  READ_LEVELING_MASK_BIT |
 			  PBS_RX_MASK_BIT |
@@ -597,8 +596,6 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 		mask_tune_func &= ~PBS_RX_MASK_BIT;
 	}
 
-	if (ck_delay == PARAM_UNDEFINED)
-		ck_delay = 160;
 	ca_delay = 0;
 	delay_enable = 1;
 	dfs_low_freq = DFS_LOW_FREQ_VALUE;
