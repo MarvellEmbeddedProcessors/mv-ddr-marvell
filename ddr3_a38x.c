@@ -312,6 +312,7 @@ static u16 a38x_vco_freq_per_sar_ref_clk_40_mhz[] = {
 };
 
 u32 pipe_multicast_mask;
+u32 async_mode_at_tf;
 
 u32 dq_bit_map_2_phy_pin[] = {
 	1, 0, 2, 6, 9, 8, 3, 7,	/* 0 */
@@ -679,6 +680,7 @@ int ddr3_tip_a38x_get_init_freq(int dev_num, enum hws_ddr_freq *freq)
 			break;
 		case 0x13:
 			*freq = DDR_FREQ_933;
+			async_mode_at_tf = 1;
 			break;
 		default:
 			*freq = 0;
@@ -818,58 +820,78 @@ static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 	else
 		divider = a38x_vco_freq_per_sar_ref_clk_40_mhz[sar_val] / freq_val[frequency];
 
-	/* Set Sync mode */
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0x20220, 0x0,
-		      0x1000));
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe42f4, 0x0,
-		      0x200));
+	if ((async_mode_at_tf == 1) && (freq_val[frequency] > 400)) {
+		/* Set async mode */
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0x20220, 0x1000, 0x1000));
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0xe42f4, 0x200, 0x200));
 
-	/* cpupll_clkdiv_reset_mask */
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe4264, 0x1f,
-		      0xff));
+		/* Wait for async mode setup */
+		mdelay(5);
 
-	/* cpupll_clkdiv_reload_smooth */
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe4260,
-		      (0x2 << 8), (0xff << 8)));
+		/* Set KNL values */
+		if (frequency == DDR_FREQ_933) {
+			CHECK_STATUS(ddr3_tip_a38x_if_write
+				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+				      0xe42f0, 0x804A002, 0xFFFFFFFF));
+		}
+	} else {
+		/* Set sync mode */
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0x20220, 0x0, 0x1000));
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0xe42f4, 0x0, 0x200));
 
-	/* cpupll_clkdiv_relax_en */
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe4260,
-		      (0x2 << 24), (0xff << 24)));
+		/* cpupll_clkdiv_reset_mask */
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0xe4264, 0x1f, 0xff));
 
-	/* write the divider */
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe4268,
-		      (divider << 8), (0x3f << 8)));
+		/* cpupll_clkdiv_reload_smooth */
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0xe4260, (0x2 << 8), (0xff << 8)));
 
-	/* set cpupll_clkdiv_reload_ratio */
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe4264,
-		      (1 << 8), (1 << 8)));
+		/* cpupll_clkdiv_relax_en */
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0xe4260, (0x2 << 24), (0xff << 24)));
 
-	/* undet cpupll_clkdiv_reload_ratio */
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe4264, 0,
-		      (1 << 8)));
+		/* write the divider */
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0xe4268, (divider << 8), (0x3f << 8)));
 
-	/* clear cpupll_clkdiv_reload_force */
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe4260, 0,
-		      (0xff << 8)));
+		/* set cpupll_clkdiv_reload_ratio */
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0xe4264, (1 << 8), (1 << 8)));
 
-	/* clear cpupll_clkdiv_relax_en */
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe4260, 0,
-		      (0xff << 24)));
+		/* undet cpupll_clkdiv_reload_ratio */
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0xe4264, 0, (1 << 8)));
 
-	/* clear cpupll_clkdiv_reset_mask */
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe4264, 0,
-		      0xff));
+		/* clear cpupll_clkdiv_reload_force */
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0xe4260, 0, (0xff << 8)));
+
+		/* clear cpupll_clkdiv_relax_en */
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0xe4260, 0, (0xff << 24)));
+
+		/* clear cpupll_clkdiv_reset_mask */
+		CHECK_STATUS(ddr3_tip_a38x_if_write
+			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
+			      0xe4264, 0, 0xff));
+	}
 
 	/* Dunit training clock + 1:1/2:1 mode */
 	CHECK_STATUS(ddr3_tip_a38x_if_write
