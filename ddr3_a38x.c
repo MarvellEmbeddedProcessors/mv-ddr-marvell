@@ -311,6 +311,28 @@ static u16 a38x_vco_freq_per_sar_ref_clk_40_mhz[] = {
 	1800			/* 30 - 0x1E */
 };
 
+u16 a38x_odt_slope[] = {
+	21443,
+	1452,
+	482,
+	240,
+	141,
+	90,
+	67,
+	52
+};
+
+u16 a38x_odt_intercept[] = {
+	1517,
+	328,
+	186,
+	131,
+	100,
+	80,
+	69,
+	61
+};
+
 u32 pipe_multicast_mask;
 u32 async_mode_at_tf;
 
