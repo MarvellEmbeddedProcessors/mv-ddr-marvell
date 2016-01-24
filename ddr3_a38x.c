@@ -225,7 +225,7 @@ static u8 a38x_bw_per_freq[DDR_FREQ_LAST] = {
 };
 
 static u8 a38x_rate_per_freq[DDR_FREQ_LAST] = {
-	 /*TBD*/ 0x1,		/* DDR_FREQ_100 */
+	0x1,			/* DDR_FREQ_100 */
 	0x2,			/* DDR_FREQ_400 */
 	0x2,			/* DDR_FREQ_533 */
 	0x2,			/* DDR_FREQ_667 */
@@ -243,7 +243,7 @@ static u8 a38x_rate_per_freq[DDR_FREQ_LAST] = {
 	0x2			/* DDR_FREQ_1000 */
 };
 
-static u16 a38x_vco_freq_per_sar[] = {
+static u16 a38x_vco_freq_per_sar_ref_clk_25_mhz[] = {
 	666,			/* 0 */
 	1332,
 	800,
@@ -275,6 +275,40 @@ static u16 a38x_vco_freq_per_sar[] = {
 	2500,
 	2500,
 	800
+};
+
+static u16 a38x_vco_freq_per_sar_ref_clk_40_mhz[] = {
+	666,			/* 0 */
+	1332,
+	800,
+	800,			/* 0x3 */
+	1066,
+	1066,			/* 0x5 */
+	1200,
+	2400,
+	1332,
+	1332,
+	1500,			/* 10 */
+	1600,			/* 0xB */
+	1600,
+	1600,
+	1700,
+	1560,			/* 0xF */
+	1866,
+	1866,
+	1800,
+	2000,
+	2000,			/* 20 */
+	4000,
+	2132,
+	2132,
+	2300,
+	2300,
+	2400,
+	2400,
+	2500,
+	2500,
+	1800			/* 30 - 0x1E */
 };
 
 u32 pipe_multicast_mask;
@@ -586,50 +620,88 @@ int ddr3_tip_init_a38x(u32 dev_num, u32 board_id)
 
 int ddr3_tip_a38x_get_init_freq(int dev_num, enum hws_ddr_freq *freq)
 {
-	u32 reg;
+	u32 reg, ref_clk_satr;
 
 	/* Read sample at reset setting */
 	reg = (reg_read(REG_DEVICE_SAR1_ADDR) >>
 	       RST2_CPU_DDR_CLOCK_SELECT_IN_OFFSET) &
 		RST2_CPU_DDR_CLOCK_SELECT_IN_MASK;
-	switch (reg) {
-	case 0x0:
-	case 0x1:
-		*freq = DDR_FREQ_333;
-		break;
-	case 0x2:
-	case 0x3:
-		*freq = DDR_FREQ_400;
-		break;
-	case 0x4:
-	case 0xd:
-		*freq = DDR_FREQ_533;
-		break;
-	case 0x6:
-		*freq = DDR_FREQ_600;
-		break;
-	case 0x8:
-	case 0x11:
-	case 0x14:
-		*freq = DDR_FREQ_667;
-		break;
-	case 0xc:
-	case 0x15:
-	case 0x1b:
-		*freq = DDR_FREQ_800;
-		break;
-	case 0x10:
-		*freq = DDR_FREQ_933;
-		break;
-	case 0x12:
-		*freq = DDR_FREQ_900;
-		break;
-	case 0x13:
-		*freq = DDR_FREQ_900;
-		break;
-	default:
-		*freq = 0;
-		return MV_NOT_SUPPORTED;
+
+	ref_clk_satr = reg_read(DEVICE_SAMPLE_AT_RESET2_REG);
+	if (((ref_clk_satr >> DEVICE_SAMPLE_AT_RESET2_REG_REFCLK_OFFSET) & 0x1) ==
+	    DEVICE_SAMPLE_AT_RESET2_REG_REFCLK_25MHZ) {
+		switch (reg) {
+		case 0x1:
+			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
+					      ("Warning: Unsupported freq mode for 333Mhz configured(%d)\n",
+					      reg));
+		case 0x0:
+			*freq = DDR_FREQ_333;
+			break;
+		case 0x3:
+			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
+					      ("Warning: Unsupported freq mode for 400Mhz configured(%d)\n",
+					      reg));
+		case 0x2:
+			*freq = DDR_FREQ_400;
+			break;
+		case 0xd:
+			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
+					      ("Warning: Unsupported freq mode for 533Mhz configured(%d)\n",
+					      reg));
+		case 0x4:
+			*freq = DDR_FREQ_533;
+			break;
+		case 0x6:
+			*freq = DDR_FREQ_600;
+			break;
+		case 0x11:
+		case 0x14:
+			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
+					      ("Warning: Unsupported freq mode for 667Mhz configured(%d)\n",
+					      reg));
+		case 0x8:
+			*freq = DDR_FREQ_667;
+			break;
+		case 0x15:
+		case 0x1b:
+			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
+					      ("Warning: Unsupported freq mode for 800Mhz configured(%d)\n",
+					      reg));
+		case 0xc:
+			*freq = DDR_FREQ_800;
+			break;
+		case 0x10:
+			*freq = DDR_FREQ_933;
+			break;
+		case 0x12:
+			*freq = DDR_FREQ_900;
+			break;
+		case 0x13:
+			*freq = DDR_FREQ_933;
+			break;
+		default:
+			*freq = 0;
+			return MV_NOT_SUPPORTED;
+		}
+	} else { /* REFCLK 40MHz case */
+		switch (reg) {
+		case 0x3:
+			*freq = DDR_FREQ_400;
+			break;
+		case 0x5:
+			*freq = DDR_FREQ_533;
+			break;
+		case 0xb:
+			*freq = DDR_FREQ_800;
+			break;
+		case 0x1e:
+			*freq = DDR_FREQ_900;
+			break;
+		default:
+			*freq = 0;
+			return MV_NOT_SUPPORTED;
+		}
 	}
 
 	return MV_OK;
@@ -637,49 +709,76 @@ int ddr3_tip_a38x_get_init_freq(int dev_num, enum hws_ddr_freq *freq)
 
 int ddr3_tip_a38x_get_medium_freq(int dev_num, enum hws_ddr_freq *freq)
 {
-	u32 reg;
+	u32 reg, ref_clk_satr;
 
 	/* Read sample at reset setting */
 	reg = (reg_read(REG_DEVICE_SAR1_ADDR) >>
 	       RST2_CPU_DDR_CLOCK_SELECT_IN_OFFSET) &
 		RST2_CPU_DDR_CLOCK_SELECT_IN_MASK;
-	switch (reg) {
-	case 0x0:
-	case 0x1:
-		/* Medium is same as TF to run PBS in this freq */
-		*freq = DDR_FREQ_333;
-		break;
-	case 0x2:
-	case 0x3:
-		/* Medium is same as TF to run PBS in this freq */
-		*freq = DDR_FREQ_400;
-		break;
-	case 0x4:
-	case 0xd:
-		*freq = DDR_FREQ_533;
-		break;
-	case 0x8:
-	case 0x11:
-	case 0x14:
-		*freq = DDR_FREQ_333;
-		break;
-	case 0xc:
-	case 0x15:
-	case 0x1b:
-		*freq = DDR_FREQ_400;
-		break;
-	case 0x6:
-		*freq = DDR_FREQ_300;
-		break;
-	case 0x12:
-		*freq = DDR_FREQ_360;
-		break;
-	case 0x13:
-		*freq = DDR_FREQ_400;
-		break;
-	default:
-		*freq = 0;
-		return MV_NOT_SUPPORTED;
+
+	ref_clk_satr = reg_read(DEVICE_SAMPLE_AT_RESET2_REG);
+	if (((ref_clk_satr >> DEVICE_SAMPLE_AT_RESET2_REG_REFCLK_OFFSET) & 0x1) ==
+	    DEVICE_SAMPLE_AT_RESET2_REG_REFCLK_25MHZ) {
+		switch (reg) {
+		case 0x0:
+		case 0x1:
+			/* Medium is same as TF to run PBS in this freq */
+			*freq = DDR_FREQ_333;
+			break;
+		case 0x2:
+		case 0x3:
+			/* Medium is same as TF to run PBS in this freq */
+			*freq = DDR_FREQ_400;
+			break;
+		case 0x4:
+		case 0xd:
+			/* Medium is same as TF to run PBS in this freq */
+			*freq = DDR_FREQ_533;
+			break;
+		case 0x8:
+		case 0x10:
+		case 0x11:
+		case 0x14:
+			*freq = DDR_FREQ_333;
+			break;
+		case 0xc:
+		case 0x15:
+		case 0x1b:
+			*freq = DDR_FREQ_400;
+			break;
+		case 0x6:
+			*freq = DDR_FREQ_300;
+			break;
+		case 0x12:
+			*freq = DDR_FREQ_360;
+			break;
+		case 0x13:
+			*freq = DDR_FREQ_400;
+			break;
+		default:
+			*freq = 0;
+			return MV_NOT_SUPPORTED;
+		}
+	} else { /* REFCLK 40MHz case */
+		switch (reg) {
+		case 0x3:
+			/* Medium is same as TF to run PBS in this freq */
+			*freq = DDR_FREQ_400;
+			break;
+		case 0x5:
+			/* Medium is same as TF to run PBS in this freq */
+			*freq = DDR_FREQ_533;
+			break;
+		case 0xb:
+			*freq = DDR_FREQ_400;
+			break;
+		case 0x1e:
+			*freq = DDR_FREQ_360;
+			break;
+		default:
+			*freq = 0;
+			return MV_NOT_SUPPORTED;
+		}
 	}
 
 	return MV_OK;
@@ -698,7 +797,7 @@ static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 				     enum hws_ddr_freq frequency)
 {
 	u32 divider = 0;
-	u32 sar_val;
+	u32 sar_val, ref_clk_satr;
 
 	if (if_id != 0) {
 		DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
@@ -711,7 +810,13 @@ static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 	sar_val = (reg_read(REG_DEVICE_SAR1_ADDR) >>
 		   RST2_CPU_DDR_CLOCK_SELECT_IN_OFFSET) &
 		RST2_CPU_DDR_CLOCK_SELECT_IN_MASK;
-	divider = a38x_vco_freq_per_sar[sar_val] / freq_val[frequency];
+
+	ref_clk_satr = reg_read(DEVICE_SAMPLE_AT_RESET2_REG);
+	if (((ref_clk_satr >> DEVICE_SAMPLE_AT_RESET2_REG_REFCLK_OFFSET) & 0x1) ==
+	    DEVICE_SAMPLE_AT_RESET2_REG_REFCLK_25MHZ)
+		divider = a38x_vco_freq_per_sar_ref_clk_25_mhz[sar_val] / freq_val[frequency];
+	else
+		divider = a38x_vco_freq_per_sar_ref_clk_40_mhz[sar_val] / freq_val[frequency];
 
 	/* Set Sync mode */
 	CHECK_STATUS(ddr3_tip_a38x_if_write
