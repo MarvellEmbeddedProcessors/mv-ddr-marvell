@@ -191,6 +191,8 @@ u8 is_validate_window_per_if = 0;
 u8 is_validate_window_per_pup = 0;
 u8 sweep_cnt = 1;
 u32 is_bist_reset_bit = 1;
+u8 is_run_leveling_sweep_tests;
+
 static struct hws_xsb_info xsb_info[MAX_DEVICE_NUM];
 
 /*
@@ -444,8 +446,6 @@ int ddr3_tip_print_log(u32 dev_num, u32 mem_addr)
 	u32 if_id = 0;
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
-	mem_addr = mem_addr;
-
 #if defined(DDR_VIEWER_TOOL)
 	if ((is_validate_window_per_if != 0) ||
 	    (is_validate_window_per_pup != 0)) {
@@ -460,6 +460,12 @@ int ddr3_tip_print_log(u32 dev_num, u32 mem_addr)
 		/* print sweep windows */
 		ddr3_tip_run_sweep_test(dev_num, sweep_cnt, 1, is_pup_log);
 		ddr3_tip_run_sweep_test(dev_num, sweep_cnt, 0, is_pup_log);
+#if defined(EXCLUDE_SWITCH_DEBUG)
+		if (is_run_leveling_sweep_tests == 1) {
+			ddr3_tip_run_leveling_sweep_test(dev_num, sweep_cnt, 0, is_pup_log);
+			ddr3_tip_run_leveling_sweep_test(dev_num, sweep_cnt, 1, is_pup_log);
+		}
+#endif /* EXCLUDE_SWITCH_DEBUG */
 		ddr3_tip_print_all_pbs_result(dev_num);
 		ddr3_tip_print_wl_supp_result(dev_num);
 		printf("===VALIDATE WINDOW LOG END ===\n");
