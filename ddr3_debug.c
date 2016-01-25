@@ -868,6 +868,38 @@ int read_phase_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM
 	return 0;
 }
 
+/**
+ * Write Leveling Value
+ */
+int write_leveling_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
+			 u32 pup_ph_values[MAX_INTERFACE_NUM * MAX_BUS_NUM], int reg_addr)
+{
+	u32 if_id = 0, bus_id = 0;
+	u32 data;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+
+	/* multi CS support - reg_addr is calucalated in calling function with CS offset */
+	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+		for (bus_id = 0 ; bus_id < octets_per_if_num ; bus_id++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
+			data = pup_values[if_id * octets_per_if_num + bus_id] +
+			       pup_ph_values[if_id * octets_per_if_num + bus_id];
+			CHECK_STATUS(ddr3_tip_bus_write(dev_num,
+							ACCESS_TYPE_UNICAST,
+							if_id,
+							ACCESS_TYPE_UNICAST,
+							bus_id,
+							DDR_PHY_DATA,
+							reg_addr,
+							data));
+		}
+	}
+
+	return 0;
+}
+
 #if !defined(EXCLUDE_SWITCH_DEBUG)
 struct hws_tip_config_func_db config_func_info[MAX_DEVICE_NUM];
 u32 start_xsb_offset = 0;
