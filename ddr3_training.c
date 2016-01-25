@@ -2406,7 +2406,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
-#ifndef EXCLUDE_SWITCH_DEBUG
+#ifdef DDR_VIEWER_TOOL
 	if (debug_training == DEBUG_LEVEL_TRACE) {
 		CHECK_STATUS(print_device_info((u8)dev_num));
 	}
@@ -2862,9 +2862,11 @@ static int ddr3_tip_ddr3_auto_tune(u32 dev_num)
 	/* print log */
 	CHECK_STATUS(ddr3_tip_print_log(dev_num, window_mem_addr));
 
+#ifndef EXCLUDE_DEBUG_PRINTS
 	if (ret != MV_OK) {
 		CHECK_STATUS(ddr3_tip_print_stability_log(dev_num));
 	}
+#endif /* EXCLUDE_DEBUG_PRINTS */
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		is_if_fail = 0;

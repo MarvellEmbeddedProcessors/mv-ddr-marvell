@@ -1014,7 +1014,7 @@ int ddr3_tip_pbs_tx(u32 uidev_num)
 	return ddr3_tip_pbs(uidev_num, PBS_TX_MODE);
 }
 
-#ifndef EXCLUDE_SWITCH_DEBUG
+#ifdef DDR_VIEWER_TOOL
 /*
  * Print PBS Result
  */
@@ -1079,7 +1079,7 @@ int ddr3_tip_print_pbs_result(u32 dev_num, u32 cs_num, enum pbs_dir pbs_mode)
 
 	return MV_OK;
 }
-#endif
+#endif /* DDR_VIEWER_TOOL */
 
 /*
  * Fixup PBS Result

@@ -376,6 +376,7 @@ int ddr3_tip_a38x_get_device_info(u8 dev_num,
 
 
 int print_adll(u32 dev_num, u32 adll[MAX_INTERFACE_NUM * MAX_BUS_NUM]);
+int print_ph(u32 dev_num, u32 adll[MAX_INTERFACE_NUM * MAX_BUS_NUM]);
 int ddr3_tip_restore_dunit_regs(u32 dev_num);
 void print_topology(struct hws_topology_map *topology_db);
 

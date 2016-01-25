@@ -110,7 +110,12 @@ u8 debug_pbs = DEBUG_LEVEL_ERROR;
 /*
  * API to change flags outside of the lib
  */
-#ifndef SILENT_LIB
+#if defined(SILENT_LIB)
+void ddr3_hws_set_log_level(enum ddr_lib_debug_block block, u8 level)
+{
+	/* do nothing */
+}
+#else /* SILENT_LIB */
 /* Debug flags for other Training modules */
 u8 debug_training_static = DEBUG_LEVEL_ERROR;
 u8 debug_training = DEBUG_LEVEL_ERROR;
@@ -167,12 +172,17 @@ void ddr3_hws_set_log_level(enum ddr_lib_debug_block block, u8 level)
 		debug_training_a38x = level;
 	}
 }
-#else
-void ddr3_hws_set_log_level(enum ddr_lib_debug_block block, u8 level)
-{
-	return;
-}
-#endif
+#endif /* SILENT_LIB */
+
+#if defined(DDR_VIEWER_TOOL)
+static char *convert_freq(enum hws_ddr_freq freq);
+#if defined(EXCLUDE_SWITCH_DEBUG)
+u32 ctrl_sweepres[ADLL_LENGTH][MAX_INTERFACE_NUM][MAX_BUS_NUM];
+u32 ctrl_adll[MAX_CS_NUM * MAX_INTERFACE_NUM * MAX_BUS_NUM];
+u32 ctrl_adll1[MAX_CS_NUM * MAX_INTERFACE_NUM * MAX_BUS_NUM];
+u32 ctrl_level_phase[MAX_CS_NUM * MAX_INTERFACE_NUM * MAX_BUS_NUM];
+#endif /* EXCLUDE_SWITCH_DEBUG */
+#endif /* DDR_VIEWER_TOOL */
 
 struct hws_tip_config_func_db config_func_info[MAX_DEVICE_NUM];
 u8 is_default_centralization = 0;
@@ -292,7 +302,7 @@ int ddr3_tip_get_device_info(u32 dev_num, struct ddr3_device_info *info_ptr)
 	return MV_FAIL;
 }
 
-#ifndef EXCLUDE_SWITCH_DEBUG
+#if defined(DDR_VIEWER_TOOL)
 /*
  * Convert freq to character string
  */
@@ -410,7 +420,7 @@ void hws_ddr3_tip_sweep_test(int enable)
 		is_validate_window_per_pup = 0;
 	}
 }
-#endif
+#endif /* DDR_VIEWER_TOOL */
 
 char *ddr3_tip_convert_tune_result(enum hws_result tune_result)
 {
@@ -436,7 +446,7 @@ int ddr3_tip_print_log(u32 dev_num, u32 mem_addr)
 
 	mem_addr = mem_addr;
 
-#ifndef EXCLUDE_SWITCH_DEBUG
+#if defined(DDR_VIEWER_TOOL)
 	if ((is_validate_window_per_if != 0) ||
 	    (is_validate_window_per_pup != 0)) {
 		u32 is_pup_log = 0;
@@ -456,7 +466,7 @@ int ddr3_tip_print_log(u32 dev_num, u32 mem_addr)
 		CHECK_STATUS(ddr3_tip_restore_dunit_regs(dev_num));
 		ddr3_tip_reg_dump(dev_num);
 	}
-#endif
+#endif /* DDR_VIEWER_TOOL */
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
@@ -589,6 +599,7 @@ int ddr3_tip_print_log(u32 dev_num, u32 mem_addr)
 	return MV_OK;
 }
 
+#if !defined(EXCLUDE_DEBUG_PRINTS)
 /*
  * Print stability log info
  */
@@ -749,6 +760,7 @@ int ddr3_tip_print_stability_log(u32 dev_num)
 
 	return MV_OK;
 }
+#endif /* EXCLUDE_DEBUG_PRINTS */
 
 /*
  * Register XSB information
@@ -828,7 +840,7 @@ int ddr3_tip_write_adll_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MA
 	return 0;
 }
 
-#ifndef EXCLUDE_SWITCH_DEBUG
+#if !defined(EXCLUDE_SWITCH_DEBUG)
 struct hws_tip_config_func_db config_func_info[MAX_DEVICE_NUM];
 u32 start_xsb_offset = 0;
 u8 is_rl_old = 0;
@@ -1256,7 +1268,9 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 	return MV_OK;
 }
 
-#ifndef EXCLUDE_SWITCH_DEBUG
+#endif /* EXCLUDE_SWITCH_DEBUG */
+
+#if defined(DDR_VIEWER_TOOL)
 /*
  * Print ADLL
  */
@@ -1266,21 +1280,34 @@ int print_adll(u32 dev_num, u32 adll[MAX_INTERFACE_NUM * MAX_BUS_NUM])
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
-	dev_num = dev_num;
-
 	for (j = 0; j < octets_per_if_num; j++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, j);
-		for (i = 0; i < MAX_INTERFACE_NUM; i++) {
-			printf("%d ,",
-			       adll[i * octets_per_if_num + j]);
-		}
+		for (i = 0; i < MAX_INTERFACE_NUM; i++)
+			printf("%d ,", adll[i * octets_per_if_num + j]);
 	}
 	printf("\n");
 
 	return MV_OK;
 }
-#endif
 
+int print_ph(u32 dev_num, u32 adll[MAX_INTERFACE_NUM * MAX_BUS_NUM])
+{
+	u32 i, j;
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+
+	for (j = 0; j < octets_per_if_num; j++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, j);
+		for (i = 0; i < MAX_INTERFACE_NUM; i++)
+			printf("%d ,", adll[i * octets_per_if_num + j] >> 6);
+	}
+	printf("\n");
+
+	return MV_OK;
+}
+#endif /* DDR_VIEWER_TOOL */
+
+#if !defined(EXCLUDE_SWITCH_DEBUG)
 /* byte_index - only byte 0, 1, 2, or 3, oxff - test all bytes */
 static u32 ddr3_tip_compare(u32 if_id, u32 *p_src, u32 *p_dst,
 			    u32 byte_index)
@@ -1315,7 +1342,9 @@ static u32 ddr3_tip_compare(u32 if_id, u32 *p_src, u32 *p_dst,
 
 	return b_is_fail;
 }
+#endif /* EXCLUDE_SWITCH_DEBUG */
 
+#if defined(DDR_VIEWER_TOOL)
 /* test_type = 0-tx , 1-rx */
 int ddr3_tip_sweep_test(u32 dev_num, u32 test_type,
 			u32 mem_addr, u32 is_modify_adll,
@@ -1379,7 +1408,6 @@ int ddr3_tip_sweep_test(u32 dev_num, u32 test_type,
 	return MV_OK;
 }
 
-#ifndef EXCLUDE_SWITCH_DEBUG
 /*
  * Sweep validation
  */
@@ -1527,6 +1555,9 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 	return 0;
 }
 
+#if defined(EXCLUDE_SWITCH_DEBUG)
+#endif /* EXCLUDE_SWITCH_DEBUG */
+
 void print_topology(struct hws_topology_map *topology_db)
 {
 	u32 ui, uj;
@@ -1573,8 +1604,9 @@ void print_topology(struct hws_topology_map *topology_db)
 		}
 	}
 }
-#endif
+#endif /* DDR_VIEWER_TOOL */
 
+#if !defined(EXCLUDE_SWITCH_DEBUG)
 /*
  * Execute XSB Test transaction (rd/wr/both)
  */
@@ -1617,7 +1649,6 @@ int run_xsb_test(u32 dev_num, u32 mem_addr, u32 write_type,
 }
 
 #else /*EXCLUDE_SWITCH_DEBUG */
-
 u32 start_xsb_offset = 0;
 
 int run_xsb_test(u32 dev_num, u32 mem_addr, u32 write_type,
@@ -1626,4 +1657,4 @@ int run_xsb_test(u32 dev_num, u32 mem_addr, u32 write_type,
 	return MV_OK;
 }
 
-#endif
+#endif /* EXCLUDE_SWITCH_DEBUG */
