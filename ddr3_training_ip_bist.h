@@ -137,6 +137,8 @@ int hws_ddr3_run_bist(u32 dev_num, enum hws_pattern pattern, u32 *result,
 		      u32 cs_num);
 int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 			    u32 mode);
+int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
+				     u32 direction, u32 mode);
 int ddr3_tip_print_regs(u32 dev_num);
 int ddr3_tip_reg_dump(u32 dev_num);
 int run_xsb_test(u32 dev_num, u32 mem_addr, u32 write_type, u32 read_type,

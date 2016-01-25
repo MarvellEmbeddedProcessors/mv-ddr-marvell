@@ -1616,6 +1616,201 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 }
 
 #if defined(EXCLUDE_SWITCH_DEBUG)
+int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
+				     u32 direction, u32 mode)
+{
+	u32 pup = 0, start_pup = 0, end_pup = 0, start_adll = 0;
+	u32 adll = 0, rep = 0, pattern_idx = 0;
+	u32 read_data[MAX_INTERFACE_NUM];
+	u32 res[MAX_INTERFACE_NUM] = { 0 };
+	int if_id = 0, gap = 0;
+	u32 adll_value = 0;
+	int reg = (direction == 0) ? WL_PHY_REG : RL_PHY_REG;
+	enum hws_access_type pup_access;
+	u32 cs;
+	u32 max_cs = hws_ddr3_tip_max_cs_get(dev_num);
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+
+	if (mode == 1) { /* per pup */
+		start_pup = 0;
+		end_pup = octets_per_if_num - 1;
+		pup_access = ACCESS_TYPE_UNICAST;
+	} else {
+		start_pup = 0;
+		end_pup = 0;
+		pup_access = ACCESS_TYPE_MULTICAST;
+	}
+
+	for (cs = 0; cs < max_cs; cs++) {
+		for (adll = 0; adll < ADLL_LENGTH; adll++) {
+			for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
+				VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+				for (pup = start_pup; pup <= end_pup; pup++)
+					ctrl_sweepres[adll][if_id][pup] = 0;
+			}
+		}
+
+		for (adll = 0; adll < MAX_INTERFACE_NUM * MAX_BUS_NUM; adll++) {
+			ctrl_adll[adll] = 0;
+			ctrl_level_phase[adll] = 0;
+			ctrl_adll1[adll] = 0;
+		}
+
+		/* save leveling value after running algorithm */
+		ddr3_tip_read_adll_value(dev_num, ctrl_adll,
+					 (reg + (cs * CS_REGISTER_ADDR_OFFSET)), 0x1F);
+		read_phase_value(ctrl_level_phase, (reg + (cs * CS_REGISTER_ADDR_OFFSET)), 0x7 << 6);
+
+		if (direction == 0)
+			ddr3_tip_read_adll_value(dev_num, ctrl_adll1,
+						 (0x1 + (cs * CS_REGISTER_ADDR_OFFSET)), MASK_ALL_BITS);
+
+		/* Sweep ADLL from 0 to 31 on all interfaces, all pups,
+		 * and perform BIST on each stage
+		 */
+		for (pup = start_pup; pup <= end_pup; pup++) {
+			for (adll = 0; adll < ADLL_LENGTH; adll++) {
+				for (rep = 0; rep < repeat_num; rep++) {
+					adll_value = (direction == 0) ? (adll * 2) : (adll * 3);
+					for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
+						start_adll = ctrl_adll[if_id * cs * octets_per_if_num + pup] +
+							     (ctrl_level_phase[if_id * cs *
+									     octets_per_if_num +
+									     pup] >> 6) * 32;
+
+						if (direction == 0)
+							start_adll = (start_adll > 32) ? (start_adll - 32) : 0;
+						else
+							start_adll = (start_adll > 48) ? (start_adll - 48) : 0;
+
+						adll_value += start_adll;
+
+						gap = ctrl_adll1[if_id * cs * octets_per_if_num + pup] -
+						      ctrl_adll[if_id * cs * octets_per_if_num + pup];
+						gap = (((adll_value % 32) + gap) % 64);
+
+						adll_value = ((adll_value % 32) +
+							       (((adll_value - (adll_value % 32)) / 32) << 6));
+
+						CHECK_STATUS(ddr3_tip_bus_write(dev_num,
+										ACCESS_TYPE_UNICAST,
+										if_id,
+										pup_access,
+										pup,
+										DDR_PHY_DATA,
+										reg + CS_BYTE_GAP(cs),
+										adll_value));
+						if (direction == 0)
+							CHECK_STATUS(ddr3_tip_bus_write(dev_num,
+											ACCESS_TYPE_UNICAST,
+											if_id,
+											pup_access,
+											pup,
+											DDR_PHY_DATA,
+											0x1 + CS_BYTE_GAP(cs),
+											gap));
+					}
+
+					for (pattern_idx = PATTERN_KILLER_DQ0;
+					     pattern_idx < PATTERN_LAST;
+					     pattern_idx++) {
+						hws_ddr3_run_bist(dev_num, sweep_pattern, res, cs);
+						ddr3_tip_reset_fifo_ptr(dev_num);
+						for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
+							VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+							if (pup != 4) { /* TODO: remove literal */
+								ctrl_sweepres[adll][if_id][pup] += res[if_id];
+							} else {
+								CHECK_STATUS(ddr3_tip_if_read(dev_num,
+											      ACCESS_TYPE_UNICAST,
+											      if_id,
+											      0x1458,
+											      read_data,
+											      MASK_ALL_BITS));
+								ctrl_sweepres[adll][if_id][pup] += read_data[if_id];
+								CHECK_STATUS(ddr3_tip_if_write(dev_num,
+											       ACCESS_TYPE_UNICAST,
+											       if_id,
+											       0x1458,
+											       0x0,
+											       0xFFFFFFFF));
+								CHECK_STATUS(ddr3_tip_if_write(dev_num,
+											       ACCESS_TYPE_UNICAST,
+											       if_id,
+											       0x145C,
+											       0x0,
+											       0xFFFFFFFF));
+							}
+						}
+					}
+				}
+			}
+
+			for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
+				start_adll = ctrl_adll[if_id * cs * octets_per_if_num + pup] +
+					     ctrl_level_phase[if_id * cs * octets_per_if_num + pup];
+				CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, pup_access, pup,
+								DDR_PHY_DATA, reg + CS_BYTE_GAP(cs), start_adll));
+				if (direction == 0)
+					CHECK_STATUS(ddr3_tip_bus_write(dev_num,
+									ACCESS_TYPE_UNICAST,
+									if_id,
+									pup_access,
+									pup,
+									DDR_PHY_DATA,
+									0x1 + CS_BYTE_GAP(cs),
+									ctrl_adll1[if_id *
+										   cs *
+										   octets_per_if_num +
+										   pup]));
+			}
+		}
+
+		printf("Final,CS %d,%s,Leveling,Result,Adll,", cs, ((direction == 0) ? "TX" : "RX"));
+
+		for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+			if (mode == 1) {
+				for (pup = start_pup; pup <= end_pup; pup++) {
+					VALIDATE_BUS_ACTIVE(tm->bus_act_mask, pup);
+					printf("I/F%d-PHY%d , ", if_id, pup);
+				}
+			} else {
+				printf("I/F%d , ", if_id);
+			}
+		}
+		printf("\n");
+
+		for (adll = 0; adll < ADLL_LENGTH; adll++) {
+			adll_value = (direction == 0) ? ((adll * 2) - 32) : ((adll * 3) - 48);
+			printf("Final,%s,LevelingSweep,Result, %d ,", ((direction == 0) ? "TX" : "RX"), adll_value);
+
+			for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
+				VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+				for (pup = start_pup; pup <= end_pup; pup++)
+					printf("%8d , ", ctrl_sweepres[adll][if_id][pup]);
+			}
+			printf("\n");
+		}
+
+		/* write back to the phy the Rx DQS value, we store in the beginning */
+		write_leveling_value(ctrl_adll, ctrl_level_phase, (reg +  cs * CS_REGISTER_ADDR_OFFSET));
+		if (direction == 0)
+			ddr3_tip_write_adll_value(dev_num, ctrl_adll1,
+						  (0x1 + (cs * CS_REGISTER_ADDR_OFFSET)));
+
+		/* print adll results */
+		ddr3_tip_read_adll_value(dev_num, ctrl_adll,
+					 (reg + cs * CS_REGISTER_ADDR_OFFSET), MASK_ALL_BITS);
+		printf("%s,DQS,Leveling,,,", (direction == 0) ? "Tx" : "Rx");
+		print_adll(dev_num, ctrl_adll);
+		print_ph(dev_num, ctrl_level_phase);
+	}
+	ddr3_tip_reset_fifo_ptr(dev_num);
+
+	return 0;
+}
 #endif /* EXCLUDE_SWITCH_DEBUG */
 
 void print_topology(struct hws_topology_map *topology_db)
