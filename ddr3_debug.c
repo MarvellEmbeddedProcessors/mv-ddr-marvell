@@ -1418,7 +1418,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 			    u32 mode)
 {
 	u32 pup = 0, start_pup = 0, end_pup = 0;
-	u32 adll = 0;
+	u32 adll = 0, rep = 0, pattern_idx = 0;
 	u32 res[MAX_INTERFACE_NUM] = { 0 };
 	int if_id = 0;
 	u32 adll_value = 0;
@@ -1430,7 +1430,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
-	repeat_num = repeat_num;
+	repeat_num = 2;
 
 	if (mode == 1) {
 		/* per pup */
@@ -1471,38 +1471,44 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 		 */
 		for (pup = start_pup; pup <= end_pup; pup++) {
 			for (adll = 0; adll < ADLL_LENGTH; adll++) {
-				adll_value =
-					(direction == 0) ? (adll * 2) : adll;
-				CHECK_STATUS(ddr3_tip_bus_write
-					     (dev_num, ACCESS_TYPE_MULTICAST, 0,
-					      pup_access, pup, DDR_PHY_DATA,
-					      reg + CS_BYTE_GAP(cs),
-					      adll_value));
-				hws_ddr3_run_bist(dev_num, sweep_pattern, res,
-						  cs);
-				/* ddr3_tip_reset_fifo_ptr(dev_num); */
-				for (if_id = 0;
-				     if_id <= MAX_INTERFACE_NUM - 1;
-				     if_id++) {
-					VALIDATE_IF_ACTIVE
-						(tm->if_act_mask,
-						 if_id);
-					ctrl_sweepres[adll][if_id][pup]
-						= res[if_id];
-					if (mode == 1) {
-						CHECK_STATUS
-							(ddr3_tip_bus_write
-							 (dev_num,
-							  ACCESS_TYPE_UNICAST,
-							  if_id,
-							  ACCESS_TYPE_UNICAST,
-							  pup,
-							  DDR_PHY_DATA,
-							  reg + CS_BYTE_GAP(cs),
-							  ctrl_adll[if_id *
-								    cs *
-								    octets_per_if_num
-								    + pup]));
+				for (rep = 0; rep < repeat_num; rep++) {
+					for (pattern_idx = PATTERN_KILLER_DQ0;
+					     pattern_idx < PATTERN_LAST;
+					     pattern_idx++) {
+						adll_value =
+							(direction == 0) ? (adll * 2) : adll;
+						CHECK_STATUS(ddr3_tip_bus_write
+							     (dev_num, ACCESS_TYPE_MULTICAST, 0,
+							      pup_access, pup, DDR_PHY_DATA,
+							      reg + CS_BYTE_GAP(cs),
+							      adll_value));
+						hws_ddr3_run_bist(dev_num, sweep_pattern, res,
+								  cs);
+						/* ddr3_tip_reset_fifo_ptr(dev_num); */
+						for (if_id = 0;
+						     if_id < MAX_INTERFACE_NUM;
+						     if_id++) {
+							VALIDATE_IF_ACTIVE
+								(tm->if_act_mask,
+								 if_id);
+							ctrl_sweepres[adll][if_id][pup]
+								+= res[if_id];
+							if (mode == 1) {
+								CHECK_STATUS
+									(ddr3_tip_bus_write
+									 (dev_num,
+									  ACCESS_TYPE_UNICAST,
+									  if_id,
+									  ACCESS_TYPE_UNICAST,
+									  pup,
+									  DDR_PHY_DATA,
+									  reg + CS_BYTE_GAP(cs),
+									  ctrl_adll[if_id *
+										    cs *
+										    octets_per_if_num
+										    + pup]));
+							}
+						}
 					}
 				}
 			}
@@ -1532,7 +1538,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 			     if_id++) {
 				VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 				for (pup = start_pup; pup <= end_pup; pup++) {
-					printf("%d , ",
+					printf("%8d , ",
 					       ctrl_sweepres[adll][if_id]
 					       [pup]);
 				}
