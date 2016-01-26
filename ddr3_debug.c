@@ -1411,69 +1411,6 @@ static u32 ddr3_tip_compare(u32 if_id, u32 *p_src, u32 *p_dst,
 #endif /* EXCLUDE_SWITCH_DEBUG */
 
 #if defined(DDR_VIEWER_TOOL)
-/* test_type = 0-tx , 1-rx */
-int ddr3_tip_sweep_test(u32 dev_num, u32 test_type,
-			u32 mem_addr, u32 is_modify_adll,
-			u32 start_if, u32 end_if, u32 startpup, u32 endpup)
-{
-	u32 bus_cnt = 0, adll_val = 0, if_id, ui_prev_adll, ui_mask_bit,
-		end_adll, start_adll;
-	u32 reg_addr = 0;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
-
-	mem_addr = mem_addr;
-
-	if (test_type == 0) {
-		reg_addr = 1;
-		ui_mask_bit = 0x3f;
-		start_adll = 0;
-		end_adll = ui_mask_bit;
-	} else {
-		reg_addr = 3;
-		ui_mask_bit = 0x1f;
-		start_adll = 0;
-		end_adll = ui_mask_bit;
-	}
-
-	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
-			  ("==============================\n"));
-	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
-			  ("Test type %d (0-tx, 1-rx)\n", test_type));
-
-	for (if_id = start_if; if_id <= end_if; if_id++) {
-		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		for (bus_cnt = startpup; bus_cnt < endpup; bus_cnt++) {
-			CHECK_STATUS(ddr3_tip_bus_read
-				     (dev_num, if_id, ACCESS_TYPE_UNICAST,
-				      bus_cnt, DDR_PHY_DATA, reg_addr,
-				      &ui_prev_adll));
-
-			for (adll_val = start_adll; adll_val <= end_adll;
-			     adll_val++) {
-				if (is_modify_adll == 1) {
-					CHECK_STATUS(ddr3_tip_bus_read_modify_write
-						     (dev_num,
-						      ACCESS_TYPE_UNICAST,
-						      if_id, bus_cnt,
-						      DDR_PHY_DATA, reg_addr,
-						      adll_val, ui_mask_bit));
-				}
-			}
-			if (is_modify_adll == 1) {
-				CHECK_STATUS(ddr3_tip_bus_write
-					     (dev_num, ACCESS_TYPE_UNICAST,
-					      if_id, ACCESS_TYPE_UNICAST,
-					      bus_cnt, DDR_PHY_DATA, reg_addr,
-					      ui_prev_adll));
-			}
-			DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO, ("\n"));
-		}
-		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO, ("\n"));
-	}
-
-	return MV_OK;
-}
-
 /*
  * Sweep validation
  */
