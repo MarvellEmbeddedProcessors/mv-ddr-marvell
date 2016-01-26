@@ -1386,7 +1386,7 @@ static u32 ddr3_tip_compare(u32 if_id, u32 *p_src, u32 *p_dst,
 		 0xff) ? (u32) 0xffffffff : (u32) (0xff << (byte_index * 8));
 	for (burst_cnt = 0; burst_cnt < EXT_ACCESS_BURST_LENGTH; burst_cnt++) {
 		if ((p_src[burst_cnt] & addr_offset) !=
-		    (p_dst[burst_cnt] & addr_offset))
+		    (p_dst[if_id] & addr_offset))
 			b_is_fail = 1;
 	}
 
