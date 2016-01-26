@@ -692,8 +692,8 @@ int ddr3_tip_print_stability_log(u32 dev_num)
 					      read_data, MASK_ALL_BITS));
 				read_data[if_id] =
 					(read_data[if_id] &
-					 (0xf << (4 * csindex))) >>
-					(4 * csindex);
+					 (0x1f << (8 * csindex))) >>
+					(8 * csindex);
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST, bus_id,
 						  DDR_PHY_DATA,
