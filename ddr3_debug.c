@@ -1015,11 +1015,11 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		break;
 
 	case 0x2:
-		*ptr = (u32 *)&low_freq;
+		low_freq = (enum hws_ddr_freq)value;
 		break;
 
 	case 0x3:
-		*ptr = (u32 *)&medium_freq;
+		medium_freq = (enum hws_ddr_freq)value;
 		break;
 
 	case 0x4:
@@ -1091,7 +1091,7 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		break;
 
 	case 0x35:
-		*ptr = (u32 *)&init_freq;
+		init_freq = (enum hws_ddr_freq)value;
 		break;
 
 	case 0x36:
@@ -1123,7 +1123,7 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		break;
 
 	case 0x4e:
-		*ptr = (u32 *)&sweep_pattern;
+		sweep_pattern = (enum hws_pattern)value;
 		break;
 
 	case 0x50:
@@ -1211,7 +1211,7 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		break;
 
 	case 0x71:
-		*ptr = (u32 *)&pbs_pattern;
+		pbs_pattern = (enum hws_pattern)value;
 		break;
 
 	case 0x72:
