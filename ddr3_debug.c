@@ -1765,8 +1765,11 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 void print_topology(struct hws_topology_map *topology_db)
 {
 	u32 ui, uj;
+	u32 dev_num = 0;
 
 	printf("\tinterface_mask: 0x%x\n", topology_db->if_act_mask);
+	printf("\tNumber of buses: 0x%x\n",
+	       ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE));
 	printf("\tbus_act_mask: 0x%x\n", topology_db->bus_act_mask);
 
 	for (ui = 0; ui < MAX_INTERFACE_NUM; ui++) {
