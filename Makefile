@@ -71,16 +71,16 @@
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
 #
-#	* Redistributions of source code must retain the above copyright notice,
-#	  this list of conditions and the following disclaimer.
+#      * Redistributions of source code must retain the above copyright notice,
+#        this list of conditions and the following disclaimer.
 #
-#	* Redistributions in binary form must reproduce the above copyright
-#	  notice, this list of conditions and the following disclaimer in the
-#	  documentation and/or other materials provided with the distribution.
+#      * Redistributions in binary form must reproduce the above copyright
+#        notice, this list of conditions and the following disclaimer in the
+#        documentation and/or other materials provided with the distribution.
 #
-#	* Neither the name of Marvell nor the names of its contributors may be
-#	  used to endorse or promote products derived from this software without
-#	  specific prior written permission.
+#      * Neither the name of Marvell nor the names of its contributors may be
+#        used to endorse or promote products derived from this software without
+#        specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -95,6 +95,7 @@
 #
 #*******************************************************************************
 
+ifdef CONFIG_SPL_BUILD
 obj-$(CONFIG_SPL_BUILD) += ddr3_a38x.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_a38x_training.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_debug.o
@@ -110,3 +111,103 @@ obj-$(CONFIG_SPL_BUILD) += ddr3_training_leveling.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_training_pbs.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_training_static.o
 obj-$(CONFIG_SPL_BUILD) += xor.o
+else # CONFIG_SPL_BUILD
+include ../../base.mk
+
+#TIP_INC = $(BH_ROOT_DIR)/src_ddr/ddr3libv2/h
+
+#INCLUDE = -I$(TIP_INC)/Os -I$(TIP_INC)/Os/gtOs -I$(TIP_INC)/Os/common/siliconIf \
+	  -I$(TIP_INC)/SoC -I$(TIP_INC)/Silicon -I$(TIP_INC)/Os/common/configElementDb \
+	  -I$(TIP_INC)/Driver -I$(TIP_INC)/Driver/ddr3  -I$(BH_ROOT_DIR)/inc/common -I$(BH_ROOT_DIR)/inc/common/gtOs\
+	  -I$(BH_ROOT_DIR)/inc/ddr3_soc/$(BOARD) -I$(BH_ROOT_DIR)/inc/ddr3_soc/$(INCNAME) \
+	  -I$(BH_ROOT_DIR)/src_ddr  -I$(BH_ROOT_DIR)/platform/sysEnv/$(BOARD)
+
+#ifeq ($(DDRTYPE),ddr4)
+#	INCLUDE += -I$(BH_ROOT_DIR)/src_ddr/ddr3libv2/src/Driver/ddr4/h
+#endif
+
+#DDRTYPE = ddr3
+#LIBNAME = a38x
+#CFLAGS += -DMV_DDR
+
+#TGT = ddr_$(LIBNAME).a
+#TGT_UART = ddr_$(LIBNAME).uart.a
+
+TLIB = ./$(DDRTYPE)_training_$(LIBNAME).lib
+
+#TDDR4SUBLIB = ./$(DDRTYPE)_training_$(LIBNAME)sub.lib
+
+#TSRC = $(wildcard ./src/Driver/ddr3/*.c)
+#TSRC += ./src/Silicon/mvHwsDdr3$(SILNAME).c
+#ifeq "$(BOARD)"  "msys"
+#	TSRC += ./src/Silicon/mvHwsDdr3Msys.c
+#endif
+#TSRC += ./src/Soc/ddr3_$(BOARDNAME)_training.c
+#TSRC += ./src/Soc/ddr3_hws_hw_training.c
+#TSRC += ./src/Os/gtOs/mvXor.c
+
+
+#TSRCDDR4 = $(wildcard ./src/Driver/ddr4/src/*.c)
+
+
+TSRC = $(wildcard ./*.c)
+TOBJ = $(TSRC:.c=.o)
+#TOBJDDR4 = $(TSRCDDR4:.c=.o)
+
+#ifeq ($(DDR4SUBLIB),yes)
+#	TARGETS = $(TLIB) $(TDDR4SUBLIB)
+#else
+#	TARGETS = $(TLIB)
+#endif
+
+TARGETS = $(TLIB)
+
+
+#############global flags enable/disable features to save footprint###########
+# exclude debug function not relevent for SoC( set by default)
+#CFLAGS += -DEXCLUDE_SWITCH_DEBUG -DDDR_VIEWER_TOOL
+#ifeq "$(CONFIG_BOBCAT2)"  "y"
+#CFLAGS += -DMV_HWS_EXCLUDE_DEBUG_PRINTS
+#endif
+#remove all debug prints from training( unset by default)
+#CFLAGS += -DSILENT_LIB
+#CFLAGS += -DLIB_FUNCTIONAL_DEBUG_ONLY
+
+#Flag to support static training algo functions( unset by default)
+#ifeq ($(BOARD),a38x)
+#CFLAGS += -DSTATIC_ALGO_SUPPORT
+#else
+#CFLAGS += -DSTATIC_ALGO_SUPPORT
+#endif
+#flag to support ODT test debug function( unset by default)
+#CFLAGS += -DODT_TEST_SUPPORT
+
+# Flag to enable RX IO BIST Test
+# CFLAGS += -DMV_HWS_RX_IO_BIST
+# Flag enable IO BIST of CMD/ADDR Test (in addition to MV_HWS_RX_IO_BIST)
+# CFLAGS += -DMV_HWS_RX_IO_BIST_ETP
+
+#############end of global flags #############################################
+
+
+all:   $(TARGETS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+#%.uart.o: %.c
+#	$(CC) $(CFLAGS) -DNOT_USE_UART -DMV_NO_INPUT -DMV_NO_PRINT  $(CPPFLAGS) -c -o  $@ $<
+
+#$(TDDR4SUBLIB): $(TOBJDDR4)
+#	$(RM) ./$@
+#	ar rcs $(TDDR4SUBLIB) $(TOBJDDR4)
+#	$(CP) ./$@ ../lib
+
+$(TLIB): $(TOBJ)
+	$(RM) ./$@
+	ar rcs $(TLIB) $(TOBJ)
+	$(CP) ./$@ ../lib
+
+clean:
+	$(RM) ./*.o  ./*.a
+endif # CONFIG_SPL_BUILD

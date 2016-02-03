@@ -95,13 +95,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include <common.h>
-#include <i2c.h>
-#include <spl.h>
-#include <asm/io.h>
-#include <asm/arch/cpu.h>
-#include <asm/arch/soc.h>
-
 #include "ddr3_init.h"
 
 #define DDR_INTERFACES_NUM		1

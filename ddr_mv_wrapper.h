@@ -95,30 +95,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include "ddr3_init.h"
+#ifndef _DDR_MV_WRAPPER_H
+#define _DDR_MV_WRAPPER_H
 
-/*
- * Name:     ddr3_tip_init_silicon
- * Desc:     initiate silicon parameters
- * Args:
- * Notes:
- * Returns:  required value
- */
-int ddr3_silicon_init(void)
-{
-	int status;
-	static int init_done;
+#include "mv_os.h"
+#include "printf.h"
+#include "mvUart.h"
 
-	if (init_done == 1)
-		return MV_OK;
+/* u-boot/tools/marvell/bin_hdr/platform/utils/printf.c */
+#define printf mvPrintf
 
-	status = ddr3_tip_init_a38x(0, 0);
-	if (MV_OK != status) {
-		printf("DDR3 A38x silicon init - FAILED 0x%x\n", status);
-		return status;
-	}
+#define SOC_REGS_PHY_BASE 0xd0000000
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
-	init_done = 1;
+#define reg_write MV_REG_WRITE
+#define reg_read MV_REG_READ
+#define reg_bit_set MV_REG_BIT_SET
 
-	return MV_OK;
-}
+/* u-boot/tools/marvell/bin_hdr/platform/utils/utils.c */
+void *memcpy(void *dst, const void *src, u32 sz);
+
+/* uboot/tools/marvell/bin_hdr/platform/drivers/mv_time.c */
+void mdelay(unsigned long);
+
+/* TODO: Check if LE/BE support is needed */
+#define MV_MEMIO_LE32_WRITE2(data,addr) \
+		MV_MEMIO32_WRITE(addr, MV_32BIT_LE_FAST(data))
+#define writel MV_MEMIO_LE32_WRITE2
+#define readl MV_MEMIO_LE32_READ
+
+#endif /* _DDR_MV_WRAPPER_H */

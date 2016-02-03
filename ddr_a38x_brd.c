@@ -95,30 +95,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include "ddr3_init.h"
+#include "ddr_mv_wrapper.h"
+
+#include "ddr3_a38x_topology.h"
 
 /*
- * Name:     ddr3_tip_init_silicon
- * Desc:     initiate silicon parameters
- * Args:
- * Notes:
- * Returns:  required value
+ * Define the DDR layout / topology here in the board file. This will
+ * be used by the DDR3 init code in the SPL U-Boot version to configure
+ * the DDR3 controller.
  */
-int ddr3_silicon_init(void)
+static struct hws_topology_map board_topology_map = {
+	0x1, /* active interfaces */
+	/* cs_mask, mirror, dqs_swap, ck_swap X PUPs */
+	{ { { {0x1, 0, 0, 0},
+	      {0x1, 0, 0, 0},
+	      {0x1, 0, 0, 0},
+	      {0x1, 0, 0, 0},
+	      {0x1, 0, 0, 0} },
+	    SPEED_BIN_DDR_1866L,	/* speed_bin */
+	    BUS_WIDTH_8,		/* memory_width */
+	    MEM_4G,			/* mem_size */
+	    DDR_FREQ_800,		/* frequency */
+	    0, 0,			/* cas_l cas_wl */
+	    HWS_TEMP_LOW} },		/* temperature */
+	BUS_MASK_32BIT			/* Busses mask */
+};
+
+struct hws_topology_map *ddr3_get_topology_map(void)
 {
-	int status;
-	static int init_done;
-
-	if (init_done == 1)
-		return MV_OK;
-
-	status = ddr3_tip_init_a38x(0, 0);
-	if (MV_OK != status) {
-		printf("DDR3 A38x silicon init - FAILED 0x%x\n", status);
-		return status;
-	}
-
-	init_done = 1;
-
-	return MV_OK;
+	/* Return the board topology as defined in the board code */
+	return &board_topology_map;
 }
+

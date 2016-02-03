@@ -97,28 +97,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 
-/*
- * Name:     ddr3_tip_init_silicon
- * Desc:     initiate silicon parameters
- * Args:
- * Notes:
- * Returns:  required value
- */
-int ddr3_silicon_init(void)
+int ddr3_init(void);
+
+/* __udelay() implemented in tools/marvell/bin_hdr/platform/drivers/mv_time.c */
+void mdelay(unsigned long msec)
 {
-	int status;
-	static int init_done;
+	while (msec--)
+		__udelay(1000);
+}
 
-	if (init_done == 1)
-		return MV_OK;
-
-	status = ddr3_tip_init_a38x(0, 0);
-	if (MV_OK != status) {
-		printf("DDR3 A38x silicon init - FAILED 0x%x\n", status);
-		return status;
-	}
-
-	init_done = 1;
+MV_U32 ddr_init(void)
+{
+	ddr3_init();
 
 	return MV_OK;
 }

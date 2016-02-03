@@ -95,16 +95,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include <common.h>
-#include <i2c.h>
-#include <spl.h>
-#include <asm/io.h>
-#include <asm/arch/cpu.h>
-#include <asm/arch/soc.h>
-
 #include "ddr3_init.h"
 
+#if defined(MV_DDR)
+#include "sys_env_lib.h"
+#else /* MV_DDR */
 #include "../../../../arch/arm/mach-mvebu/serdes/a38x/sys_env_lib.h"
+#endif /* MV_DDR */
 
 static struct dlb_config ddr3_dlb_config_table[] = {
 	{REG_STATIC_DRAM_DLB_CONTROL, 0x2000005c},
