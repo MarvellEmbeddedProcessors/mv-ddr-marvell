@@ -126,6 +126,7 @@ void mdelay(unsigned long);
 
 #if defined(CONFIG_DDR4)
 #define vref_calibration_wa vrefCalibrationWA
+#define dmin_phy_reg_table dminPhyRegTable
 #endif
 
 #endif /* _DDR_MV_WRAPPER_H */

@@ -182,6 +182,11 @@ enum ddr_lib_debug_block {
 	DEBUG_BLOCK_DEVICE,
 	DEBUG_BLOCK_ACCESS,
 	DEBUG_STAGES_REG_DUMP,
+#if defined(CONFIG_DDR4)
+	DEBUG_TAP_TUNING,
+	DEBUG_BLOCK_CALIBRATION,
+	DEBUG_BLOCK_DDR4_CENTRALIZATION,
+#endif /* CONFIG_DDR4 */
 	/* All excluding IP and REG_DUMP, should be enabled separatelly */
 	DEBUG_BLOCK_ALL
 };
