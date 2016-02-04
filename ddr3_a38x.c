@@ -202,12 +202,18 @@ static int a38x_silicon_delay_offset[] = {
 
 static u8 a38x_bw_per_freq[DDR_FREQ_LAST] = {
 	0x3,			/* DDR_FREQ_100 */
+#if !defined(CONFIG_DDR4)
 	0x4,			/* DDR_FREQ_400 */
 	0x4,			/* DDR_FREQ_533 */
+#endif /* CONFIG_DDR4 */
 	0x5,			/* DDR_FREQ_667 */
 	0x5,			/* DDR_FREQ_800 */
 	0x5,			/* DDR_FREQ_933 */
 	0x5,			/* DDR_FREQ_1066 */
+#if defined(CONFIG_DDR4)
+	0x5,			/*DDR_FREQ_900*/
+	0x5,			/*DDR_FREQ_1000*/
+#else /* CONFIG_DDR4 */
 	0x3,			/* DDR_FREQ_311 */
 	0x3,			/* DDR_FREQ_333 */
 	0x4,			/* DDR_FREQ_467 */
@@ -217,16 +223,23 @@ static u8 a38x_bw_per_freq[DDR_FREQ_LAST] = {
 	0x5,			/* DDR_FREQ_900 */
 	0x3,			/* DDR_FREQ_360 */
 	0x5			/* DDR_FREQ_1000 */
+#endif /* CONFIG_DDR4 */
 };
 
 static u8 a38x_rate_per_freq[DDR_FREQ_LAST] = {
 	0x1,			/* DDR_FREQ_100 */
+#if !defined(CONFIG_DDR4)
 	0x2,			/* DDR_FREQ_400 */
 	0x2,			/* DDR_FREQ_533 */
+#endif /* CONFIG_DDR4 */
 	0x2,			/* DDR_FREQ_667 */
 	0x2,			/* DDR_FREQ_800 */
 	0x3,			/* DDR_FREQ_933 */
 	0x3,			/* DDR_FREQ_1066 */
+#ifdef CONFIG_DDR4
+	0x2,			/*DDR_FREQ_900*/
+	0x2,			/*DDR_FREQ_1000*/
+#else /* CONFIG_DDR4 */
 	0x1,			/* DDR_FREQ_311 */
 	0x1,			/* DDR_FREQ_333 */
 	0x2,			/* DDR_FREQ_467 */
@@ -236,6 +249,7 @@ static u8 a38x_rate_per_freq[DDR_FREQ_LAST] = {
 	0x2,			/* DDR_FREQ_900 */
 	0x1,			/* DDR_FREQ_360 */
 	0x2			/* DDR_FREQ_1000 */
+#endif /* CONFIG_DDR4 */
 };
 
 static u16 a38x_vco_freq_per_sar_ref_clk_25_mhz[] = {
@@ -622,7 +636,9 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 
 	init_freq = tm->interface_params[first_active_if].memory_freq;
 
+#if !defined(CONFIG_DDR4)
 	ddr3_tip_a38x_get_medium_freq(dev_num, &medium_freq);
+#endif /* CONFIG_DDR4 */
 
 	return MV_OK;
 }
@@ -670,6 +686,7 @@ int ddr3_tip_a38x_get_init_freq(int dev_num, enum hws_ddr_freq *freq)
 	if (((ref_clk_satr >> DEVICE_SAMPLE_AT_RESET2_REG_REFCLK_OFFSET) & 0x1) ==
 	    DEVICE_SAMPLE_AT_RESET2_REG_REFCLK_25MHZ) {
 		switch (reg) {
+#if !defined(CONFIG_DDR4)
 		case 0x1:
 			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
 					      ("Warning: Unsupported freq mode for 333Mhz configured(%d)\n",
@@ -694,6 +711,7 @@ int ddr3_tip_a38x_get_init_freq(int dev_num, enum hws_ddr_freq *freq)
 		case 0x6:
 			*freq = DDR_FREQ_600;
 			break;
+#endif /* CONFIG_DDR4 */
 		case 0x11:
 		case 0x14:
 			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
@@ -716,22 +734,33 @@ int ddr3_tip_a38x_get_init_freq(int dev_num, enum hws_ddr_freq *freq)
 		case 0x12:
 			*freq = DDR_FREQ_900;
 			break;
+#if defined(CONFIG_DDR4)
+		case 0x13:
+			*freq = DDR_FREQ_1000;
+			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
+					      ("Warning: Unsupported freq mode for 1000Mhz configured(%d)\n",
+					      reg));
+			break;
+#else /* CONFIG_DDR4 */
 		case 0x13:
 			*freq = DDR_FREQ_933;
 			async_mode_at_tf = 1;
 			break;
+#endif /* CONFIG_DDR4 */
 		default:
 			*freq = 0;
 			return MV_NOT_SUPPORTED;
 		}
 	} else { /* REFCLK 40MHz case */
 		switch (reg) {
+#if !defined(CONFIG_DDR4)
 		case 0x3:
 			*freq = DDR_FREQ_400;
 			break;
 		case 0x5:
 			*freq = DDR_FREQ_533;
 			break;
+#endif /* CONFIG_DDR4 */
 		case 0xb:
 			*freq = DDR_FREQ_800;
 			break;
@@ -747,6 +776,7 @@ int ddr3_tip_a38x_get_init_freq(int dev_num, enum hws_ddr_freq *freq)
 	return MV_OK;
 }
 
+#if !defined(CONFIG_DDR4)
 int ddr3_tip_a38x_get_medium_freq(int dev_num, enum hws_ddr_freq *freq)
 {
 	u32 reg, ref_clk_satr;
@@ -823,6 +853,7 @@ int ddr3_tip_a38x_get_medium_freq(int dev_num, enum hws_ddr_freq *freq)
 
 	return MV_OK;
 }
+#endif /* CONFIG_DDR4 */
 
 u32 ddr3_tip_get_init_freq(void)
 {
