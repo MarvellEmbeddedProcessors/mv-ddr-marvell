@@ -97,6 +97,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 
+#include "sys_env_lib.h"
+
 #define DDR_INTERFACES_NUM		1
 #define DDR_INTERFACE_OCTETS_NUM	5
 
@@ -554,6 +556,24 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 		return status;
 	}
 
+#if defined(CONFIG_DDR4)
+	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
+			  LOAD_PATTERN_MASK_BIT |
+			  SET_TARGET_FREQ_MASK_BIT |
+			  WRITE_LEVELING_TF_MASK_BIT |
+			  READ_LEVELING_TF_MASK_BIT |
+			  RECEIVER_CALIBRATION_MASK_BIT |
+			  WL_PHASE_CORRECTION_MASK_BIT |
+			  DQ_VREF_CALIBRATION_MASK_BIT |
+			  DQ_MAPPING_MASK_BIT);
+	rl_mid_freq_wa = 0;
+
+	/* In case A382, Vref calibration workaround isn't required */
+	if (((reg_read(DEV_ID_REG) & 0xFFFF0000) >> 16) == 0x6811) {
+		printf("vref_calibration_wa is disabled\n");
+		vref_calibration_wa = 0;
+	}
+#else /* CONFIG_DDR4 */
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
 			  LOAD_PATTERN_MASK_BIT |
 			  SET_MEDIUM_FREQ_MASK_BIT | WRITE_LEVELING_MASK_BIT |
@@ -588,6 +608,7 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 		mask_tune_func &= ~PBS_TX_MASK_BIT;
 		mask_tune_func &= ~PBS_RX_MASK_BIT;
 	}
+#endif /* CONFIG_DDR4 */
 
 	ca_delay = 0;
 	delay_enable = 1;

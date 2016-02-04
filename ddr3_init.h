@@ -235,6 +235,10 @@ extern u32 target_freq;
 extern u32 dfs_low_freq;
 extern u32 mem_size[];
 
+#if defined(CONFIG_DDR4)
+/* if 1, SSTL & POD have same Vref and workaround is required */
+extern u8 vref_calibration_wa;
+#endif /* CONFIG_DDR4 */
 
 /* Prototypes */
 int ddr3_tip_enable_init_sequence(u32 dev_num);

@@ -124,4 +124,8 @@ void mdelay(unsigned long);
 #define writel MV_MEMIO_LE32_WRITE2
 #define readl MV_MEMIO_LE32_READ
 
+#if defined(CONFIG_DDR4)
+#define vref_calibration_wa vrefCalibrationWA
+#endif
+
 #endif /* _DDR_MV_WRAPPER_H */
