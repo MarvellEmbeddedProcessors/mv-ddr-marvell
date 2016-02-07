@@ -171,7 +171,11 @@ u32 mem_size[] = {
 	ADDR_SIZE_8GB
 };
 
+#if defined(CONFIG_DDR4)
+static char *ddr_type = "DDR4";
+#else /* CONFIG_DDR4 */
 static char *ddr_type = "DDR3";
+#endif /* CONFIG_DDR4 */
 
 /*
  * Set 1 to use dynamic DUNIT configuration,
@@ -660,6 +664,12 @@ void ddr3_new_tip_dlb_config(void)
 		i++;
 	}
 
+#if defined(CONFIG_DDR4)
+	reg = reg_read(REG_DDR_CONT_HIGH_ADDR);
+	reg |= DLB_INTERJECTION_ENABLE;
+	reg_write(REG_DDR_CONT_HIGH_ADDR, reg);
+#endif /* CONFIG_DDR4 */
+
 	/* Enable DLB */
 	reg = reg_read(REG_STATIC_DRAM_DLB_CONTROL);
 	reg |= DLB_ENABLE | DLB_WRITE_COALESING | DLB_AXI_PREFETCH_EN |
@@ -870,11 +880,18 @@ static int ddr3_hws_tune_training_params(u8 dev_num)
 	params.g_znri_ctrl = TUNE_TRAINING_PARAMS_NRI_CTRL;
 	params.g_zpodt_data = TUNE_TRAINING_PARAMS_P_ODT_DATA;
 	params.g_znodt_data = TUNE_TRAINING_PARAMS_N_ODT_DATA;
-	params.g_zpodt_ctrl = TUNE_TRAINING_PARAMS_P_ODT_CTRL;
 	params.g_znodt_ctrl = TUNE_TRAINING_PARAMS_N_ODT_CTRL;
+
+#if defined(CONFIG_DDR4)
+	params.g_zpodt_data = TUNE_TRAINING_PARAMS_P_ODT_DATA_DDR4;
+	params.g_odt_config = TUNE_TRAINING_PARAMS_ODT_CONFIG_DDR4;
+	params.g_rtt_nom = TUNE_TRAINING_PARAMS_RTT_NOM_DDR4;
+	params.g_rtt_wr =  TUNE_TRAINING_PARAMS_RTT_WR;
+	params.g_dic = TUNE_TRAINING_PARAMS_DIC_DDR4;
+#else /* CONFIG_DDR4 */
+	params.g_zpodt_ctrl = TUNE_TRAINING_PARAMS_P_ODT_CTRL;
 	params.g_dic = TUNE_TRAINING_PARAMS_DIC;
 	params.g_rtt_nom = TUNE_TRAINING_PARAMS_RTT_NOM;
-
 	if (cs_num == 1) {
 		params.g_rtt_wr = TUNE_TRAINING_PARAMS_RTT_WR_1CS;
 		params.g_odt_config = TUNE_TRAINING_PARAMS_ODT_CONFIG_1CS;
@@ -882,6 +899,7 @@ static int ddr3_hws_tune_training_params(u8 dev_num)
 		params.g_rtt_wr = TUNE_TRAINING_PARAMS_RTT_WR_2CS;
 		params.g_odt_config = TUNE_TRAINING_PARAMS_ODT_CONFIG_2CS;
 	}
+#endif /* CONFIG_DDR4 */
 
 	status = ddr3_tip_tune_training_params(dev_num, &params);
 	if (MV_OK != status) {
