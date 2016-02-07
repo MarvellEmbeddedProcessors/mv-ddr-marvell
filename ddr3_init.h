@@ -268,7 +268,14 @@ int ddr3_a38x_update_topology_map(u32 dev_num,
 				  struct hws_topology_map *topology_map);
 int ddr3_tip_a38x_get_init_freq(int dev_num, enum hws_ddr_freq *freq);
 u8 ddr3_tip_clock_mode(u32 frequency);
-#if !defined(CONFIG_DDR4)
+#if defined(CONFIG_DDR4)
+const char* ddr4_sublib_version_get(void);
+int ddr4_tip_configure_phy(u32 dev_num);
+int ddr4_tip_calibration_adjust(u32 dev_num, u8 vref_en, u8 pod_only);
+int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type interface_access,
+			u32 if_id, enum hws_ddr_freq frequency);
+int ddr3_tip_ddr4_ddr4_training_main_flow(u32 dev_num);
+#else
 int ddr3_tip_a38x_get_medium_freq(int dev_num, enum hws_ddr_freq *freq);
 #endif /* CONFIG_DDR4 */
 int ddr3_tip_a38x_if_read(u8 dev_num, enum hws_access_type interface_access,

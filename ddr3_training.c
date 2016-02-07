@@ -123,6 +123,7 @@ u32 odt_config = 1;
 u32 is_pll_before_init = 0, is_adll_calib_before_init = 1, is_dfs_in_init = 0;
 u32 dfs_low_freq;
 
+u32 g_rtt_nom_cs0, g_rtt_nom_cs1;
 u8 calibration_update_control;	/* 2 external only, 1 is internal only */
 
 enum hws_result training_result[MAX_STAGE_LIMIT][MAX_INTERFACE_NUM];
@@ -171,13 +172,23 @@ u32 mask_tune_func = (SET_MEDIUM_FREQ_MASK_BIT |
 		      WRITE_LEVELING_MASK_BIT |
 		      LOAD_PATTERN_2_MASK_BIT |
 		      READ_LEVELING_MASK_BIT |
-		      SET_TARGET_FREQ_MASK_BIT | WRITE_LEVELING_TF_MASK_BIT |
+		      SET_TARGET_FREQ_MASK_BIT |
+		      WRITE_LEVELING_TF_MASK_BIT |
+#if defined(CONFIG_DDR4)
+		      SW_READ_LEVELING_MASK_BIT |
+#else /* CONFIG_DDR4 */
 		      READ_LEVELING_TF_MASK_BIT |
-		      CENTRALIZATION_RX_MASK_BIT | CENTRALIZATION_TX_MASK_BIT);
+#endif /* CONFIG_DDR4 */
+		      CENTRALIZATION_RX_MASK_BIT |
+		      CENTRALIZATION_TX_MASK_BIT);
 
 void ddr3_print_version(void)
 {
+#if defined(CONFIG_DDR4)
+	printf(ddr4_sublib_version_get());
+#else /* CONFIG_DDR4 */
 	printf(DDR3_TIP_VERSION_STRING);
+#endif /* CONFIG_DDR4 */
 }
 
 static int ddr3_tip_ddr3_training_main_flow(u32 dev_num);
@@ -395,6 +406,10 @@ int ddr3_tip_configure_phy(u32 dev_num)
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 			      ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 			      DDR_PHY_DATA, 0x90, 0x6002));
+
+#if defined(CONFIG_DDR4)
+	ddr4_tip_configure_phy(dev_num);
+#endif /* CONFIG_DDR4 */
 
 	return MV_OK;
 }
@@ -659,6 +674,12 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 				: speed_bin_table(speed_bin_index,
 						  SPEED_BIN_TFAW2K);
 
+#if defined(CONFIG_DDR4)
+			t_faw = GET_MAX_VALUE(t_ckclk *
+					      ((page_size == 1) ? 20 : 28),
+					      t_faw);
+#endif /* CONFIG_DDR4 */
+
 			data_value = TIME_2_CLOCK_CYCLES(t_faw, t_ckclk);
 			data_value = data_value << 24;
 			CHECK_STATUS(ddr3_tip_if_write
@@ -877,6 +898,11 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 			      CALIB_MACHINE_CTRL_REG,
 			      calibration_update_control << 3, 0x3 << 3));
 	}
+
+#if defined(CONFIG_DDR4)
+	/* dev_num, vref_en, pod_only */
+	CHECK_STATUS(ddr4_tip_calibration_adjust(dev_num, 1, 0));
+#endif /* CONFIG_DDR4 */
 
 	CHECK_STATUS(ddr3_tip_enable_init_sequence(dev_num));
 
@@ -1691,6 +1717,20 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 
 		/* disable ODT in case of dll off */
 		if (is_dll_off == 1) {
+#if defined(CONFIG_DDR4)
+			CHECK_STATUS(ddr3_tip_if_read
+				     (dev_num, access_type, PARAM_NOT_CARE,
+				      0x1974, &g_rtt_nom_cs0, MASK_ALL_BITS));
+			CHECK_STATUS(ddr3_tip_if_write
+				     (dev_num, access_type, if_id,
+				      0x1974, 0, (0x7 << 8)));
+			CHECK_STATUS(ddr3_tip_if_read
+				     (dev_num, access_type, PARAM_NOT_CARE,
+				      0x1A74, &g_rtt_nom_cs1, MASK_ALL_BITS));
+			CHECK_STATUS(ddr3_tip_if_write
+				     (dev_num, access_type, if_id,
+				      0x1A74, 0, (0x7 << 8)));
+#else /* CONFIG_DDR4 */
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
 				      0x1874, 0, 0x244));
@@ -1703,6 +1743,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
 				      0x18a4, 0, 0x244));
+#endif /* CONFIG_DDR4 */
 		}
 
 		/* DFS  - Enter Self-Refresh */
@@ -1783,6 +1824,14 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 
 		/* Restore original RTT values if returning from DLL OFF mode */
 		if (is_dll_off == 1) {
+#if defined(CONFIG_DDR4)
+			CHECK_STATUS(ddr3_tip_if_write
+				     (dev_num, access_type, if_id,
+				      0x1974, g_rtt_nom_cs0, (0x7 << 8)));
+			CHECK_STATUS(ddr3_tip_if_write
+				     (dev_num, access_type, if_id,
+				      0x1A74, g_rtt_nom_cs1, (0x7 << 8)));
+#else /* CONFIG_DDR4 */
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id, 0x1874,
 				      g_dic | g_rtt_nom, 0x266));
@@ -1795,6 +1844,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id, 0x18a4,
 				      g_dic | g_rtt_nom, 0x266));
+#endif /* CONFIG_DDR4 */
 		}
 
 		/* Reset divider_b assert -> de-assert */
@@ -2020,8 +2070,13 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	t_rtp =	GET_MAX_VALUE(t_ckclk * 4, speed_bin_table(speed_bin_index,
 							   SPEED_BIN_TRTP));
 	t_mod = GET_MAX_VALUE(t_ckclk * 12, 15000);
+#if defined(CONFIG_DDR4)
+	t_wtr = GET_MAX_VALUE(t_ckclk * 2, speed_bin_table(speed_bin_index,
+							   SPEED_BIN_TWTR));
+#else /* CONFIG_DDR4 */
 	t_wtr = GET_MAX_VALUE(t_ckclk * 4, speed_bin_table(speed_bin_index,
 							   SPEED_BIN_TWTR));
+#endif /* CONFIG_DDR4 */
 	t_ras = TIME_2_CLOCK_CYCLES(speed_bin_table(speed_bin_index,
 						    SPEED_BIN_TRAS),
 				    t_ckclk);
@@ -2078,6 +2133,10 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
 				       SDRAM_TIMING_HIGH_REG,
 				       0x40000000, 0xc0000000));
+
+#if defined(CONFIG_DDR4)
+	ddr4_tip_set_timing(dev_num, access_type, if_id, frequency);
+#endif /* CONFIG_DDR4 */
 
 	return MV_OK;
 }
@@ -2193,7 +2252,11 @@ int ddr3_tip_write_mrs_cmd(u32 dev_num, u32 *cs_mask_arr, u32 cmd,
 	u32 if_id, reg;
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
+#if defined(CONFIG_DDR4)
+	reg = (cmd == MRS1_CMD) ? DDR4_MR1_REG : DDR4_MR2_REG;
+#else /* CONFIG_DDR4 */
 	reg = (cmd == MRS1_CMD) ? MR1_REG : MR2_REG;
+#endif /* CONFIG_DDR4 */
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST,
 				       PARAM_NOT_CARE, reg, data, mask));
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
@@ -2622,6 +2685,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 		}
 	}
 
+#if !defined(CONFIG_DDR4)
 	for (effective_cs = 0; effective_cs < max_cs; effective_cs++) {
 		if (mask_tune_func & PBS_RX_MASK_BIT) {
 			training_stage = PBS_RX;
@@ -2661,6 +2725,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	}
 	/* Set to 0 after each loop to avoid illegal value may be used */
 	effective_cs = 0;
+#endif /* CONFIG_DDR4 */
 
 	if (mask_tune_func & SET_TARGET_FREQ_MASK_BIT) {
 		training_stage = SET_TARGET_FREQ;
@@ -2729,6 +2794,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 		}
 	}
 
+#if !defined(CONFIG_DDR4)
 	if (mask_tune_func & DM_PBS_TX_MASK_BIT) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO, ("DM_PBS_TX_MASK_BIT\n"));
 	}
@@ -2774,6 +2840,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	}
 	/* Set to 0 after each loop to avoid illegal value may be used */
 	effective_cs = 0;
+#endif /* CONFIG_DDR4 */
 
 	for (effective_cs = 0; effective_cs < max_cs; effective_cs++) {
 		if (mask_tune_func & WRITE_LEVELING_SUPP_TF_MASK_BIT) {
@@ -2796,6 +2863,12 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	/* Set to 0 after each loop to avoid illegal value may be used */
 	effective_cs = 0;
 
+#if defined(CONFIG_DDR4)
+	for (effective_cs = 0; effective_cs < max_cs; effective_cs++)
+		CHECK_STATUS(ddr3_tip_ddr4_ddr4_training_main_flow(dev_num));
+#endif /* CONFIG_DDR4 */
+
+#if !defined(CONFIG_DDR4)
 	for (effective_cs = 0; effective_cs < max_cs; effective_cs++) {
 		if (mask_tune_func & CENTRALIZATION_TX_MASK_BIT) {
 			training_stage = CENTRALIZATION_TX;
@@ -2816,6 +2889,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	}
 	/* Set to 0 after each loop to avoid illegal value may be used */
 	effective_cs = 0;
+#endif /* CONFIG_DDR4 */
 
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO, ("restore registers to default\n"));
 	/* restore register values */

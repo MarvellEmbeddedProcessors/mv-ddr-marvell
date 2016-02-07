@@ -376,6 +376,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CS_PBS_GAP(cs_num)			((cs_num) * 0x10)
 #define ADLL_LENGTH				32
 
+#if defined(CONFIG_DDR4)
+/* DDR4 MRS */
+#define MRS4_CMD				0x10
+#define MRS5_CMD				0x11
+#define MRS6_CMD				0x12
+
+/* DDR4 Registers */
+#define DDR4_MR0_REG				0x1900
+#define DDR4_MR1_REG				0x1904
+#define DDR4_MR2_REG				0x1908
+#define DDR4_MR3_REG				0x190C
+#define DDR4_MR4_REG				0x1910
+#define DDR4_MR5_REG				0x1914
+#define DDR4_MR6_REG				0x1918
+#define DDR4_MPR_WR_REG				0x19D0
+#define DRAM_PINS_MUX_REG			0x19D4
+#endif /* CONFIG_DDR4 */
+
 struct write_supp_result {
 	enum hws_wl_supp stage;
 	int is_pup_fail;
