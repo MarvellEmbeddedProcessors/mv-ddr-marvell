@@ -101,6 +101,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 enum mv_ddr_dev_attribute ddr_dev_attributes[MAX_DEVICE_NUM][MV_ATTR_LAST];
 int ddr_dev_attr_init_done[MAX_DEVICE_NUM] = { 0 };
 
+#if !defined(CONFIG_DDR4)
 /* List of allowed frequency listed in order of enum hws_ddr_freq */
 u32 freq_val[DDR_FREQ_LAST] = {
 	0,			/*DDR_FREQ_LOW_FREQ */
@@ -868,6 +869,7 @@ inline u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 
 	return pattern;
 }
+#endif /* CONFIG_DDR4 */
 
 /* Device attribute functions */
 void ddr3_tip_dev_attr_init(u32 dev_num)

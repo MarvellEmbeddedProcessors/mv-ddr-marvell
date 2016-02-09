@@ -165,6 +165,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #endif
 
+#ifdef CONFIG_DDR4
+#ifdef SILENT_LIB
+#define DEBUG_TAP_TUNING_ENGINE(level, s)
+#define DEBUG_CALIBRATION(level, s)
+#define DEBUG_DDR4_CENTRALIZATION(level, s)
+#else /* SILENT_LIB */
+#define DEBUG_TAP_TUNING_ENGINE(level, s)	\
+	if (level >= debug_tap_tuning)		\
+		printf s
+#define DEBUG_CALIBRATION(level, s)		\
+	if (level >= debug_calibration)		\
+		printf s
+#define DEBUG_DDR4_CENTRALIZATION(level, s)	\
+	if (level >= debug_ddr4_centralization)	\
+		printf s
+#endif /* SILENT_LIB */
+#endif /* CONFIG_DDR4 */
+
 /* Logging defines */
 #define DEBUG_LEVEL_TRACE	1
 #define DEBUG_LEVEL_INFO	2

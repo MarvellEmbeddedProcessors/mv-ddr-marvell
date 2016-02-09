@@ -101,6 +101,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_os.h"
 #include "printf.h"
 #include "mvUart.h"
+#include "util.h"
 
 /* u-boot/tools/marvell/bin_hdr/platform/utils/printf.c */
 #define printf mvPrintf
@@ -111,9 +112,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define reg_write MV_REG_WRITE
 #define reg_read MV_REG_READ
 #define reg_bit_set MV_REG_BIT_SET
-
-/* u-boot/tools/marvell/bin_hdr/platform/utils/utils.c */
-void *memcpy(void *dst, const void *src, u32 sz);
 
 /* uboot/tools/marvell/bin_hdr/platform/drivers/mv_time.c */
 void mdelay(unsigned long);
@@ -131,6 +129,7 @@ void mdelay(unsigned long);
 #define ddr4_tip_configure_phy ddr4TipConfigurePhy
 #define ddr4_tip_calibration_adjust ddr4TipCalibrationAdjust
 #define ddr4_tip_set_timing ddr4TipSetTiming
+#define ddr3_tip_ddr4_ddr4_training_main_flow ddr3TipDDR4Ddr4TrainingMainFlow
 #endif
 
 #endif /* _DDR_MV_WRAPPER_H */

@@ -122,9 +122,9 @@ include ../../base.mk
 	  -I$(BH_ROOT_DIR)/inc/ddr3_soc/$(BOARD) -I$(BH_ROOT_DIR)/inc/ddr3_soc/$(INCNAME) \
 	  -I$(BH_ROOT_DIR)/src_ddr  -I$(BH_ROOT_DIR)/platform/sysEnv/$(BOARD)
 
-#ifeq ($(DDRTYPE),ddr4)
-#	INCLUDE += -I$(BH_ROOT_DIR)/src_ddr/ddr3libv2/src/Driver/ddr4/h
-#endif
+ifeq ($(DDRTYPE),ddr4)
+	INCLUDE += -I$(BH_ROOT_DIR)/src_ddr/mv_ddr4/
+endif
 
 #DDRTYPE = ddr3
 #LIBNAME = a38x
@@ -135,7 +135,7 @@ include ../../base.mk
 
 TLIB = ./$(DDRTYPE)_training_$(LIBNAME).lib
 
-#TDDR4SUBLIB = ./$(DDRTYPE)_training_$(LIBNAME)sub.lib
+TDDR4SUBLIB = ./$(DDRTYPE)_training_$(LIBNAME)sub.lib
 
 #TSRC = $(wildcard ./src/Driver/ddr3/*.c)
 #TSRC += ./src/Silicon/mvHwsDdr3$(SILNAME).c
@@ -147,20 +147,20 @@ TLIB = ./$(DDRTYPE)_training_$(LIBNAME).lib
 #TSRC += ./src/Os/gtOs/mvXor.c
 
 
-#TSRCDDR4 = $(wildcard ./src/Driver/ddr4/src/*.c)
+TSRCDDR4 = $(wildcard ../mv_ddr4/*.c)
 
 
 TSRC = $(wildcard ./*.c)
 TOBJ = $(TSRC:.c=.o)
-#TOBJDDR4 = $(TSRCDDR4:.c=.o)
+TOBJDDR4 = $(TSRCDDR4:.c=.o)
 
-#ifeq ($(DDR4SUBLIB),yes)
-#	TARGETS = $(TLIB) $(TDDR4SUBLIB)
-#else
-#	TARGETS = $(TLIB)
-#endif
+ifeq ($(DDR4SUBLIB),yes)
+	TARGETS = $(TLIB) $(TDDR4SUBLIB)
+else
+	TARGETS = $(TLIB)
+endif
 
-TARGETS = $(TLIB)
+#TARGETS = $(TLIB)
 
 
 #############global flags enable/disable features to save footprint###########
@@ -198,10 +198,10 @@ all:   $(TARGETS)
 #%.uart.o: %.c
 #	$(CC) $(CFLAGS) -DNOT_USE_UART -DMV_NO_INPUT -DMV_NO_PRINT  $(CPPFLAGS) -c -o  $@ $<
 
-#$(TDDR4SUBLIB): $(TOBJDDR4)
-#	$(RM) ./$@
-#	ar rcs $(TDDR4SUBLIB) $(TOBJDDR4)
-#	$(CP) ./$@ ../lib
+$(TDDR4SUBLIB): $(TOBJDDR4)
+	$(RM) ./$@
+	ar rcs $(TDDR4SUBLIB) $(TOBJDDR4)
+	$(CP) ./$@ ../lib
 
 $(TLIB): $(TOBJ)
 	$(RM) ./$@

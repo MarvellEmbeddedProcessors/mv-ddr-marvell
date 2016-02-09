@@ -133,6 +133,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			return status;	\
 	}
 
+#define GET_MAX_VALUE(x, y)			\
+	((x) > (y)) ? (x) : (y)
+#define CEIL_DIVIDE(x, y)					\
+	((x - (x / y) * y) == 0) ? ((x / y) - 1) : (x / y)
+
+#define TIME_2_CLOCK_CYCLES	CEIL_DIVIDE
+
 enum log_level  {
 	MV_LOG_LEVEL_0,
 	MV_LOG_LEVEL_1,
@@ -141,7 +148,8 @@ enum log_level  {
 };
 
 /* Globals */
-extern u8 debug_training;
+extern u8 debug_training, debug_calibration, debug_ddr4_centralization,
+	debug_tap_tuning;
 extern u8 is_reg_dump;
 extern u8 generic_init_controller;
 /* list of allowed frequency listed in order of enum hws_ddr_freq */
@@ -173,6 +181,7 @@ extern u32 g_znodt_ctrl;
 extern u32 g_dic;
 extern u32 g_odt_config;
 extern u32 g_rtt_nom;
+extern u32 g_rtt_wr;
 
 extern u8 debug_training_access;
 extern u8 debug_training_a38x;

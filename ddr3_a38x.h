@@ -210,4 +210,7 @@ enum {
 
 #define ACTIVE_INTERFACE_MASK			0x1
 
+extern u16 a38x_odt_slope[];
+extern u16 a38x_odt_intercept[];
+
 #endif /* _DDR3_A38X_H */
