@@ -102,7 +102,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr_topology_def.h"
 #include "ddr_training_ip_db.h"
 
-#define DDR3_TIP_VERSION_STRING "DDR3 Training Sequence - Ver TIP-1.29."
+#if defined(CONFIG_DDR4)
+#define DDR3_TIP_VERSION_STRING "DDR4 Training Sequence - Ver TIP-0.23."
+#else /* CONFIG_DDR4 */
+#define DDR3_TIP_VERSION_STRING "DDR3 Training Sequence - Ver TIP-1.55."
+#endif /* CONFIG_DDR4 */
 
 #define MAX_CS_NUM		4
 #define MAX_TOTAL_BUS_NUM	(MAX_INTERFACE_NUM * MAX_BUS_NUM)
