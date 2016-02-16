@@ -106,9 +106,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* u-boot/tools/marvell/bin_hdr/platform/utils/printf.c */
 #define printf mvPrintf
 
-#define SOC_REGS_PHY_BASE 0xd0000000
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-
 #define reg_write MV_REG_WRITE
 #define reg_read MV_REG_READ
 #define reg_bit_set MV_REG_BIT_SET

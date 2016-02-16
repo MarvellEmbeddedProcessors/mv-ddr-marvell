@@ -177,10 +177,9 @@ u32 mask_tune_func = (SET_MEDIUM_FREQ_MASK_BIT |
 
 void ddr3_print_version(void)
 {
+	printf(DDR3_TIP_VERSION_STRING);
 #if defined(CONFIG_DDR4)
 	printf(ddr4_sublib_version_get());
-#else /* CONFIG_DDR4 */
-	printf(DDR3_TIP_VERSION_STRING);
 #endif /* CONFIG_DDR4 */
 }
 

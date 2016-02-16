@@ -103,6 +103,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../../../arch/arm/mach-mvebu/serdes/a38x/sys_env_lib.h"
 #endif /* MV_DDR */
 
+#if defined(CONFIG_DDR4)
+static struct dlb_config ddr3_dlb_config_table[] = {
+	{REG_STATIC_DRAM_DLB_CONTROL, 0x2000005f},
+	{DLB_BUS_OPTIMIZATION_WEIGHTS_REG, 0x00880000},
+	{DLB_AGING_REGISTER, 0x3f7f007f},
+	{DLB_EVICTION_CONTROL_REG, 0x0000129f},
+	{DLB_EVICTION_TIMERS_REGISTER_REG, 0x00ff0000},
+	{DLB_BUS_WEIGHTS_DIFF_CS, 0x04030803},
+	{DLB_BUS_WEIGHTS_DIFF_BG, 0x00000A02},
+	{DLB_BUS_WEIGHTS_SAME_BG, 0x08000901},
+	{DLB_BUS_WEIGHTS_RD_WR,  0x00020005},
+	{DLB_BUS_WEIGHTS_ATTR_SYS_PRIO, 0x00060f10},
+	{DLB_MAIN_QUEUE_MAP, 0x00000543},
+	{DLB_LINE_SPLIT, 0x0000000f},
+	{DLB_USER_COMMAND_REG, 0x00000000},
+	{0x0, 0x0}
+};
+#else /* CONFIG_DDR4 */
 static struct dlb_config ddr3_dlb_config_table[] = {
 	{REG_STATIC_DRAM_DLB_CONTROL, 0x2000005c},
 	{DLB_BUS_OPTIMIZATION_WEIGHTS_REG, 0x00880000},
@@ -119,23 +137,7 @@ static struct dlb_config ddr3_dlb_config_table[] = {
 	{DLB_USER_COMMAND_REG, 0x00000000},
 	{0x0, 0x0}
 };
-
-static struct dlb_config ddr3_dlb_config_table_a0[] = {
-	{REG_STATIC_DRAM_DLB_CONTROL, 0x2000005c},
-	{DLB_BUS_OPTIMIZATION_WEIGHTS_REG, 0x00880000},
-	{DLB_AGING_REGISTER, 0x0f7f007f},
-	{DLB_EVICTION_CONTROL_REG, 0x0000129f},
-	{DLB_EVICTION_TIMERS_REGISTER_REG, 0x00ff0000},
-	{DLB_BUS_WEIGHTS_DIFF_CS, 0x04030802},
-	{DLB_BUS_WEIGHTS_DIFF_BG, 0x00000a02},
-	{DLB_BUS_WEIGHTS_SAME_BG, 0x09000a01},
-	{DLB_BUS_WEIGHTS_RD_WR, 0x00020005},
-	{DLB_BUS_WEIGHTS_ATTR_SYS_PRIO, 0x00060f10},
-	{DLB_MAIN_QUEUE_MAP, 0x00000543},
-	{DLB_LINE_SPLIT, 0x00000000},
-	{DLB_USER_COMMAND_REG, 0x00000000},
-	{0x0, 0x0}
-};
+#endif /* CONFIG_DDR4 */
 
 #if defined(CONFIG_ARMADA_38X)
 struct dram_modes {
@@ -239,14 +241,7 @@ u8 sys_env_device_rev_get(void)
  */
 struct dlb_config *sys_env_dlb_config_ptr_get(void)
 {
-#ifdef CONFIG_ARMADA_39X
-	return &ddr3_dlb_config_table_a0[0];
-#else
-	if (sys_env_device_rev_get() == MV_88F68XX_A0_ID)
-		return &ddr3_dlb_config_table_a0[0];
-	else
-		return &ddr3_dlb_config_table[0];
-#endif
+	return &ddr3_dlb_config_table[0];
 }
 
 /*
@@ -878,8 +873,8 @@ static int ddr3_hws_tune_training_params(u8 dev_num)
 	params.g_znri_data = TUNE_TRAINING_PARAMS_NRI_DATA;
 	params.g_zpri_ctrl = TUNE_TRAINING_PARAMS_PRI_CTRL;
 	params.g_znri_ctrl = TUNE_TRAINING_PARAMS_NRI_CTRL;
-	params.g_zpodt_data = TUNE_TRAINING_PARAMS_P_ODT_DATA;
 	params.g_znodt_data = TUNE_TRAINING_PARAMS_N_ODT_DATA;
+	params.g_zpodt_ctrl = TUNE_TRAINING_PARAMS_P_ODT_CTRL;
 	params.g_znodt_ctrl = TUNE_TRAINING_PARAMS_N_ODT_CTRL;
 
 #if defined(CONFIG_DDR4)
@@ -889,7 +884,7 @@ static int ddr3_hws_tune_training_params(u8 dev_num)
 	params.g_rtt_wr =  TUNE_TRAINING_PARAMS_RTT_WR;
 	params.g_dic = TUNE_TRAINING_PARAMS_DIC_DDR4;
 #else /* CONFIG_DDR4 */
-	params.g_zpodt_ctrl = TUNE_TRAINING_PARAMS_P_ODT_CTRL;
+	params.g_zpodt_data = TUNE_TRAINING_PARAMS_P_ODT_DATA;
 	params.g_dic = TUNE_TRAINING_PARAMS_DIC;
 	params.g_rtt_nom = TUNE_TRAINING_PARAMS_RTT_NOM;
 	if (cs_num == 1) {

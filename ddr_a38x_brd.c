@@ -104,6 +104,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * be used by the DDR3 init code in the SPL U-Boot version to configure
  * the DDR3 controller.
  */
+
+#if defined(CONFIG_DDR4)
+#define SPEED_BIN_DDR_DB_68XX	SPEED_BIN_DDR_2400R
+#define BUS_WIDTH_DB_68XX	BUS_WIDTH_16
+#else /* CONFIG_DDR4 */
+#define SPEED_BIN_DDR_DB_68XX	SPEED_BIN_DDR_1866L
+#define BUS_WIDTH_DB_68XX	BUS_WIDTH_8
+#endif /* CONFIG_DDR4 */
+
+/* Marvell board - Board_ID = DB_68XX_ID = 1 (DDR3/4)*/
+static struct hws_topology_map board_topology_map = {
+	0x1, /* active interfaces */
+	/* cs_mask, mirror, dqs_swap, ck_swap X PUPs */
+	{ { { {0x3, 0x2, 0, 0},
+	      {0x3, 0x2, 0, 0},
+	      {0x3, 0x2, 0, 0},
+	      {0x3, 0x2, 0, 0},
+	      {0x3, 0x2, 0, 0} },
+	    SPEED_BIN_DDR_DB_68XX,	/* speed_bin */
+	    BUS_WIDTH_DB_68XX,		/* memory_width */
+	    MEM_4G,			/* mem_size */
+	    DDR_FREQ_800,		/* frequency */
+	    0, 0,			/* cas_l, cas_wl */
+	    HWS_TEMP_LOW} },		/* temperature */
+	BUS_MASK_32BIT			/* Buses mask */
+};
+
+#if 0
+/* Marvell board - Board_ID = DB_GP_68XX_ID = 4 */
 static struct hws_topology_map board_topology_map = {
 	0x1, /* active interfaces */
 	/* cs_mask, mirror, dqs_swap, ck_swap X PUPs */
@@ -120,6 +149,7 @@ static struct hws_topology_map board_topology_map = {
 	    HWS_TEMP_LOW} },		/* temperature */
 	BUS_MASK_32BIT			/* Busses mask */
 };
+#endif
 
 struct hws_topology_map *ddr3_get_topology_map(void)
 {
