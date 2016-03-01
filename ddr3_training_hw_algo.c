@@ -133,7 +133,7 @@ static u32 rd_sample_mask[] = {
  */
 int ddr3_tip_write_additional_odt_setting(u32 dev_num, u32 if_id)
 {
-	u32 cs_num = 0, max_read_sample = 0, min_read_sample = 0;
+	u32 cs_num = 0, max_read_sample = 0, min_read_sample = 0x1f;
 	u32 data_read[MAX_INTERFACE_NUM] = { 0 };
 	u32 read_sample[MAX_CS_NUM];
 	u32 val;
