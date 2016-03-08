@@ -103,9 +103,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr_training_ip_db.h"
 
 #if defined(CONFIG_DDR4)
-#define DDR3_TIP_VERSION_STRING "DDR4 Training Sequence - Ver TIP-0.23."
+#define DDR3_TIP_VERSION_STRING "DDR4 Training Sequence - Ver mv_ddr TIP-0.23."
 #else /* CONFIG_DDR4 */
-#define DDR3_TIP_VERSION_STRING "DDR3 Training Sequence - Ver TIP-1.55."
+#define DDR3_TIP_VERSION_STRING "DDR3 Training Sequence - Ver mv_ddr TIP-1.55."
 #endif /* CONFIG_DDR4 */
 
 #define MAX_CS_NUM		4
