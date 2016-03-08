@@ -323,4 +323,64 @@ u32 sys_env_device_id_get(void)
 	return g_dev_id;
 }
 
+/*
+ * sys_env_device_rev_get - Get Marvell controller device revision number
+ *
+ * DESCRIPTION:
+ *       This function returns 8bit describing the device revision as defined
+ *       Revision ID Register.
+ *
+ * INPUT:
+ *       None.
+ *
+ * OUTPUT:
+ *       None.
+ *
+ * RETURN:
+ *       8bit desscribing Marvell controller revision number
+ */
+u8 sys_env_device_rev_get(void)
+{
+	u32 value;
+
+	value = reg_read(DEV_VERSION_ID_REG);
+	return (value & (REVISON_ID_MASK)) >> REVISON_ID_OFFS;
+}
+
+/*
+ * sys_env_dlb_config_ptr_get
+ *
+ * DESCRIPTION: defines pointer to to DLB COnfiguration table
+ *
+ * INPUT: none
+ *
+ * OUTPUT: pointer to DLB COnfiguration table
+ *
+ * RETURN:
+ *       returns pointer to DLB COnfiguration table
+ */
+struct dlb_config *sys_env_dlb_config_ptr_get(void)
+{
+	return &ddr3_dlb_config_table[0];
+}
+
+/*
+ * sys_env_get_cs_ena_from_reg
+ *
+ * DESCRIPTION: Get bit mask of enabled CS
+ *
+ * INPUT: None
+ *
+ * OUTPUT: None
+ *
+ * RETURN:
+ *       Bit mask of enabled CS, 1 if only CS0 enabled,
+ *       3 if both CS0 and CS1 enabled
+ */
+u32 sys_env_get_cs_ena_from_reg(void)
+{
+	return reg_read(REG_DDR3_RANK_CTRL_ADDR) &
+		REG_DDR3_RANK_CTRL_CS_ENA_MASK;
+}
+
 #endif /* MV_DDR */

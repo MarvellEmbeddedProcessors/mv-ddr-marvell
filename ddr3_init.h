@@ -105,9 +105,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* MV_DDR */
 
 #if defined(CONFIG_ARMADA_38X)
-#include "ddr3_a38x.h"
-#include "ddr3_a38x_mc_static.h"
-#include "ddr3_a38x_topology.h"
+#include "ddr3_a38x_init.h"
 #endif /* CONFIG_ARMADA_38X */
 
 #include "ddr3_hws_hw_training.h"
@@ -160,7 +158,6 @@ extern struct pattern_info pattern_table[];
 extern struct cl_val_per_freq cas_write_latency_table[];
 extern u8 debug_centralization, debug_training_ip, debug_training_bist,
 	debug_pbs, debug_training_static, debug_leveling;
-extern u32 pipe_multicast_mask;
 extern struct hws_tip_config_func_db config_func_info[];
 extern u8 twr_mask_table[];
 extern u8 cl_mask_table[];
@@ -184,7 +181,6 @@ extern u32 g_rtt_nom;
 extern u32 g_rtt_wr;
 
 extern u8 debug_training_access;
-extern u8 debug_training_a38x;
 extern u32 first_active_if;
 extern enum hws_ddr_freq init_freq;
 extern u32 delay_enable, ck_delay, ca_delay;
@@ -244,6 +240,8 @@ extern u32 target_freq;
 extern u32 dfs_low_freq;
 extern u32 mem_size[];
 
+extern struct dlb_config ddr3_dlb_config_table[];
+
 #if defined(CONFIG_DDR4)
 /* if 1, SSTL & POD have same Vref and workaround is required */
 extern u8 vref_calibration_wa;
@@ -253,8 +251,6 @@ extern u32 dmin_phy_reg_table[MAX_BUS_NUM * MAX_CS_NUM][2];
 /* Prototypes */
 int ddr3_tip_enable_init_sequence(u32 dev_num);
 
-int ddr3_tip_init_a38x(u32 dev_num, u32 board_id);
-
 int ddr3_hws_hw_training(void);
 int ddr3_silicon_pre_init(void);
 int ddr3_silicon_post_init(void);
@@ -263,20 +259,12 @@ int ddr3_if_ecc_enabled(void);
 void ddr3_new_tip_ecc_scrub(void);
 
 void ddr3_print_version(void);
-void ddr3_new_tip_dlb_config(void);
 struct hws_topology_map *ddr3_get_topology_map(void);
 
 int ddr3_if_ecc_enabled(void);
 int ddr3_tip_reg_write(u32 dev_num, u32 reg_addr, u32 data);
 int ddr3_tip_reg_read(u32 dev_num, u32 reg_addr, u32 *data, u32 reg_mask);
 int ddr3_silicon_get_ddr_target_freq(u32 *ddr_freq);
-int ddr3_tip_a38x_get_freq_config(u8 dev_num, enum hws_ddr_freq freq,
-				  struct hws_tip_freq_config_info
-				  *freq_config_info);
-int ddr3_a38x_update_topology_map(u32 dev_num,
-				  struct hws_topology_map *topology_map);
-int ddr3_tip_a38x_get_init_freq(int dev_num, enum hws_ddr_freq *freq);
-u8 ddr3_tip_clock_mode(u32 frequency);
 #if defined(CONFIG_DDR4)
 const char* ddr4_sublib_version_get(void);
 int ddr4_tip_configure_phy(u32 dev_num);
@@ -284,16 +272,7 @@ int ddr4_tip_calibration_adjust(u32 dev_num, u8 vref_en, u8 pod_only);
 int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type interface_access,
 			u32 if_id, enum hws_ddr_freq frequency);
 int ddr3_tip_ddr4_ddr4_training_main_flow(u32 dev_num);
-#else
-int ddr3_tip_a38x_get_medium_freq(int dev_num, enum hws_ddr_freq *freq);
 #endif /* CONFIG_DDR4 */
-int ddr3_tip_a38x_if_read(u8 dev_num, enum hws_access_type interface_access,
-			  u32 if_id, u32 reg_addr, u32 *data, u32 mask);
-int ddr3_tip_a38x_if_write(u8 dev_num, enum hws_access_type interface_access,
-			   u32 if_id, u32 reg_addr, u32 data, u32 mask);
-int ddr3_tip_a38x_get_device_info(u8 dev_num,
-				  struct ddr3_device_info *info_ptr);
-
 
 int print_adll(u32 dev_num, u32 adll[MAX_INTERFACE_NUM * MAX_BUS_NUM]);
 int print_ph(u32 dev_num, u32 adll[MAX_INTERFACE_NUM * MAX_BUS_NUM]);
@@ -309,18 +288,13 @@ u32 mv_board_id_get(void);
 int ddr3_load_topology_map(void);
 int ddr3_tip_init_specific_reg_config(u32 dev_num,
 				      struct reg_data *reg_config_arr);
-u32 ddr3_tip_get_init_freq(void);
 void ddr3_hws_set_log_level(enum ddr_lib_debug_block block, u8 level);
 int ddr3_tip_tune_training_params(u32 dev_num,
 				  struct tune_train_params *params);
 void get_target_freq(u32 freq_mode, u32 *ddr_freq, u32 *hclk_ps);
-int ddr3_fast_path_dynamic_cs_size_config(u32 cs_ena);
 void ddr3_fast_path_static_cs_size_config(u32 cs_ena);
-u32 ddr3_get_device_width(u32 cs);
 u32 mv_board_id_index_get(u32 board_id);
-u32 ddr3_get_bus_width(void);
 void ddr3_set_log_level(u32 n_log_level);
-int ddr3_calc_mem_cs_size(u32 cs, u32 *cs_size);
 int calc_cs_num(u32 dev_num, u32 if_id, u32 *cs_num);
 
 int hws_ddr3_cs_base_adr_calc(u32 if_id, u32 cs, u32 *cs_base_addr);
@@ -333,5 +307,6 @@ int ddr3_tip_static_round_trip_arr_build(u32 dev_num,
 					 int is_wl, u32 *round_trip_delay_arr);
 
 u32 hws_ddr3_tip_max_cs_get(void);
+u32 ddr3_tip_get_init_freq(void);
 
 #endif /* _DDR3_INIT_H */

@@ -95,30 +95,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include "ddr3_init.h"
+#ifndef _DDR3_A38X_INIT_H
+#define _DDR3_A38X_INIT_H
 
-/*
- * Name:     ddr3_tip_init_silicon
- * Desc:     initiate silicon parameters
- * Args:
- * Notes:
- * Returns:  required value
- */
-int ddr3_silicon_init(void)
-{
-	int status;
-	static int init_done;
+#include "ddr3_topology_def.h"
+#include "ddr3_training_ip.h"
+#include "ddr3_training_ip_prv_if.h"
 
-	if (init_done == 1)
-		return MV_OK;
+#if defined(MV_DDR)
+#include "sys_env_lib.h"
+#else /* MV_DDR */
+#include "../../../../../arch/arm/mach-mvebu/serdes/a38x/sys_env_lib.h"
+#endif /* MV_DDR */
 
-	status = ddr3_tip_init_a38x(0, 0);
-	if (MV_OK != status) {
-		printf("DDR3 A38x silicon init - FAILED 0x%x\n", status);
-		return status;
-	}
+#include "ddr3_a38x.h"
+#include "ddr3_a38x_mc_static.h"
+#include "ddr3_a38x_topology.h"
 
-	init_done = 1;
+/* A38x revisions */
+#define MV_88F68XX_Z1_ID		0x0
+#define MV_88F68XX_A0_ID		0x4
+/* A39x revisions */
+#define MV_88F69XX_Z1_ID		0x2
 
-	return MV_OK;
-}
+/* device revision */
+#define DEV_ID_REG			0x18238
+#define DEV_VERSION_ID_REG		0x1823c
+#define REVISON_ID_OFFS			8
+#define REVISON_ID_MASK			0xf00
+
+#endif /* _DDR3_A38X_INIT_H */

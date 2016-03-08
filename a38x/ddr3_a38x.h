@@ -213,4 +213,7 @@ enum {
 extern u16 a38x_odt_slope[];
 extern u16 a38x_odt_intercept[];
 
+int mv_ddr_pre_training_soc_config(const char *ddr_type);
+int mv_ddr_post_training_soc_config(const char *ddr_type);
+
 #endif /* _DDR3_A38X_H */

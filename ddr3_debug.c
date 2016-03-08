@@ -118,7 +118,7 @@ u8 debug_training_ip = DEBUG_LEVEL_ERROR;
 u8 debug_training_bist = DEBUG_LEVEL_ERROR;
 u8 debug_training_hw_alg = DEBUG_LEVEL_ERROR;
 u8 debug_training_access = DEBUG_LEVEL_ERROR;
-u8 debug_training_a38x = DEBUG_LEVEL_ERROR;
+u8 debug_training_device = DEBUG_LEVEL_ERROR;
 
 #if defined(CONFIG_DDR4)
 u8 debug_tap_tuning = DEBUG_LEVEL_ERROR;
@@ -148,7 +148,7 @@ void ddr3_hws_set_log_level(enum ddr_lib_debug_block block, u8 level)
 		debug_training_hw_alg = level;
 		break;
 	case DEBUG_BLOCK_DEVICE:
-		debug_training_a38x = level;
+		debug_training_device = level;
 		break;
 	case DEBUG_BLOCK_ACCESS:
 		debug_training_access = level;
@@ -179,7 +179,7 @@ void ddr3_hws_set_log_level(enum ddr_lib_debug_block block, u8 level)
 		debug_pbs = level;
 		debug_training_hw_alg = level;
 		debug_training_access = level;
-		debug_training_a38x = level;
+		debug_training_device = level;
 #if defined(CONFIG_DDR4)
 		debug_tap_tuning = level;
 		debug_calibration = level;

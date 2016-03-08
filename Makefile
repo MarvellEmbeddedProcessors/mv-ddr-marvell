@@ -114,7 +114,12 @@ obj-$(CONFIG_SPL_BUILD) += xor.o
 else # CONFIG_SPL_BUILD
 include ../../base.mk
 
-INCLUDE = -I$(BH_ROOT_DIR)/inc/common -I$(BH_ROOT_DIR)/src_ddr/mv_ddr
+INCLUDE = -I$(BH_ROOT_DIR)/src_ddr/mv_ddr -I$(BH_ROOT_DIR)/inc/common
+
+# A38x
+ifeq "$(CONFIG_ARMADA_38X)"  "y"
+  INCLUDE += -I$(BH_ROOT_DIR)/src_ddr/mv_ddr/a38x
+endif
 
 ifeq ($(DDRTYPE),ddr4)
 	INCLUDE += -I$(BH_ROOT_DIR)/src_ddr/mv_ddr4
@@ -128,6 +133,11 @@ TSRCDDR4 = $(wildcard ../mv_ddr4/*.c)
 
 
 TSRC = $(wildcard ./*.c)
+# A38x
+ifeq "$(CONFIG_ARMADA_38X)"  "y"
+  TSRC += $(wildcard ./a38x/*.c)
+endif
+
 TOBJ = $(TSRC:.c=.o)
 TOBJDDR4 = $(TSRCDDR4:.c=.o)
 
