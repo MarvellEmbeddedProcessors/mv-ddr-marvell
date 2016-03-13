@@ -136,41 +136,57 @@ int ddr3_init(void)
 {
 	int status;
 
-	/* SoC/Board special Initializtions */
-	/* Get version from internal library */
+	/* Print version from internal library */
 	ddr3_print_version();
 
-	/*Add sub_version string */
+	/* Add sub-version string */
 	DEBUG_INIT_C("", SUB_VERSION, 1);
 
+	/* SoC/Board special initializations */
 	mv_ddr_pre_training_soc_config(ddr_type);
 
-	/*
-	 * Stage 0 - Set board configuration
-	 */
-
-	/*
-	 * Stage 1 - Dunit Setup
-	 */
-
-	/* set training algorithm's paramteres */
+	/* Set training algorithm's parameters */
 	status = mv_ddr_training_params_set(0);
 	if (MV_OK != status)
 		return status;
 
-	/* Set log level for training lib */
+	/* Set log level for training library */
 	ddr3_hws_set_log_level(DEBUG_BLOCK_ALL, DEBUG_LEVEL_ERROR);
 
-	/* Start New Training IP */
-	status = ddr3_hws_hw_training();
+	status = ddr3_silicon_pre_init();
+	if (MV_OK != status) {
+		printf("DDR3 Pre silicon Config - FAILED 0x%x\n", status);
+		return status;
+	}
+
+	/* Memory controller initializations */
+	enum hws_algo_type algo_mode = ALGO_TYPE_DYNAMIC;
+	struct init_cntr_param init_param;
+
+	init_param.do_mrs_phy = 1;
+	init_param.is_ctrl64_bit = 0;
+	init_param.init_phy = 1;
+	init_param.msys_init = 1;
+	status = hws_ddr3_tip_init_controller(0, &init_param);
+	if (MV_OK != status) {
+		printf("DDR3 init controller - FAILED 0x%x\n", status);
+		return status;
+	}
+
+	status = ddr3_silicon_post_init();
+	if (MV_OK != status) {
+		printf("DDR3 Post Init - FAILED 0x%x\n", status);
+		return status;
+	}
+
+	/* PHY initialization (Training) */
+	status = ddr3_hws_hw_training(algo_mode);
 	if (MV_OK != status) {
 		printf("%s Training Sequence - FAILED\n", ddr_type);
 		return status;
 	}
 
-	/*
-	 * Stage 3 - Finish
-	 */
+	/* Post MC/PHY initializations */
 	mv_ddr_post_training_soc_config(ddr_type);
 
 #if defined(ECC_SUPPORT)

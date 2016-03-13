@@ -172,42 +172,9 @@ int ddr3_post_algo_config(void)
 	return MV_OK;
 }
 
-int ddr3_hws_hw_training(void)
+int ddr3_hws_hw_training(enum hws_algo_type algo_mode)
 {
-	enum hws_algo_type algo_mode = ALGO_TYPE_DYNAMIC;
 	int status;
-	struct init_cntr_param init_param;
-
-	status = ddr3_silicon_pre_init();
-	if (MV_OK != status) {
-		printf("DDR3 Pre silicon Config - FAILED 0x%x\n", status);
-		return status;
-	}
-
-	init_param.do_mrs_phy = 1;
-#if defined(CONFIG_ARMADA_38X)  || defined(CONFIG_ARMADA_39X)
-	init_param.is_ctrl64_bit = 0;
-#else
-	init_param.is_ctrl64_bit = 1;
-#endif
-#if defined(CONFIG_ALLEYCAT3) || defined(CONFIG_ARMADA_38X) || \
-	defined(CONFIG_ARMADA_39X)
-	init_param.init_phy = 1;
-#else
-	init_param.init_phy = 0;
-#endif
-	init_param.msys_init = 1;
-	status = hws_ddr3_tip_init_controller(0, &init_param);
-	if (MV_OK != status) {
-		printf("DDR3 init controller - FAILED 0x%x\n", status);
-		return status;
-	}
-
-	status = ddr3_silicon_post_init();
-	if (MV_OK != status) {
-		printf("DDR3 Post Init - FAILED 0x%x\n", status);
-		return status;
-	}
 
 	status = ddr3_pre_algo_config();
 	if (MV_OK != status) {
