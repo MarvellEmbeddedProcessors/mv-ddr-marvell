@@ -120,6 +120,9 @@ INCLUDE = -I$(BH_ROOT_DIR)/src_ddr/mv_ddr -I$(BH_ROOT_DIR)/inc/common
 ifeq "$(CONFIG_ARMADA_38X)"  "y"
   INCLUDE += -I$(BH_ROOT_DIR)/src_ddr/mv_ddr/a38x
 endif
+ifeq "$(CONFIG_ARMADA_39X)"  "y"
+  INCLUDE += -I$(BH_ROOT_DIR)/src_ddr/mv_ddr/a38x
+endif
 
 ifeq ($(DDRTYPE),ddr4)
 	INCLUDE += -I$(BH_ROOT_DIR)/src_ddr/mv_ddr4
@@ -135,6 +138,10 @@ TSRCDDR4 = $(wildcard ../mv_ddr4/*.c)
 TSRC = $(wildcard ./*.c)
 # A38x
 ifeq "$(CONFIG_ARMADA_38X)"  "y"
+  TSRC += $(wildcard ./a38x/*.c)
+endif
+# A39x
+ifeq "$(CONFIG_ARMADA_39X)"  "y"
   TSRC += $(wildcard ./a38x/*.c)
 endif
 
