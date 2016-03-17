@@ -104,7 +104,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr_ml_wrapper.h"
 #endif /* MV_DDR */
 
-#if defined(CONFIG_ARMADA_38X)
+#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
 #include "ddr3_a38x_init.h"
 #endif /* CONFIG_ARMADA_38X */
 
