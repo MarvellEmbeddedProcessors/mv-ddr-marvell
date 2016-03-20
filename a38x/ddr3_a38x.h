@@ -208,6 +208,12 @@ enum {
 	LAST_FREQ
 };
 
+/* struct used for DLB configuration array */
+struct dlb_config {
+	u32 reg_addr;
+	u32 reg_data;
+};
+
 #define ACTIVE_INTERFACE_MASK			0x1
 
 extern u16 a38x_odt_slope[];
