@@ -1164,12 +1164,76 @@ int ddr3_tip_validate_algo_components(u8 dev_num)
 	return (status == 1) ? MV_OK : MV_NOT_INITIALIZED;
 }
 
+
+int ddr3_pre_algo_config(void)
+{
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+
+	/* Set Bus3 ECC training mode */
+	if (DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask)) {
+		/* Set Bus3 ECC MUX */
+		CHECK_STATUS(ddr3_tip_if_write
+			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
+			      REG_SDRAM_PINS_MUX, 0x100, 0x100));
+	}
+
+	/* Set regular ECC training mode (bus4 and bus 3) */
+	if ((DDR3_IS_ECC_PUP4_MODE(tm->bus_act_mask)) ||
+	    (DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask))) {
+		/* Enable ECC Write MUX */
+		CHECK_STATUS(ddr3_tip_if_write
+			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
+			      TRAINING_SW_2_REG, 0x100, 0x100));
+		/* General ECC enable */
+		CHECK_STATUS(ddr3_tip_if_write
+			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
+			      REG_SDRAM_CONFIG_ADDR, 0x40000, 0x40000));
+		/* Disable Read Data ECC MUX */
+		CHECK_STATUS(ddr3_tip_if_write
+			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
+			      TRAINING_SW_2_REG, 0x0, 0x2));
+	}
+
+	return MV_OK;
+}
+
+int ddr3_post_algo_config(void)
+{
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+	int status;
+
+	status = ddr3_post_run_alg();
+	if (MV_OK != status) {
+		printf("DDR3 Post Run Alg - FAILED 0x%x\n", status);
+		return status;
+	}
+
+	/* Un_set ECC training mode */
+	if ((DDR3_IS_ECC_PUP4_MODE(tm->bus_act_mask)) ||
+	    (DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask))) {
+		/* Disable ECC Write MUX */
+		CHECK_STATUS(ddr3_tip_if_write
+			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
+			      TRAINING_SW_2_REG, 0x0, 0x100));
+		/* General ECC and Bus3 ECC MUX remains enabled */
+	}
+
+	return MV_OK;
+}
+
 /*
  * Run Training Flow
  */
 int hws_ddr3_tip_run_alg(u32 dev_num, enum hws_algo_type algo_type)
 {
 	int ret = MV_OK;
+	int status;
+
+	status = ddr3_pre_algo_config();
+	if (MV_OK != status) {
+		printf("DDR3 Pre Algo Config - FAILED 0x%x\n", status);
+		return status;
+	}
 
 #ifdef ODT_TEST_SUPPORT
 	if (finger_test == 1)
@@ -1205,6 +1269,12 @@ int hws_ddr3_tip_run_alg(u32 dev_num, enum hws_algo_type algo_type)
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
 				  ("********   DRAM initialization Failed (res 0x%x)   ********\n",
 				   ret));
+	}
+
+	status = ddr3_post_algo_config();
+	if (MV_OK != status) {
+		printf("DDR3 Post Algo Config - FAILED 0x%x\n", status);
+		return status;
 	}
 
 	return ret;

@@ -109,7 +109,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* CONFIG_ARMADA_38X */
 
 #include "ddr3_hws_hw_training.h"
-#include "ddr3_hws_sil_training.h"
 #include "ddr3_logging_def.h"
 #include "ddr3_training_hw_algo.h"
 #include "ddr3_training_ip.h"

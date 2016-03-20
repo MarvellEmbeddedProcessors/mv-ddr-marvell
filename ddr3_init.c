@@ -180,7 +180,7 @@ int ddr3_init(void)
 	}
 
 	/* PHY initialization (Training) */
-	status = ddr3_hws_hw_training(algo_mode);
+	status = hws_ddr3_tip_run_alg(0, algo_mode);
 	if (MV_OK != status) {
 		printf("%s Training Sequence - FAILED\n", ddr_type);
 		return status;
@@ -197,6 +197,17 @@ int ddr3_init(void)
 	printf("%s Training Sequence - Ended Successfully\n", ddr_type);
 
 	return MV_OK;
+}
+
+int ddr3_if_ecc_enabled(void)
+{
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+
+	if (DDR3_IS_ECC_PUP4_MODE(tm->bus_act_mask) ||
+	    DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask))
+		return 1;
+	else
+		return 0;
 }
 
 /*

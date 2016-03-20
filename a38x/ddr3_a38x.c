@@ -1030,6 +1030,32 @@ int ddr3_tip_ext_write(u32 dev_num, u32 if_id, u32 reg_addr,
 	return MV_OK;
 }
 
+/*
+ * Name:     ddr3_tip_init_silicon
+ * Desc:     initiate silicon parameters
+ * Args:
+ * Notes:
+ * Returns:  required value
+ */
+int ddr3_silicon_init(void)
+{
+	int status;
+	static int init_done;
+
+	if (init_done == 1)
+		return MV_OK;
+
+	status = ddr3_tip_init_a38x(0, 0);
+	if (MV_OK != status) {
+		printf("DDR3 A38x silicon init - FAILED 0x%x\n", status);
+		return status;
+	}
+
+	init_done = 1;
+
+	return MV_OK;
+}
+
 int ddr3_silicon_pre_init(void)
 {
 	int result;
@@ -1535,32 +1561,6 @@ int mv_ddr_post_training_soc_config(const char *ddr_type)
 
 	/* DLB config */
 	ddr3_new_tip_dlb_config();
-
-	return MV_OK;
-}
-
-/*
- * Name:     ddr3_tip_init_silicon
- * Desc:     initiate silicon parameters
- * Args:
- * Notes:
- * Returns:  required value
- */
-int ddr3_silicon_init(void)
-{
-	int status;
-	static int init_done;
-
-	if (init_done == 1)
-		return MV_OK;
-
-	status = ddr3_tip_init_a38x(0, 0);
-	if (MV_OK != status) {
-		printf("DDR3 A38x silicon init - FAILED 0x%x\n", status);
-		return status;
-	}
-
-	init_done = 1;
 
 	return MV_OK;
 }
