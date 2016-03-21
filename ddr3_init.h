@@ -141,6 +141,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define SUB_VERSION	0
 
+/* max number of devices supported by driver */
+#define MAX_DEVICE_NUM	1
+
 enum log_level  {
 	MV_LOG_LEVEL_0,
 	MV_LOG_LEVEL_1,
