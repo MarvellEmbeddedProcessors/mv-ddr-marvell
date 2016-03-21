@@ -208,11 +208,10 @@ extern u32 phy_reg2_val;
 extern u32 phy_reg3_val;
 extern enum hws_pattern sweep_pattern;
 extern enum hws_pattern pbs_pattern;
-extern u8 is_rzq6;
-extern u32 znri_data_phy_val;
-extern u32 zpri_data_phy_val;
-extern u32 znri_ctrl_phy_val;
-extern u32 zpri_ctrl_phy_val;
+extern u32 g_znri_data;
+extern u32 g_zpri_data;
+extern u32 g_znri_ctrl;
+extern u32 g_zpri_ctrl;
 extern u32 finger_test, p_finger_start, p_finger_end, n_finger_start,
 	n_finger_end, p_finger_step, n_finger_step;
 extern u32 mode_2t;

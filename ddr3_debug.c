@@ -293,7 +293,11 @@ int hws_ddr3_tip_read_training_result(
 
 	if (result == NULL)
 		return MV_BAD_PARAM;
-	memcpy(result, training_result, sizeof(result));
+
+	memcpy(result, training_result,
+	       sizeof(enum hws_result) *
+	       MAX_STAGE_LIMIT *
+	       MAX_INTERFACE_NUM);
 
 	return MV_OK;
 }
@@ -1243,16 +1247,12 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		sweep_pattern = (enum hws_pattern)value;
 		break;
 
-	case 0x50:
-		*ptr = (u32 *)&is_rzq6;
-		break;
-
 	case 0x51:
-		*ptr = (u32 *)&znri_data_phy_val;
+		*ptr = (u32 *)&g_znri_data;
 		break;
 
 	case 0x52:
-		*ptr = (u32 *)&zpri_data_phy_val;
+		*ptr = (u32 *)&g_zpri_data;
 		break;
 
 	case 0x53:
@@ -1284,11 +1284,11 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		break;
 
 	case 0x5a:
-		*ptr = (u32 *)&znri_ctrl_phy_val;
+		*ptr = (u32 *)&g_znri_ctrl;
 		break;
 
 	case 0x5b:
-		*ptr = (u32 *)&zpri_ctrl_phy_val;
+		*ptr = (u32 *)&g_zpri_ctrl;
 		break;
 
 	case 0x5c:
