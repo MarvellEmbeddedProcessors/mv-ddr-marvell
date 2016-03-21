@@ -95,8 +95,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#ifndef _DDR3_A38X_INIT_H
-#define _DDR3_A38X_INIT_H
+#ifndef _MV_DDR_A38X_INIT_H
+#define _MV_DDR_A38X_INIT_H
 
 #include "ddr3_topology_def.h"
 #include "ddr3_training_ip.h"
@@ -126,4 +126,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define REVISON_ID_OFFS			8
 #define REVISON_ID_MASK			0xf00
 
-#endif /* _DDR3_A38X_INIT_H */
+#endif /* _MV_DDR_A38X_INIT_H */
