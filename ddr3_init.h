@@ -98,17 +98,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _DDR3_INIT_H
 #define _DDR3_INIT_H
 
-#if defined(MV_DDR)
+#if defined(MV_DDR) /* U-BOOT MARVELL 2013.01 */
 #include "ddr_mv_wrapper.h"
-#else /* MV_DDR */
+#elif defined(MV_DDR_ATF) /* MARVELL ATF */
+#include "mv_ddr_atf_wrapper.h"
+#else /* U-BOOT SPL */
 #include "ddr_ml_wrapper.h"
-#endif /* MV_DDR */
+#endif
 
 #if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
 #include "ddr3_a38x_init.h"
-#endif /* CONFIG_ARMADA_38X */
+#endif
 
-#include "ddr3_hws_hw_training.h"
+#include "seq_exec.h"
 #include "ddr3_logging_def.h"
 #include "ddr3_training_hw_algo.h"
 #include "ddr3_training_ip.h"
@@ -250,6 +252,7 @@ extern u32 dmin_phy_reg_table[MAX_BUS_NUM * MAX_CS_NUM][2];
 #endif /* CONFIG_DDR4 */
 
 /* Prototypes */
+int ddr3_init(void);
 int ddr3_tip_enable_init_sequence(u32 dev_num);
 
 int ddr3_hws_hw_training(enum hws_algo_type algo_mode);

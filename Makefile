@@ -95,6 +95,9 @@
 #
 #*******************************************************************************
 
+# ******************
+# U-BOOT SPL SUPPORT
+# ******************
 ifdef CONFIG_SPL_BUILD
 obj-$(CONFIG_SPL_BUILD) += ddr3_a38x.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_a38x_training.o
@@ -111,7 +114,11 @@ obj-$(CONFIG_SPL_BUILD) += ddr3_training_leveling.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_training_pbs.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_training_static.o
 obj-$(CONFIG_SPL_BUILD) += xor.o
-else # CONFIG_SPL_BUILD
+
+# ******************************
+# U-BOOT MARVELL 2013.01 SUPPORT
+# ******************************
+else ifeq ($(DDR3LIB), 3)
 include ../../base.mk
 
 INCLUDE = -I$(BH_ROOT_DIR)/src_ddr/mv_ddr -I$(BH_ROOT_DIR)/inc/common
@@ -172,4 +179,77 @@ $(TLIB): $(TOBJ)
 
 clean:
 	$(RM) ./*.o  ./*.a
-endif # CONFIG_SPL_BUILD
+
+# *******************
+# MARVELL ATF SUPPORT
+# *******************
+else # ifeq ($(DDR3LIB), 3)
+CROSS    = $(CROSS_COMPILE)
+
+LD       = $(CROSS)ld
+CC       = $(CROSS)gcc
+AS       = $(CROSS)gcc
+AR       = $(CROSS)ar
+OBJCOPY  = $(CROSS)objcopy
+OBJDUMP  = $(CROSS)objdump
+
+RM       = @rm -rf
+MKDIR    = @mkdir -p
+CD       = @cd
+MV       = @mv
+CAT      = @cat
+PWD      = @pwd
+ECHO     = @echo
+
+
+OBJ_DIR  ?= . # set to $(CUR_DIR)/$(BUILD_PLAT)/ble in ble/ble.mk
+SRCDIRS  = . ./a38x # TODO: temporary; to be changed to ap806
+INCPATH  = $(SRCDIRS) ./include
+INCLUDE	  = $(addprefix -I, $(INCPATH))
+LIB = $(OBJ_DIR)/dramlib.a
+
+CFLAGS   = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2
+CFLAGS   += -march=armv8-a -fpie $(INCLUDE) -D$(PLATFORM)
+
+CFLAGS += -DMV_DDR_ATF -DCONFIG_ARMADA_38X # TODO: temporary; to be changed ap806
+
+LDFLAGS  = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
+
+CSRC = $(foreach DIR, $(SRCDIRS), $(wildcard $(DIR)/*.c))
+ASRC = $(foreach DIR, $(SRCDIRS), $(wildcard $(DIR)/*.S))
+
+COBJ  = $(patsubst %.c,$(OBJ_DIR)/%.o,$(CSRC))
+COBJ += $(patsubst %.S,$(OBJ_DIR)/%.o,$(ASRC))
+
+.SILENT:
+
+all: check_env header create_dir $(LIB)
+
+$(OBJ_DIR)/%.o: %.c
+	$(ECHO) "  CC    $<"
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+$(OBJ_DIR)/%.o: %.S
+	$(ECHO) "  AS    $<"
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+$(LIB): $(OBJ_DIR) $(COBJ)
+	$(AR) r $(LIB) $(COBJ)
+
+create_dir:
+	$(MKDIR) $(OBJ_DIR)/a38x # TODO: temporary; to be changed ap806
+
+header:
+	$(ECHO) "\n  Building DRAM driver"
+	$(ECHO) "\n  COBJ = $(COBJ)"
+
+check_env:
+ifndef PLATFORM
+	$(error PLATFORM is undefined. please set PLATFORM variable)
+endif
+
+clean:
+	$(ECHO) "  CLEAN"
+	@$(RM) $(COBJ) $(LIB)
+
+endif # ifeq ($(DDR3LIB), 3)

@@ -102,11 +102,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_training_ip.h"
 #include "ddr3_training_ip_prv_if.h"
 
-#if defined(MV_DDR)
+/* MARVELL U-BOOT 20013.01 & ATF SUPPORT */
+#if defined(MV_DDR) || defined(MV_DDR_ATF)
 #include "sys_env_lib.h"
-#else /* MV_DDR */
+/* U-BOOT SPL SUPPORT */
+#else
 #include "../../../../../arch/arm/mach-mvebu/serdes/a38x/sys_env_lib.h"
-#endif /* MV_DDR */
+#endif
 
 #include "ddr3_a38x.h"
 #include "ddr3_a38x_mc_static.h"

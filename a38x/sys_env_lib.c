@@ -95,12 +95,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#if defined(MV_DDR)
-#include "ddr_mv_wrapper.h"
-#include "ddr3_a38x.h"
-
-#include "seq_exec.h"
-#include "sys_env_lib.h"
+#include "ddr3_init.h"
 
 #ifdef CONFIG_ARMADA_38X
 enum unit_id sys_env_soc_unit_nums[MAX_UNITS_ID][MAX_DEV_ID_NUM] = {
@@ -382,5 +377,3 @@ u32 sys_env_get_cs_ena_from_reg(void)
 	return reg_read(REG_DDR3_RANK_CTRL_ADDR) &
 		REG_DDR3_RANK_CTRL_CS_ENA_MASK;
 }
-
-#endif /* MV_DDR */

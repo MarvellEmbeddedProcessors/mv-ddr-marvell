@@ -95,9 +95,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include "ddr_mv_wrapper.h"
-
-#include "ddr3_a38x_topology.h"
+#include "ddr3_init.h"
 
 /*
  * Define the DDR layout / topology here in the board file. This will

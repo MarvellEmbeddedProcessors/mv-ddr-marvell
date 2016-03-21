@@ -97,8 +97,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 
-int ddr3_init(void);
-
+/* U-BOOT MARVELL 2013.01 SUPPORT */
+#if defined(MV_DDR)
 /* __udelay() implemented in tools/marvell/bin_hdr/platform/drivers/mv_time.c */
 void mdelay(unsigned long msec)
 {
@@ -112,3 +112,26 @@ MV_U32 ddr_init(void)
 
 	return MV_OK;
 }
+/* MARVELL ATF SUPPORT */
+#elif defined(MV_DDR_ATF)
+#include "dram_if.h"
+
+void mdelay(unsigned long msec)
+{
+	unsigned long cnt;
+
+	if (msec > 999)
+		cnt = 1000000000; /* 1,000,000,000 */
+	else
+		cnt *= 1000000; /* cnt * 1,000,000 */
+
+	while (msec--)
+		;
+}
+
+int dram_init(struct dram_config *cfg)
+{
+	ddr3_init();
+	return 0;
+}
+#endif
