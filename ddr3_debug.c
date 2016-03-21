@@ -1704,7 +1704,7 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 	int reg = (direction == 0) ? WL_PHY_REG : RL_PHY_REG;
 	enum hws_access_type pup_access;
 	u32 cs;
-	u32 max_cs = hws_ddr3_tip_max_cs_get(dev_num);
+	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 

@@ -312,7 +312,6 @@ int ddr3_tip_static_round_trip_arr_build(u32 dev_num,
 					 struct trip_delay_element *table_ptr,
 					 int is_wl, u32 *round_trip_delay_arr);
 
-u32 hws_ddr3_tip_max_cs_get(void);
 u32 ddr3_tip_get_init_freq(void);
 
 #endif /* _DDR3_INIT_H */
