@@ -102,7 +102,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_topology_def.h"
 
 #if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
-#include "ddr3_a38x.h"
+#include "mv_ddr_a38x.h"
 #endif
 
 /* bus width in bits */

@@ -110,9 +110,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../../../../arch/arm/mach-mvebu/serdes/a38x/sys_env_lib.h"
 #endif
 
-#include "ddr3_a38x.h"
-#include "ddr3_a38x_mc_static.h"
-#include "ddr3_a38x_topology.h"
+#include "mv_ddr_a38x.h"
+#include "mv_ddr_a38x_mc_static.h"
+#include "mv_ddr_a38x_topology.h"
 
 /* A38x revisions */
 #define MV_88F68XX_Z1_ID		0x0

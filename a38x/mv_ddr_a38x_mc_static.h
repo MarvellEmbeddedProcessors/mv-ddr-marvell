@@ -95,10 +95,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#ifndef _DDR3_A38X_MC_STATIC_H
-#define _DDR3_A38X_MC_STATIC_H
+#ifndef _MV_DDR_A38X_MC_STATIC_H
+#define _MV_DDR_A38X_MC_STATIC_H
 
-#include "ddr3_a38x.h"
+#include "mv_ddr_a38x.h"
 
 #ifdef SUPPORT_STATIC_DUNIT_CONFIG
 
@@ -314,4 +314,4 @@ static struct reg_data ddr3_a38x_533[] = {
 
 #endif /* SUPPORT_STATIC_DUNIT_CONFIG */
 
-#endif /* _DDR3_A38X_MC_STATIC_H */
+#endif /* _MV_DDR_A38X_MC_STATIC_H */
