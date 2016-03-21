@@ -95,117 +95,43 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#ifndef _DDR_TOPOLOGY_DEF_H
-#define _DDR_TOPOLOGY_DEF_H
+#include "ddr3_init.h"
 
-#include "ddr3_training_ip_def.h"
-#include "ddr3_topology_def.h"
+/*
+ * Define the DDR layout / topology here in the board file. This will
+ * be used by the DDR3 init code in the SPL U-Boot version to configure
+ * the DDR3 controller.
+ */
 
-#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
-#include "mv_ddr_a38x.h"
-#elif defined(CONFIG_APN806)
-#include "mv_ddr_apn806.h"
-#endif
+#if defined(CONFIG_DDR4)
+#define SPEED_BIN_DDR_DB_68XX	SPEED_BIN_DDR_2400R
+#define BUS_WIDTH_DB_68XX	BUS_WIDTH_16
+#else /* CONFIG_DDR4 */
+#define SPEED_BIN_DDR_DB_68XX	SPEED_BIN_DDR_1866L
+#define BUS_WIDTH_DB_68XX	BUS_WIDTH_8
+#endif /* CONFIG_DDR4 */
 
-/* bus width in bits */
-enum hws_bus_width {
-	BUS_WIDTH_4,
-	BUS_WIDTH_8,
-	BUS_WIDTH_16,
-	BUS_WIDTH_32
+/* Marvell board - Board_ID = DB_68XX_ID = 1 (DDR3/4)*/
+static struct hws_topology_map board_topology_map = {
+	0x1, /* active interfaces */
+	/* cs_mask, mirror, dqs_swap, ck_swap X PUPs */
+	{ { { {0x3, 0x2, 0, 0},
+	      {0x3, 0x2, 0, 0},
+	      {0x3, 0x2, 0, 0},
+	      {0x3, 0x2, 0, 0},
+	      {0x3, 0x2, 0, 0} },
+	    SPEED_BIN_DDR_DB_68XX,	/* speed_bin */
+	    BUS_WIDTH_DB_68XX,		/* memory_width */
+	    MEM_4G,			/* mem_size */
+	    DDR_FREQ_800,		/* frequency */
+	    0, 0,			/* cas_l, cas_wl */
+	    HWS_TEMP_LOW} },		/* temperature */
+	BUS_MASK_32BIT			/* Buses mask */
 };
 
-enum hws_temperature {
-	HWS_TEMP_LOW,
-	HWS_TEMP_NORMAL,
-	HWS_TEMP_HIGH
-};
+struct hws_topology_map *ddr3_get_topology_map(void)
+{
+	/* Return the board topology as defined in the board code */
+	return &board_topology_map;
+}
 
-enum hws_mem_size {
-	MEM_512M,
-	MEM_1G,
-	MEM_2G,
-	MEM_4G,
-	MEM_8G,
-	MEM_SIZE_LAST
-};
-
-struct bus_params {
-	/* Chip Select (CS) bitmask (bits 0-CS0, bit 1- CS1 ...) */
-	u8 cs_bitmask;
-
-	/*
-	 * mirror enable/disable
-	 * (bits 0-CS0 mirroring, bit 1- CS1 mirroring ...)
-	 */
-	int mirror_enable_bitmask;
-
-	/* DQS Swap (polarity) - true if enable */
-	int is_dqs_swap;
-
-	/* CK swap (polarity) - true if enable */
-	int is_ck_swap;
-};
-
-struct if_params {
-	/* bus configuration */
-	struct bus_params as_bus_params[MAX_BUS_NUM];
-
-	/* Speed Bin Table */
-	enum hws_speed_bin speed_bin_index;
-
-	/* bus width of memory */
-	enum hws_bus_width bus_width;
-
-	/* Bus memory size (MBit) */
-	enum hws_mem_size memory_size;
-
-	/* The DDR frequency for each interfaces */
-	enum hws_ddr_freq memory_freq;
-
-	/*
-	 * delay CAS Write Latency
-	 * - 0 for using default value (jedec suggested)
-	 */
-	u8 cas_wl;
-
-	/*
-	 * delay CAS Latency
-	 * - 0 for using default value (jedec suggested)
-	 */
-	u8 cas_l;
-
-	/* operation temperature */
-	enum hws_temperature interface_temp;
-};
-
-struct hws_topology_map {
-	/* Number of interfaces (default is 12) */
-	u8 if_act_mask;
-
-	/* Controller configuration per interface */
-	struct if_params interface_params[MAX_INTERFACE_NUM];
-
-	/* Bit mask for active buses */
-	u8 bus_act_mask;
-};
-
-/* DDR3 training global configuration parameters */
-struct tune_train_params {
-	u32 ck_delay;
-	u32 phy_reg3_val;
-	u32 g_zpri_data;
-	u32 g_znri_data;
-	u32 g_zpri_ctrl;
-	u32 g_znri_ctrl;
-	u32 g_zpodt_data;
-	u32 g_znodt_data;
-	u32 g_zpodt_ctrl;
-	u32 g_znodt_ctrl;
-	u32 g_dic;
-	u32 g_odt_config;
-	u32 g_rtt_nom;
-	u32 g_rtt_wr;
-};
-
-#endif /* _DDR_TOPOLOGY_DEF_H */

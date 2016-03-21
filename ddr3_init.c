@@ -123,7 +123,9 @@ static char *ddr_type = "DDR3";
  */
 u8 generic_init_controller = 1;
 
+#if !defined(CONFIG_APN806)
 static int mv_ddr_training_params_set(u8 dev_num);
+#endif
 
 /*
  * Name:     ddr3_init - Main DDR3 Init function
@@ -145,10 +147,12 @@ int ddr3_init(void)
 	/* SoC/Board special initializations */
 	mv_ddr_pre_training_soc_config(ddr_type);
 
+#if !defined(CONFIG_APN806)
 	/* Set training algorithm's parameters */
 	status = mv_ddr_training_params_set(0);
 	if (MV_OK != status)
 		return status;
+#endif
 
 	/* Set log level for training library */
 	ddr3_hws_set_log_level(DEBUG_BLOCK_ALL, DEBUG_LEVEL_ERROR);
@@ -159,6 +163,7 @@ int ddr3_init(void)
 		return status;
 	}
 
+#if !defined(CONFIG_APN806)
 	/* Memory controller initializations */
 	enum hws_algo_type algo_mode = ALGO_TYPE_DYNAMIC;
 	struct init_cntr_param init_param;
@@ -172,6 +177,7 @@ int ddr3_init(void)
 		printf("DDR3 init controller - FAILED 0x%x\n", status);
 		return status;
 	}
+#endif
 
 	status = ddr3_silicon_post_init();
 	if (MV_OK != status) {
@@ -179,12 +185,14 @@ int ddr3_init(void)
 		return status;
 	}
 
+#if !defined(CONFIG_APN806)
 	/* PHY initialization (Training) */
 	status = hws_ddr3_tip_run_alg(0, algo_mode);
 	if (MV_OK != status) {
 		printf("%s Training Sequence - FAILED\n", ddr_type);
 		return status;
 	}
+#endif
 
 	/* Post MC/PHY initializations */
 	mv_ddr_post_training_soc_config(ddr_type);
@@ -210,6 +218,7 @@ int ddr3_if_ecc_enabled(void)
 		return 0;
 }
 
+#if !defined(CONFIG_APN806)
 /*
  * Name:	mv_ddr_training_params_set
  * Desc:
@@ -269,3 +278,4 @@ static int mv_ddr_training_params_set(u8 dev_num)
 
 	return MV_OK;
 }
+#endif

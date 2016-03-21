@@ -203,7 +203,7 @@ ECHO     = @echo
 
 
 OBJ_DIR  ?= . # set to $(CUR_DIR)/$(BUILD_PLAT)/ble in ble/ble.mk
-SRCDIRS  = . ./a38x # TODO: temporary; to be changed to ap806
+SRCDIRS  = . ./apn806
 INCPATH  = $(SRCDIRS) ./include
 INCLUDE	  = $(addprefix -I, $(INCPATH))
 LIB = $(OBJ_DIR)/dramlib.a
@@ -211,7 +211,7 @@ LIB = $(OBJ_DIR)/dramlib.a
 CFLAGS   = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2
 CFLAGS   += -march=armv8-a -fpie $(INCLUDE) -D$(PLATFORM)
 
-CFLAGS += -DMV_DDR_ATF -DCONFIG_ARMADA_38X # TODO: temporary; to be changed ap806
+CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806
 
 LDFLAGS  = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
@@ -237,7 +237,7 @@ $(LIB): $(OBJ_DIR) $(COBJ)
 	$(AR) r $(LIB) $(COBJ)
 
 create_dir:
-	$(MKDIR) $(OBJ_DIR)/a38x # TODO: temporary; to be changed ap806
+	$(MKDIR) $(OBJ_DIR)/apn806
 
 header:
 	$(ECHO) "\n  Building DRAM driver"

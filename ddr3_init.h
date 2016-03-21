@@ -108,6 +108,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
 #include "mv_ddr_a38x_init.h"
+#elif defined(CONFIG_APN806)
+#include "mv_ddr_apn806_init.h"
 #endif
 
 #include "seq_exec.h"

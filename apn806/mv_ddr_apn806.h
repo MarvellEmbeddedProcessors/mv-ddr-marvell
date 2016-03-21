@@ -95,117 +95,91 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#ifndef _DDR_TOPOLOGY_DEF_H
-#define _DDR_TOPOLOGY_DEF_H
+#ifndef _MV_DDR_AP806_H
+#define _MV_DDR_AP806_H
 
-#include "ddr3_training_ip_def.h"
-#include "ddr3_topology_def.h"
+#define MAX_INTERFACE_NUM		1
+#define MAX_BUS_NUM			5
+#define DDR_IF_CTRL_SUBPHYS_NUM		3
 
-#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
-#include "mv_ddr_a38x.h"
-#elif defined(CONFIG_APN806)
-#include "mv_ddr_apn806.h"
-#endif
+#define DFS_LOW_FREQ_VALUE		120
 
-/* bus width in bits */
-enum hws_bus_width {
-	BUS_WIDTH_4,
-	BUS_WIDTH_8,
-	BUS_WIDTH_16,
-	BUS_WIDTH_32
+/* right now, we're not supporting this in mainline */
+#undef SUPPORT_STATIC_DUNIT_CONFIG
+
+/* Controler bus divider 1 for 32 bit, 2 for 64 bit */
+#define DDR_CONTROLLER_BUS_WIDTH_MULTIPLIER	1
+
+/* Tune internal training params values */
+#define TUNE_TRAINING_PARAMS_CK_DELAY		160
+#define TUNE_TRAINING_PARAMS_PHYREG3VAL		0xA
+#define TUNE_TRAINING_PARAMS_PRI_DATA		123
+#define TUNE_TRAINING_PARAMS_NRI_DATA		123
+#define TUNE_TRAINING_PARAMS_PRI_CTRL		74
+#define TUNE_TRAINING_PARAMS_NRI_CTRL		74
+#define TUNE_TRAINING_PARAMS_P_ODT_DATA		45
+#define TUNE_TRAINING_PARAMS_N_ODT_DATA		45
+#define TUNE_TRAINING_PARAMS_P_ODT_CTRL		45
+#define TUNE_TRAINING_PARAMS_N_ODT_CTRL		45
+#define TUNE_TRAINING_PARAMS_DIC		0x2
+#define TUNE_TRAINING_PARAMS_ODT_CONFIG_2CS	0x120012
+#define TUNE_TRAINING_PARAMS_ODT_CONFIG_1CS	0x10000
+#define TUNE_TRAINING_PARAMS_RTT_NOM		0x44
+#define TUNE_TRAINING_PARAMS_RTT_WR_1CS		0x0
+#define TUNE_TRAINING_PARAMS_RTT_WR_2CS		0x0
+
+#if defined(CONFIG_DDR4)
+#define TUNE_TRAINING_PARAMS_P_ODT_DATA_DDR4	0xD
+#define TUNE_TRAINING_PARAMS_DIC_DDR4		0x0
+#define TUNE_TRAINING_PARAMS_ODT_CONFIG_DDR4	0x330012
+#define TUNE_TRAINING_PARAMS_RTT_NOM_DDR4	0x400 /*RZQ/3 = 0x600*/
+#define TUNE_TRAINING_PARAMS_RTT_WR		0x200 /*RZQ/1 = 0x400*/
+#else /* CONFIG_DDR4 */
+#define TUNE_TRAINING_PARAMS_RTT_WR		0x0   /*off*/
+#endif /* CONFIG_DDR4 */
+
+#define MARVELL_BOARD				MARVELL_BOARD_ID_BASE
+
+/* Matrix enables DRAM modes (bus width/ECC) per boardId */
+#define TOPOLOGY_UPDATE_32BIT			0
+#define TOPOLOGY_UPDATE_32BIT_ECC		1
+#define TOPOLOGY_UPDATE_16BIT			2
+#define TOPOLOGY_UPDATE_16BIT_ECC		3
+#define TOPOLOGY_UPDATE_16BIT_ECC_PUP3		4
+#define TOPOLOGY_UPDATE { \
+		/* 32Bit, 32bit ECC, 16bit, 16bit ECC PUP4, 16bit ECC PUP3 */ \
+		{1, 1, 1, 1, 1},	/* RD_NAS_68XX_ID */ \
+		{1, 1, 1, 1, 1},	/* DB_68XX_ID	  */ \
+		{1, 0, 1, 0, 1},	/* RD_AP_68XX_ID  */ \
+		{1, 0, 1, 0, 1},	/* DB_AP_68XX_ID  */ \
+		{1, 0, 1, 0, 1},	/* DB_GP_68XX_ID  */ \
+		{0, 0, 1, 1, 0},	/* DB_BP_6821_ID  */ \
+		{1, 1, 1, 1, 1}		/* DB_AMC_6820_ID */ \
+	};
+
+enum {
+	CPU_1066MHZ_DDR_400MHZ,
+	CPU_RESERVED_DDR_RESERVED0,
+	CPU_667MHZ_DDR_667MHZ,
+	CPU_800MHZ_DDR_800MHZ,
+	CPU_RESERVED_DDR_RESERVED1,
+	CPU_RESERVED_DDR_RESERVED2,
+	CPU_RESERVED_DDR_RESERVED3,
+	LAST_FREQ
 };
 
-enum hws_temperature {
-	HWS_TEMP_LOW,
-	HWS_TEMP_NORMAL,
-	HWS_TEMP_HIGH
+/* struct used for DLB configuration array */
+struct dlb_config {
+	u32 reg_addr;
+	u32 reg_data;
 };
 
-enum hws_mem_size {
-	MEM_512M,
-	MEM_1G,
-	MEM_2G,
-	MEM_4G,
-	MEM_8G,
-	MEM_SIZE_LAST
-};
+#define ACTIVE_INTERFACE_MASK			0x1
 
-struct bus_params {
-	/* Chip Select (CS) bitmask (bits 0-CS0, bit 1- CS1 ...) */
-	u8 cs_bitmask;
+extern u16 apn806_odt_slope[];
+extern u16 apn806_odt_intercept[];
 
-	/*
-	 * mirror enable/disable
-	 * (bits 0-CS0 mirroring, bit 1- CS1 mirroring ...)
-	 */
-	int mirror_enable_bitmask;
+int mv_ddr_pre_training_soc_config(const char *ddr_type);
+int mv_ddr_post_training_soc_config(const char *ddr_type);
 
-	/* DQS Swap (polarity) - true if enable */
-	int is_dqs_swap;
-
-	/* CK swap (polarity) - true if enable */
-	int is_ck_swap;
-};
-
-struct if_params {
-	/* bus configuration */
-	struct bus_params as_bus_params[MAX_BUS_NUM];
-
-	/* Speed Bin Table */
-	enum hws_speed_bin speed_bin_index;
-
-	/* bus width of memory */
-	enum hws_bus_width bus_width;
-
-	/* Bus memory size (MBit) */
-	enum hws_mem_size memory_size;
-
-	/* The DDR frequency for each interfaces */
-	enum hws_ddr_freq memory_freq;
-
-	/*
-	 * delay CAS Write Latency
-	 * - 0 for using default value (jedec suggested)
-	 */
-	u8 cas_wl;
-
-	/*
-	 * delay CAS Latency
-	 * - 0 for using default value (jedec suggested)
-	 */
-	u8 cas_l;
-
-	/* operation temperature */
-	enum hws_temperature interface_temp;
-};
-
-struct hws_topology_map {
-	/* Number of interfaces (default is 12) */
-	u8 if_act_mask;
-
-	/* Controller configuration per interface */
-	struct if_params interface_params[MAX_INTERFACE_NUM];
-
-	/* Bit mask for active buses */
-	u8 bus_act_mask;
-};
-
-/* DDR3 training global configuration parameters */
-struct tune_train_params {
-	u32 ck_delay;
-	u32 phy_reg3_val;
-	u32 g_zpri_data;
-	u32 g_znri_data;
-	u32 g_zpri_ctrl;
-	u32 g_znri_ctrl;
-	u32 g_zpodt_data;
-	u32 g_znodt_data;
-	u32 g_zpodt_ctrl;
-	u32 g_znodt_ctrl;
-	u32 g_dic;
-	u32 g_odt_config;
-	u32 g_rtt_nom;
-	u32 g_rtt_wr;
-};
-
-#endif /* _DDR_TOPOLOGY_DEF_H */
+#endif /* _MV_DDR_AP806_H */
