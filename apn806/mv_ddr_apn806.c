@@ -97,6 +97,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 
+#if defined(SUPPORT_STATIC_PHY_CONFIG) || defined(SUPPORT_STATIC_MC_CONFIG)
+#include "mv_ddr_apn806_static.h"
+#endif
+
 #define DDR_INTERFACES_NUM		1
 #define DDR_INTERFACE_OCTETS_NUM	5
 
@@ -342,8 +346,6 @@ int ddr3_silicon_pre_init(void)
 	static int init_done;
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
-	printf("MV_DDR::Hello from %s\n", __func__);
-
 	if (init_done == 1)
 		return MV_OK;
 
@@ -365,22 +367,16 @@ int ddr3_post_run_alg(void)
 
 int ddr3_silicon_post_init(void)
 {
-	printf("MV_DDR::Hello from %s\n", __func__);
-
 	return MV_OK;
 }
 
 int mv_ddr_pre_training_soc_config(const char *ddr_type)
 {
-	printf("MV_DDR::Hello from %s\n", __func__);
-
 	return MV_OK;
 }
 
 int mv_ddr_post_training_soc_config(const char *ddr_type)
 {
-	printf("MV_DDR::Hello from %s\n", __func__);
-
 	return MV_OK;
 }
 
@@ -390,3 +386,101 @@ u32 ddr3_tip_get_init_freq(void)
 	return 0;
 }
 
+#ifdef SUPPORT_STATIC_MC_CONFIG
+#if defined(a70x0) || defined(a70x0_cust)
+static void ddr_static_config(void)
+{
+	struct mk6_reg_data *reg_data = ddr_static_setup;
+
+	for (; reg_data->offset != -1; reg_data++)
+		mmio_write_32(reg_data->offset, reg_data->value);
+}
+#else
+static void mk6_mac_init(void)
+{
+	struct mk6_reg_data *mac_regs = mk6_mac_setup;
+
+	/* RFU crap setups */
+	reg_write(0x6f0098, 0x0040004e);
+	reg_write(0x6F0108, 0xFFFF0001);
+	reg_write(0x841100, 0x80000000);
+
+	for (; mac_regs->offset != -1 ; mac_regs++) {
+		reg_write(MK6_BASE_ADDRESS + mac_regs->offset, mac_regs->value);
+	}
+}
+#endif
+
+int mv_ddr_mc_static_config(void)
+{
+#if defined(a70x0) || defined(a70x0_cust)
+	ddr_static_config();
+#else
+	mk6_mac_init();
+#endif
+	return MV_OK;
+}
+
+#endif /* CONFIG_MV_DDR_STATIC_MC */
+
+#ifdef SUPPORT_STATIC_PHY_CONFIG
+#if defined(a70x0)
+static int mv_ddr_apn806_phy_static_config(u32 if_id, u32 subphys_num, enum hws_ddr_phy subphy_type)
+{
+	u32 i, mode, subphy_id, dev_num = 0;
+
+	mode = ddr3_get_static_ddr_mode();
+	if (subphy_type == DDR_PHY_DATA) {
+		for (subphy_id = 0; subphy_id < subphys_num; subphy_id++) {
+			i = 0;
+			while (ddr_modes[mode].data_phy_regs[i].reg_addr != 0xffffffff) {
+				ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ACCESS_TYPE_UNICAST,
+							subphy_id, subphy_type, ddr_modes[mode].data_phy_regs[i].reg_addr,
+							ddr_modes[mode].data_phy_regs[i].reg_data[subphy_id]);
+				i++;
+			}
+		}
+	} else {
+		for (subphy_id = 0; subphy_id < subphys_num; subphy_id++) {
+			i = 0;
+			while (ddr_modes[mode].ctrl_phy_regs[i].reg_addr != 0xffffffff) {
+				ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ACCESS_TYPE_UNICAST,
+							subphy_id, subphy_type, ddr_modes[mode].ctrl_phy_regs[i].reg_addr,
+							ddr_modes[mode].ctrl_phy_regs[i].reg_data[subphy_id]);
+				i++;
+			}
+		}
+	}
+	return MV_OK;
+}
+#else
+static void mk6_phy_init(void)
+{
+	struct mk6_reg_data *phy_regs = mk6_phy_setup;
+	uint32_t reg, cs_mask;
+
+	for (; phy_regs->offset != -1 ; phy_regs++) {
+		reg_write(MK6_BASE_ADDRESS + phy_regs->offset, phy_regs->value);
+	}
+
+	/* Trigger DDR init for Channel 0, all Chip-Selects */
+	reg = SDRAM_INIT_REQ_MASK;
+	reg |= CMD_CH_ENABLE(0);
+	cs_mask = 0x1;
+
+	reg |= CMD_CS_MASK(cs_mask);
+	reg_write(MK6_BASE_ADDRESS + MCK6_USER_COMMAND_0_REG, reg);
+}
+#endif
+
+void mv_ddr_phy_static_config(void)
+{
+#if defined(a70x0)
+	/* TODO: Need to use variable for subphys number */
+	mv_ddr_apn806_phy_static_config(0, 4, DDR_PHY_DATA);
+	mv_ddr_apn806_phy_static_config(0, 3, DDR_PHY_CONTROL);
+#else
+	mk6_phy_init();
+#endif
+}
+#endif

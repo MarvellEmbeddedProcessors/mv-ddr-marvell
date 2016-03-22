@@ -99,6 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MV_DDR_AP806_H
 
 #define TIP_BASE_ADDRESS	0x10000
+#define MK6_BASE_ADDRESS	0x20000
 #define MAX_INTERFACE_NUM		1
 #define MAX_BUS_NUM			5
 #define DDR_IF_CTRL_SUBPHYS_NUM		3
@@ -182,5 +183,13 @@ extern u16 apn806_odt_intercept[];
 
 int mv_ddr_pre_training_soc_config(const char *ddr_type);
 int mv_ddr_post_training_soc_config(const char *ddr_type);
+
+#ifdef SUPPORT_STATIC_MC_CONFIG
+int mv_ddr_mc_static_config(void);
+#endif /* SUPPORT_STATIC_MC_CONFIG */
+
+#ifdef SUPPORT_STATIC_PHY_CONFIG
+void mv_ddr_phy_static_config(void);
+#endif /* SUPPORT_STATIC_PHY_CONFIG */
 
 #endif /* _MV_DDR_AP806_H */

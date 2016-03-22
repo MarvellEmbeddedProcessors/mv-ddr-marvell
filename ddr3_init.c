@@ -163,8 +163,7 @@ int ddr3_init(void)
 		return status;
 	}
 
-#if !defined(CONFIG_APN806)
-#ifdef SUPPORT_STATIC_MC_CONFIG
+#if defined(SUPPORT_STATIC_MC_CONFIG)
 	mv_ddr_mc_static_config();
 #else
 	/* Memory controller initializations */
@@ -181,7 +180,6 @@ int ddr3_init(void)
 		return status;
 	}
 #endif
-#endif
 
 	status = ddr3_silicon_post_init();
 	if (MV_OK != status) {
@@ -189,7 +187,6 @@ int ddr3_init(void)
 		return status;
 	}
 
-#if !defined(CONFIG_APN806)
 #ifdef SUPPORT_STATIC_PHY_CONFIG
 	mv_ddr_phy_static_config();
 #else
@@ -199,7 +196,6 @@ int ddr3_init(void)
 		printf("%s Training Sequence - FAILED\n", ddr_type);
 		return status;
 	}
-#endif
 #endif
 	/* Post MC/PHY initializations */
 	mv_ddr_post_training_soc_config(ddr_type);
