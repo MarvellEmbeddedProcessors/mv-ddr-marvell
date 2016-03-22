@@ -111,7 +111,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "mv_ddr_a38x.h"
-#include "mv_ddr_a38x_mc_static.h"
 #include "mv_ddr_a38x_topology.h"
 
 /* A38x revisions */

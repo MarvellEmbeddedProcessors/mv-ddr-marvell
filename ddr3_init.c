@@ -164,6 +164,9 @@ int ddr3_init(void)
 	}
 
 #if !defined(CONFIG_APN806)
+#ifdef SUPPORT_STATIC_MC_CONFIG
+	mv_ddr_mc_static_config();
+#else
 	/* Memory controller initializations */
 	enum hws_algo_type algo_mode = ALGO_TYPE_DYNAMIC;
 	struct init_cntr_param init_param;
@@ -178,6 +181,7 @@ int ddr3_init(void)
 		return status;
 	}
 #endif
+#endif
 
 	status = ddr3_silicon_post_init();
 	if (MV_OK != status) {
@@ -186,6 +190,9 @@ int ddr3_init(void)
 	}
 
 #if !defined(CONFIG_APN806)
+#ifdef SUPPORT_STATIC_PHY_CONFIG
+	mv_ddr_phy_static_config();
+#else
 	/* PHY initialization (Training) */
 	status = hws_ddr3_tip_run_alg(0, algo_mode);
 	if (MV_OK != status) {
@@ -193,7 +200,7 @@ int ddr3_init(void)
 		return status;
 	}
 #endif
-
+#endif
 	/* Post MC/PHY initializations */
 	mv_ddr_post_training_soc_config(ddr_type);
 

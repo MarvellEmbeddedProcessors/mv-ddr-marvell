@@ -99,6 +99,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "sys_env_lib.h"
 
+#if defined(SUPPORT_STATIC_PHY_CONFIG)
+#include "mv_ddr_a38x_phy_static.h"
+#endif
+#if defined(SUPPORT_STATIC_MC_CONFIG)
+#include "mv_ddr_a38x_mc_static.h"
+#endif
+
 #define DDR_INTERFACES_NUM		1
 #define DDR_INTERFACE_OCTETS_NUM	5
 
@@ -155,30 +162,22 @@ struct dlb_config ddr3_dlb_config_table[] = {
 };
 #endif /* CONFIG_DDR4 */
 
-#ifdef SUPPORT_STATIC_DUNIT_CONFIG
+#if defined(SUPPORT_STATIC_PHY_CONFIG) || defined(SUPPORT_STATIC_MC_CONFIG)
 struct dram_modes {
 	char *mode_name;
 	u8 cpu_freq;
-	u8 fab_freq;
-	u8 chip_id;
-	u8 chip_board_rev;
-	struct reg_data *regs;
+	struct reg_data *mc_regs;
+	struct mv_ddr_subphys_reg_config *ctrl_phy_regs;
+	struct mv_ddr_subphys_reg_config *data_phy_regs;
 };
 
 static struct dram_modes ddr_modes[] = {
-	/* Conf name, CPUFreq, Fab_freq, Chip ID, Chip/Board, MC regs*/
-#ifdef CONFIG_CUSTOMER_BOARD_SUPPORT
-	{"a38x_customer_0_800", DDR_FREQ_800, 0, 0x0, A38X_CUSTOMER_BOARD_ID0,
-	 ddr3_customer_800},
-	{"a38x_customer_1_800", DDR_FREQ_800, 0, 0x0, A38X_CUSTOMER_BOARD_ID1,
-	 ddr3_customer_800},
-#else /* CONFIG_CUSTOMER_BOARD_SUPPORT */
-	{"a38x_533", DDR_FREQ_533, 0, 0x0, MARVELL_BOARD, ddr3_a38x_533},
-	{"a38x_667", DDR_FREQ_667, 0, 0x0, MARVELL_BOARD, ddr3_a38x_667},
-	{"a38x_800", DDR_FREQ_800, 0, 0x0, MARVELL_BOARD, ddr3_a38x_800},
-	{"a38x_933", DDR_FREQ_933, 0, 0x0, MARVELL_BOARD, ddr3_a38x_933},
-#endif /* CONFIG_CUSTOMER_BOARD_SUPPORT */
-	{"", DDR_FREQ_LAST, 0, 0, 0, NULL}
+	/* Conf name, DDR Frequency, MC regs, PHY cntrl, PHY data */
+#if !defined(CONFIG_DDR4)
+	{"a38x_600", DDR_FREQ_600, a38x_mc_600, a38x_ctrl_phy_600, a38x_data_phy_600},
+#endif
+	{"a38x_800", DDR_FREQ_800, a38x_mc_800, a38x_ctrl_phy_800, a38x_data_phy_800},
+	{"", DDR_FREQ_LAST, NULL, NULL, NULL}
 };
 #endif /* SUPPORT_STATIC_DUNIT_CONFIG */
 
@@ -1093,7 +1092,7 @@ u32 ddr3_tip_get_init_freq(void)
 	return freq;
 }
 
-#if defined SUPPORT_STATIC_DUNIT_CONFIG
+#if defined(SUPPORT_STATIC_PHY_CONFIG) || defined(SUPPORT_STATIC_MC_CONFIG)
 /*
  * Name:     ddr3_get_cpu_freq
  * Desc:     read S@R and return CPU frequency
@@ -1107,18 +1106,6 @@ static u32 ddr3_get_cpu_freq(void)
 }
 
 /*
- * Name:     ddr3_get_fab_opt
- * Desc:     read S@R and return CPU frequency
- * Args:
- * Notes:
- * Returns:  required value
- */
-static u32 ddr3_get_fab_opt(void)
-{
-	return 0;		/* No fabric */
-}
-
-/*
  * Name:     ddr3_get_static_ddr_mode - Init Memory controller with
  *           static parameters
  * Desc:     Use this routine to init the controller without the HW training
@@ -1128,26 +1115,13 @@ static u32 ddr3_get_fab_opt(void)
  * Notes:
  * Returns:  None.
  */
-static u32 ddr3_get_static_ddr_mode(void)
+
+u32 ddr3_get_static_ddr_mode(void)
 {
-	u32 chip_board_rev, i;
+	u32 i;
 
-	/* Valid only for A380 only, MSYS using dynamic controller config */
-#if defined CONFIG_CUSTOMER_BOARD_SUPPORT
-	/*
-	 * Customer boards select DDR mode according to
-	 * board ID & Sample@Reset
-	 */
-	chip_board_rev = mv_board_id_get();
-#else /* CONFIG_CUSTOMER_BOARD_SUPPORT */
-	/* Marvell boards select DDR mode according to Sample@Reset only */
-	chip_board_rev = MARVELL_BOARD;
-#endif /* CONFIG_CUSTOMER_BOARD_SUPPORT */
-
-	for (i = 0; ddr_modes[i].regs != NULL; i++) {
-		if ((ddr3_get_cpu_freq() == ddr_modes[i].cpu_freq) &&
-		    (ddr3_get_fab_opt() == ddr_modes[i].fab_freq) &&
-		    (chip_board_rev == ddr_modes[i].chip_board_rev))
+	for (i = 0; ddr_modes[i].mc_regs != NULL; i++) {
+		if (ddr3_get_cpu_freq() == ddr_modes[i].cpu_freq)
 			return i;
 	}
 
@@ -1155,7 +1129,7 @@ static u32 ddr3_get_static_ddr_mode(void)
 
 	return 0;
 }
-#endif /* SUPPORT_STATIC_DUNIT_CONFIG */
+#endif
 
 static u32 ddr3_get_bus_width(void)
 {
@@ -1564,3 +1538,62 @@ int mv_ddr_post_training_soc_config(const char *ddr_type)
 
 	return MV_OK;
 }
+
+#ifdef SUPPORT_STATIC_MC_CONFIG
+int mv_ddr_mc_static_config(void)
+{
+	u32 mode, i = 0;
+
+	mode = ddr3_get_static_ddr_mode();
+	while (ddr_modes[mode].mc_regs[i].reg_addr != 0xffffffff) {
+		ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+				  ddr_modes[mode].mc_regs[i].reg_addr,
+				  ddr_modes[mode].mc_regs[i].reg_data,
+				  ddr_modes[mode].mc_regs[i].reg_mask);
+		i++;
+	}
+
+	CHECK_STATUS(ddr3_tip_enable_init_sequence(0));
+
+	return MV_OK;
+}
+#endif /* CONFIG_MV_DDR_STATIC_MC */
+
+#ifdef SUPPORT_STATIC_PHY_CONFIG
+static int mv_ddr_a38x_phy_static_config(u32 if_id, u32 subphys_num, enum hws_ddr_phy subphy_type)
+{
+	u32 i, mode, subphy_id, dev_num = 0;
+
+	mode = ddr3_get_static_ddr_mode();
+	if (subphy_type == DDR_PHY_DATA) {
+		for (subphy_id = 0; subphy_id < subphys_num; subphy_id++) {
+			i = 0;
+			while (ddr_modes[mode].data_phy_regs[i].reg_addr != 0xffffffff) {
+				ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ACCESS_TYPE_UNICAST,
+							subphy_id, subphy_type, ddr_modes[mode].data_phy_regs[i].reg_addr,
+							ddr_modes[mode].data_phy_regs[i].reg_data[subphy_id]);
+				i++;
+			}
+		}
+	} else {
+		for (subphy_id = 0; subphy_id < subphys_num; subphy_id++) {
+			i = 0;
+			while (ddr_modes[mode].ctrl_phy_regs[i].reg_addr != 0xffffffff) {
+				ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ACCESS_TYPE_UNICAST,
+							subphy_id, subphy_type, ddr_modes[mode].ctrl_phy_regs[i].reg_addr,
+							ddr_modes[mode].ctrl_phy_regs[i].reg_data[subphy_id]);
+				i++;
+			}
+		}
+	}
+
+	return MV_OK;
+}
+
+void mv_ddr_phy_static_config(void)
+{
+/* TODO: Need to use variable for subphys number */
+	mv_ddr_a38x_phy_static_config(0, 4, DDR_PHY_DATA);
+	mv_ddr_a38x_phy_static_config(0, 3, DDR_PHY_CONTROL);
+}
+#endif
