@@ -134,8 +134,8 @@ static u32 dq_bit_map_2_phy_pin[] = {
 };
 
 /*
- * Name:     ddr3_tip_apn806_if_read.
- * Desc:
+ * Name:	ddr3_tip_apn806_if_read.
+ * Desc:	this function reads from the tip and dunit in the ap806
  * Args:
  * Notes:
  * Returns:  MV_OK if success, other error code if fail.
@@ -143,14 +143,15 @@ static u32 dq_bit_map_2_phy_pin[] = {
 static int ddr3_tip_apn806_if_read(u8 dev_num, enum hws_access_type interface_access,
 			  u32 if_id, u32 reg_addr, u32 *data, u32 mask)
 {
+	reg_addr += TIP_BASE_ADDRESS;
 	*data = reg_read(reg_addr) & mask;
 
 	return MV_OK;
 }
 
 /*
- * Name:     ddr3_tip_apn806_if_write.
- * Desc:
+ * Name:	ddr3_tip_apn806_if_write.
+ * Desc:	this function writes to the tip and dunit in the ap806
  * Args:
  * Notes:
  * Returns:  MV_OK if success, other error code if fail.
@@ -160,6 +161,8 @@ static int ddr3_tip_apn806_if_write(u8 dev_num, enum hws_access_type interface_a
 			   u32 mask)
 {
 	u32 ui_data_read;
+
+	reg_addr += TIP_BASE_ADDRESS;
 
 	if (mask != MASK_ALL_BITS) {
 		CHECK_STATUS(ddr3_tip_apn806_if_read
