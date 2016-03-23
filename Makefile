@@ -197,57 +197,54 @@ RM       = @rm -rf
 MKDIR    = @mkdir -p
 CD       = @cd
 MV       = @mv
+CP       = @cp
 CAT      = @cat
 PWD      = @pwd
 ECHO     = @echo
 
-# FIXME: temporary workaround to enable DDR4 code compilation
-# The final version will check a flag given as a make option
-MV_DDR4_SA = yes
-
 OBJ_DIR ?= . # set to $(CUR_DIR)/$(BUILD_PLAT)/ble in ble/ble.mk
 SRCDIRS = . ./apn806
-ifeq ($(MV_DDR4_SA),yes)
-DDR4SRCDIR = ../mv_ddr4
+ifeq ($(MV_DDR4),y)
+SRCDIR4 = ../mv_ddr4
 endif
 
 INCPATH = $(SRCDIRS) ./include
-ifeq ($(MV_DDR4_SA),yes)
+ifeq ($(MV_DDR4),y)
 INCPATH += ../mv_ddr4
 endif
 INCLUDE = $(addprefix -I, $(INCPATH))
 
-LIB = $(OBJ_DIR)/dramlib.a
-ifeq ($(MV_DDR4_SA),yes)
-DDR4LIB = $(DDR4SRCDIR)/ddr4lib.a
+LIB = $(OBJ_DIR)/mv_ddr_lib.a
+ifeq ($(MV_DDR4),y)
+LIB4 = $(SRCDIR4)/mv_ddr4_lib.a
 endif
 
 CFLAGS = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2
 CFLAGS += -march=armv8-a -fpie $(INCLUDE) -D$(PLATFORM)
 
 CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806
-ifeq ($(MV_DDR4_SA),yes)
+ifeq ($(MV_DDR4),y)
 CFLAGS += -DCONFIG_DDR4
 endif
 
 LDFLAGS  = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
 CSRC  = $(foreach DIR, $(SRCDIRS), $(wildcard $(DIR)/*.c))
-ifeq ($(MV_DDR4_SA),yes)
-DDR4CSRC = $(wildcard $(DDR4SRCDIR)/*.c)
+ifeq ($(MV_DDR4),y)
+CSRC4 = $(wildcard $(SRCDIR4)/*.c)
 endif
 ASRC = $(foreach DIR, $(SRCDIRS), $(wildcard $(DIR)/*.S))
 
 COBJ  = $(patsubst %.c,$(OBJ_DIR)/%.o,$(CSRC))
-ifeq ($(MV_DDR4_SA),yes)
-DDR4COBJ = $(DDR4CSRC:.c=.o)
+ifeq ($(MV_DDR4),y)
+COBJ4 = $(CSRC4:.c=.o)
 endif
 COBJ += $(patsubst %.S,$(OBJ_DIR)/%.o,$(ASRC))
 
 .SILENT:
 
-ifeq ($(MV_DDR4_SA),yes)
-all: check_env header create_dir $(LIB) $(DDR4LIB)
+ifeq ($(MV_DDR4),y)
+all: check_env header create_dir $(LIB) $(LIB4)
 else
 all: check_env header create_dir $(LIB)
 endif
@@ -263,13 +260,14 @@ $(OBJ_DIR)/%.o: %.S
 $(LIB): $(OBJ_DIR) $(COBJ)
 	$(AR) r $(LIB) $(COBJ)
 
-$(DDR4SRCDIR)/%.o: %.c
+$(SRCDIR4)/%.o: %.c
 	$(ECHO) "  CC    $<"
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-$(DDR4LIB): $(DDR4COBJ)
-	$(AR) r $(DDR4LIB) $(DDR4COBJ)
-	$(MV) $(DDR4LIB) $(OBJ_DIR)
+$(LIB4): $(COBJ4)
+	$(AR) r $(LIB4) $(COBJ4)
+	$(RM) $(COBJ4)
+	$(MV) $(LIB4) $(OBJ_DIR)
 
 create_dir:
 	$(MKDIR) $(OBJ_DIR)/apn806
@@ -277,7 +275,9 @@ create_dir:
 header:
 	$(ECHO) "\n  Building DRAM driver"
 	$(ECHO) "\n  COBJ = $(COBJ)"
-	$(ECHO) "\n  DDR4COBJ = $(DDR4COBJ)"
+ifeq ($(MV_DDR4),y)
+	$(ECHO) "\n  COBJ4 = $(COBJ4)"
+endif
 
 check_env:
 ifndef PLATFORM
