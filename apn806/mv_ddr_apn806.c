@@ -100,7 +100,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DDR_INTERFACES_NUM		1
 #define DDR_INTERFACE_OCTETS_NUM	5
 
-#if 0 /* TODO */
+#if defined(CONFIG_DDR4)
 u16 apn806_odt_slope[] = {
 	21443,
 	1452,
@@ -122,7 +122,7 @@ u16 apn806_odt_intercept[] = {
 	69,
 	61
 };
-#endif
+#endif /* CONFIG_DDR4 */
 
 
 static u32 dq_bit_map_2_phy_pin[] = {
@@ -242,7 +242,10 @@ int ddr3_tip_ext_write(u32 dev_num, u32 if_id, u32 reg_addr,
 static int ddr3_tip_init_apn806_silicon(u32 dev_num, u32 board_id)
 {
 	struct hws_tip_config_func_db config_func;
-	enum hws_ddr_freq ddr_freq = DDR_FREQ_LOW_FREQ; /* FIXME */
+#if !defined(CONFIG_DDR4) /* FIXME::Added to prevent error on unused var */
+	 /* FIXME::all ddr_freq logic removed while setting a new platform */
+	enum hws_ddr_freq ddr_freq = DDR_FREQ_LOW_FREQ;
+#endif
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	/* new read leveling version */
@@ -380,3 +383,10 @@ int mv_ddr_post_training_soc_config(const char *ddr_type)
 
 	return MV_OK;
 }
+
+/* FIXME: this is a stub function required by DDR4 code */
+u32 ddr3_tip_get_init_freq(void)
+{
+	return 0;
+}
+

@@ -145,6 +145,16 @@ typedef unsigned int u32;
 #define NULL ((void*)0)
 #endif
 
+#define MV_STATUS	int
+#define MV_BOOL		int
+#define MV_TRUE		(int)(1)
+#define MV_FALSE	(int)(0)
+#define MV_U8		u8
+#define MV_U16		u16
+#define MV_U32		u32
+#define MV_8		char
+#define MV_32		int
+
 /*
  * MV_DEBUG_INIT need to be defines, otherwise the output of the
  * DDR2 training code is not complete and misleading
@@ -260,5 +270,15 @@ static inline void mmio_write2_32(u32 val, u32 addr)
 
 #define writel mmio_write2_32
 #define readl mmio_read_32
+
+#if defined(CONFIG_DDR4)
+#define vref_calibration_wa vrefCalibrationWA
+#define dmin_phy_reg_table dminPhyRegTable
+#define ddr4_sublib_version_get mvHwsDdr4SubLibVersionGet
+#define ddr4_tip_configure_phy ddr4TipConfigurePhy
+#define ddr4_tip_calibration_adjust ddr4TipCalibrationAdjust
+#define ddr4_tip_set_timing ddr4TipSetTiming
+#define ddr3_tip_ddr4_ddr4_training_main_flow ddr3TipDDR4Ddr4TrainingMainFlow
+#endif
 
 #endif /* _MV_DDR_ATF_WRAPPER_H */
