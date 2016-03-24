@@ -272,13 +272,10 @@ static int ddr3_tip_init_apn806_silicon(u32 dev_num, u32 board_id)
 	/* set device attributes*/
 	ddr3_tip_dev_attr_init(dev_num);
 	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_TIP_REV, MV_TIP_REV_4);
-	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_PHY_EDGE, MV_DDR_PHY_EDGE_POSITIVE);
+	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_PHY_EDGE, MV_DDR_PHY_EDGE_NEGATIVE);
 	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_OCTET_PER_INTERFACE, DDR_INTERFACE_OCTETS_NUM);
-#ifdef CONFIG_ARMADA_39X
-	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_INTERLEAVE_WA, 1);
-#else
 	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_INTERLEAVE_WA, 0);
-#endif
+
 
 #if defined(CONFIG_DDR4)
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
