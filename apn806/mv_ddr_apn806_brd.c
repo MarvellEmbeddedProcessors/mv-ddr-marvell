@@ -104,24 +104,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #if defined(CONFIG_DDR4)
-#define SPEED_BIN_DDR_DB_68XX	SPEED_BIN_DDR_2400R
-#define BUS_WIDTH_DB_68XX	BUS_WIDTH_16
+#define SPEED_BIN_DDR_DB_70x0	SPEED_BIN_DDR_2133P
+#define BUS_WIDTH_DB_70x0	BUS_WIDTH_8
 #else /* CONFIG_DDR4 */
-#define SPEED_BIN_DDR_DB_68XX	SPEED_BIN_DDR_1866L
-#define BUS_WIDTH_DB_68XX	BUS_WIDTH_8
+#define SPEED_BIN_DDR_DB_70x0	SPEED_BIN_DDR_1866L
+#define BUS_WIDTH_DB_70x0	BUS_WIDTH_8
 #endif /* CONFIG_DDR4 */
 
 /* Marvell board - Board_ID = DB_68XX_ID = 1 (DDR3/4)*/
 static struct hws_topology_map board_topology_map = {
 	0x1, /* active interfaces */
 	/* cs_mask, mirror, dqs_swap, ck_swap X PUPs */
-	{ { { {0x3, 0x2, 0, 0},
-	      {0x3, 0x2, 0, 0},
-	      {0x3, 0x2, 0, 0},
-	      {0x3, 0x2, 0, 0},
-	      {0x3, 0x2, 0, 0} },
-	    SPEED_BIN_DDR_DB_68XX,	/* speed_bin */
-	    BUS_WIDTH_DB_68XX,		/* memory_width */
+	{ { { {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0} },
+	    SPEED_BIN_DDR_DB_70x0,	/* speed_bin */
+	    BUS_WIDTH_DB_70x0,		/* memory_width */
 	    MEM_4G,			/* mem_size */
 	    DDR_FREQ_800,		/* frequency */
 	    0, 0,			/* cas_l, cas_wl */
