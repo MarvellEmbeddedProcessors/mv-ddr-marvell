@@ -383,6 +383,13 @@ u32 ddr3_tip_get_init_freq(void)
 	return 0;
 }
 
+void mv_ddr_mc_config(void)
+{
+	/* TODO: Add MC MUX setting */
+
+	/* TODO: Add McKinley6 init function */
+}
+
 #ifdef SUPPORT_STATIC_MC_CONFIG
 #if defined(a70x0) || defined(a70x0_cust)
 static void ddr_static_config(void)

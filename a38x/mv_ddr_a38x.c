@@ -1539,6 +1539,22 @@ int mv_ddr_post_training_soc_config(const char *ddr_type)
 	return MV_OK;
 }
 
+void mv_ddr_mc_config(void)
+{
+	/* Memory controller initializations */
+	struct init_cntr_param init_param;
+	int status;
+
+	init_param.do_mrs_phy = 1;
+	init_param.is_ctrl64_bit = 0;
+	init_param.init_phy = 1;
+	init_param.msys_init = 1;
+	status = hws_ddr3_tip_init_controller(0, &init_param);
+	if (MV_OK != status) {
+		printf("DDR3 init controller - FAILED 0x%x\n", status);
+	}
+}
+
 #ifdef SUPPORT_STATIC_MC_CONFIG
 int mv_ddr_mc_static_config(void)
 {

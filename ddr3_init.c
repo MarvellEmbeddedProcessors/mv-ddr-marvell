@@ -159,22 +159,10 @@ int ddr3_init(void)
 	if (MV_OK != status)
 		return status;
 
-#if defined(SUPPORT_STATIC_MC_CONFIG)
+#ifdef SUPPORT_STATIC_MC_CONFIG
 	mv_ddr_mc_static_config();
 #else
-	/* Memory controller initializations */
-	enum hws_algo_type algo_mode = ALGO_TYPE_DYNAMIC;
-	struct init_cntr_param init_param;
-
-	init_param.do_mrs_phy = 1;
-	init_param.is_ctrl64_bit = 0;
-	init_param.init_phy = 1;
-	init_param.msys_init = 1;
-	status = hws_ddr3_tip_init_controller(0, &init_param);
-	if (MV_OK != status) {
-		printf("DDR3 init controller - FAILED 0x%x\n", status);
-		return status;
-	}
+	mv_ddr_mc_config();
 #endif
 
 	status = ddr3_silicon_post_init();
@@ -187,7 +175,7 @@ int ddr3_init(void)
 	mv_ddr_phy_static_config();
 #else
 	/* PHY initialization (Training) */
-	status = hws_ddr3_tip_run_alg(0, algo_mode);
+	status = hws_ddr3_tip_run_alg(0, ALGO_TYPE_DYNAMIC);
 	if (MV_OK != status) {
 		printf("%s Training Sequence - FAILED\n", ddr_type);
 		return status;
