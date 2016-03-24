@@ -98,8 +98,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_AP806_H
 #define _MV_DDR_AP806_H
 
-#define TIP_BASE_ADDRESS	0x10000
-#define MK6_BASE_ADDRESS	0x20000
+#define NO_EFUSE
+#define IF_ID_0				0
+#define DEVICE_NUM_0			0
+#define MEMORY_TO_MC6_FREQ_RATIO	2	/*TODO - check this coefficient for mc6 it might be wrong*/
+
+#define DSS_CR0				0x6f0100/*TODO - put this register in h file of ATF*/
+#define MUXING_MODE_OFFSET		17
+#define MUXING_MODE_MASK		0x7
+#define LPDDR4_64_DIMM			0x0
+#define LPDDR4_32_BRD			0x1
+#define DDR3_DIMM			0x3
+#define DDR4_DIMM			0x4
+#define DDR3_ON_BOARD			0x5
+#define DDR4_ON_BOARD			0x6
+
+#define TIP_BASE_ADDRESS		0x10000
+#define MK6_BASE_ADDRESS		0x20000
 #define MAX_INTERFACE_NUM		1
 #define MAX_BUS_NUM			5
 #define DDR_IF_CTRL_SUBPHYS_NUM		3
