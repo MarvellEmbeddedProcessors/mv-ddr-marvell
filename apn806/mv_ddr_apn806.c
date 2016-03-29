@@ -128,7 +128,6 @@ u16 apn806_odt_intercept[] = {
 };
 #endif /* CONFIG_DDR4 */
 
-
 static u32 dq_bit_map_2_phy_pin[] = {
 /*DQ0	DQ1	DQ2	DQ3	DQ4	DQ5	DQ6	DQ7	DM*/
 	0,	1,	2,	7,	10,	9,	8,	6,/*3,phy 0*/
@@ -141,6 +140,38 @@ static u32 dq_bit_map_2_phy_pin[] = {
 	0,	0,	0,	0,	0,	0,	0,	0,/*0,phy 7*/
 	2,	8,	0,	9,	6,	7,	10,	1/*	3 phy 8 - ECC*/
 };
+
+static u8 mv_ddr_tip_clk_ratio_get(u32 freq)
+{
+	if ((freq == DDR_FREQ_LOW_FREQ) || (freq_val[freq] <= 400))
+		return 1;
+
+	return 2;
+}
+
+/*
+ * Name:	mv_ddr_tip_freq_config_get
+ * Desc:
+ * Args:
+ * Notes:
+ * Returns:	MV_OK if success, other error code if fail
+ */
+static int mv_ddr_tip_freq_config_get(u8 dev_num, enum hws_ddr_freq freq,
+				      struct hws_tip_freq_config_info
+					*freq_config_info)
+{
+	if (bw_per_freq[freq] == 0xff)
+		return MV_NOT_SUPPORTED;
+
+	if (freq_config_info == NULL)
+		return MV_BAD_PARAM;
+
+	freq_config_info->bw_per_freq = NULL;
+	freq_config_info->rate_per_freq = NULL;
+	freq_config_info->is_supported = 1;
+
+	return MV_OK;
+}
 
 /*
  * Name:	ddr3_tip_apn806_if_read.
@@ -185,228 +216,220 @@ static int ddr3_tip_apn806_if_write(u8 dev_num, enum hws_access_type interface_a
 	return MV_OK;
 }
 /*
- * Name:	apn806_get_init_ddr_freq.
- * Desc:	this function read the ddr frequency according to ddr3 or ddr4 arrays
-			the ddr frequency in apn806 is twice the mc6 frequency so only ddr frequency enum
-			value is returned from this function.
+ * Name:	mv_ddr_init_ddr_freq_get
+ * Desc:	gets ddr freq per ddr3 or ddr4 arrays
  * Args:
  * Notes:
- * Returns:  MV_OK if success, other error code if fail.
+ * Returns:	MV_OK if success, other error code if fail.
  */
-int mv_ddr_apn806_get_init_ddr_freq(int dev_num, enum hws_ddr_freq *freq)
+static int mv_ddr_init_ddr_freq_get(int dev_num, enum hws_ddr_freq *freq)
 {
-	u32 ref_clk_satr;
+	u32 ddr_clk_config;
 
-	/* Read sample at reset setting */
-	ref_clk_satr = (reg_read(REG_DEVICE_SAR_ADDR_APN806) >>
-		RST2_CLOCK_FREQ_MODE_OFFSET) &
+	/* Read ddr clk config from sar */
+	ddr_clk_config = (reg_read(SAR_REG_ADDR) >>
+		RST2_CLOCK_FREQ_MODE_OFFS) &
 		RST2_CLOCK_FREQ_MODE_MASK;
 
-	switch (ref_clk_satr) {
+	switch (ddr_clk_config) {
 #ifdef NO_EFUSE
 #ifdef CONFIG_DDR4
-	case SAMPLE_AT_RESET_CPU1800_0X2:
+	case SAR_CPU1800_0X2:
 			*freq = DDR_FREQ_1200;
 			break;
-		case SAMPLE_AT_RESET_CPU1800_0X3:
+		case SAR_CPU1800_0X3:
 			*freq = DDR_FREQ_1050;
 			break;
-		case SAMPLE_AT_RESET_CPU1600_0X4:
+		case SAR_CPU1600_0X4:
 			*freq = DDR_FREQ_1050;
 			break;
 #endif
-		case SAMPLE_AT_RESET_CPU1600_0X5:
+		case SAR_CPU1600_0X5:
 			*freq = DDR_FREQ_900;
 			break;
-		case SAMPLE_AT_RESET_CPU1300_0X6:
+		case SAR_CPU1300_0X6:
 			*freq = DDR_FREQ_800;
 			break;
 #ifdef CONFIG_DDR4
-		case SAMPLE_AT_RESET_CPU1300_0X7:
-			*freq = DDR_FREQ_650;/*TODO - add this frequency to DDR3 frequencies*/
+		case SAR_CPU1300_0X7:
+			*freq = DDR_FREQ_650;
 			break;
 #endif
-		case SAMPLE_AT_RESET_CPU1200_TO_BE_DEFINED:
+		case SAR_CPU1200_TBD:
 			*freq = DDR_FREQ_800;
 			break;
-#else/*EFUSE*/
-		case SAMPLE_AT_RESET_CPU1600_0X0:
+#else /* EFUSE */
+		case SAR_CPU1600_0X0:
 			*freq = DDR_FREQ_800;
 			break;
-		case SAMPLE_AT_RESET_CPU1600_0X1:
+		case SAR_CPU1600_0X1:
 			*freq = DDR_FREQ_900;
 			break;
 #ifdef CONFIG_DDR4
-		case SAMPLE_AT_RESET_CPU1000_0X2:
-			*freq = DDR_FREQ_650;/*TODO - add this frequency to DDR3 frequencies*/
+		case SAR_CPU1000_0X2:
+			*freq = DDR_FREQ_650;
 			break;
 #endif
-		case SAMPLE_AT_RESET_CPU1200_0X3:
+		case SAR_CPU1200_0X3:
 			*freq = DDR_FREQ_800;
 			break;
-		case SAMPLE_AT_RESET_CPU1400_0X4:
+		case SAR_CPU1400_0X4:
 			*freq = DDR_FREQ_800;
 			break;
-		case SAMPLE_AT_RESET_CPU600_0X5:
+		case SAR_CPU600_0X5:
 			*freq = DDR_FREQ_800;
 			break;
-		case SAMPLE_AT_RESET_CPU800_0X6:
+		case SAR_CPU800_0X6:
 			*freq = DDR_FREQ_800;
 			break;
-		case SAMPLE_AT_RESET_CPU1000_0X7:
+		case SAR_CPU1000_0X7:
 			*freq = DDR_FREQ_800;
 			break;
-#endif/*NO_EFUSE*/
+#endif /* NO_EFUSE */
 		default:
 			*freq = 0;
 			return MV_NOT_SUPPORTED;
 	}
+
 	return MV_OK;
 }
 
 /*
- * Name:	get_controllers_divider.
- * Desc:	this function reads the soc clock dividers for both controllers mc6 and tip
+ * Name:	mv_ddr_target_div_calc
+ * Desc:	calculates and returns target mc clk divider value
  * Args:
+		curr_div -  current mc clk divider value
+		curr_freq  - current frequency configured to
+		target_freq - target frequency to step to
  * Notes:
- * Returns:  MV_OK if success, other error code if fail.
+ * Returns:	target mc clk divider value
  */
-void get_controllers_divider(u32 *misc_clck_div_ratio_0, u32 *misc_clck_div_ratio_1)
+static u32 mv_ddr_target_div_calc(u32 curr_div, u32 curr_freq, u32 target_freq)
 {
-	u32 misc_clk_div_ratio;
+	u32 target_div;
 
-	misc_clk_div_ratio = reg_read(DEVICE_GENERAL_CONTROL_1);
-	*misc_clck_div_ratio_0 = (misc_clk_div_ratio >> MISC_CLKDIV_RATIO_0_OFFSET) & MISC_CLKDIV_RATIO_0_MASK;
-	*misc_clck_div_ratio_1 = (misc_clk_div_ratio >> MISC_CLKDIV_RATIO_1_OFFSET) & MISC_CLKDIV_RATIO_1_MASK;
+	target_div = (curr_freq * curr_div) / target_freq;
+
+	return target_div;
 }
 
 /*
- * Name:	calc_target_divider_value.
- * Desc:	this function calculates the target divider value and returns it
+ * Name:	mv_ddr_clk_dividers_set
+ * Desc:	sets target frequency
+		- changes clk dividers for mc6 and dunit
+		  and executes DFS procedure.
+		- dunit and mc6 freqs to be configured;
+		  other freqs (e.g., hclk, fclk) are derivatives.
+		- the DFS flow is as follows:
+		  -> save specific SoC configurations (e.g., ODT),
+		  -> turn DLL off (no need at low freq)
+		  -> put memory in self-refresh mode
  * Args:
-		current_divider_value - the current value of the frequency divider for the current controller
-		curent_frequency_value	the current frequency the cpu is configured to
-		target_frequency the target frequency to step to
- * Notes:
- * Returns:	target divider value
- */
-u32 calc_target_divider_value(u32 current_divider_value, u32 curent_frequency_value, u32 target_frequency)
-{
-	u32 target_divider_value;
-
-	target_divider_value = curent_frequency_value * current_divider_value / target_frequency;
-	return target_divider_value;
-}
-
-/*
- * Name:	apn806_set_divider.
- * Desc:	this function sets the target frequency.
-			it changes the dividers of both controllers tip and mc6
-			and executes the dfs procedure.
-			two target frequencies should be configured.
-			1. Dunit frequency
-			2. Mc6 Frequency
-			all other frequencies are by product of these configurations
-			like Hclk and Fclk
-			this function - int apn806_set_divider is part of the DFS procedure.
-			The DFS function does the bellow:
-			1. save specific soc configurations like saving ODT
-			2. moves to DLL off, in low frequency there is no need to activate the PLL
-			in the memory.
-			3. put the memory in self refresh mode
- * Args:
-		target_frequency the target frequency for both controllers
+		ddr target frequency
  * Notes:
  * Returns:	status MV_OK or fail
  */
-int mv_ddr_apn806_set_divider(u8 dev_num, u32 if_id, enum hws_ddr_freq target_frequency)
+static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum hws_ddr_freq target_ddr_freq)
 {
-	u32	mc6_divider, dunit_divider, mc6_target_divider, dunit_target_divider;
-	u32	controller_init_frequency;
-	enum hws_ddr_freq ddr_freq;
+	u32 mc_div, ddr_div;
+	u32 mc_target_div, ddr_target_div;
+	u32 init_ddr_freq_val, target_ddr_freq_val;
+	u32 reg;
+	enum hws_ddr_freq init_ddr_freq;
 
 	if (if_id != 0) {
 		DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
-			("A70x does not support interface 0x%x\n", if_id));
+			              ("mv_ddr: a70x0: interface 0x%x not supported\n",
+				       if_id));
 		return MV_BAD_PARAM;
 	}
 
-	/* get the frequencies according to the sample @ reset */
-	mv_ddr_apn806_get_init_ddr_freq(DEVICE_NUM_0, &ddr_freq);
+	/* get ddr freq from sar */
+	mv_ddr_init_ddr_freq_get(DEV_NUM_0, &init_ddr_freq);
 
-	/* get the controller dividers values */
-	get_controllers_divider(&mc6_divider, &dunit_divider);
+	/* get mc & ddr clk dividers values */
+	reg = reg_read(DEV_GEN_CTRL1_REG_ADDR);
+	ddr_div = (reg >> MISC_CLKDIV_RATIO_1_OFFS) & MISC_CLKDIV_RATIO_1_MASK;
+	mc_div = (reg >> MISC_CLKDIV_RATIO_2_OFFS) & MISC_CLKDIV_RATIO_2_MASK;
 
-	/* Dunit frequency*/
-	controller_init_frequency = freq_val[ddr_freq];
+	init_ddr_freq_val = freq_val[init_ddr_freq];
+	target_ddr_freq_val = freq_val[target_ddr_freq];
 
-	/* calculate the dunit target divider value */
-	dunit_target_divider = calc_target_divider_value(dunit_divider, controller_init_frequency, target_frequency);
+	/* calc mc & ddr target clk divider value */
+	mc_target_div = mv_ddr_target_div_calc(mc_div, init_ddr_freq_val, target_ddr_freq_val);
+	ddr_target_div = mv_ddr_target_div_calc(ddr_div, init_ddr_freq_val, target_ddr_freq_val);
 
-	/* calculate the mc6 target frequency */
-	controller_init_frequency = controller_init_frequency / MEMORY_TO_MC6_FREQ_RATIO;
+	/* FIXME: temporary solution bypassing previously calculated values */
+	if (target_ddr_freq == DDR_FREQ_LOW_FREQ) { /* 100MHz; clk src / 16 for mc, / 8 for ddr */
+		mc_target_div = 16;
+		ddr_target_div = 8;
+	} else { /* 800MHz; clk src / 2 for mc, / 1 for ddr */
+		mc_target_div = 2;
+		ddr_target_div = 1;
+	}
 
-	/* calculate the mc6 target divider value */
-	mc6_target_divider = calc_target_divider_value(mc6_divider, controller_init_frequency, target_frequency);
-
-	writel_clrset(DEVICE_GENERAL_CONTROL_1,
-		mc6_target_divider << MISC_CLKDIV_RATIO_0_OFFSET |
-		dunit_target_divider << MISC_CLKDIV_RATIO_1_OFFSET,
-		MISC_CLKDIV_RATIO_0_MASK << MISC_CLKDIV_RATIO_0_OFFSET |
-		MISC_CLKDIV_RATIO_1_MASK << MISC_CLKDIV_RATIO_1_OFFSET);
+	reg = reg_read(DEV_GEN_CTRL1_REG_ADDR);
+	reg &= ~(MISC_CLKDIV_RATIO_2_MASK << MISC_CLKDIV_RATIO_2_OFFS | MISC_CLKDIV_RATIO_1_MASK << MISC_CLKDIV_RATIO_1_OFFS);
+	reg |= mc_target_div << MISC_CLKDIV_RATIO_2_OFFS | ddr_target_div << MISC_CLKDIV_RATIO_1_OFFS;
+	reg_write(DEV_GEN_CTRL1_REG_ADDR, reg);
 
 	/* Reload force, relax enable, align enable set */
-	writel_clrset(DEVICE_GENERAL_CONTROL_3,
-		RELOAD_FORCE_VALUE << MISC_CLKDIV_RELOAD_FORCE_OFFSET |
-		RELAX_EN_VALUE << MISC_CLKDIV_RELAX_EN_OFFSET |
-		ALIGN_EN_VALUE << MISC_CLKDIV_RELOAD_FORCE_OFFSET,
-		MISC_CLKDIV_RELOAD_FORCE_MASK << MISC_CLKDIV_RELOAD_FORCE_OFFSET |
-		MISC_CLKDIV_RELAX_EN_MASK << MISC_CLKDIV_RELAX_EN_OFFSET |
-		MISC_CLKDIV_ALIGN_EN_MASK << MISC_CLKDIV_RELOAD_FORCE_OFFSET);
+	reg = reg_read(DEV_GEN_CTRL3_REG_ADDR);
+	reg &= ~(MISC_CLKDIV_RELOAD_FORCE_MASK << MISC_CLKDIV_RELOAD_FORCE_OFFS |
+		 MISC_CLKDIV_RELAX_EN_MASK << MISC_CLKDIV_RELAX_EN_OFFS |
+		 MISC_CLKDIV_ALIGN_EN_MASK << MISC_CLKDIV_ALIGN_EN_OFFS);
+	reg |= RELOAD_FORCE_VAL << MISC_CLKDIV_RELOAD_FORCE_OFFS |
+	       RELAX_EN_VAL << MISC_CLKDIV_RELAX_EN_OFFS |
+	       ALIGN_EN_VAL << MISC_CLKDIV_ALIGN_EN_OFFS;
+	reg_write(DEV_GEN_CTRL3_REG_ADDR, reg);
 
 	/* Reload smooth */
-	writel_clrset(DEVICE_GENERAL_CONTROL_4,
-		RELOAD_SMOOTH_VALUE << MISC_CLKDIV_RELOAD_SMOOTH_OFFSET,
-		MISC_CLKDIV_RELOAD_SMOOTH_MASK << MISC_CLKDIV_RELOAD_SMOOTH_OFFSET);
+	reg = reg_read(DEV_GEN_CTRL4_REG_ADDR);
+	reg &= ~(MISC_CLKDIV_RELOAD_SMOOTH_MASK << MISC_CLKDIV_RELOAD_SMOOTH_OFFS);
+	reg |= RELOAD_SMOOTH_VAL << MISC_CLKDIV_RELOAD_SMOOTH_OFFS;
+	reg_write(DEV_GEN_CTRL4_REG_ADDR, reg);
 
 	/* Toggle reload ratio first 0x1 then 0x0*/
-	writel_clrset(DEVICE_GENERAL_CONTROL_4,
-		RELOAD_RATIO_VALUE << MISC_CLKDIV_RELOAD_RATIO_OFFSET,
-		MISC_CLKDIV_RELOAD_RATIO_MASK << MISC_CLKDIV_RELOAD_RATIO_OFFSET);
+	reg = reg_read(DEV_GEN_CTRL4_REG_ADDR);
+	reg &= ~(MISC_CLKDIV_RELOAD_RATIO_MASK << MISC_CLKDIV_RELOAD_RATIO_OFFS);
+	reg |= RELOAD_RATIO_VAL << MISC_CLKDIV_RELOAD_RATIO_OFFS;
+	reg_write(DEV_GEN_CTRL4_REG_ADDR, reg);
 
 	/* delay between toggles */
-	mdelay(10);/* need to define the delay value */
-	writel_clrset(DEVICE_GENERAL_CONTROL_4,
-		(~ RELOAD_RATIO_VALUE) << MISC_CLKDIV_RELOAD_RATIO_OFFSET,
-		MISC_CLKDIV_RELOAD_RATIO_MASK << MISC_CLKDIV_RELOAD_RATIO_OFFSET);
+	mdelay(10); /* TODO: check the delay value */
+	reg = reg_read(DEV_GEN_CTRL4_REG_ADDR);
+	reg &= ~(MISC_CLKDIV_RELOAD_RATIO_MASK << MISC_CLKDIV_RELOAD_RATIO_OFFS);
+	reg_write(DEV_GEN_CTRL4_REG_ADDR, reg);
 
 	/* Unblock phase_sync_mc_clk in RFU */
-	writel_clrset(CLOCKS_CONTROL,
-		BLOCK_PHASE_RESET_VALUE << BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_OFFSET,
-		BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_MASK << BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_OFFSET);
+	reg = reg_read(CLKS_CTRL_REG_ADDR);
+	reg &= ~(BLOCK_PHI_RST_TO_RING_TO_MC_CLK_MASK << BLOCK_PHI_RST_TO_RING_TO_MC_CLK_OFFS);
+	reg_write(CLKS_CTRL_REG_ADDR, reg);
+
 	/* delay between toggles */
-	mdelay(10);/* need to define the delay value */
+	mdelay(10); /* TODO: check the delay value */
 
 	/* Ring-MC clock f2s reset toggle */
-	writel_clrset(CLOCKS_CONTROL,
-		RING_CLOCK_VALUE << RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_OFFSET,
-		RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_MASK << RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_OFFSET);
+	reg = reg_read(CLKS_CTRL_REG_ADDR);
+	reg &= ~(RING_CLK_TO_ALL_CLK_PHI_RST_MASK << RING_CLK_TO_ALL_CLK_PHI_RST_OFFS);
+	reg_write(CLKS_CTRL_REG_ADDR, reg);
 
 	/* delay between toggles */
-	mdelay(50);/* need to define the delay value */
-	writel_clrset(CLOCKS_CONTROL,
-		(~ RING_CLOCK_VALUE) << RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_OFFSET,
-		RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_MASK << RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_OFFSET);
+	mdelay(100); /* TODO: check the delay value */
 
-	/* delay between toggles */
-	mdelay(50);/* need to define the delay value */
-	/* Set phase_sync_mc_clk back to 0x1*/
-	writel_clrset(CLOCKS_CONTROL,
-		(~ BLOCK_PHASE_RESET_VALUE) << BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_OFFSET,
-		BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_MASK << BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_OFFSET);
+	reg = reg_read(CLKS_CTRL_REG_ADDR);
+	reg |= (RING_CLK_TO_ALL_CLK_PHI_RST_MASK << RING_CLK_TO_ALL_CLK_PHI_RST_OFFS);
+	reg_write(CLKS_CTRL_REG_ADDR, reg);
+
+	mdelay(50); /* TODO: check the delay value */
+
+	reg = reg_read(CLKS_CTRL_REG_ADDR);
+	reg |= (BLOCK_PHI_RST_TO_RING_TO_MC_CLK_MASK << BLOCK_PHI_RST_TO_RING_TO_MC_CLK_OFFS);
+	reg_write(CLKS_CTRL_REG_ADDR, reg);
 
 	return MV_OK;
 }
+
 /*
  * Name:     ddr3_tip_apn806_select_ddr_controller.
  * Desc:     Enable/Disable access to Marvell's server.
@@ -468,8 +491,7 @@ int ddr3_tip_ext_write(u32 dev_num, u32 if_id, u32 reg_addr,
 static int ddr3_tip_init_apn806_silicon(u32 dev_num, u32 board_id)
 {
 	struct hws_tip_config_func_db config_func;
-#if !defined(CONFIG_DDR4) /* FIXME::Added to prevent error on unused var */
-	 /* FIXME::all ddr_freq logic removed while setting a new platform */
+#if !defined(CONFIG_DDR4)
 	enum hws_ddr_freq ddr_freq = DDR_FREQ_LOW_FREQ;
 #endif
 	struct hws_topology_map *tm = ddr3_get_topology_map();
@@ -479,11 +501,11 @@ static int ddr3_tip_init_apn806_silicon(u32 dev_num, u32 board_id)
 	config_func.tip_dunit_write_func = ddr3_tip_apn806_if_write;
 	config_func.tip_dunit_mux_select_func =
 		ddr3_tip_apn806_select_ddr_controller;
-	config_func.tip_get_freq_config_info_func = NULL;
-	config_func.tip_set_freq_divider_func = mv_ddr_apn806_set_divider;
+	config_func.tip_get_freq_config_info_func = mv_ddr_tip_freq_config_get;
+	config_func.tip_set_freq_divider_func = mv_ddr_clk_dividers_set;
 	config_func.tip_get_device_info_func = NULL;
 	config_func.tip_get_temperature = NULL;
-	config_func.tip_get_clock_ratio = NULL;
+	config_func.tip_get_clock_ratio = mv_ddr_tip_clk_ratio_get;
 	config_func.tip_external_read = ddr3_tip_ext_read;
 	config_func.tip_external_write = ddr3_tip_ext_write;
 
@@ -498,7 +520,6 @@ static int ddr3_tip_init_apn806_silicon(u32 dev_num, u32 board_id)
 	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_OCTET_PER_INTERFACE, DDR_INTERFACE_OCTETS_NUM);
 	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_INTERLEAVE_WA, 0);
 
-
 #if defined(CONFIG_DDR4)
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
 			  LOAD_PATTERN_MASK_BIT |
@@ -506,9 +527,7 @@ static int ddr3_tip_init_apn806_silicon(u32 dev_num, u32 board_id)
 			  WRITE_LEVELING_TF_MASK_BIT |
 			  READ_LEVELING_TF_MASK_BIT |
 			  RECEIVER_CALIBRATION_MASK_BIT |
-			  WL_PHASE_CORRECTION_MASK_BIT |
-			  DQ_VREF_CALIBRATION_MASK_BIT |
-			  DQ_MAPPING_MASK_BIT);
+			  DQ_VREF_CALIBRATION_MASK_BIT);
 	rl_mid_freq_wa = 0;
 #else /* CONFIG_DDR4 */
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
