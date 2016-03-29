@@ -171,14 +171,14 @@ static int ddr3_tip_apn806_if_write(u8 dev_num, enum hws_access_type interface_a
 {
 	u32 ui_data_read;
 
-	reg_addr += TIP_BASE_ADDRESS;
-
 	if (mask != MASK_ALL_BITS) {
 		CHECK_STATUS(ddr3_tip_apn806_if_read
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id, reg_addr,
 			      &ui_data_read, MASK_ALL_BITS));
 		data_value = (ui_data_read & (~mask)) | (data_value & mask);
 	}
+
+	reg_addr += TIP_BASE_ADDRESS;
 
 	reg_write(reg_addr, data_value);
 
