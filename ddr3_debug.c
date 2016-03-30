@@ -1736,7 +1736,7 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 		/* save leveling value after running algorithm */
 		ddr3_tip_read_adll_value(dev_num, ctrl_adll,
 					 (reg + (cs * CS_REGISTER_ADDR_OFFSET)), 0x1F);
-		read_phase_value(ctrl_level_phase, (reg + (cs * CS_REGISTER_ADDR_OFFSET)), 0x7 << 6);
+		read_phase_value(dev_num, ctrl_level_phase, (reg + (cs * CS_REGISTER_ADDR_OFFSET)), 0x7 << 6);
 
 		if (direction == 0)
 			ddr3_tip_read_adll_value(dev_num, ctrl_adll1,
@@ -1871,7 +1871,7 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 		}
 
 		/* write back to the phy the Rx DQS value, we store in the beginning */
-		write_leveling_value(ctrl_adll, ctrl_level_phase, (reg +  cs * CS_REGISTER_ADDR_OFFSET));
+		write_leveling_value(dev_num, ctrl_adll, ctrl_level_phase, (reg +  cs * CS_REGISTER_ADDR_OFFSET));
 		if (direction == 0)
 			ddr3_tip_write_adll_value(dev_num, ctrl_adll1,
 						  (0x1 + (cs * CS_REGISTER_ADDR_OFFSET)));
