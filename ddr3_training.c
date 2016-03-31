@@ -2518,7 +2518,10 @@ int ddr3_tip_adll_regs_bypass(u32 dev_num, u32 reg_val1, u32 reg_val2)
 static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 {
 	enum hws_ddr_freq freq = init_freq;
+/* TODO: enable this functionality for other platforms */
+#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
 	struct init_cntr_param init_cntr_prm;
+#endif
 	int ret = MV_OK;
 	int adll_bypass_flag = 0;
 	u32 if_id;
@@ -2550,6 +2553,8 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 		}
 	}
 
+/* TODO: enable this functionality for other platforms */
+#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
 	if (is_adll_calib_before_init != 0) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 				  ("with adll calib before init\n"));
@@ -2580,6 +2585,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 				return MV_FAIL;
 		}
 	}
+#endif
 
 #ifdef STATIC_ALGO_SUPPORT
 	if (mask_tune_func & STATIC_LEVELING_MASK_BIT) {
