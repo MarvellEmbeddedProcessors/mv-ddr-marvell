@@ -654,6 +654,7 @@ int mv_ddr_mc_static_config(void)
 #if defined(a70x0)
 static int mv_ddr_apn806_phy_static_config(u32 if_id, u32 subphys_num, enum hws_ddr_phy subphy_type)
 {
+#if 0
 	u32 i, mode, subphy_id, dev_num = 0;
 
 	mode = ddr3_get_static_ddr_mode();
@@ -678,6 +679,7 @@ static int mv_ddr_apn806_phy_static_config(u32 if_id, u32 subphys_num, enum hws_
 			}
 		}
 	}
+#endif
 	return MV_OK;
 }
 #else
@@ -710,4 +712,4 @@ void mv_ddr_phy_static_config(void)
 	mk6_phy_init();
 #endif
 }
-#endif
+#endif /* CONFIG_PHY_STATIC */

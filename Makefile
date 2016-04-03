@@ -192,6 +192,7 @@ AS       = $(CROSS)gcc
 AR       = $(CROSS)ar
 OBJCOPY  = $(CROSS)objcopy
 OBJDUMP  = $(CROSS)objdump
+STRIP    = $(CROSS)strip
 
 RM       = @rm -rf
 MKDIR    = @mkdir -p
@@ -214,15 +215,18 @@ INCPATH += ../mv_ddr4
 endif
 INCLUDE = $(addprefix -I, $(INCPATH))
 
-LIB = $(OBJ_DIR)/mv_ddr_lib.a
+LIBNAME = mv_ddr_lib.a
+LIB = $(OBJ_DIR)/$(LIBNAME)
 ifeq ($(MV_DDR4),y)
-LIB4 = $(SRCDIR4)/mv_ddr4_lib.a
+LIBNAME4 = mv_ddr4_lib.a
+LIB4 = $(SRCDIR4)/$(LIBNAME4)
 endif
 
 CFLAGS = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2
 CFLAGS += -march=armv8-a -fpie $(INCLUDE) -D$(PLATFORM)
 
-CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806
+CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806 -DCONFIG_MC_STATIC -DCONFIG_PHY_STATIC
+
 ifeq ($(MV_DDR4),y)
 CFLAGS += -DCONFIG_DDR4
 endif
@@ -249,35 +253,39 @@ else
 all: check_env header create_dir $(LIB)
 endif
 
+%.o: %.c
+	$(CC) -c $(CFLAGS) -o $@ $<
+
 $(OBJ_DIR)/%.o: %.c
-	$(ECHO) "  CC    $<"
+	$(ECHO) "  CC      $<"
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(OBJ_DIR)/%.o: %.S
-	$(ECHO) "  AS    $<"
+	$(ECHO) "  AS      $<"
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-$(LIB): $(OBJ_DIR) $(COBJ)
-	$(AR) r $(LIB) $(COBJ)
+$(LIB): $(COBJ)
+	$(ECHO) "  AR      $(LIBNAME)"
+	$(AR) rcs $(LIB) $(COBJ)
 
-$(SRCDIR4)/%.o: %.c
-	$(ECHO) "  CC    $<"
-	$(CC) -c $(CFLAGS) -o $@ $<
-
+ifeq ($(MV_DDR4_BUILD),y)
 $(LIB4): $(COBJ4)
-	$(AR) r $(LIB4) $(COBJ4)
+	$(ECHO) "  AR      $(LIBNAME4)"
+	$(AR) rcs $(LIB4) $(COBJ4)
+	$(STRIP) --strip-unneeded $(LIB4)
+	$(CP) $(LIB4) $(OBJ_DIR)
 	$(RM) $(COBJ4)
-	$(MV) $(LIB4) $(OBJ_DIR)
+else
+$(LIB4): $(OBJ_DIR)
+	$(ECHO) "  CP      $(LIBNAME4)"
+	$(CP) $(LIB4) $(OBJ_DIR)
+endif
 
 create_dir:
 	$(MKDIR) $(OBJ_DIR)/apn806
 
 header:
-	$(ECHO) "\n  Building DRAM driver"
-	$(ECHO) "\n  COBJ = $(COBJ)"
-ifeq ($(MV_DDR4),y)
-	$(ECHO) "\n  COBJ4 = $(COBJ4)"
-endif
+	$(ECHO) "\nBuilding DRAM driver"
 
 check_env:
 ifndef PLATFORM
