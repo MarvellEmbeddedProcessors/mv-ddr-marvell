@@ -116,19 +116,6 @@ MV_U32 ddr_init(void)
 #elif defined(MV_DDR_ATF)
 #include "dram_if.h"
 
-void mdelay(unsigned long msec)
-{
-	unsigned long cnt;
-
-	if (msec > 999)
-		cnt = 1000000000; /* 1,000,000,000 */
-	else
-		cnt *= 1000000; /* cnt * 1,000,000 */
-
-	while (msec--)
-		;
-}
-
 int dram_init(struct dram_config *cfg)
 {
 	ddr3_init();
