@@ -270,12 +270,12 @@ static inline void mmio_write2_32(u32 val, u32 addr)
 
 static inline void mmio_clrsetbits2_32(u32 addr, u32 val, u32 mask)
 {
-	mmio_clrsetbits2_32(addr, mask, val);
+	mmio_clrsetbits_32(addr, mask, val);
 }
 
 #define writel mmio_write2_32
 #define readl mmio_read_32
-#define writel_mask mmio_clrsetbits2_32
+#define writel_clrset mmio_clrsetbits2_32
 
 #if defined(CONFIG_DDR4)
 #define vref_calibration_wa vrefCalibrationWA

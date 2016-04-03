@@ -349,14 +349,14 @@ int mv_ddr_apn806_set_divider(u8 dev_num, u32 if_id, enum hws_ddr_freq target_fr
 	/* calculate the mc6 target divider value */
 	mc6_target_divider = calc_target_divider_value(mc6_divider, controller_init_frequency, target_frequency);
 
-	writel_mask(DEVICE_GENERAL_CONTROL_1,
+	writel_clrset(DEVICE_GENERAL_CONTROL_1,
 		mc6_target_divider << MISC_CLKDIV_RATIO_0_OFFSET |
 		dunit_target_divider << MISC_CLKDIV_RATIO_1_OFFSET,
 		MISC_CLKDIV_RATIO_0_MASK << MISC_CLKDIV_RATIO_0_OFFSET |
 		MISC_CLKDIV_RATIO_1_MASK << MISC_CLKDIV_RATIO_1_OFFSET);
 
 	/* Reload force, relax enable, align enable set */
-	writel_mask(DEVICE_GENERAL_CONTROL_3,
+	writel_clrset(DEVICE_GENERAL_CONTROL_3,
 		RELOAD_FORCE_VALUE << MISC_CLKDIV_RELOAD_FORCE_OFFSET |
 		RELAX_EN_VALUE << MISC_CLKDIV_RELAX_EN_OFFSET |
 		ALIGN_EN_VALUE << MISC_CLKDIV_RELOAD_FORCE_OFFSET,
@@ -365,43 +365,43 @@ int mv_ddr_apn806_set_divider(u8 dev_num, u32 if_id, enum hws_ddr_freq target_fr
 		MISC_CLKDIV_ALIGN_EN_MASK << MISC_CLKDIV_RELOAD_FORCE_OFFSET);
 
 	/* Reload smooth */
-	writel_mask(DEVICE_GENERAL_CONTROL_4,
+	writel_clrset(DEVICE_GENERAL_CONTROL_4,
 		RELOAD_SMOOTH_VALUE << MISC_CLKDIV_RELOAD_SMOOTH_OFFSET,
 		MISC_CLKDIV_RELOAD_SMOOTH_MASK << MISC_CLKDIV_RELOAD_SMOOTH_OFFSET);
 
 	/* Toggle reload ratio first 0x1 then 0x0*/
-	writel_mask(DEVICE_GENERAL_CONTROL_4,
+	writel_clrset(DEVICE_GENERAL_CONTROL_4,
 		RELOAD_RATIO_VALUE << MISC_CLKDIV_RELOAD_RATIO_OFFSET,
 		MISC_CLKDIV_RELOAD_RATIO_MASK << MISC_CLKDIV_RELOAD_RATIO_OFFSET);
 
 	/* delay between toggles */
 	mdelay(10);/* need to define the delay value */
-	writel_mask(DEVICE_GENERAL_CONTROL_4,
+	writel_clrset(DEVICE_GENERAL_CONTROL_4,
 		(~ RELOAD_RATIO_VALUE) << MISC_CLKDIV_RELOAD_RATIO_OFFSET,
 		MISC_CLKDIV_RELOAD_RATIO_MASK << MISC_CLKDIV_RELOAD_RATIO_OFFSET);
 
 	/* Unblock phase_sync_mc_clk in RFU */
-	writel_mask(CLOCKS_CONTROL,
+	writel_clrset(CLOCKS_CONTROL,
 		BLOCK_PHASE_RESET_VALUE << BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_OFFSET,
 		BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_MASK << BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_OFFSET);
 	/* delay between toggles */
 	mdelay(10);/* need to define the delay value */
 
 	/* Ring-MC clock f2s reset toggle */
-	writel_mask(CLOCKS_CONTROL,
+	writel_clrset(CLOCKS_CONTROL,
 		RING_CLOCK_VALUE << RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_OFFSET,
 		RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_MASK << RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_OFFSET);
 
 	/* delay between toggles */
 	mdelay(50);/* need to define the delay value */
-	writel_mask(CLOCKS_CONTROL,
+	writel_clrset(CLOCKS_CONTROL,
 		(~ RING_CLOCK_VALUE) << RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_OFFSET,
 		RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_MASK << RING_CLOCK_TO_ALL_CLOCK_PHASE_RESET_OFFSET);
 
 	/* delay between toggles */
 	mdelay(50);/* need to define the delay value */
 	/* Set phase_sync_mc_clk back to 0x1*/
-	writel_mask(CLOCKS_CONTROL,
+	writel_clrset(CLOCKS_CONTROL,
 		(~ BLOCK_PHASE_RESET_VALUE) << BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_OFFSET,
 		BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_MASK << BLOCK_PHASE_RESET_TO_RING_TO_MC_CLOCK_OFFSET);
 
@@ -590,7 +590,7 @@ int ddr3_silicon_post_init(void)
 
 int mv_ddr_pre_training_soc_config(const char *ddr_type)
 {
-	writel_mask(DSS_CR0, DDR4_ON_BOARD << MUXING_MODE_OFFSET, MUXING_MODE_MASK);
+	writel_clrset(DSS_CR0, DDR4_ON_BOARD << MUXING_MODE_OFFSET, MUXING_MODE_MASK);
 
 	return MV_OK;
 }
