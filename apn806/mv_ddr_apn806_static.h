@@ -148,10 +148,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DRAM_DIRECT_SIZE		(2048)
 
 /*
- * TIP_DDR_STATIC_CONFIG for static configuration thru TIP,
+ * CONFIG_DUNIT_STATIC for static configuration thru TIP,
  * otherwise, thru MK6.
  */
-#define TIP_DDR_STATIC_CONFIG
+#define CONFIG_DUNIT_STATIC
 
 struct mk6_reg_data {
 	uint32_t offset;
@@ -2163,84 +2163,89 @@ struct mk6_reg_data mk6_phy_setup[] = {
 	{-1, -1},
 };
 #elif defined(70x0)
-#if defined(TIP_DDR_STATIC_CONFIG)
+#if defined(CONFIG_DUNIT_STATIC)
 struct mk6_reg_data ddr_static_setup[] = {
 	/* Traffic thru Tip::TIP init for MISL BOARD 2CS 4Gb x8 devices of micron - 2133P */
-	{0xF00116D8, 0x3CA},
-	{0xF06F0100, 0x44C0000},
-	{0xF00119D4, 0x2},
-	{0xF06F8D36, 0xACAC0000},
-	{0xF06F4360, 0xFFFF0044},
-	{0xF00114C8, 0x5145941},
-	{0xF00117C8, 0x15145941},
-	{0xF0011DC8, 0x5145941},
-	{0xF0011EC8, 0x15145941},
-	{0xF00114CC, 0x1200D},
-	{0xF0011538, 0xD0D},
-	{0xF001153C, 0x1515},
-	{0xf00116a0, 0xcc000000},	/* CKdelayADLL */
-	{0xf00116a0, 0xc0000047},	/* WLpup0CS0 */
-	{0xf00116a0, 0xc0400051},	/* WLpup1 */
-	{0xf00116a0, 0xc0800013},	/* WLpup2 */
-	{0xf00116a0, 0xc0c0000E},	/* WLpup3 */
-	{0xf00116a0, 0xc002004E},	/* RLpup0 */
-	{0xf00116a0, 0xc042004F},	/* RLpup1 */
-	{0xf00116a0, 0xc0820018},	/* RLpup2 */
-	{0xf00116a0, 0xc0c20048},	/* RLpup3 */
-	{0xf00116a0, 0xc0010011},	/* Ctxpup0 */
-	{0xf00116a0, 0xc041001B},	/* Ctxpup1 */
-	{0xf00116a0, 0xc081001D},	/* Ctxpup2 */
-	{0xf00116a0, 0xc0c10018},	/* Ctxpup3 */
-	{0xf00116a0, 0xc0040044},	/* WLpup0CS1 */
-	{0xf00116a0, 0xc044004E},	/* WLpup1 */
-	{0xf00116a0, 0xc0840010},	/* WLpup2 */
-	{0xf00116a0, 0xc0c4000B},	/* WLpup3 */
-	{0xf00116a0, 0xc006004B},	/* RLpup0 */
-	{0xf00116a0, 0xc046004C},	/* RLpup1 */
-	{0xf00116a0, 0xc0860015},	/* RLpup2 */
-	{0xf00116a0, 0xc0c60046},	/* RLpup3 */
-	{0xf00116a0, 0xc005000E},	/* Ctxpup0 */
-	{0xf00116a0, 0xc0450018},	/* Ctxpup1 */
-	{0xf00116a0, 0xc085001A},	/* Ctxpup2 */
-	{0xf00116a0, 0xc0c50015},	/* Ctxpup3 */
-	{0xf00116a0, 0xE8021503},	/* ADLL 0x92 */
-	{0xf00116a0, 0xE8130050},	/* ADLL */
-	{0xf00116a0, 0xE8140012},	/* ADLL */
-	{0xf00116a0, 0xEC021503},	/* ADLL */
-	{0xf00116a0, 0xEC130050},	/* ADLL */
-	{0xf00116a0, 0xEC140012},	/* ADLL */
-	{0xf00116a0, 0xF81B0020},	/* datareceivercalibrationBC */
-	{0xf00116a0, 0xE8280428},	/* vrefconfigurationBC */
-	{0xf00116a0, 0xEC24070C},	/* ctrldrivestrengthBC */
-	{0xf00116a0, 0xE824070E},	/* datadrivestrengthBC */
-	{0xf00116a0, 0xE8260040},	/* dataODTBC */
-	{0xF0011400, 0x7b10cc30},
-	{0xF0011404, 0x36301848},
-	{0xF0011408, 0x5411cbb9},
-	{0xF001140c, 0x384A1f97},
-	{0xF0011410, 0x17114444},
-	{0xF0011414, 0x7c8},
-	{0xF0011424, 0x60f3f7},
-	{0xF001142c, 0x14c5138},
-	{0xF0011498, 0xf},
-	{0xF001149c, 0x303},
-	{0xF00114e0, 0x400},
-	{0xF00114e4, 0x3ff},
-	{0xF00114e8, 0x7f01ff},
-	{0xF00114ec, 0x54},
-	{0xF0011524, 0x8800},
-	{0xF00115e0, 0x23},
-	{0xF00115e4, 0x203c18},
-	{0xF00115ec, 0xd9ff0029},
-	{0xF0011900, 0x314},	/* MR0 */
-	{0xF0011904, 0x001},	/* MR1 */
-	{0xF0011908, 0x200},	/* MR2 */
-	{0xF001190c, 0x800},	/* MR3 */
-	{0xF0011910, 0x0},	/* MR4 */
-	{0xF0011914, 0x4A0},	/* MR5 */
-	{0xF0011918, 0x80A},	/* MR6 */
-	{0xF0020020, 0x13000001},	/* MCinit */
-	{0xF0011480, 0x1},	/* init */
+	{0xF0000030, 0x00000003}, /* set private ID*/
+	{0xF000070C, 0x000000FF}, /* enable SMC for STX access */
+	{0xf00116d8, 0x000003cc},
+	{0xf06f0100, 0x044c0006},
+	{0xf00119d4, 0x00000002},
+	{0xf06f8d38, 0xacac0000},
+	{0xf06f4360, 0xffff0044},
+	{0xf00114c8, 0x01cb0008},
+	{0xf00117c8, 0x12c80008},
+	{0xf0011dc8, 0x01cb0008},
+	{0xf0011ec8, 0x12c80008},
+	{0xf00116a0, 0xe83f0001},
+	{0xf00114cc, 0x0001200d},
+	{0xf0011524, 0x00008800},
+	{0xf0011400, 0x6b10cc30},
+	{0xf0011400, 0x7b10cc30},
+	{0xf0011538, 0x00000d0d},
+	{0xf001153c, 0x00001515},
+	{0xf00116a0, 0xcc00000a},
+	{0xf00116a0, 0xc0006852},
+	{0xf00116a0, 0xc0402080},
+	{0xf00116a0, 0xc0808419},
+	{0xf00116a0, 0xc0c06010},
+	{0xf00116a0, 0xc002010d},
+	{0xf00116a0, 0xc042010e},
+	{0xf00116a0, 0xc08200d2},
+	{0xf00116a0, 0xc0c20103},
+	{0xf00116a0, 0xc003000a},
+	{0xf00116a0, 0xc043000a},
+	{0xf00116a0, 0xc083000a},
+	{0xf00116a0, 0xc0c3000a},
+	{0xf00116a0, 0xc0040044},
+	{0xf00116a0, 0xc044004e},
+	{0xf00116a0, 0xc0840010},
+	{0xf00116a0, 0xc0c4000b},
+	{0xf00116a0, 0xc006004b},
+	{0xf00116a0, 0xc046004c},
+	{0xf00116a0, 0xc0860015},
+	{0xf00116a0, 0xc0c60046},
+	{0xf00116a0, 0xc005000e},
+	{0xf00116a0, 0xc0450018},
+	{0xf00116a0, 0xc085001a},
+	{0xf00116a0, 0xc0c50015},
+	{0xf00116a0, 0xe8021503},
+	{0xf00116a0, 0xe8130050},
+	{0xf00116a0, 0xe8140012},
+	{0xf00116a0, 0xec021503},
+	{0xf00116a0, 0xec130050},
+	{0xf00116a0, 0xec140012},
+	{0xf00116a0, 0xf81b0020},
+	{0xf00116a0, 0xe8280428},
+	{0xf00116a0, 0xec24070e},
+	{0xf00116a0, 0xe824078f},
+	{0xf00116a0, 0xe8260100},
+	{0xf0011400, 0x7b104c30},
+	{0xf0011404, 0x36301848},
+	{0xf0011408, 0x5411cbb9},
+	{0xf001140c, 0x784a1f97},
+	{0xf0011410, 0x17114444},
+	{0xf0011414, 0x000007c8},
+	{0xf0011424, 0x0060f3f7},
+	{0xf001142c, 0x14c5138 },
+	{0xf0011498, 0x0000000f},
+	{0xf001149c, 0x00000303},
+	{0xf00114e0, 0x00000400},
+	{0xf00114e4, 0x000003ff},
+	{0xf00114e8, 0x007f01ff},
+	{0xf00114ec, 0x00000054},
+	{0xf00115e0, 0x00000023},
+	{0xf00115e4, 0x00203c18},
+	{0xf00115ec, 0xd9ff0029},
+	{0xf0011900, 0x00000314},
+	{0xf0011904, 0x00000001},
+	{0xf0011908, 0x00000200},
+	{0xf001190c, 0x00000800},
+	{0xf0011910, 0x00000000},
+	{0xf0011914, 0x000004a0},
+	{0xf0011918, 0x0000080a},
+	{0xf0020020, 0x13000001},
+	{0xf0011480, 0x00000001},
 	{-1, -1},
 };
 #else /* ddr static configuratioin thru mk6 */
@@ -2353,9 +2358,9 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xF0020020, 0x13000001},	/* MCinit */
 	{-1, -1},
 };
-#endif /* TIP_DDR_STATIC_CONFIG */
+#endif /* CONFIG_DUNIT_STATIC */
 #elif defined(a70x0_cust)
-#if defined(TIP_DDR_STATIC_CONFIG)
+#if defined(CONFIG_DUNIT_STATIC)
 struct mk6_reg_data ddr_static_setup[] = {
 	/* Traffic thru Tip::TIP init for CISCO with 1CS 8Gb x4 devices of Samsung 2400 (17-17-17) */
 	{0xF00116D8, 0x3CA},
@@ -2521,7 +2526,7 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xF0020020, 0x13000001},	/* MCinit */
 	{-1, -1},
 };
-#endif /* TIP_DDR_STATIC_CONFIG */
+#endif /* CONFIG_DUNIT_STATIC */
 #endif /* a70x0 or a70x0_cust */
 #endif /* defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC) */
 #endif /* _MV_DDR_APN806_Z_STATIC_H */
