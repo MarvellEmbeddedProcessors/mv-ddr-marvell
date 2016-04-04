@@ -97,7 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 
-#if defined(SUPPORT_STATIC_PHY_CONFIG) || defined(SUPPORT_STATIC_MC_CONFIG)
+#if defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC)
 #include "mv_ddr_apn806_static.h"
 #endif
 
@@ -613,7 +613,7 @@ void mv_ddr_mc_config(void)
 	/* TODO: Add McKinley6 init function */
 }
 
-#ifdef SUPPORT_STATIC_MC_CONFIG
+#ifdef CONFIG_MC_STATIC
 #if defined(a70x0) || defined(a70x0_cust)
 static void ddr_static_config(void)
 {
@@ -650,7 +650,7 @@ int mv_ddr_mc_static_config(void)
 
 #endif /* CONFIG_MV_DDR_STATIC_MC */
 
-#ifdef SUPPORT_STATIC_PHY_CONFIG
+#ifdef CONFIG_PHY_STATIC
 #if defined(a70x0)
 static int mv_ddr_apn806_phy_static_config(u32 if_id, u32 subphys_num, enum hws_ddr_phy subphy_type)
 {

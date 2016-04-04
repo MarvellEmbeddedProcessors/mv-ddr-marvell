@@ -256,13 +256,13 @@ extern u16 apn806_odt_intercept[];
 int mv_ddr_pre_training_soc_config(const char *ddr_type);
 int mv_ddr_post_training_soc_config(const char *ddr_type);
 
-#ifdef SUPPORT_STATIC_MC_CONFIG
+#ifdef CONFIG_MC_STATIC
 int mv_ddr_mc_static_config(void);
-#endif /* SUPPORT_STATIC_MC_CONFIG */
+#endif /* CONFIG_MC_STATIC */
 
-#ifdef SUPPORT_STATIC_PHY_CONFIG
+#ifdef CONFIG_PHY_STATIC
 void mv_ddr_phy_static_config(void);
-#endif /* SUPPORT_STATIC_PHY_CONFIG */
+#endif /* CONFIG_PHY_STATIC */
 
 int mv_ddr_apn806_get_init_ddr_freq(int dev_num, enum hws_ddr_freq *freq);
 int mv_ddr_apn806_set_divider(u8 dev_num, u32 if_id, enum hws_ddr_freq target_frequency);

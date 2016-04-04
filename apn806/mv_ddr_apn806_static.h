@@ -98,7 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_APN806_Z_STATIC_H
 #define _MV_DDR_APN806_Z_STATIC_H
 
-#if defined(SUPPORT_STATIC_PHY_CONFIG) || defined(SUPPORT_STATIC_MC_CONFIG)
+#if defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC)
 
 #define MCK6_DRAM_STATUS_REG		(0x8)
 #define INIT_DONE0_CH0			(0x1)
@@ -2523,5 +2523,5 @@ struct mk6_reg_data ddr_static_setup[] = {
 };
 #endif /* TIP_DDR_STATIC_CONFIG */
 #endif /* a70x0 or a70x0_cust */
-#endif /* defined(SUPPORT_STATIC_PHY_CONFIG) || defined(SUPPORT_STATIC_MC_CONFIG) */
+#endif /* defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC) */
 #endif /* _MV_DDR_APN806_Z_STATIC_H */

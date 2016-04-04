@@ -159,7 +159,7 @@ int ddr3_init(void)
 	if (MV_OK != status)
 		return status;
 
-#ifdef SUPPORT_STATIC_MC_CONFIG
+#ifdef CONFIG_MC_STATIC
 	mv_ddr_mc_static_config();
 #else
 	mv_ddr_mc_config();
@@ -171,7 +171,7 @@ int ddr3_init(void)
 		return status;
 	}
 
-#ifdef SUPPORT_STATIC_PHY_CONFIG
+#ifdef CONFIG_PHY_STATIC
 	mv_ddr_phy_static_config();
 #else
 	/* PHY initialization (Training) */

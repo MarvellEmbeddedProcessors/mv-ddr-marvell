@@ -98,7 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_A38X_MC_STATIC_H
 #define _MV_DDR_A38X_MC_STATIC_H
 
-#ifdef SUPPORT_STATIC_MC_CONFIG
+#ifdef CONFIG_MC_STATIC
 
 struct reg_data a38x_mc_800[] = {
 	{0x1400,	0x7b00cc30, 0xffffffff},
@@ -168,6 +168,6 @@ struct reg_data a38x_mc_600[] = {
 	{0xffffffff,	0, 0}
 };
 
-#endif /* SUPPORT_STATIC_MC_CONFIG */
+#endif /* CONFIG_MC_STATIC */
 
 #endif /* _MV_DDR_A38X_MC_STATIC_H */

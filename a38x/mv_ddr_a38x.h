@@ -222,7 +222,7 @@ extern u16 a38x_odt_intercept[];
 int mv_ddr_pre_training_soc_config(const char *ddr_type);
 int mv_ddr_post_training_soc_config(const char *ddr_type);
 
-#ifdef SUPPORT_STATIC_MC_CONFIG
+#ifdef CONFIG_MC_STATIC
 struct mv_ddr_mc_reg_config {
 	u32 reg_addr;
 	u32 reg_data;
@@ -230,16 +230,16 @@ struct mv_ddr_mc_reg_config {
 };
 
 int mv_ddr_mc_static_config(void);
-#endif /* SUPPORT_STATIC_MC_CONFIG */
+#endif /* CONFIG_MC_STATIC */
 
-#ifdef SUPPORT_STATIC_PHY_CONFIG
+#ifdef CONFIG_PHY_STATIC
 struct mv_ddr_subphys_reg_config {
 	u32 reg_addr;
 	u32 reg_data[5];
 };
 
 void mv_ddr_phy_static_config(void);
-#endif /* SUPPORT_STATIC_PHY_CONFIG */
+#endif /* CONFIG_PHY_STATIC */
 
 
 #endif /* _MV_DDR_A38X_H */

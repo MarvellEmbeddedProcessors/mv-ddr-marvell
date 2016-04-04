@@ -99,10 +99,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "sys_env_lib.h"
 
-#if defined(SUPPORT_STATIC_PHY_CONFIG)
+#if defined(CONFIG_PHY_STATIC)
 #include "mv_ddr_a38x_phy_static.h"
 #endif
-#if defined(SUPPORT_STATIC_MC_CONFIG)
+#if defined(CONFIG_MC_STATIC)
 #include "mv_ddr_a38x_mc_static.h"
 #endif
 
@@ -162,7 +162,7 @@ struct dlb_config ddr3_dlb_config_table[] = {
 };
 #endif /* CONFIG_DDR4 */
 
-#if defined(SUPPORT_STATIC_PHY_CONFIG) || defined(SUPPORT_STATIC_MC_CONFIG)
+#if defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC)
 struct dram_modes {
 	char *mode_name;
 	u8 cpu_freq;
@@ -1092,7 +1092,7 @@ u32 ddr3_tip_get_init_freq(void)
 	return freq;
 }
 
-#if defined(SUPPORT_STATIC_PHY_CONFIG) || defined(SUPPORT_STATIC_MC_CONFIG)
+#if defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC)
 /*
  * Name:     ddr3_get_cpu_freq
  * Desc:     read S@R and return CPU frequency
@@ -1555,7 +1555,7 @@ void mv_ddr_mc_config(void)
 	}
 }
 
-#ifdef SUPPORT_STATIC_MC_CONFIG
+#ifdef CONFIG_MC_STATIC
 int mv_ddr_mc_static_config(void)
 {
 	u32 mode, i = 0;
@@ -1575,7 +1575,7 @@ int mv_ddr_mc_static_config(void)
 }
 #endif /* CONFIG_MV_DDR_STATIC_MC */
 
-#ifdef SUPPORT_STATIC_PHY_CONFIG
+#ifdef CONFIG_PHY_STATIC
 static int mv_ddr_a38x_phy_static_config(u32 if_id, u32 subphys_num, enum hws_ddr_phy subphy_type)
 {
 	u32 i, mode, subphy_id, dev_num = 0;

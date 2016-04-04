@@ -98,7 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_A38X_PHY_STATIC_H
 #define _MV_DDR_A38X_PHY_STATIC_H
 
-#ifdef SUPPORT_STATIC_PHY_CONFIG
+#ifdef CONFIG_PHY_STATIC
 
 struct mv_ddr_subphys_reg_config a38x_ctrl_phy_600[] = {
 	{0x0,{0x6,0x6,0x6}},
@@ -1139,6 +1139,6 @@ struct mv_ddr_subphys_reg_config a38x_data_phy_800[] = {
 	{0xff,{0x3f,0x3f,0x3f,0x3f}},
 	{0xffffffff, {0, 0, 0, 0}}
 };
-#endif /* SUPPORT_STATIC_PHY_CONFIG */
+#endif /* CONFIG_PHY_STATIC */
 
 #endif /* _MV_DDR_A38X_PHY_STATIC_H */
