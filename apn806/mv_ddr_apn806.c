@@ -590,7 +590,9 @@ int ddr3_silicon_post_init(void)
 
 int mv_ddr_pre_training_soc_config(const char *ddr_type)
 {
+#if 0 /* FIXME */
 	writel_clrset(DSS_CR0, DDR4_ON_BOARD << MUXING_MODE_OFFSET, MUXING_MODE_MASK);
+#endif
 
 	return MV_OK;
 }
