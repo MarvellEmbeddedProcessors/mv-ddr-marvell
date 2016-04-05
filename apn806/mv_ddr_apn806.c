@@ -647,6 +647,9 @@ int mv_ddr_mc_static_config(void)
 #else
 	mk6_mac_init();
 #endif
+
+	mdelay(10);
+
 	return MV_OK;
 }
 
