@@ -136,11 +136,8 @@ int ddr3_init(void)
 {
 	int status;
 
-	/* Print version from internal library */
-	ddr3_print_version();
-
-	/* Add sub-version string */
-	DEBUG_INIT_C("", SUB_VERSION, 1);
+	/* Print mv_ddr version */
+	mv_ddr_ver_print();
 
 	/* SoC/Board special initializations */
 	mv_ddr_pre_training_soc_config(ddr_type);
@@ -189,7 +186,7 @@ int ddr3_init(void)
 		ddr3_new_tip_ecc_scrub();
 #endif
 
-	printf("%s Training Sequence - Ended Successfully\n", ddr_type);
+	printf("mv_ddr: completed successfully\n");
 
 	return MV_OK;
 }

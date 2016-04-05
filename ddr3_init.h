@@ -266,7 +266,7 @@ int ddr3_post_run_alg(void);
 int ddr3_if_ecc_enabled(void);
 void ddr3_new_tip_ecc_scrub(void);
 
-void ddr3_print_version(void);
+void mv_ddr_ver_print(void);
 struct hws_topology_map *ddr3_get_topology_map(void);
 
 int ddr3_if_ecc_enabled(void);
