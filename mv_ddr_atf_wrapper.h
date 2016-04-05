@@ -227,11 +227,7 @@ typedef unsigned int u32;
 #include <string.h>
 
 /* mdelay function */
-#if 0 /* TODO: temporary excluded until enabled in ATF */
 #include "../../../include/drivers/delay_timer.h"
-#endif
-/* TODO: meantime, temporary implementation used */
-void mdelay(unsigned long msec);
 
 /* memcpy function */
 #include "../../../include/lib/mmio.h"
