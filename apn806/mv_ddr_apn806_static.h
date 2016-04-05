@@ -2162,7 +2162,7 @@ struct mk6_reg_data mk6_phy_setup[] = {
 	{ 0x8d0, 0x00000019},
 	{-1, -1},
 };
-#elif defined(70x0)
+#elif defined(a70x0)
 #if defined(CONFIG_DUNIT_STATIC)
 struct mk6_reg_data ddr_static_setup[] = {
 	/* Traffic thru Tip::TIP init for MISL BOARD 2CS 4Gb x8 devices of micron - 2133P */
