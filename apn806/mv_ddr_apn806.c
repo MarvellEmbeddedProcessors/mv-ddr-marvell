@@ -149,6 +149,7 @@ static u8 mv_ddr_tip_clk_ratio_get(u32 freq)
 	return 2;
 }
 
+
 /*
  * Name:	mv_ddr_tip_freq_config_get
  * Desc:
@@ -160,14 +161,11 @@ static int mv_ddr_tip_freq_config_get(u8 dev_num, enum hws_ddr_freq freq,
 				      struct hws_tip_freq_config_info
 					*freq_config_info)
 {
-	if (bw_per_freq[freq] == 0xff)
-		return MV_NOT_SUPPORTED;
-
 	if (freq_config_info == NULL)
 		return MV_BAD_PARAM;
 
-	freq_config_info->bw_per_freq = NULL;
-	freq_config_info->rate_per_freq = NULL;
+	freq_config_info->bw_per_freq = 0xff; /* TODO: TBD */
+	freq_config_info->rate_per_freq = 0xff; /* TODO: TBD */
 	freq_config_info->is_supported = 1;
 
 	return MV_OK;
