@@ -205,6 +205,8 @@ ECHO     = @echo
 
 OBJ_DIR ?= . # set to $(CUR_DIR)/$(BUILD_PLAT)/ble in ble/ble.mk
 SRCDIRS = . ./apn806
+MV_DDR4 = y
+
 ifeq ($(MV_DDR4),y)
 SRCDIR4 = ../mv_ddr4
 endif
