@@ -616,6 +616,9 @@ int mv_ddr_pre_training_soc_config(const char *ddr_type)
 
 int mv_ddr_post_training_soc_config(const char *ddr_type)
 {
+	/* set mux to MC6 */
+	mmio_write_32(0xf00116d8, 0x38c);
+
 	return MV_OK;
 }
 
