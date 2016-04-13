@@ -676,7 +676,7 @@ int mv_ddr_mc_static_config(void)
 #endif /* CONFIG_MV_DDR_STATIC_MC */
 
 #ifdef CONFIG_PHY_STATIC
-#if defined(a70x0)
+#if defined(a70x0) || defined(a70x0_cust)
 static int mv_ddr_apn806_phy_static_config(u32 if_id, u32 subphys_num, enum hws_ddr_phy subphy_type)
 {
 #if 0
@@ -729,7 +729,7 @@ static void mk6_phy_init(void)
 
 void mv_ddr_phy_static_config(void)
 {
-#if defined(a70x0)
+#if defined(a70x0) || defined(a70x0_cust)
 	/* TODO: Need to use variable for subphys number */
 	mv_ddr_apn806_phy_static_config(0, 4, DDR_PHY_DATA);
 	mv_ddr_apn806_phy_static_config(0, 3, DDR_PHY_CONTROL);
