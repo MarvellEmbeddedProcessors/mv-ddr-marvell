@@ -216,6 +216,7 @@ ifeq ($(MV_DDR4),y)
 INCPATH += ../mv_ddr4
 endif
 INCLUDE = $(addprefix -I, $(INCPATH))
+INCLUDE += $(PLAT_INCLUDES)
 
 LIBNAME = mv_ddr_lib.a
 LIB = $(OBJ_DIR)/$(LIBNAME)
@@ -224,7 +225,7 @@ LIBNAME4 = mv_ddr4_lib.a
 LIB4 = $(SRCDIR4)/$(LIBNAME4)
 endif
 
-CFLAGS = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2
+CFLAGS = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2 -nostdinc
 CFLAGS += -march=armv8-a -fpie $(INCLUDE) -D$(PLATFORM)
 
 CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806 -DCONFIG_MC_STATIC
