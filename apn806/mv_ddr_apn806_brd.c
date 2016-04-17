@@ -103,14 +103,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * the DDR3 controller.
  */
 
-#if defined(CONFIG_DDR4)
-#define SPEED_BIN_DDR_DB_70x0	SPEED_BIN_DDR_2133P
-#define BUS_WIDTH_DB_70x0	BUS_WIDTH_8
-#else /* CONFIG_DDR4 */
-#define SPEED_BIN_DDR_DB_70x0	SPEED_BIN_DDR_1866L
-#define BUS_WIDTH_DB_70x0	BUS_WIDTH_8
-#endif /* CONFIG_DDR4 */
-
 static struct hws_topology_map board_topology_map = {
 #if defined(a70x0)
 /* FIXME: MISL board 2CS 4Gb x8 devices of micron - 2133P */
@@ -120,8 +112,8 @@ static struct hws_topology_map board_topology_map = {
 	      {0x1, 0x0, 0, 0},
 	      {0x1, 0x0, 0, 0},
 	      {0x1, 0x0, 0, 0} },
-	   SPEED_BIN_DDR_DB_70x0,	/* speed_bin */
-	   BUS_WIDTH_DB_70x0,		/* memory_width */
+	   SPEED_BIN_DDR_2133P,		/* speed_bin */
+	   BUS_WIDTH_8,			/* memory_width */
 	   MEM_4G,			/* mem_size */
 	   DDR_FREQ_800,		/* frequency */
 	   0, 0,			/* cas_l, cas_wl */
@@ -136,13 +128,42 @@ static struct hws_topology_map board_topology_map = {
 	      {0x1, 0x0, 0, 0},
 	      {0x1, 0x0, 0, 0} },
 	   SPEED_BIN_DDR_2400S,		/* speed_bin */
-	   BUS_WIDTH_DB_70x0,		/* memory_width */
+	   BUS_WIDTH_8,			/* memory_width */
 	   MEM_8G,			/* mem_size */
 	   DDR_FREQ_800,		/* frequency */
 	   0, 0,			/* cas_l, cas_wl */
 	   HWS_TEMP_LOW} },		/* temperature */
 	BUS_MASK_32BIT			/* Buses mask */
-
+#elif defined(a80x0)
+	/* MISL board with 1CS 8Gb x4 devices of Micron 2400T */
+	0x1, /* active interfaces */
+	/* cs_mask, mirror, dqs_swap, ck_swap X subphys */
+	{ { { {0x1, 0x0, 0, 0},					/* FIXME: change the cs mask for all 64 bit */
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0} },
+	   SPEED_BIN_DDR_2400S,		/* speed_bin */		/* TODO: double check if the speed bin is 2400S */
+	   BUS_WIDTH_8,			/* memory_width */
+	   MEM_8G,			/* mem_size */
+	   DDR_FREQ_800,		/* frequency */
+	   0, 0,			/* cas_l, cas_wl */
+	   HWS_TEMP_LOW} },		/* temperature */
+	BUS_MASK_32BIT			/* Buses mask */	/* FIXME: change to 64bit */
+#elif defined(a80x0_cust)
+	/* Customer board with 1CS 8Gb x4 devices of Micron 2400T */
+	0x1, /* active interfaces */
+	/* cs_mask, mirror, dqs_swap, ck_swap X subphys */
+	{ { { {0x1, 0x0, 0, 0},					/* FIXME: change the cs mask for all 64 bit */
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0} },
+	   SPEED_BIN_DDR_2400S,		/* speed_bin */		/* TODO: double check if the speed bin is 2400S */
+	   BUS_WIDTH_8,			/* memory_width */
+	   MEM_8G,			/* mem_size */
+	   DDR_FREQ_800,		/* frequency */
+	   0, 0,			/* cas_l, cas_wl */
+	   HWS_TEMP_LOW} },		/* temperature */
+	BUS_MASK_32BIT			/* Buses mask */	/* FIXME: change to 64bit */
 #endif
 };
 
