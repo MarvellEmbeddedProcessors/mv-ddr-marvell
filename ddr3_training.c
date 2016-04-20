@@ -2112,8 +2112,9 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 {
 	u32 t_ckclk = 0, t_ras = 0;
 	u32 t_rcd = 0, t_rp = 0, t_wr = 0, t_wtr = 0, t_rrd = 0, t_rtp = 0,
-		t_rfc = 0, t_mod = 0;
-	u32 val = 0, page_size = 0;
+		t_rfc = 0, t_mod = 0, t_r2r = 0x3, t_r2r_high = 0,
+		t_r2w_w2r = 0x3, t_r2w_w2r_high = 0x1, t_w2w = 0x3;
+	u32 val = 0, page_size = 0, mask = 0;
 	enum hws_speed_bin speed_bin_index;
 	enum hws_mem_size memory_size = MEM_2G;
 	struct hws_topology_map *tm = ddr3_get_topology_map();
@@ -2158,43 +2159,53 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	t_mod = TIME_2_CLOCK_CYCLES(t_mod, t_ckclk);
 
 	/* SDRAM Timing Low */
-	val = (t_ras & 0xf) | (t_rcd << 4) | (t_rp << 8) | (t_wr << 12) |
-		(t_wtr << 16) | (((t_ras & 0x30) >> 4) << 20) | (t_rrd << 24) |
-		(t_rtp << 28);
+	val = ((t_ras & SDRAM_TIMING_LOW_TRAS_MASK) << SDRAM_TIMING_LOW_TRAS_OFFS) |
+	      ((t_rcd & SDRAM_TIMING_LOW_TRCD_MASK) << SDRAM_TIMING_LOW_TRCD_OFFS) |
+	      ((t_rp & SDRAM_TIMING_LOW_TRP_MASK) << SDRAM_TIMING_LOW_TRP_OFFS) |
+	      ((t_wr & SDRAM_TIMING_LOW_TWR_MASK) << SDRAM_TIMING_LOW_TWR_OFFS) |
+	      ((t_wtr & SDRAM_TIMING_LOW_TWTR_MASK) << SDRAM_TIMING_LOW_TWTR_OFFS) |
+	      (((t_ras >> 4) & SDRAM_TIMING_LOW_TRAS_HIGH_MASK) << SDRAM_TIMING_LOW_TRAS_HIGH_OFFS) |
+	      ((t_rrd & SDRAM_TIMING_LOW_TRRD_MASK) << SDRAM_TIMING_LOW_TRRD_OFFS) |
+	      ((t_rtp & SDRAM_TIMING_LOW_TRTP_MASK) << SDRAM_TIMING_LOW_TRTP_OFFS);
+
+	mask = (SDRAM_TIMING_LOW_TRAS_MASK << SDRAM_TIMING_LOW_TRAS_OFFS) |
+	       (SDRAM_TIMING_LOW_TRCD_MASK << SDRAM_TIMING_LOW_TRCD_OFFS) |
+	       (SDRAM_TIMING_LOW_TRP_MASK << SDRAM_TIMING_LOW_TRP_OFFS) |
+	       (SDRAM_TIMING_LOW_TWR_MASK << SDRAM_TIMING_LOW_TWR_OFFS) |
+	       (SDRAM_TIMING_LOW_TWTR_MASK << SDRAM_TIMING_LOW_TWTR_OFFS) |
+	       (SDRAM_TIMING_LOW_TRAS_HIGH_MASK << SDRAM_TIMING_LOW_TRAS_HIGH_OFFS) |
+	       (SDRAM_TIMING_LOW_TRRD_MASK << SDRAM_TIMING_LOW_TRRD_OFFS) |
+	       (SDRAM_TIMING_LOW_TRTP_MASK << SDRAM_TIMING_LOW_TRTP_OFFS);
+
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       SDRAM_TIMING_LOW_REG, val, 0xff3fffff));
+				       SDRAM_TIMING_LOW_REG, val, mask));
 
 	/* SDRAM Timing High */
+	val = 0;
+	mask = 0;
+
+	val = ((t_rfc & SDRAM_TIMING_HIGH_TRFC_MASK) << SDRAM_TIMING_HIGH_TRFC_OFFS) |
+	      ((t_r2r & SDRAM_TIMING_HIGH_TR2R_MASK) << SDRAM_TIMING_HIGH_TR2R_OFFS) |
+	      ((t_r2w_w2r & SDRAM_TIMING_HIGH_TR2W_W2R_MASK) << SDRAM_TIMING_HIGH_TR2W_W2R_OFFS) |
+	      ((t_w2w & SDRAM_TIMING_HIGH_TW2W_MASK) << SDRAM_TIMING_HIGH_TW2W_OFFS) |
+	      (((t_rfc >> 7) & SDRAM_TIMING_HIGH_TRFC_HIGH_MASK) << SDRAM_TIMING_HIGH_TRFC_HIGH_OFFS) |
+	      ((t_r2r_high & SDRAM_TIMING_HIGH_TR2R_HIGH_MASK) << SDRAM_TIMING_HIGH_TR2R_HIGH_OFFS) |
+	      ((t_r2w_w2r_high & SDRAM_TIMING_HIGH_TR2W_W2R_HIGH_MASK) << SDRAM_TIMING_HIGH_TR2W_W2R_HIGH_OFFS) |
+	      ((t_mod & SDRAM_TIMING_HIGH_TMOD_MASK) << SDRAM_TIMING_HIGH_TMOD_OFFS) |
+	      (((t_mod >> 4) & SDRAM_TIMING_HIGH_TMOD_HIGH_MASK) << SDRAM_TIMING_HIGH_TMOD_HIGH_OFFS);
+
+	mask = (SDRAM_TIMING_HIGH_TRFC_MASK << SDRAM_TIMING_HIGH_TRFC_OFFS) |
+	       (SDRAM_TIMING_HIGH_TR2R_MASK << SDRAM_TIMING_HIGH_TR2R_OFFS) |
+	       (SDRAM_TIMING_HIGH_TR2W_W2R_MASK << SDRAM_TIMING_HIGH_TR2W_W2R_OFFS) |
+	       (SDRAM_TIMING_HIGH_TW2W_MASK << SDRAM_TIMING_HIGH_TW2W_OFFS) |
+	       (SDRAM_TIMING_HIGH_TRFC_HIGH_MASK << SDRAM_TIMING_HIGH_TRFC_HIGH_OFFS) |
+	       (SDRAM_TIMING_HIGH_TR2R_HIGH_MASK << SDRAM_TIMING_HIGH_TR2R_HIGH_OFFS) |
+	       (SDRAM_TIMING_HIGH_TR2W_W2R_HIGH_MASK << SDRAM_TIMING_HIGH_TR2W_W2R_HIGH_OFFS) |
+	       (SDRAM_TIMING_HIGH_TMOD_MASK << SDRAM_TIMING_HIGH_TMOD_OFFS) |
+	       (SDRAM_TIMING_HIGH_TMOD_HIGH_MASK << SDRAM_TIMING_HIGH_TMOD_HIGH_OFFS);
+
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       SDRAM_TIMING_HIGH_REG,
-				       t_rfc & 0x7f, 0x7f));
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       SDRAM_TIMING_HIGH_REG,
-				       0x180, 0x180));
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       SDRAM_TIMING_HIGH_REG,
-				       0x600, 0x600));
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       SDRAM_TIMING_HIGH_REG,
-				       0x1800, 0xf800));
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       SDRAM_TIMING_HIGH_REG,
-				       ((t_rfc & 0x380) >> 7) << 16, 0x70000));
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       SDRAM_TIMING_HIGH_REG, 0,
-				       0x380000));
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       SDRAM_TIMING_HIGH_REG,
-				       (t_mod & 0xf) << 25, 0x1e00000));
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       SDRAM_TIMING_HIGH_REG,
-				       (t_mod >> 4) << 30, 0xc0000000));
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       SDRAM_TIMING_HIGH_REG,
-				       0x16000000, 0x1e000000));
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       SDRAM_TIMING_HIGH_REG,
-				       0x40000000, 0xc0000000));
+				       SDRAM_TIMING_HIGH_REG, val, mask));
 
 #if defined(CONFIG_DDR4)
 	ddr4_tip_set_timing(dev_num, access_type, if_id, frequency);
