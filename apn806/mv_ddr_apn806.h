@@ -349,6 +349,16 @@ enum {
 	LAST_FREQ
 };
 
+enum {
+	LPDDR4_DIMM,
+	LPDDR4_BRD,
+	DDR4_DIMM,
+	DDR4_BRD,
+	DDR3_DIMM,
+	DDR3_BRD,
+	LAST_DDR_CFG_OPT
+};
+
 /* struct used for DLB configuration array */
 struct dlb_config {
 	u32 reg_addr;

@@ -128,17 +128,32 @@ u16 apn806_odt_intercept[] = {
 };
 #endif /* CONFIG_DDR4 */
 
-static u32 dq_bit_map_2_phy_pin[] = {
-/*DQ0	DQ1	DQ2	DQ3	DQ4	DQ5	DQ6	DQ7	DM*/
-	0,	1,	2,	7,	10,	9,	8,	6,/*3,phy 0*/
-	8,	10,	1,	2,	0,	7,	9,	6,/*3,phy 1*/
-	9,	10,	2,	7,	0,	1,	6,	8,/*3,phy 2*/
-	2,	1,	6,	0,	8,	10,	7,	9,/*3,phy 3*/
-	0,	0,	0,	0,	0,	0,	0,	0,/*0,phy 4*/
-	0,	0,	0,	0,	0,	0,	0,	0,/*0,phy 5*/
-	0,	0,	0,	0,	0,	0,	0,	0,/*0,phy 6*/
-	0,	0,	0,	0,	0,	0,	0,	0,/*0,phy 7*/
-	2,	8,	0,	9,	6,	7,	10,	1/*	3 phy 8 - ECC*/
+static u32 dq_bit_map_2_phy_pin[LAST_DDR_CFG_OPT][MAX_DQ_NUM] = {
+	{/* LPDDR4_DIMM */},
+	{/* LPDDR4_BRD */},
+	{/* DDR4_DIMM */
+	 /*DQ0	DQ1	DQ2	DQ3	DQ4	DQ5	DQ6	DQ7	DM*/
+	 0,	7,	2,	6,	8,	10,	9,	1,/* 3,phy 0 */
+	 6,	2,	1,	0,	8,	9,	10,	7,/* 3,phy 1 */
+	 1,	2,	0,	6,	8,	9,	10,	7,/* 3,phy 2 */
+	 1,	6,	0,	2,	8,	9,	10,	7,/* 3,phy 3 */
+	 0,	2,	1,	6,	7,	8,	9,	10,/* 3,phy 4 */
+	 0,	2,	1,	6,	7,	8,	9,	10,/* 3,phy 5 */
+	 0,	6,	1,	2,	7,	8,	9,	10,/* 3,phy 6 */
+	 0,	1,	2,	6,	7,	8,	9,	10,/* 3,phy 7 */
+	 9,	0,	8,	7,	6,	10,	2,	1/* 3 phy 8 - ECC */},
+	{/* DDR4_BRD */
+	 0,	1,	2,	7,	10,	9,	8,	6,/* 3,phy 0 */
+	 8,	10,	1,	2,	0,	7,	9,	6,/* 3,phy 1 */
+	 9,	10,	2,	7,	0,	1,	6,	8,/* 3,phy 2 */
+	 2,	1,	6,	0,	8,	10,	7,	9,/* 3,phy 3 */
+	 0,	0,	0,	0,	0,	0,	0,	0,/* 0,phy 4 */
+	 0,	0,	0,	0,	0,	0,	0,	0,/* 0,phy 5 */
+	 0,	0,	0,	0,	0,	0,	0,	0,/* 0,phy 6 */
+	 0,	0,	0,	0,	0,	0,	0,	0,/* 0,phy 7 */
+	 2,	8,	0,	9,	6,	7,	10,	1/* 3 phy 8 - ECC */},
+	{/* DDR3_DIMM */},
+	{/* DDR3_BRD */}
 };
 
 static u8 mv_ddr_tip_clk_ratio_get(u32 freq)
@@ -509,8 +524,11 @@ static int ddr3_tip_init_apn806_silicon(u32 dev_num, u32 board_id)
 
 	ddr3_tip_init_config_func(dev_num, &config_func);
 
-	ddr3_tip_register_dq_table(dev_num, dq_bit_map_2_phy_pin);
-
+#if defined(a80x0) || defined(a80x0_cust)
+	ddr3_tip_register_dq_table(dev_num, dq_bit_map_2_phy_pin[DDR4_DIMM]);
+#else
+	ddr3_tip_register_dq_table(dev_num, dq_bit_map_2_phy_pin[DDR4_BRD]);
+#endif
 	/* set device attributes*/
 	ddr3_tip_dev_attr_init(dev_num);
 	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_TIP_REV, MV_TIP_REV_4);
