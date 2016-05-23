@@ -1174,7 +1174,7 @@ int ddr3_pre_algo_config(void)
 		/* Set Bus3 ECC MUX */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
-			      REG_SDRAM_PINS_MUX, 0x100, 0x100));
+			      REG_SDRAM_PINS_MUX_ADDR, 0x100, 0x100));
 	}
 
 	/* Set regular ECC training mode (bus4 and bus 3) */
