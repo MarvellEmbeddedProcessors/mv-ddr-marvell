@@ -2690,7 +2690,12 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xF00210c0, 0x81000001},
 	{0xF00202c8, 0xfefe},
 
-	{0xf00116a0, 0xcc000000},	/* CKdelayADLL */
+	/* FIXME: unremark the register below "0xf00116a0, 0xcc000000"
+	 * and set the correct value for the clk delay after implementing
+	 * the supplementary algorithm
+	 */
+	/* {0xf00116a0, 0xcc000000},	CKdelayADLL */
+
 	{0xf00116a0, 0xc0009c5f},
 	{0xf00116a0, 0xc0405c8f},
 	{0xf00116a0, 0xc0804c4b},
