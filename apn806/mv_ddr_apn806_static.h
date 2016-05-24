@@ -2733,6 +2733,17 @@ struct mk6_reg_data ddr_static_setup[] = {
 	/* {0xf00116a0, 0xE8260040},	dataODTBC */
 	{0xf00116a0, 0xE82601C0},	/* for debug termination */
 
+	/* FIXME: run over calibration values in static array patch */
+	{0xf00114c8, 0x018F0008},/* 6,F		H SSTL */
+	{0xf00117c8, 0x020E0008},/* 8,E		H-POD	OB: The driving strength was too strong */
+	{0xf0011dc8, 0x018F0008},/* 6,F		V  SSTL */
+	{0xf0011ec8, 0x01CC0008},/* 7,C		V-POD */
+
+	{0xf00116a0, 0xEC24050A},/* 5,10	ctrldrivestrengthBC 34Ohm drive (the DIMM is 5Ohm */
+	{0xf00116a0, 0xE824070E},/* 7,14	datadrivestrengthBC  set 34Ohm drive */
+	{0xf00116a0, 0xE8260200},/* 6,0		dataODTBC single CS set termination of 60Ohm */
+	/* FIXME: run over calibration values in static array patch */
+
 	{0xF0011404, 0x5321BAA4},	/* 0x36301848 */
 	{0xF0011408, 0x5411cbb9},
 	{0xF001140c, 0x784A1f97},
