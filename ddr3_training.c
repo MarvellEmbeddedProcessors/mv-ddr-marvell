@@ -2806,6 +2806,13 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 					PARAM_NOT_CARE,
 					tm->interface_params[first_active_if].
 					memory_freq);
+#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
+		/* FIXME: remove this configuration
+		 * this is a patch due to the DFS algorithm
+		 * which override the static parameters
+		 */
+		mv_ddr_mc_static_config();
+#endif /* #if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust) */
 		if (is_reg_dump != 0)
 			ddr3_tip_reg_dump(dev_num);
 		if (ret != MV_OK) {

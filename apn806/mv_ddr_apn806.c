@@ -690,6 +690,14 @@ int mv_ddr_mc_static_config(void)
 {
 #if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 	ddr_static_config();
+/* FIXME: remove this configuration which is needed because
+ * running over the static parameters when calling the timing function
+ * during the DFS algorithm
+ * add the two registers to the static configuration
+ * these registers initialize the dunit and the mc6
+ */
+	reg_write(0x11480, 0x1);
+	reg_write(0x20020, 0x13000001);
 #else
 	mk6_mac_init();
 #endif

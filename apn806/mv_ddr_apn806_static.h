@@ -2238,8 +2238,12 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf0011910, 0x00000000},
 	{0xf0011914, 0x000004a0},
 	{0xf0011918, 0x0000080a},
-	{0xf0020020, 0x13000001},
-	{0xf0011480, 0x00000001},
+	/* FIXME: add the two registers configuration below when fixing the timing
+	 * algorithm also remove it from the main flow function and from the
+	 * static function
+	 */
+	/* {0xF0011480, 0x1},		Tipinit */
+	/* {0xF0020020, 0x13000001},	MCinit */
 	{-1, -1},
 };
 #else /* ddr static configuratioin thru mk6 */
@@ -2382,8 +2386,12 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf00203c0, 0x10400},
 	{0xf00203c4, 0x0},
 	{0xf00203cc, 0xf010345},
-	{0xF0011480, 0x1},		/* Tipinit */
-	{0xF0020020, 0x13000001},	/* MCinit */
+	/* FIXME: add the two registers configuration below when fixing the timing
+	 * algorithm also remove it from the main flow function and from the
+	 * static function
+	 */
+	/* {0xF0011480, 0x1},		Tipinit */
+	/* {0xF0020020, 0x13000001},	MCinit */
 	{-1, -1},
 };
 #endif /* CONFIG_DUNIT_STATIC */
@@ -2470,8 +2478,12 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf0011910, 0x0},		/* MR4 */
 	{0xf0011914, 0x4a0},		/* MR5 */
 	{0xf0011918, 0x80a},		/* MR6 */
-	{0xf0020020, 0x13000001},	/* mc init */
-	{0xf0011480, 0x1},		/* init */
+	/* FIXME: add the two registers configuration below when fixing the timing
+	 * algorithm also remove it from the main flow function and from the
+	 * static function
+	 */
+	/* {0xF0011480, 0x1},		Tipinit */
+	/* {0xF0020020, 0x13000001},	MCinit */
 	{-1, -1},
 };
 #else /* ddr static configuration thru mk6 */
@@ -2568,8 +2580,12 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf00203c0, 0x10400},
 	{0xf00203c4, 0x0},
 	{0xf00203cc, 0xf010345},
-	{0xF0011480, 0x1},	/* Tipinit */
-	{0xF0020020, 0x13000001},	/* MCinit */
+	/* FIXME: add the two registers configuration below when fixing the timing
+	 * algorithm also remove it from the main flow function and from the
+	 * static function
+	 */
+	/* {0xF0011480, 0x1},		Tipinit */
+	/* {0xF0020020, 0x13000001},	MCinit */
 	{-1, -1},
 };
 #endif
@@ -2640,8 +2656,12 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xF0011910, 0x0},	/* MR4 */
 	{0xF0011914, 0x5A0},	/* MR5 */
 	{0xF0011918, 0x806},	/* MR6 */
-	{0xF0020020, 0x11000001},	/* MCinit */
-	{0xF0011480, 0x1},	/* init */
+	/* FIXME: add the two registers configuration below when fixing the timing
+	 * algorithm also remove it from the main flow function and from the
+	 * static function
+	 */
+	/* {0xF0011480, 0x1},		Tipinit */
+	/* {0xF0020020, 0x13000001},	MCinit */
 	{-1, -1},
 };
 #else /* ddr static configuration thru mk6 */
@@ -2790,8 +2810,12 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf00203c4, 0x0},
 	{0xf00203cc, 0xf010345},
 	/* {0xF06F8130, 0x1002A2A5},	AVS*/
-	{0xF0011480, 0x1},		Tipinit
-	{0xF0020020, 0x13000001},	MCinit
+	/* FIXME: add the two registers configuration below when fixing the timing
+	 * algorithm also remove it from the main flow function and from the
+	 * static function
+	 */
+	/* {0xF0011480, 0x1},		Tipinit */
+	/* {0xF0020020, 0x13000001},	MCinit */
 	{-1, -1},
 };
 #endif
