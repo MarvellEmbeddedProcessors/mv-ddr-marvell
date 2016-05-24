@@ -673,10 +673,47 @@ static void mv_ddr_convert_read_params_from_tip2mc6(void)
 }
 #endif
 
+#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
+/*
+ * Name:     mv_ddr3_tip_pre_charge.
+ * Desc:     precharges the ddr banks before moving to mc6 controller
+ * Args:
+ * Notes:
+ * Returns:
+ */
+static void mv_ddr3_tip_pre_charge(void)
+{
+	u32 if_id;
+
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+
+		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id)
+			ddr3_tip_apn806_if_write(DEV_NUM_0, ACCESS_TYPE_MULTICAST, if_id, REG_SDRAM_OPERATION_ADDR,
+						 (~tm->interface_params[if_id].as_bus_params[0].cs_bitmask) <<
+						  REG_SDRAM_OPERATION_CS_OFFS |
+						  CMD_PRECHARGE << REG_SDRAM_CMD_OFFS,
+						  REG_SDRAM_CMD_MASK << REG_SDRAM_CMD_OFFS |
+						  REG_SDRAM_OPERATION_CMD_MASK << REG_SDRAM_OPERATION_CS_OFFS);
+		}
+
+		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
+			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id)
+			if (ddr3_tip_if_polling(DEV_NUM_0, ACCESS_TYPE_UNICAST, if_id, 0, REG_SDRAM_CMD_MASK,
+						REG_SDRAM_OPERATION_ADDR, MAX_POLLING_ITERATIONS) != MV_OK)
+				printf("Pre-charge: Poll fail");
+		}
+	}
+}
+#endif
+
 int ddr3_post_run_alg(void)
 {
 #if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 	mv_ddr_convert_read_params_from_tip2mc6();
+	mv_ddr3_tip_pre_charge();
 #endif
 
 	return MV_OK;
