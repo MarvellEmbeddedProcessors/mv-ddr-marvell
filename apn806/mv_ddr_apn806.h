@@ -164,6 +164,20 @@ enum{
 #define BLOCK_PHI_RST_VAL			0
 #define RING_CLK_VAL				0
 
+/* FIXME: locate the definition in mc6 driver file when generated */
+#define REG_CH0_PHY_RL_CTRL_OFFS	0x1180
+#define REG_CH0_PHY_RL_CTRL_ADDR(cs)	(MC6_BASE_ADDR + REG_CH0_PHY_RL_CTRL_OFFS + (cs * 36))
+#define PHY_RL_CYCLE_DLY_MC6_OFFS	8
+#define PHY_RL_CYCLE_DLY_MC6_MASK	0xf
+
+#define REG_PHY_CONTROL_1_ADDR		(MC6_BASE_ADDR + 0x1000)
+#define PHY_RFIFO_RPTR_DLY_VAL_OFFS	4
+#define PHY_RFIFO_RPTR_DLY_VAL_MASK	0xf
+
+#define REG_RDP_CONTROL_ADDR		(MC6_BASE_ADDR + 0x64)
+#define MB_READ_DATA_LATENCY_CH0_OFFS	0
+#define MB_READ_DATA_LATENCY_CH0_MASK	0x3f
+
 #ifdef NO_EFUSE
 #define	SAR_CPU1800_0X2	0x2
 #define	SAR_CPU1800_0X3	0x3

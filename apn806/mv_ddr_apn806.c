@@ -612,8 +612,73 @@ int ddr3_silicon_pre_init(void)
 	return MV_OK;
 }
 
+#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
+/*
+ * Name:     mv_ddr_convert_read_params_from_tip2mc6.
+ * Desc:     convert the read ready and the read sample from tip to mc6.
+ * Args:
+ * Notes:
+ * Returns:
+ */
+static void mv_ddr_convert_read_params_from_tip2mc6(void)
+{
+	u32	if_id, cs, cl_val, cwl_val, phy_rl_cycle_dly_mc6, rd_smp_dly_tip, phy_rfifo_rptr_dly_val;
+	u32	mb_read_data_latency;
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+	u32 max_cs = ddr3_tip_max_cs_get(DEV_NUM_0);
+	enum hws_speed_bin speed_bin_index;
+	enum hws_ddr_freq freq;
+
+	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
+		speed_bin_index = tm->interface_params[if_id].speed_bin_index;
+		freq = tm->interface_params[first_active_if].memory_freq;
+		cl_val = cas_latency_table[speed_bin_index].cl_val[freq];
+		cwl_val = cas_write_latency_table[speed_bin_index].cl_val[freq];
+
+		for (cs = 0; cs < max_cs; cs++) {
+			ddr3_tip_apn806_if_read(DEV_NUM_0, PARAM_NOT_CARE, if_id, REG_READ_DATA_SAMPLE_DELAYS_ADDR,
+						&rd_smp_dly_tip, MASK_ALL_BITS);
+
+			rd_smp_dly_tip &= (REG_READ_DATA_SAMPLE_DELAYS_MASK <<
+				(REG_READ_DATA_SAMPLE_DELAYS_OFFS * cs));
+
+			phy_rl_cycle_dly_mc6 = 2 * (rd_smp_dly_tip - cl_val) + 1;
+
+			/* if cl is odd value add 2 else decrease 2 */
+			if (cl_val & 0x1)
+				phy_rl_cycle_dly_mc6 += 2;
+			else
+				phy_rl_cycle_dly_mc6 -= 2;
+
+			/* if cwl is odd add 2 */
+			if (cwl_val & 0x1)
+				phy_rl_cycle_dly_mc6 += 2;
+
+			/* TODO: how to write to mc6 per interface */
+			reg_bit_clrset(REG_CH0_PHY_RL_CTRL_ADDR(cs),
+					  phy_rl_cycle_dly_mc6 << PHY_RL_CYCLE_DLY_MC6_OFFS,
+					  PHY_RL_CYCLE_DLY_MC6_MASK << PHY_RL_CYCLE_DLY_MC6_OFFS);
+		}
+	}
+
+	/* TODO: change these constant initialization below to functions */
+	phy_rfifo_rptr_dly_val = 9;	/*FIXME: this parameter should be between 6 to 12 */
+	reg_bit_clrset(REG_PHY_CONTROL_1_ADDR, phy_rfifo_rptr_dly_val << PHY_RFIFO_RPTR_DLY_VAL_OFFS,
+			  PHY_RFIFO_RPTR_DLY_VAL_MASK << PHY_RFIFO_RPTR_DLY_VAL_OFFS);
+
+	mb_read_data_latency = 8;	/*FIXME: this parameter should be between 4 to 12 */
+	reg_bit_clrset(REG_RDP_CONTROL_ADDR, mb_read_data_latency << MB_READ_DATA_LATENCY_CH0_OFFS,
+			  MB_READ_DATA_LATENCY_CH0_MASK << MB_READ_DATA_LATENCY_CH0_OFFS);
+}
+#endif
+
 int ddr3_post_run_alg(void)
 {
+#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
+	mv_ddr_convert_read_params_from_tip2mc6();
+#endif
+
 	return MV_OK;
 }
 
