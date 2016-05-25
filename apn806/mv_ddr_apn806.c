@@ -644,7 +644,7 @@ void mv_ddr_mc_config(void)
 }
 
 #ifdef CONFIG_MC_STATIC
-#if defined(a70x0) || defined(a70x0_cust)
+#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 static void ddr_static_config(void)
 {
 	struct mk6_reg_data *reg_data = ddr_static_setup;
@@ -670,7 +670,7 @@ static void mk6_mac_init(void)
 
 int mv_ddr_mc_static_config(void)
 {
-#if defined(a70x0) || defined(a70x0_cust)
+#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 	ddr_static_config();
 #else
 	mk6_mac_init();
@@ -684,7 +684,7 @@ int mv_ddr_mc_static_config(void)
 #endif /* CONFIG_MV_DDR_STATIC_MC */
 
 #ifdef CONFIG_PHY_STATIC
-#if defined(a70x0) || defined(a70x0_cust)
+#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 static int mv_ddr_apn806_phy_static_config(u32 if_id, u32 subphys_num, enum hws_ddr_phy subphy_type)
 {
 #if 0
@@ -737,7 +737,7 @@ static void mk6_phy_init(void)
 
 void mv_ddr_phy_static_config(void)
 {
-#if defined(a70x0) || defined(a70x0_cust)
+#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 	/* TODO: Need to use variable for subphys number */
 	mv_ddr_apn806_phy_static_config(0, 4, DDR_PHY_DATA);
 	mv_ddr_apn806_phy_static_config(0, 3, DDR_PHY_CONTROL);

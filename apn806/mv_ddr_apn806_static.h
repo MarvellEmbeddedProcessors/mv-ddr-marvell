@@ -2572,7 +2572,27 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xF0020020, 0x13000001},	/* MCinit */
 	{-1, -1},
 };
+#endif
+#elif defined(a80x0)
+#if defined(CONFIG_DUNIT_STATIC)
+struct mk6_reg_data ddr_static_setup[] = {
+	{-1, -1},
+};
+#else /* ddr static configuration thru mk6 */
+struct mk6_reg_data ddr_static_setup[] = {
+	{-1, -1},
+};
+#endif
+#elif defined(a80x0_cust)
+#if defined(CONFIG_DUNIT_STATIC)
+struct mk6_reg_data ddr_static_setup[] = {
+	{-1, -1},
+};
+#else /* ddr static configuration thru mk6 */
+struct mk6_reg_data ddr_static_setup[] = {
+	{-1, -1},
+};
 #endif /* CONFIG_DUNIT_STATIC */
-#endif /* a70x0 or a70x0_cust */
+#endif /* a80x0_cust */
 #endif /* defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC) */
 #endif /* _MV_DDR_APN806_Z_STATIC_H */
