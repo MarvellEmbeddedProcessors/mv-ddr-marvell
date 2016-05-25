@@ -178,6 +178,18 @@ enum{
 #define MB_READ_DATA_LATENCY_CH0_OFFS	0
 #define MB_READ_DATA_LATENCY_CH0_MASK	0x3f
 
+#define MC6_REG_DRAM_CFG1			(MC6_BASE_ADDR + 0x300)
+#define MC6_CAP_LATENCY_OFFS		28
+#define MC6_CAP_LATENCY_MASK		0xf
+#define MC6_CA_LATENCY_OFFS			24
+#define MC6_CA_LATENCY_MASK			0xf
+#define MC6_WL_SELECT_OFFS			15
+#define MC6_WL_SELECT_MASK			0x1
+#define MC6_CWL_OFFS			8
+#define MC6_CWL_MASK			0x3f
+#define MC6_CL_OFFS				0
+#define MC6_CL_MASK				0x3f
+
 #ifdef NO_EFUSE
 #define	SAR_CPU1800_0X2	0x2
 #define	SAR_CPU1800_0X3	0x3

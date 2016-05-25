@@ -636,6 +636,10 @@ static void mv_ddr_convert_read_params_from_tip2mc6(void)
 		cl_val = cas_latency_table[speed_bin_index].cl_val[freq];
 		cwl_val = cas_write_latency_table[speed_bin_index].cl_val[freq];
 
+		reg_bit_clrset(MC6_REG_DRAM_CFG1,
+			cwl_val << MC6_CWL_OFFS | cl_val << MC6_CL_OFFS,
+			MC6_CWL_MASK << MC6_CWL_OFFS | MC6_CL_MASK << MC6_CL_OFFS);
+
 		for (cs = 0; cs < max_cs; cs++) {
 			ddr3_tip_apn806_if_read(DEV_NUM_0, PARAM_NOT_CARE, if_id, REG_READ_DATA_SAMPLE_DELAYS_ADDR,
 						&rd_smp_dly_tip, MASK_ALL_BITS);
