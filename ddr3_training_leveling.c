@@ -1556,8 +1556,9 @@ static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
 				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
 				   WL_PHY_REG + effective_cs *
 				   CS_REGISTER_ADDR_OFFSET, write_data);
-		CHECK_STATUS(ddr3_tip_xsb_compare_test(dev_num, if_id,
-						       bus_id, -2));
+		if (ddr3_tip_xsb_compare_test
+		    (dev_num, if_id, bus_id, -2) == MV_OK)
+			return MV_OK;
 	}
 
 	/* Set phase (0x0[6-8]) +2 */
@@ -1568,8 +1569,9 @@ static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
 				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
 				   WL_PHY_REG + effective_cs *
 				   CS_REGISTER_ADDR_OFFSET, write_data);
-		CHECK_STATUS(ddr3_tip_xsb_compare_test(dev_num, if_id,
-						       bus_id, 2));
+		if (ddr3_tip_xsb_compare_test
+		    (dev_num, if_id, bus_id, 2) == MV_OK)
+			return MV_OK;
 	}
 
 	/* Set phase (0x0[6-8]) +4 */
@@ -1580,8 +1582,9 @@ static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
 				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
 				   WL_PHY_REG + effective_cs *
 				   CS_REGISTER_ADDR_OFFSET, write_data);
-		CHECK_STATUS(ddr3_tip_xsb_compare_test(dev_num, if_id,
-						       bus_id, 4));
+		if (ddr3_tip_xsb_compare_test
+		    (dev_num, if_id, bus_id, 4) == MV_OK)
+			return MV_OK;
 	}
 
 	/* Set phase (0x0[6-8]) +6 */
@@ -1592,8 +1595,9 @@ static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
 				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
 				   WL_PHY_REG + effective_cs *
 				   CS_REGISTER_ADDR_OFFSET, write_data);
-		CHECK_STATUS(ddr3_tip_xsb_compare_test(dev_num, if_id,
-						       bus_id, 6));
+		if (ddr3_tip_xsb_compare_test
+		    (dev_num, if_id, bus_id, 6) == MV_OK)
+			return MV_OK;
 	}
 
 	/* Write original WL result back */
