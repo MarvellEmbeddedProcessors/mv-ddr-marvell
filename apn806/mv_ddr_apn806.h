@@ -218,15 +218,7 @@ enum{
 #define DDR_CONTROLLER_BUS_WIDTH_MULTIPLIER	1
 
 /* Tune internal training params values */
-#if defined(a80x0) || defined(a80x0_cust)
-/* FIXME: remove the configuration below for a80x0
- * and set the correct value for the clk delay after implementing
- * the supplementary algorithm
- */
-#define TUNE_TRAINING_PARAMS_CK_DELAY		80
-#else
 #define TUNE_TRAINING_PARAMS_CK_DELAY		160
-#endif /* defined(a80x0) || defined(a80x0_cust) */
 
 #define TUNE_TRAINING_PARAMS_PHYREG3VAL		0xA
 #define TUNE_TRAINING_PARAMS_PRI_DATA		123
