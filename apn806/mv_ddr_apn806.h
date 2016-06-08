@@ -408,4 +408,17 @@ int mv_ddr_mc_static_config(void);
 void mv_ddr_phy_static_config(void);
 #endif /* CONFIG_PHY_STATIC */
 
+/*
+ * TODO: dq to pad mapping detection code to be relocated
+ * to the generic part of mv_ddr code.
+ */
+#if 0 /* unmask to enable dq to pad mapping detection */
+#define MV_DDR_DQ_MAPPING_DETECT
+#endif
+
+#if defined(MV_DDR_DQ_MAPPING_DETECT)
+#define MV_DDR_DQ_MAPPING_DETECT_VERBOSE 0
+int mv_ddr_dq_mapping_detect(u32 dev_num);
+#endif
+
 #endif /* _MV_DDR_AP806_H */

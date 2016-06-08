@@ -879,3 +879,223 @@ void mv_ddr_phy_static_config(void)
 #endif
 }
 #endif /* CONFIG_PHY_STATIC */
+
+/*
+ * TODO: dq to pad mapping detection code to be relocated
+ * to the generic part of mv_ddr code.
+ */
+#if defined(MV_DDR_DQ_MAPPING_DETECT)
+static u32 mv_ddr_pad_to_dq_detect(u32 dev_num, u32 iface, u32 subphy, u32 pad)
+{
+	enum hws_training_ip_stat train_result[MAX_INTERFACE_NUM];
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+	u32 i, a, b, diff, max_diff, max_diff_cnt, dq;
+
+	/*
+	 * Note: HWS_LOW2HIGH direction didn't work because of asymmetry
+	 * between tx windows (revealed by tap tuning function)
+	 */
+	enum hws_search_dir search_dir = HWS_HIGH2LOW;
+	u8 prior_result[BUS_WIDTH_IN_BITS], post_result[BUS_WIDTH_IN_BITS];
+	u32 *result[HWS_SEARCH_DIR_LIMIT];
+
+	/* run training prior to any delay insertion */
+	ddr3_tip_ip_training_wrapper(dev_num, ACCESS_TYPE_MULTICAST,
+				     PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+				     PARAM_NOT_CARE, RESULT_PER_BIT,
+				     HWS_CONTROL_ELEMENT_ADLL,
+				     PARAM_NOT_CARE, OPER_WRITE,
+				     tm->if_act_mask, 0x0,
+				     MAX_WINDOW_SIZE_TX - 1,
+				     MAX_WINDOW_SIZE_TX - 1,
+				     PATTERN_VREF, EDGE_FPF, CS_SINGLE,
+				     PARAM_NOT_CARE, train_result);
+
+	/* read training results */
+	if (ddr3_tip_read_training_result(dev_num, iface,
+					  ACCESS_TYPE_UNICAST, subphy,
+					  ALL_BITS_PER_PUP, search_dir,
+					  OPER_WRITE, RESULT_PER_BIT,
+					  TRAINING_LOAD_OPERATION_UNLOAD,
+					  CS_SINGLE, &result[search_dir],
+					  1, 0, 0) != MV_OK)
+		return MV_FAIL;
+
+	/* save prior to delay insertion results */
+	for (i = 0; i < BUS_WIDTH_IN_BITS; i++)
+		prior_result[i] = result[search_dir][i] & 0xff;
+
+	ddr3_hws_set_log_level(DEBUG_BLOCK_CENTRALIZATION, DEBUG_LEVEL_INFO);
+
+#if MV_DDR_DQ_MAPPING_DETECT_VERBOSE == 1
+	printf("MV_DDR: %s: Prior to DQ shift: if %d, subphy %d, pad %d,\n"
+	       "\tregs: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",
+	       __func__, iface, subphy, pad,
+	       prior_result[0], prior_result[1], prior_result[2], prior_result[3],
+	       prior_result[4], prior_result[5], prior_result[6], prior_result[7]);
+#endif
+
+	/* insert delay to pad under test (max val is 0x1f) */
+	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST,
+			     iface, ACCESS_TYPE_UNICAST,
+			     subphy, DDR_PHY_DATA,
+			     PBS_TX_PHY_REG + pad, 0x1f);
+
+	/* run training after delay insertion */
+	ddr3_tip_ip_training_wrapper(dev_num, ACCESS_TYPE_MULTICAST,
+				     PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+				     PARAM_NOT_CARE, RESULT_PER_BIT,
+				     HWS_CONTROL_ELEMENT_ADLL,
+				     PARAM_NOT_CARE, OPER_WRITE,
+				     tm->if_act_mask, 0x0,
+				     MAX_WINDOW_SIZE_TX - 1,
+				     MAX_WINDOW_SIZE_TX - 1,
+				     PATTERN_VREF, EDGE_FPF, CS_SINGLE,
+				     PARAM_NOT_CARE, train_result);
+
+	/* read training results */
+	if (ddr3_tip_read_training_result(dev_num, iface,
+					  ACCESS_TYPE_UNICAST, subphy,
+					  ALL_BITS_PER_PUP, search_dir,
+					  OPER_WRITE, RESULT_PER_BIT,
+					  TRAINING_LOAD_OPERATION_UNLOAD,
+					  CS_SINGLE, &result[search_dir],
+					  1, 0, 0) != MV_OK)
+		return MV_FAIL;
+
+	/* save post delay insertion results */
+	for (i = 0; i < BUS_WIDTH_IN_BITS; i++)
+		post_result[i] = result[search_dir][i] & 0xff;
+
+#if MV_DDR_DQ_MAPPING_DETECT_VERBOSE == 1
+	printf("MV_DDR: %s: After DQ shift: if %d, subphy %d, pad %d,\n"
+	       "\tregs: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",
+	       __func__, iface, subphy, pad,
+	       post_result[0], post_result[1], post_result[2], post_result[3],
+	       post_result[4], post_result[5], post_result[6], post_result[7]);
+#endif
+
+	/* remove inserted to pad delay */
+	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST,
+			   iface, ACCESS_TYPE_UNICAST,
+			   subphy, DDR_PHY_DATA,
+			   PBS_TX_PHY_REG + pad, 0x0);
+
+	/* find max diff and its occurrence num */
+	max_diff = 0, max_diff_cnt = 0, dq = 0;
+	for (i = 0; i < BUS_WIDTH_IN_BITS; i++) {
+		a = prior_result[i];
+		b = post_result[i];
+		if (a > b)
+			diff = a - b;
+		else
+			diff = 0; /* tx version */
+
+		if (diff > max_diff) {
+			max_diff = diff;
+			dq = i;
+			max_diff_cnt = 0;
+		} else if (diff == max_diff) {
+			max_diff_cnt++;
+		}
+	}
+#if MV_DDR_DQ_MAPPING_DETECT_VERBOSE == 1
+	printf("MV_DDR: %s: if %d, subphy %d, pad %d, max diff = %d, max diff count = %d, dq = %d\n",
+	       __func__, iface, subphy, pad, max_diff, max_diff_cnt, dq);
+#endif
+
+	/* check for pad to dq pairing criteria */
+	if (max_diff > 2 && max_diff_cnt == 0)
+#if MV_DDR_DQ_MAPPING_DETECT_VERBOSE == 1
+		printf("MV_DDR: %s: if %d, subphy %d, DQ[%d] = PAD[%d]\n",
+		       __func__, iface, subphy, dq, pad);
+#else
+		;
+#endif
+	else
+		dq = 0xff;
+
+	return dq;
+}
+
+#define MV_DDR_DQ_MAPPING_DETECT_NTRIES 5
+
+int mv_ddr_dq_mapping_detect(u32 dev_num)
+{
+	u32 iface, subphy, pad, dq_detected;
+	int ntries;
+	u32 cs_enable_reg_val[MAX_INTERFACE_NUM];
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 mv_ddr_dq_mapping_detected[MAX_INTERFACE_NUM][MAX_BUS_NUM][BUS_WIDTH_IN_BITS] = {0};
+	struct hws_topology_map *tm = ddr3_get_topology_map();
+
+	for (iface = 0; iface < MAX_INTERFACE_NUM; iface++) {
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, iface);
+		/* save current cs enable reg val */
+		ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST,
+				 iface, CS_ENABLE_REG,
+				 cs_enable_reg_val,
+				 MASK_ALL_BITS);
+		/* enable single cs */
+		ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST,
+				  iface, CS_ENABLE_REG,
+				  (1 << 3), (1 << 3));
+
+	}
+
+	for (iface = 0; iface < MAX_INTERFACE_NUM; iface++) {
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, iface);
+		for (subphy = 0; subphy < octets_per_if_num; subphy++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy);
+			for (pad = 0; pad < 11; pad++) {
+				ntries = MV_DDR_DQ_MAPPING_DETECT_NTRIES;
+				/*
+				 * TODO: This part is platform-dependent.
+				 * For APN806 platform: pad 3 is DM, pad 4 & 5 are DQS ones.
+				 */
+				if (pad == 3 || pad == 4 || pad == 5)
+					continue;
+				do {
+					dq_detected = mv_ddr_pad_to_dq_detect(dev_num, iface, subphy, pad);
+					ntries--;
+				} while (dq_detected == 0xff && ntries > 0);
+
+				if (dq_detected == 0xff)
+					printf("MV_DDR: %s: Error: if %d, subphy %d, DQ for PAD[%d] not found after %d tries!\n",
+					       __func__, iface, subphy, pad, MV_DDR_DQ_MAPPING_DETECT_NTRIES - ntries);
+				else
+					mv_ddr_dq_mapping_detected[iface][subphy][dq_detected] = pad;
+			}
+		}
+	}
+
+	/* restore cs enable value */
+	for (iface = 0; iface < MAX_INTERFACE_NUM; iface++) {
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, iface);
+		ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST,
+				  iface, CS_ENABLE_REG,
+				  cs_enable_reg_val[iface],
+				  MASK_ALL_BITS);
+	}
+
+	printf("MV_DDR: %s: dq to pad mapping detection results:\n", __func__);
+	for (iface = 0; iface < MAX_INTERFACE_NUM; iface++) {
+		VALIDATE_IF_ACTIVE(tm->if_act_mask, iface);
+		printf("if/subphy:\tdq0\tdq1\tdq2\tdq3\tdq4\tdq5\tdq6\tdq7\n");
+		for (subphy = 0; subphy < octets_per_if_num; subphy++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy);
+			printf("%d/%d:\t\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", iface, subphy,
+			       mv_ddr_dq_mapping_detected[iface][subphy][0],
+			       mv_ddr_dq_mapping_detected[iface][subphy][1],
+			       mv_ddr_dq_mapping_detected[iface][subphy][2],
+			       mv_ddr_dq_mapping_detected[iface][subphy][3],
+			       mv_ddr_dq_mapping_detected[iface][subphy][4],
+			       mv_ddr_dq_mapping_detected[iface][subphy][5],
+			       mv_ddr_dq_mapping_detected[iface][subphy][6],
+			       mv_ddr_dq_mapping_detected[iface][subphy][7]);
+		}
+	}
+
+	return MV_OK;
+}
+#endif
