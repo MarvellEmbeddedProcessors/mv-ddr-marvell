@@ -1315,11 +1315,24 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 					 * ([4:0] ADLL, [8:6] Phase, [15:10]
 					 * (centralization) ADLL + 0x10)
 					 */
+/* FIXME: 64-bit write leveling supplementary workaround (a80x0)*/
+#if defined(CONFIG_64BIT) && defined(a80x0)
+					if (bus_cnt > 3) {
+						reg_data = (reg_data & 0x1f) |
+							   ((((reg_data & 0xe0) >> 5) + 2) << 6) |
+							   (((reg_data & 0x1f) + phy_reg1_val) << 10);
+					} else {
+						reg_data = (reg_data & 0x1f) |
+							   (((reg_data & 0xe0) >> 5) << 6) |
+							   (((reg_data & 0x1f) + phy_reg1_val) << 10);
+					}
+#else
 					reg_data =
 						(reg_data & 0x1f) |
 						(((reg_data & 0xe0) >> 5) << 6) |
 						(((reg_data & 0x1f) +
 						  phy_reg1_val) << 10);
+#endif
 					ddr3_tip_bus_write(
 						dev_num,
 						ACCESS_TYPE_UNICAST,
