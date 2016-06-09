@@ -153,6 +153,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DDR3_IS_16BIT_DRAM_MODE(mask) \
 	(((((mask) & 0x4) == 0)) ? 1 : 0)
 
+#define MV_DDR_IS_64BIT_DRAM_MODE(mask) \
+	((((mask) & MV_DDR_64BIT_BUS_MASK) == MV_DDR_64BIT_BUS_MASK) ? 1 : 0)
+
 #define MEGA				1000000
 #define BUS_WIDTH_IN_BITS		8
 
