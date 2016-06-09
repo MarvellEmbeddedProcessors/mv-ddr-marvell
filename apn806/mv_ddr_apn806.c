@@ -537,6 +537,15 @@ static int ddr3_tip_init_apn806_silicon(u32 dev_num, u32 board_id)
 	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_INTERLEAVE_WA, 0);
 
 #if defined(CONFIG_DDR4)
+#if defined(CONFIG_64BIT)
+	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
+			  LOAD_PATTERN_MASK_BIT |
+			  SET_TARGET_FREQ_MASK_BIT |
+			  WRITE_LEVELING_TF_MASK_BIT |
+			  READ_LEVELING_TF_MASK_BIT |
+			  RECEIVER_CALIBRATION_MASK_BIT |
+			  DQ_VREF_CALIBRATION_MASK_BIT);
+#else
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
 			  LOAD_PATTERN_MASK_BIT |
 			  SET_TARGET_FREQ_MASK_BIT |
@@ -545,6 +554,7 @@ static int ddr3_tip_init_apn806_silicon(u32 dev_num, u32 board_id)
 			  READ_LEVELING_TF_MASK_BIT |
 			  RECEIVER_CALIBRATION_MASK_BIT |
 			  DQ_VREF_CALIBRATION_MASK_BIT);
+#endif
 	rl_mid_freq_wa = 0;
 #else /* CONFIG_DDR4 */
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
