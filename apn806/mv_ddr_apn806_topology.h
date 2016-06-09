@@ -106,6 +106,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define BUS_MASK_16BIT			0x3 /* TODO: check if needed */
 #define BUS_MASK_16BIT_ECC		0x13 /* TODO: check if needed */
 #define BUS_MASK_16BIT_ECC_PUP3		0xb /* TODO: check if needed */
+#define MV_DDR_64BIT_BUS_MASK		0xff
 
 #define DYNAMIC_CS_SIZE_CONFIG
 
