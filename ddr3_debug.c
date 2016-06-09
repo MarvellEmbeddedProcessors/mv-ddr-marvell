@@ -160,7 +160,7 @@ void ddr3_hws_set_log_level(enum ddr_lib_debug_block block, u8 level)
 			is_reg_dump = 0;
 		break;
 #if defined(CONFIG_DDR4)
-	case DEBUG_TAP_TUNING:
+	case DEBUG_TAP_TUNING_ENGINE:
 		debug_tap_tuning = level;
 		break;
 	case DEBUG_BLOCK_CALIBRATION:
