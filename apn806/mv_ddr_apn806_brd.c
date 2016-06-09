@@ -141,6 +141,10 @@ static struct hws_topology_map board_topology_map = {
 	{ { { {0x1, 0x0, 0, 0},					/* FIXME: change the cs mask for all 64 bit */
 	      {0x1, 0x0, 0, 0},
 	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
 	      {0x1, 0x0, 0, 0} },
 	   SPEED_BIN_DDR_2400S,		/* speed_bin */		/* TODO: double check if the speed bin is 2400S */
 	   BUS_WIDTH_8,			/* memory_width */
@@ -148,7 +152,11 @@ static struct hws_topology_map board_topology_map = {
 	   DDR_FREQ_800,		/* frequency */
 	   0, 0,			/* cas_l, cas_wl */
 	   HWS_TEMP_LOW} },		/* temperature */
-	BUS_MASK_32BIT			/* Buses mask */	/* FIXME: change to 64bit */
+#if defined(CONFIG_64BIT)
+	MV_DDR_64BIT_BUS_MASK
+#else
+	BUS_MASK_32BIT			/* Buses mask */
+#endif
 #elif defined(a80x0_cust)
 	/* Customer board with 1CS 8Gb x4 devices of Micron 2400T */
 	0x1, /* active interfaces */
@@ -156,6 +164,10 @@ static struct hws_topology_map board_topology_map = {
 	{ { { {0x1, 0x0, 0, 0},					/* FIXME: change the cs mask for all 64 bit */
 	      {0x1, 0x0, 0, 0},
 	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
+	      {0x1, 0x0, 0, 0},
 	      {0x1, 0x0, 0, 0} },
 	   SPEED_BIN_DDR_2400S,		/* speed_bin */		/* TODO: double check if the speed bin is 2400S */
 	   BUS_WIDTH_8,			/* memory_width */
@@ -163,7 +175,11 @@ static struct hws_topology_map board_topology_map = {
 	   DDR_FREQ_800,		/* frequency */
 	   0, 0,			/* cas_l, cas_wl */
 	   HWS_TEMP_LOW} },		/* temperature */
+#if defined(CONFIG_64BIT)
+	MV_DDR_64BIT_BUS_MASK
+#else
 	BUS_MASK_32BIT			/* Buses mask */	/* FIXME: change to 64bit */
+#endif
 #endif
 };
 
