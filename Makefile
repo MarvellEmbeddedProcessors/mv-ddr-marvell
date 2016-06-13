@@ -238,6 +238,10 @@ ifeq ($(MV_DDR4),y)
 CFLAGS += -DCONFIG_DDR4
 endif
 
+ifeq ($(PLAT),$(filter $(PLAT),a80x0 a80x0_cust))
+CFLAGS += -DCONFIG_64BIT
+endif
+
 LDFLAGS  = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
 CSRC  = $(foreach DIR, $(SRCDIRS), $(wildcard $(DIR)/*.c))
