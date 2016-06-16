@@ -194,6 +194,104 @@ u16 mask_results_pup_reg_map_pup3_ecc[] = {
 };
 #endif
 
+struct pattern_info pattern_table_64[] = {
+	/*
+	 * num_of_phases_tx, tx_burst_size;
+	 * delay_between_bursts, num_of_phases_rx,
+	 * start_addr, pattern_len
+	 */
+	{0x7, 0x7, 2, 0x7, 0x00000, 8},		/* PATTERN_PBS1 */
+	{0x7, 0x7, 2, 0x7, 0x00080, 8},		/* PATTERN_PBS2 */
+	{0x7, 0x7, 2, 0x7, 0x00100, 8},		/* PATTERN_PBS3 */
+	{0x7, 0x7, 2, 0x7, 0x00180, 8},		/* PATTERN_TEST */
+	{0x7, 0x7, 2, 0x7, 0x00200, 8},		/* PATTERN_RL */
+	{0x7, 0x7, 2, 0x7, 0x00280, 8},		/* PATTERN_RL2 */
+	{0x1f, 0xf, 2, 0xf, 0x00680, 32},	/* PATTERN_STATIC_PBS */
+	{0x1f, 0xf, 2, 0xf, 0x00a80, 32},	/* PATTERN_KILLER_DQ0 */
+	{0x1f, 0xf, 2, 0xf, 0x01280, 32},	/* PATTERN_KILLER_DQ1 */
+	{0x1f, 0xf, 2, 0xf, 0x01a80, 32},	/* PATTERN_KILLER_DQ2 */
+	{0x1f, 0xf, 2, 0xf, 0x02280, 32},	/* PATTERN_KILLER_DQ3 */
+	{0x1f, 0xf, 2, 0xf, 0x02a80, 32},	/* PATTERN_KILLER_DQ4 */
+	{0x1f, 0xf, 2, 0xf, 0x03280, 32},	/* PATTERN_KILLER_DQ5 */
+	{0x1f, 0xf, 2, 0xf, 0x03a80, 32},	/* PATTERN_KILLER_DQ6 */
+	{0x1f, 0xf, 2, 0xf, 0x04280, 32},	/* PATTERN_KILLER_DQ7 */
+	{0x1f, 0xf, 2, 0xf, 0x00e80, 32},	/* PATTERN_KILLER_DQ0_64 */
+	{0x1f, 0xf, 2, 0xf, 0x01680, 32},	/* PATTERN_KILLER_DQ1_64 */
+	{0x1f, 0xf, 2, 0xf, 0x01e80, 32},	/* PATTERN_KILLER_DQ2_64 */
+	{0x1f, 0xf, 2, 0xf, 0x02680, 32},	/* PATTERN_KILLER_DQ3_64 */
+	{0x1f, 0xf, 2, 0xf, 0x02e80, 32},	/* PATTERN_KILLER_DQ4_64 */
+	{0x1f, 0xf, 2, 0xf, 0x03680, 32},	/* PATTERN_KILLER_DQ5_64 */
+	{0x1f, 0xf, 2, 0xf, 0x03e80, 32},	/* PATTERN_KILLER_DQ6_64 */
+	{0x1f, 0xf, 2, 0xf, 0x04680, 32},	/* PATTERN_KILLER_DQ7_64 */
+	{0x1f, 0xf, 2, 0xf, 0x04a80, 32},	/* PATTERN_KILLER_DQ0_INV */
+	{0x1f, 0xf, 2, 0xf, 0x05280, 32},	/* PATTERN_KILLER_DQ1_INV */
+	{0x1f, 0xf, 2, 0xf, 0x05a80, 32},	/* PATTERN_KILLER_DQ2_INV */
+	{0x1f, 0xf, 2, 0xf, 0x06280, 32},	/* PATTERN_KILLER_DQ3_INV */
+	{0x1f, 0xf, 2, 0xf, 0x06a80, 32},	/* PATTERN_KILLER_DQ4_INV */
+	{0x1f, 0xf, 2, 0xf, 0x07280, 32},	/* PATTERN_KILLER_DQ5_INV */
+	{0x1f, 0xf, 2, 0xf, 0x07a80, 32},	/* PATTERN_KILLER_DQ6_INV */
+	{0x1f, 0xf, 2, 0xf, 0x08280, 32},	/* PATTERN_KILLER_DQ7_INV */
+	{0x1f, 0xf, 2, 0xf, 0x04e80, 32},	/* PATTERN_KILLER_DQ0_INV_64 */
+	{0x1f, 0xf, 2, 0xf, 0x05680, 32},	/* PATTERN_KILLER_DQ1_INV_64 */
+	{0x1f, 0xf, 2, 0xf, 0x05e80, 32},	/* PATTERN_KILLER_DQ2_INV_64 */
+	{0x1f, 0xf, 2, 0xf, 0x06680, 32},	/* PATTERN_KILLER_DQ3_INV_64 */
+	{0x1f, 0xf, 2, 0xf, 0x06e80, 32},	/* PATTERN_KILLER_DQ4_INV_64 */
+	{0x1f, 0xf, 2, 0xf, 0x07680, 32},	/* PATTERN_KILLER_DQ5_INV_64 */
+	{0x1f, 0xf, 2, 0xf, 0x07e80, 32},	/* PATTERN_KILLER_DQ6_INV_64 */
+	{0x1f, 0xf, 2, 0xf, 0x08680, 32},	/* PATTERN_KILLER_DQ7_INV_64 */
+	{0x1f, 0xf, 2, 0xf, 0x08a80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ0 */
+	{0x1f, 0xf, 2, 0xf, 0x09280, 32},	/* PATTERN_SSO_FULL_XTALK_DQ1 */
+	{0x1f, 0xf, 2, 0xf, 0x09a80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ2 */
+	{0x1f, 0xf, 2, 0xf, 0x0a280, 32},	/* PATTERN_SSO_FULL_XTALK_DQ3 */
+	{0x1f, 0xf, 2, 0xf, 0x0aa80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ4 */
+	{0x1f, 0xf, 2, 0xf, 0x0b280, 32},	/* PATTERN_SSO_FULL_XTALK_DQ5 */
+	{0x1f, 0xf, 2, 0xf, 0x0ba80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ6 */
+	{0x1f, 0xf, 2, 0xf, 0x0c280, 32},	/* PATTERN_SSO_FULL_XTALK_DQ7 */
+	{0x1f, 0xf, 2, 0xf, 0x08e80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ0_64 */
+	{0x1f, 0xf, 2, 0xf, 0x09680, 32},	/* PATTERN_SSO_FULL_XTALK_DQ1_64 */
+	{0x1f, 0xf, 2, 0xf, 0x09e80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ2_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0a680, 32},	/* PATTERN_SSO_FULL_XTALK_DQ3_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0ae80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ4_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0b680, 32},	/* PATTERN_SSO_FULL_XTALK_DQ5_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0be80, 32},	/* PATTERN_SSO_FULL_XTALK_DQ6_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0c680, 32},	/* PATTERN_SSO_FULL_XTALK_DQ7_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0ca80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ0 */
+	{0x1f, 0xf, 2, 0xf, 0x0d280, 32},	/* PATTERN_SSO_XTALK_FREE_DQ1 */
+	{0x1f, 0xf, 2, 0xf, 0x0da80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ2 */
+	{0x1f, 0xf, 2, 0xf, 0x0e280, 32},	/* PATTERN_SSO_XTALK_FREE_DQ3 */
+	{0x1f, 0xf, 2, 0xf, 0x0ea80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ4 */
+	{0x1f, 0xf, 2, 0xf, 0x0f280, 32},	/* PATTERN_SSO_XTALK_FREE_DQ5 */
+	{0x1f, 0xf, 2, 0xf, 0x0fa80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ6 */
+	{0x1f, 0xf, 2, 0xf, 0x10280, 32},	/* PATTERN_SSO_XTALK_FREE_DQ7 */
+	{0x1f, 0xf, 2, 0xf, 0x0ce80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ0_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0d680, 32},	/* PATTERN_SSO_XTALK_FREE_DQ1_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0de80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ2_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0e680, 32},	/* PATTERN_SSO_XTALK_FREE_DQ3_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0ee80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ4_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0f680, 32},	/* PATTERN_SSO_XTALK_FREE_DQ5_64 */
+	{0x1f, 0xf, 2, 0xf, 0x0fe80, 32},	/* PATTERN_SSO_XTALK_FREE_DQ6_64 */
+	{0x1f, 0xf, 2, 0xf, 0x10680, 32},	/* PATTERN_SSO_XTALK_FREE_DQ7_64 */
+	{0x1f, 0xf, 2, 0xf, 0x10a80, 32},	/* PATTERN_ISI_XTALK_FREE */
+	{0x1f, 0xf, 2, 0xf, 0x10e80, 32},	/* PATTERN_ISI_XTALK_FREE_64 */
+	{0x1f, 0xf, 2, 0xf, 0x11280, 32},	/* PATTERN_VREF */
+	{0x1f, 0xf, 2, 0xf, 0x11680, 32},	/* PATTERN_VREF_64 */
+	{0x1f, 0xf, 2, 0xf, 0x11a80, 32},	/* PATTERN_VREF_INV */
+	{0x1f, 0xf, 2, 0xf, 0x11e80, 32},	/* PATTERN_FULL_SSO_0T */
+	{0x1f, 0xf, 2, 0xf, 0x12280, 32},	/* PATTERN_FULL_SSO_1T */
+	{0x1f, 0xf, 2, 0xf, 0x12680, 32},	/* PATTERN_FULL_SSO_2T */
+	{0x1f, 0xf, 2, 0xf, 0x12a80, 32},	/* PATTERN_FULL_SSO_3T */
+	{0x1f, 0xf, 2, 0xf, 0x12e80, 32},	/* PATTERN_RESONANCE_1T */
+	{0x1f, 0xf, 2, 0xf, 0x13280, 32},	/* PATTERN_RESONANCE_2T */
+	{0x1f, 0xf, 2, 0xf, 0x13680, 32},	/* PATTERN_RESONANCE_3T */
+	{0x1f, 0xf, 2, 0xf, 0x13a80, 32},	/* PATTERN_RESONANCE_4T */
+	{0x1f, 0xf, 2, 0xf, 0x13e80, 32},	/* PATTERN_RESONANCE_5T */
+	{0x1f, 0xf, 2, 0xf, 0x14280, 32},	/* PATTERN_RESONANCE_6T */
+	{0x1f, 0xf, 2, 0xf, 0x14680, 32},	/* PATTERN_RESONANCE_7T */
+	{0x1f, 0xf, 2, 0xf, 0x14a80, 32},	/* PATTERN_RESONANCE_8T */
+	{0x1f, 0xf, 2, 0xf, 0x14e80, 32}	/* PATTERN_RESONANCE_9T */
+	/* Note: actual start_address is "<< 3" of defined address */
+};
+
 #if defined(CONFIG_DDR4)
 struct pattern_info pattern_table_16[] = {
 	/*
@@ -767,23 +865,38 @@ int ddr3_tip_load_pattern_to_odpg(u32 dev_num, enum hws_access_type access_type,
 {
 	u32 pattern_length_cnt = 0;
 	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
+	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	for (pattern_length_cnt = 0;
 	     pattern_length_cnt < pattern_table[pattern].pattern_len;
 	     pattern_length_cnt++) {
-		CHECK_STATUS(ddr3_tip_if_write
-			     (dev_num, access_type, if_id,
-			      ODPG_PATTERN_DATA_LOW_REG,
-			      pattern_table_get_word(dev_num, pattern,
-						     (u8) (pattern_length_cnt *
-							   2)), MASK_ALL_BITS));
-		CHECK_STATUS(ddr3_tip_if_write
-			     (dev_num, access_type, if_id,
-			      ODPG_PATTERN_DATA_HI_REG,
-			      pattern_table_get_word(dev_num, pattern,
-						     (u8) (pattern_length_cnt *
-							   2 + 1)),
-			      MASK_ALL_BITS));
+		if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask)) {
+			CHECK_STATUS(ddr3_tip_if_write
+				     (dev_num, access_type, if_id,
+				      ODPG_PATTERN_DATA_LOW_REG,
+				      pattern_table_get_word(dev_num, pattern,
+							     (u8) (pattern_length_cnt)),
+				      MASK_ALL_BITS));
+			CHECK_STATUS(ddr3_tip_if_write
+				     (dev_num, access_type, if_id,
+				      ODPG_PATTERN_DATA_HI_REG,
+				      pattern_table_get_word(dev_num, pattern,
+							     (u8) (pattern_length_cnt)),
+				      MASK_ALL_BITS));
+		} else {
+			CHECK_STATUS(ddr3_tip_if_write
+				     (dev_num, access_type, if_id,
+					      ODPG_PATTERN_DATA_LOW_REG,
+				      pattern_table_get_word(dev_num, pattern,
+							     (u8) (pattern_length_cnt * 2)),
+				      MASK_ALL_BITS));
+			CHECK_STATUS(ddr3_tip_if_write
+				     (dev_num, access_type, if_id,
+				      ODPG_PATTERN_DATA_HI_REG,
+				      pattern_table_get_word(dev_num, pattern,
+							     (u8) (pattern_length_cnt * 2 + 1)),
+				      MASK_ALL_BITS));
+		}
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, access_type, if_id,
 			      ODPG_PATTERN_ADDR_REG, pattern_length_cnt,
@@ -1621,7 +1734,9 @@ struct pattern_info *ddr3_tip_get_pattern_table()
 {
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
-	if (DDR3_IS_16BIT_DRAM_MODE(tm->bus_act_mask) == 0)
+	if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask))
+		return pattern_table_64;
+	else if (DDR3_IS_16BIT_DRAM_MODE(tm->bus_act_mask) == 0)
 		return pattern_table_32;
 	else
 		return pattern_table_16;

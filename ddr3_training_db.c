@@ -797,7 +797,7 @@ u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 	struct hws_topology_map *tm = ddr3_get_topology_map();
 
 	if (DDR3_IS_16BIT_DRAM_MODE(tm->bus_act_mask) == 0) {
-		/* 32bit patterns */
+		/* 32/64-bit patterns */
 		switch (type) {
 		case PATTERN_PBS1:
 		case PATTERN_PBS2:
@@ -847,6 +847,23 @@ u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 #endif /* !CONFIG_DDR4 */
 				(u8)(type - PATTERN_KILLER_DQ0), index);
 			break;
+#if defined(CONFIG_64BIT)
+		case PATTERN_KILLER_DQ0_64:
+		case PATTERN_KILLER_DQ1_64:
+		case PATTERN_KILLER_DQ2_64:
+		case PATTERN_KILLER_DQ3_64:
+		case PATTERN_KILLER_DQ4_64:
+		case PATTERN_KILLER_DQ5_64:
+		case PATTERN_KILLER_DQ6_64:
+		case PATTERN_KILLER_DQ7_64:
+#if !defined(CONFIG_DDR4)
+			pattern = pattern_table_get_killer_word(
+#else /* CONFIG_DDR4 */
+			pattern = pattern_table_get_killer_word_4(
+#endif /* !CONFIG_DDR4 */
+				(u8)(type - PATTERN_KILLER_DQ0_64), index + 32);
+			break;
+#endif /* CONFIG_64BIT */
 		case PATTERN_RL2:
 #if !defined(CONFIG_DDR4)
 			if (index < 6)
@@ -871,6 +888,11 @@ u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 		case PATTERN_VREF:
 			pattern = pattern_table_get_vref_word(index);
 			break;
+#if defined(CONFIG_64BIT)
+		case PATTERN_VREF_64:
+			pattern = pattern_table_get_vref_word(index + 32);
+			break;
+#endif /* CONFIG_64BIT */
 		case PATTERN_SSO_FULL_XTALK_DQ0:
 		case PATTERN_SSO_FULL_XTALK_DQ1:
 		case PATTERN_SSO_FULL_XTALK_DQ2:
@@ -882,6 +904,19 @@ u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 			pattern = pattern_table_get_sso_full_xtalk_word(
 				(u8)(type - PATTERN_SSO_FULL_XTALK_DQ0), index);
 			break;
+#if defined(CONFIG_64BIT)
+		case PATTERN_SSO_FULL_XTALK_DQ0_64:
+		case PATTERN_SSO_FULL_XTALK_DQ1_64:
+		case PATTERN_SSO_FULL_XTALK_DQ2_64:
+		case PATTERN_SSO_FULL_XTALK_DQ3_64:
+		case PATTERN_SSO_FULL_XTALK_DQ4_64:
+		case PATTERN_SSO_FULL_XTALK_DQ5_64:
+		case PATTERN_SSO_FULL_XTALK_DQ6_64:
+		case PATTERN_SSO_FULL_XTALK_DQ7_64:
+			pattern = pattern_table_get_sso_full_xtalk_word(
+				(u8)(type - PATTERN_SSO_FULL_XTALK_DQ0_64), index + 32);
+			break;
+#endif /* CONFIG_64BIT */
 		case PATTERN_SSO_XTALK_FREE_DQ0:
 		case PATTERN_SSO_XTALK_FREE_DQ1:
 		case PATTERN_SSO_XTALK_FREE_DQ2:
@@ -893,9 +928,27 @@ u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 			pattern = pattern_table_get_sso_xtalk_free_word(
 				(u8)(type - PATTERN_SSO_XTALK_FREE_DQ0), index);
 			break;
+#if defined(CONFIG_64BIT)
+		case PATTERN_SSO_XTALK_FREE_DQ0_64:
+		case PATTERN_SSO_XTALK_FREE_DQ1_64:
+		case PATTERN_SSO_XTALK_FREE_DQ2_64:
+		case PATTERN_SSO_XTALK_FREE_DQ3_64:
+		case PATTERN_SSO_XTALK_FREE_DQ4_64:
+		case PATTERN_SSO_XTALK_FREE_DQ5_64:
+		case PATTERN_SSO_XTALK_FREE_DQ6_64:
+		case PATTERN_SSO_XTALK_FREE_DQ7_64:
+			pattern = pattern_table_get_sso_xtalk_free_word(
+				(u8)(type - PATTERN_SSO_XTALK_FREE_DQ0_64), index + 32);
+			break;
+#endif /* CONFIG_64BIT */
 		case PATTERN_ISI_XTALK_FREE:
 			pattern = pattern_table_get_isi_word(index);
 			break;
+#if defined(CONFIG_64BIT)
+		case PATTERN_ISI_XTALK_FREE_64:
+			pattern = pattern_table_get_isi_word(index + 32);
+			break;
+#endif /* CONFIG_64BIT */
 #if defined(CONFIG_DDR4)
 		case PATTERN_KILLER_DQ0_INV:
 		case PATTERN_KILLER_DQ1_INV:
@@ -908,6 +961,19 @@ u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 			pattern = ~pattern_table_get_killer_word_4(
 				(u8)(type - PATTERN_KILLER_DQ0_INV), index);
 			break;
+#if defined(CONFIG_64BIT)
+		case PATTERN_KILLER_DQ0_INV_64:
+		case PATTERN_KILLER_DQ1_INV_64:
+		case PATTERN_KILLER_DQ2_INV_64:
+		case PATTERN_KILLER_DQ3_INV_64:
+		case PATTERN_KILLER_DQ4_INV_64:
+		case PATTERN_KILLER_DQ5_INV_64:
+		case PATTERN_KILLER_DQ6_INV_64:
+		case PATTERN_KILLER_DQ7_INV_64:
+			pattern = ~pattern_table_get_killer_word_4(
+				(u8)(type - PATTERN_KILLER_DQ0_INV_64), index + 32);
+			break;
+#endif /* CONFIG_64BIT */
 		case PATTERN_RESONANCE_1T:
 		case PATTERN_RESONANCE_2T:
 		case PATTERN_RESONANCE_3T:
