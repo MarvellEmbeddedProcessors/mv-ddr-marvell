@@ -103,6 +103,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mvUart.h"
 #include "util.h"
 
+typedef unsigned long long uint64_t;
+typedef uint64_t uintptr_t;
+
+static inline void mmio_write_64(uintptr_t addr, uint64_t value)
+{
+}
+
+static inline uint64_t mmio_read_64(uintptr_t addr)
+{
+	return (uint64_t)0;
+}
+
 /* u-boot/tools/marvell/bin_hdr/platform/utils/printf.c */
 #define printf mvPrintf
 
