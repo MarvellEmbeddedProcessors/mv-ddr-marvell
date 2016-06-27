@@ -222,7 +222,7 @@ LIBNAME = mv_ddr_lib.a
 LIB = $(OBJ_DIR)/$(LIBNAME)
 ifeq ($(MV_DDR4),y)
 LIBNAME4 = mv_ddr4_lib.a
-LIB4 = $(SRCDIR4)/$(LIBNAME4)
+LIB4 = ./$(LIBNAME4)
 endif
 
 CFLAGS = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2 -nostdinc
