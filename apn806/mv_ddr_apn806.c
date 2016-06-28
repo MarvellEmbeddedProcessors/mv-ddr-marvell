@@ -779,7 +779,6 @@ void mv_ddr_mc_config(void)
 }
 
 #ifdef CONFIG_MC_STATIC
-#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 static void ddr_static_config(void)
 {
 	struct mk6_reg_data *reg_data = ddr_static_setup;
@@ -787,25 +786,9 @@ static void ddr_static_config(void)
 	for (; reg_data->offset != -1; reg_data++)
 		mmio_write_32(reg_data->offset, reg_data->value);
 }
-#else
-static void mk6_mac_init(void)
-{
-	struct mk6_reg_data *mac_regs = mk6_mac_setup;
-
-	/* RFU crap setups */
-	reg_write(0x6f0098, 0x0040004e);
-	reg_write(0x6F0108, 0xFFFF0001);
-	reg_write(0x841100, 0x80000000);
-
-	for (; mac_regs->offset != -1 ; mac_regs++) {
-		reg_write(MC6_BASE_ADDR + mac_regs->offset, mac_regs->value);
-	}
-}
-#endif
 
 int mv_ddr_mc_static_config(void)
 {
-#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 	ddr_static_config();
 /* FIXME: remove this configuration which is needed because
  * running over the static parameters when calling the timing function
@@ -815,16 +798,12 @@ int mv_ddr_mc_static_config(void)
  */
 	reg_write(0x11480, 0x1);
 	reg_write(0x20020, 0x13000001);
-#else
-	mk6_mac_init();
-#endif
 
 	mdelay(10);
 
 	return MV_OK;
 }
-
-#endif /* CONFIG_MV_DDR_STATIC_MC */
+#endif /* CONFIG_MC_STATIC */
 
 #ifdef CONFIG_PHY_STATIC
 static int mv_ddr_apn806_phy_static_config(u32 if_id, u32 subphys_num, enum hws_ddr_phy subphy_type)
