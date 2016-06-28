@@ -281,6 +281,7 @@ $(LIB): $(COBJ)
 
 ifeq ($(MV_DDR4_BUILD),y)
 $(LIB4): $(COBJ4)
+	$(RM) $(LIB4)
 	$(ECHO) "  AR      $(LIBNAME4)"
 	$(AR) rcs $(LIB4) $(COBJ4)
 	$(STRIP) --strip-unneeded $(LIB4)
