@@ -230,10 +230,6 @@ CFLAGS += -march=armv8-a -fpie $(INCLUDE) -D$(PLATFORM)
 
 CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806 -DCONFIG_MC_STATIC
 
-ifneq ($(PLAT),$(filter $(PLAT),a70x0 a70x0_cust a80x0 a80x0_cust))
-CFLAGS += -DCONFIG_PHY_STATIC
-endif
-
 ifeq ($(MV_DDR4),y)
 CFLAGS += -DCONFIG_DDR4
 endif
