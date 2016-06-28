@@ -827,7 +827,6 @@ int mv_ddr_mc_static_config(void)
 #endif /* CONFIG_MV_DDR_STATIC_MC */
 
 #ifdef CONFIG_PHY_STATIC
-#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 static int mv_ddr_apn806_phy_static_config(u32 if_id, u32 subphys_num, enum hws_ddr_phy subphy_type)
 {
 #if 0
@@ -858,35 +857,12 @@ static int mv_ddr_apn806_phy_static_config(u32 if_id, u32 subphys_num, enum hws_
 #endif
 	return MV_OK;
 }
-#else
-static void mk6_phy_init(void)
-{
-	struct mk6_reg_data *phy_regs = mk6_phy_setup;
-	uint32_t reg, cs_mask;
-
-	for (; phy_regs->offset != -1 ; phy_regs++) {
-		reg_write(MC6_BASE_ADDR + phy_regs->offset, phy_regs->value);
-	}
-
-	/* Trigger DDR init for Channel 0, all Chip-Selects */
-	reg = SDRAM_INIT_REQ_MASK;
-	reg |= CMD_CH_ENABLE(0);
-	cs_mask = 0x1;
-
-	reg |= CMD_CS_MASK(cs_mask);
-	reg_write(MC6_BASE_ADDR + MCK6_USER_COMMAND_0_REG, reg);
-}
-#endif
 
 void mv_ddr_phy_static_config(void)
 {
-#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 	/* TODO: Need to use variable for subphys number */
 	mv_ddr_apn806_phy_static_config(0, 4, DDR_PHY_DATA);
 	mv_ddr_apn806_phy_static_config(0, 3, DDR_PHY_CONTROL);
-#else
-	mk6_phy_init();
-#endif
 }
 #endif /* CONFIG_PHY_STATIC */
 
