@@ -623,7 +623,6 @@ int ddr3_silicon_pre_init(void)
 	return MV_OK;
 }
 
-#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 /*
  * Name:     mv_ddr_convert_read_params_from_tip2mc6.
  * Desc:     convert the read ready and the read sample from tip to mc6.
@@ -686,9 +685,7 @@ static void mv_ddr_convert_read_params_from_tip2mc6(void)
 	reg_bit_clrset(REG_RDP_CONTROL_ADDR, mb_read_data_latency << MB_READ_DATA_LATENCY_CH0_OFFS,
 			  MB_READ_DATA_LATENCY_CH0_MASK << MB_READ_DATA_LATENCY_CH0_OFFS);
 }
-#endif
 
-#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 /*
  * Name:     mv_ddr3_tip_pre_charge.
  * Desc:     precharges the ddr banks before moving to mc6 controller
@@ -722,14 +719,11 @@ static void mv_ddr3_tip_pre_charge(void)
 		}
 	}
 }
-#endif
 
 int ddr3_post_run_alg(void)
 {
-#if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
 	mv_ddr_convert_read_params_from_tip2mc6();
 	mv_ddr3_tip_pre_charge();
-#endif
 
 	return MV_OK;
 }
