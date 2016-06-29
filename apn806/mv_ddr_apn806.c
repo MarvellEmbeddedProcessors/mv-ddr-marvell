@@ -105,7 +105,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DDR_INTERFACE_OCTETS_NUM	9
 
 #if defined(CONFIG_DDR4)
-u16 apn806_odt_slope[] = {
+u16 odt_slope[] = {
 	21443,
 	1452,
 	482,
@@ -116,7 +116,7 @@ u16 apn806_odt_slope[] = {
 	52
 };
 
-u16 apn806_odt_intercept[] = {
+u16 odt_intercept[] = {
 	1517,
 	328,
 	186,

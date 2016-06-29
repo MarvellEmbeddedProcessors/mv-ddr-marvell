@@ -367,7 +367,7 @@ static u16 a38x_vco_freq_per_sar_ref_clk_40_mhz[] = {
 };
 
 #if defined(CONFIG_DDR4)
-u16 a38x_odt_slope[] = {
+u16 odt_slope[] = {
 	21443,
 	1452,
 	482,
@@ -378,7 +378,7 @@ u16 a38x_odt_slope[] = {
 	52
 };
 
-u16 a38x_odt_intercept[] = {
+u16 odt_intercept[] = {
 	1517,
 	328,
 	186,
