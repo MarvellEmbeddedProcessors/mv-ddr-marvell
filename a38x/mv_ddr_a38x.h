@@ -276,6 +276,7 @@ struct dlb_config {
 
 #define ACTIVE_INTERFACE_MASK			0x1
 
+extern u32 dmin_phy_reg_table[][2];
 extern u16 a38x_odt_slope[];
 extern u16 a38x_odt_intercept[];
 

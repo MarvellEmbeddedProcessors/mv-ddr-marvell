@@ -366,6 +366,7 @@ static u16 a38x_vco_freq_per_sar_ref_clk_40_mhz[] = {
 	1800			/* 30 - 0x1E */
 };
 
+#if defined(CONFIG_DDR4)
 u16 a38x_odt_slope[] = {
 	21443,
 	1452,
@@ -387,6 +388,32 @@ u16 a38x_odt_intercept[] = {
 	69,
 	61
 };
+
+/* Map of scratch PHY registers used to store stability value */
+u32 dmin_phy_reg_table[MAX_BUS_NUM * MAX_CS_NUM][2] = {
+	/* subphy, addr */
+	{0, 0xc0},	/* cs 0, subphy 0 */
+	{0, 0xc1},	/* cs 0, subphy 1 */
+	{0, 0xc2},	/* cs 0, subphy 2 */
+	{0, 0xc3},	/* cs 0, subphy 3 */
+	{0, 0xc4},	/* cs 0, subphy 4 */
+	{1, 0xc0},	/* cs 1, subphy 0 */
+	{1, 0xc1},	/* cs 1, subphy 1 */
+	{1, 0xc2},	/* cs 1, subphy 2 */
+	{1, 0xc3},	/* cs 1, subphy 3 */
+	{1, 0xc4},	/* cs 1, subphy 4 */
+	{2, 0xc0},	/* cs 2, subphy 0 */
+	{2, 0xc1},	/* cs 2, subphy 1 */
+	{2, 0xc2},	/* cs 2, subphy 2 */
+	{2, 0xc3},	/* cs 2, subphy 3 */
+	{2, 0xc4},	/* cs 2, subphy 4 */
+	{0, 0xc5},	/* cs 3, subphy 0 */
+	{1, 0xc5},	/* cs 3, subphy 1 */
+	{2, 0xc5},	/* cs 3, subphy 2 */
+	{0, 0xc6},	/* cs 3, subphy 3 */
+	{1, 0xc6}	/* cs 3, subphy 4 */
+};
+#endif /* CONFIG_DDR4 */
 
 static u32 async_mode_at_tf;
 

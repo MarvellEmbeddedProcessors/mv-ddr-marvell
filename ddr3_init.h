@@ -252,7 +252,6 @@ extern struct dlb_config ddr3_dlb_config_table[];
 #if defined(CONFIG_DDR4)
 /* if 1, SSTL & POD have same Vref and workaround is required */
 extern u8 vref_calibration_wa;
-extern u32 dmin_phy_reg_table[MAX_BUS_NUM * MAX_CS_NUM][2];
 #endif /* CONFIG_DDR4 */
 
 /* Prototypes */
