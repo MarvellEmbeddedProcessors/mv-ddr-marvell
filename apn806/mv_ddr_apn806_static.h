@@ -206,10 +206,10 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf00116a0, 0xec130050},
 	{0xf00116a0, 0xec140012},
 	{0xf00116a0, 0xf81b0020},
-	{0xf00116a0, 0xe8280428},
+	{0xf00116a0, 0xe8280427},
 	{0xf00116a0, 0xec24070e},
 	{0xf00116a0, 0xe824078f},
-	{0xf00116a0, 0xe8260100},
+	{0xf00116a0, 0xe8260200},
 	{0xf0011400, 0x7b104c30},
 	{0xf0011404, 0x36301848},
 	{0xf0011408, 0x5411cbb9},
@@ -247,6 +247,7 @@ struct mk6_reg_data ddr_static_setup[] = {
 	/* Traffic thru Mckinley 6::MC init for MISL BOARD 2CS 4Gb x8 devices of micron - 2133P */
 	{0xF00116D8, 0x3CC},
 	{0xF06F0100, 0x44C0006},
+	{0xF06F0108, 0xD88FFFF},	/* neg edge */
 	{0xF00119D4, 0x2},
 	{0xF06F8D38, 0xACAC0000},
 	{0xF06F4360, 0xFFFF0044},
@@ -300,10 +301,10 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf00116a0, 0xEC130050},	/* ADLL */
 	{0xf00116a0, 0xEC140012},	/* ADLL */
 	{0xf00116a0, 0xF81B0020},	/* datareceivercalibrationBC */
-	{0xf00116a0, 0xE8280428},	/* vrefconfigurationBC */
+	{0xf00116a0, 0xE8280427},	/* vrefconfigurationBC */
 	{0xf00116a0, 0xEC24070C},	/* ctrldrivestrengthBC */
 	{0xf00116a0, 0xE824070E},	/* datadrivestrengthBC */
-	{0xf00116a0, 0xE8260040},	/* dataODTBC */
+	{0xf00116a0, 0xE8260200},	/* dataODTBC */
 
 	{0xF0011400, 0x7b104c30},
 	{0xF0011404, 0x36301848},
@@ -446,10 +447,10 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf00116a0, 0xec130050},	/* adll */
 	{0xf00116a0, 0xec140012},	/* adll */
 	{0xf00116a0, 0xf81b0020},	/* data receiver calibration bc */
-	{0xf00116a0, 0xe8280428},	/* vref configuration bc */
+	{0xf00116a0, 0xe8280427},	/* vref configuration bc */
 	{0xf00116a0, 0xec24070c},	/* ctrl drive strength bc */
 	{0xf00116a0, 0xe824070e},	/* data drive strength bc */
-	{0xf00116a0, 0xe8260040},	/* data odt bc */
+	{0xf00116a0, 0xe8260200},	/* data odt bc */
 	{0xf0011400, 0x7b104c30},
 	{0xf0011404, 0x36301848},
 	{0xf0011408, 0x5411cbb9},
@@ -520,10 +521,10 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf00116a0, 0xEC130050},	/* ADLL */
 	{0xf00116a0, 0xEC140012},	/* ADLL */
 	{0xf00116a0, 0xF81B0020},	/* datareceivercalibrationBC */
-	{0xf00116a0, 0xE8280429},	/* vrefconfigurationBC */
+	{0xf00116a0, 0xE8280427},	/* vrefconfigurationBC */
 	{0xf00116a0, 0xEC24070C},	/* ctrldrivestrengthBC */
 	{0xf00116a0, 0xE824070E},	/* datadrivestrengthBC */
-	{0xf00116a0, 0xE82600C0},	/* dataODTBC */
+	{0xf00116a0, 0xE8260200},	/* dataODTBC */
 	{0xf0020340, 0x0},
 	{0xf0020344, 0x10000000},
 	{0xf0020310, 0x21010000},
