@@ -186,8 +186,6 @@ int ddr3_init(void)
 		ddr3_new_tip_ecc_scrub();
 #endif
 
-	printf("mv_ddr: completed successfully\n");
-
 	return MV_OK;
 }
 
