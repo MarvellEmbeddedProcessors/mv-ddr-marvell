@@ -256,7 +256,7 @@ int ddr3_tip_vref(u32 dev_num)
 	enum hws_result *flow_result = ddr3_tip_get_result_ptr(training_stage);
 	u8 res[4];
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	CHECK_STATUS(ddr3_tip_special_rx(dev_num));
 
@@ -720,7 +720,7 @@ int ddr3_tip_cmd_addr_init_delay(u32 dev_num, u32 adll_tap)
 {
 	u32 if_id = 0;
 	u32 ck_num_adll_tap = 0, ca_num_adll_tap = 0, data = 0;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/*
 	 * ck_delay_table is delaying the of the clock signal only.

@@ -112,7 +112,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* CONFIG_DDR4 */
 
 /* Marvell board - Board_ID = DB_68XX_ID = 1 (DDR3/4)*/
-static struct hws_topology_map board_topology_map = {
+static struct mv_ddr_topology_map board_topology_map = {
 	0x1, /* active interfaces */
 	/* cs_mask, mirror, dqs_swap, ck_swap X PUPs */
 	{ { { {0x3, 0x2, 0, 0},
@@ -131,7 +131,7 @@ static struct hws_topology_map board_topology_map = {
 
 #if 0
 /* Marvell board - Board_ID = DB_GP_68XX_ID = 4 */
-static struct hws_topology_map board_topology_map = {
+static struct mv_ddr_topology_map board_topology_map = {
 	0x1, /* active interfaces */
 	/* cs_mask, mirror, dqs_swap, ck_swap X PUPs */
 	{ { { {0x1, 0, 0, 0},
@@ -149,7 +149,7 @@ static struct hws_topology_map board_topology_map = {
 };
 #endif
 
-struct hws_topology_map *ddr3_get_topology_map(void)
+struct mv_ddr_topology_map *mv_ddr_topology_map_get(void)
 {
 	/* Return the board topology as defined in the board code */
 	return &board_topology_map;

@@ -122,7 +122,7 @@ int ddr3_tip_bist_activate(u32 dev_num, enum hws_pattern pattern,
 	u32 poll_cnt = 0, max_poll = 1000, i, start_if, end_if;
 	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
 	u32 read_data[MAX_INTERFACE_NUM];
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/* ODPG Write enable from BIST */
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_num,
@@ -241,7 +241,7 @@ int ddr3_tip_bist_read_result(u32 dev_num, u32 if_id,
 {
 	int ret;
 	u32 read_data[MAX_INTERFACE_NUM];
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (IS_IF_ACTIVE(tm->if_act_mask, if_id) == 0)
 		return MV_NOT_SUPPORTED;
@@ -287,7 +287,7 @@ int hws_ddr3_run_bist(u32 dev_num, enum hws_pattern pattern, u32 *result,
 	u32 i = 0;
 	u32 win_base;
 	struct bist_result st_bist_result;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	for (i = 0; i < MAX_INTERFACE_NUM; i++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, i);
@@ -365,7 +365,7 @@ void ddr3_tip_print_bist_res(void)
 	u32 i;
 	struct bist_result st_bist_result[MAX_INTERFACE_NUM];
 	int res;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	for (i = 0; i < MAX_INTERFACE_NUM; i++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, i);

@@ -185,7 +185,7 @@ int ddr3_tip_static_round_trip_arr_build(u32 dev_num,
 	u32 board_trace;
 	struct trip_delay_element *pkg_delay_ptr;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/*
 	 * In WL we calc the diff between Clock to DQs in RL we sum the round
@@ -304,7 +304,7 @@ int ddr3_tip_read_leveling_static_config(u32 dev_num,
 	u32 rd_sample_dly[MAX_CS_NUM] = { 0 };
 	u32 rd_ready_del[MAX_CS_NUM] = { 0 };
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	DEBUG_TRAINING_STATIC_IP(DEBUG_LEVEL_TRACE,
 				 ("ddr3_tip_read_leveling_static_config\n"));
@@ -430,7 +430,7 @@ int ddr3_tip_run_static_alg(u32 dev_num, enum hws_ddr_freq freq)
 	u32 rl_total_round_trip_delay_arr[MAX_TOTAL_BUS_NUM];
 	struct init_cntr_param init_cntr_prm;
 	int ret;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	DEBUG_TRAINING_STATIC_IP(DEBUG_LEVEL_TRACE,
 				 ("ddr3_tip_run_static_alg"));

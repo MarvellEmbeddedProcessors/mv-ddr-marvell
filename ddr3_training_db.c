@@ -794,7 +794,7 @@ static inline u32 pattern_table_get_static_pbs_word(u8 index)
 u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 {
 	u32 pattern;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (DDR3_IS_16BIT_DRAM_MODE(tm->bus_act_mask) == 0) {
 		/* 32/64-bit patterns */

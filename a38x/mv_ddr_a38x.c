@@ -760,7 +760,7 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 	struct hws_tip_config_func_db config_func;
 	enum hws_ddr_freq ddr_freq;
 	int status;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/* new read leveling version */
 	config_func.tip_dunit_read_func = ddr3_tip_a38x_if_read;
@@ -888,7 +888,7 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 	return MV_OK;
 }
 
-static int ddr3_a38x_update_topology_map(u32 dev_num, struct hws_topology_map *tm)
+static int ddr3_a38x_update_topology_map(u32 dev_num, struct mv_ddr_topology_map *tm)
 {
 	u32 if_id = 0;
 	enum hws_ddr_freq freq;
@@ -907,7 +907,7 @@ static int ddr3_a38x_update_topology_map(u32 dev_num, struct hws_topology_map *t
 
 static int ddr3_tip_init_a38x(u32 dev_num, u32 board_id)
 {
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (NULL == tm)
 		return MV_FAIL;
@@ -1098,7 +1098,7 @@ int ddr3_post_run_alg(void)
 
 int ddr3_silicon_post_init(void)
 {
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/* Set half bus width */
 	if (DDR3_IS_16BIT_DRAM_MODE(tm->bus_act_mask)) {
@@ -1260,7 +1260,7 @@ static int ddr3_fast_path_dynamic_cs_size_config(u32 cs_ena)
 #ifdef DEVICE_MAX_DRAM_ADDRESS_SIZE
 	u32 physical_mem_size;
 	u32 max_mem_size = DEVICE_MAX_DRAM_ADDRESS_SIZE;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 #endif
 
 	/* Open fast path windows */
@@ -1377,7 +1377,7 @@ static int ddr3_save_and_set_training_windows(u32 *win)
 	win_remap_reg = REG_XBAR_WIN_4_REMAP_ADDR;
 	win_jump_index = 0x10;
 	num_of_win_regs = 16;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 #ifdef DISABLE_L2_FILTERING_DURING_DDR_TRAINING
 	/*

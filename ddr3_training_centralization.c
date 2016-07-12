@@ -159,7 +159,7 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 	u8 opt_window, waste_window, start_window_skew, end_window_skew;
 	u8 final_pup_window[MAX_INTERFACE_NUM][BUS_WIDTH_IN_BITS];
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	enum hws_training_result result_type = RESULT_PER_BIT;
 	enum hws_dir direction;
 	u32 *result[HWS_SEARCH_DIR_LIMIT];
@@ -603,7 +603,7 @@ int ddr3_tip_special_rx(u32 dev_num)
 	u32 temp = 0;
 	int pad_num = 0;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if ((ddr3_tip_special_rx_run_once_flag & (1 << effective_cs)) == (1 << effective_cs))
 		return MV_OK;
@@ -795,7 +795,7 @@ int ddr3_tip_print_centralization_result(u32 dev_num)
 {
 	u32 if_id = 0, bus_id = 0;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	dev_num = dev_num;
 

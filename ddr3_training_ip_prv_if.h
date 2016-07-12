@@ -154,7 +154,7 @@ typedef int (*HWS_TRAINING_IP_PBS_TX_FUNC_PTR)(u32 dev_num);
 typedef int (*HWS_TRAINING_IP_SELECT_CONTROLLER_FUNC_PTR)(
 	u32 dev_num, int enable);
 typedef int (*HWS_TRAINING_IP_TOPOLOGY_MAP_LOAD_FUNC_PTR)(
-	u32 dev_num, struct hws_topology_map *topology_map);
+	u32 dev_num, struct mv_ddr_topology_map *tm);
 typedef int (*HWS_TRAINING_IP_STATIC_CONFIG_FUNC_PTR)(
 	u32 dev_num, enum hws_ddr_freq frequency,
 	enum hws_static_config_type static_config_type, u32 if_id);

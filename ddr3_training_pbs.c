@@ -141,7 +141,7 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
 	u8 temp = 0;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/* save current cs enable reg val */
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
@@ -1035,7 +1035,7 @@ int ddr3_tip_print_pbs_result(u32 dev_num, u32 cs_num, enum pbs_dir pbs_mode)
 		(PBS_RX_PHY_REG + cs_num * 0x10) :
 		(PBS_TX_PHY_REG + cs_num * 0x10);
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	printf("%s,CS%d,PBS,ADLLRATIO,,,",
 	       (pbs_mode == PBS_RX_MODE) ? "Rx" : "Tx", cs_num);
@@ -1085,7 +1085,7 @@ int ddr3_tip_clean_pbs_result(u32 dev_num, enum pbs_dir pbs_mode)
 		(PBS_RX_PHY_REG + effective_cs * 0x10) :
 		(PBS_TX_PHY_REG + effective_cs * 0x10);
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);

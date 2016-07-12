@@ -266,7 +266,7 @@ int ddr3_if_ecc_enabled(void);
 void ddr3_new_tip_ecc_scrub(void);
 
 void mv_ddr_ver_print(void);
-struct hws_topology_map *ddr3_get_topology_map(void);
+struct mv_ddr_topology_map *mv_ddr_topology_map_get(void);
 
 int ddr3_if_ecc_enabled(void);
 int ddr3_tip_reg_write(u32 dev_num, u32 reg_addr, u32 data);
@@ -288,7 +288,7 @@ int read_phase_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM
 int write_leveling_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
 			 u32 pup_ph_values[MAX_INTERFACE_NUM * MAX_BUS_NUM], int reg_addr);
 int ddr3_tip_restore_dunit_regs(u32 dev_num);
-void print_topology(struct hws_topology_map *topology_db);
+void print_topology(struct mv_ddr_topology_map *tm);
 
 u32 mv_board_id_get(void);
 

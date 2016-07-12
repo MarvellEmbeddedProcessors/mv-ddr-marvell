@@ -275,7 +275,7 @@ int hws_ddr3_tip_select_ddr_controller(u32 dev_num, int enable);
 int hws_ddr3_tip_init_controller(u32 dev_num,
 				 struct init_cntr_param *init_cntr_prm);
 int hws_ddr3_tip_load_topology_map(u32 dev_num,
-				   struct hws_topology_map *topology);
+				   struct mv_ddr_topology_map *topology);
 int hws_ddr3_tip_run_alg(u32 dev_num, enum hws_algo_type algo_type);
 int hws_ddr3_tip_mode_read(u32 dev_num, struct mode_info *mode_info);
 int hws_ddr3_tip_read_training_result(u32 dev_num,

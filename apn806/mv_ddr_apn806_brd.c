@@ -103,7 +103,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * the DDR3 controller.
  */
 
-static struct hws_topology_map board_topology_map = {
+static struct mv_ddr_topology_map board_topology_map = {
 #if defined(a70x0)
 /* FIXME: MISL board 2CS 4Gb x8 devices of micron - 2133P */
 	0x1, /* active interfaces */
@@ -183,7 +183,7 @@ static struct hws_topology_map board_topology_map = {
 #endif
 };
 
-struct hws_topology_map *ddr3_get_topology_map(void)
+struct mv_ddr_topology_map *mv_ddr_topology_map_get(void)
 {
 	/* Return the board topology as defined in the board code */
 	return &board_topology_map;

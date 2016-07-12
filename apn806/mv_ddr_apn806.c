@@ -584,7 +584,7 @@ static int ddr3_tip_init_apn806_silicon(u32 dev_num, u32 board_id)
 #if !defined(CONFIG_DDR4)
 	enum hws_ddr_freq ddr_freq = DDR_FREQ_LOW_FREQ;
 #endif
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/* new read leveling version */
 	config_func.tip_dunit_read_func = ddr3_tip_apn806_if_read;
@@ -686,7 +686,7 @@ int ddr3_silicon_pre_init(void)
 	int dev_num = 0;
 	int board_id = 0;
 	static int init_done;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (init_done == 1)
 		return MV_OK;
@@ -712,7 +712,7 @@ static void mv_ddr_convert_read_params_from_tip2mc6(void)
 {
 	u32	if_id, cs, cl_val, cwl_val, phy_rl_cycle_dly_mc6, rd_smp_dly_tip, phy_rfifo_rptr_dly_val;
 	u32	mb_read_data_latency;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 max_cs = ddr3_tip_max_cs_get(DEV_NUM_0);
 	enum hws_speed_bin speed_bin_index;
 	enum hws_ddr_freq freq;
@@ -775,7 +775,7 @@ static void mv_ddr3_tip_pre_charge(void)
 {
 	u32 if_id;
 
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 
@@ -925,7 +925,7 @@ void mv_ddr_phy_static_config(void)
 static u32 mv_ddr_pad_to_dq_detect(u32 dev_num, u32 iface, u32 subphy, u32 pad)
 {
 	enum hws_training_ip_stat train_result[MAX_INTERFACE_NUM];
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 i, a, b, diff, max_diff, max_diff_cnt, dq;
 
 	/*
@@ -1064,7 +1064,7 @@ int mv_ddr_dq_mapping_detect(u32 dev_num)
 	u32 cs_enable_reg_val[MAX_INTERFACE_NUM];
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	u32 mv_ddr_dq_mapping_detected[MAX_INTERFACE_NUM][MAX_BUS_NUM][BUS_WIDTH_IN_BITS] = {0};
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	for (iface = 0; iface < MAX_INTERFACE_NUM; iface++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, iface);

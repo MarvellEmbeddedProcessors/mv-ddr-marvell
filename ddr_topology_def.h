@@ -179,7 +179,7 @@ struct if_params {
 	enum hws_temperature interface_temp;
 };
 
-struct hws_topology_map {
+struct mv_ddr_topology_map {
 	/* Number of interfaces (default is 12) */
 	u8 if_act_mask;
 

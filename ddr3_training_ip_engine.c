@@ -571,7 +571,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (pup_num >= octets_per_if_num) {
 		DEBUG_TRAINING_IP_ENGINE(DEBUG_LEVEL_ERROR,
@@ -865,7 +865,7 @@ int ddr3_tip_load_pattern_to_odpg(u32 dev_num, enum hws_access_type access_type,
 {
 	u32 pattern_length_cnt = 0;
 	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	for (pattern_length_cnt = 0;
 	     pattern_length_cnt < pattern_table[pattern].pattern_len;
@@ -998,7 +998,7 @@ int ddr3_tip_read_training_result(u32 dev_num, u32 if_id,
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/*
 	 * Agreed assumption: all CS mask contain same number of bits,
@@ -1138,7 +1138,7 @@ int ddr3_tip_read_training_result(u32 dev_num, u32 if_id,
 int ddr3_tip_load_all_pattern_to_mem(u32 dev_num)
 {
 	u32 pattern = 0, if_id;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
@@ -1206,7 +1206,7 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 {
 	u32 reg_data, if_id;
 	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/* load pattern to memory */
 	/*
@@ -1309,7 +1309,7 @@ int ddr3_tip_ip_training_wrapper_int(u32 dev_num,
 	enum hws_edge_compare edge_comp_used;
 	u8 cons_tap = (direction == OPER_WRITE) ? (64) : (0);
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (train_status == NULL) {
 		DEBUG_TRAINING_IP_ENGINE(DEBUG_LEVEL_ERROR,
@@ -1413,7 +1413,7 @@ int ddr3_tip_ip_training_wrapper(u32 dev_num, enum hws_access_type access_type,
 	u8 bit_bit_mask[MAX_BUS_NUM] = { 0 }, bit_bit_mask_active = 0;
 	u8 pup_id;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (pup_num >= octets_per_if_num) {
 		DEBUG_TRAINING_IP_ENGINE(DEBUG_LEVEL_ERROR,
@@ -1583,7 +1583,7 @@ int ddr3_tip_load_phy_values(int b_load)
 {
 	u32 bus_cnt = 0, if_id, dev_num = 0;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
@@ -1665,7 +1665,7 @@ int ddr3_tip_training_ip_test(u32 dev_num, enum hws_training_result result_type,
 	u32 *res = NULL;
 	u32 search_state = 0;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	ddr3_tip_load_phy_values(1);
 
@@ -1732,7 +1732,7 @@ int ddr3_tip_training_ip_test(u32 dev_num, enum hws_training_result result_type,
 
 struct pattern_info *ddr3_tip_get_pattern_table()
 {
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask))
 		return pattern_table_64;
@@ -1745,7 +1745,7 @@ struct pattern_info *ddr3_tip_get_pattern_table()
 u16 *ddr3_tip_get_mask_results_dq_reg()
 {
 #if MAX_BUS_NUM == 5
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask))
 		return mask_results_dq_reg_map_pup3_ecc;
@@ -1757,7 +1757,7 @@ u16 *ddr3_tip_get_mask_results_dq_reg()
 u16 *ddr3_tip_get_mask_results_pup_reg_map()
 {
 #if MAX_BUS_NUM == 5
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask))
 		return mask_results_pup_reg_map_pup3_ecc;

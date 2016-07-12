@@ -191,7 +191,7 @@ int ddr3_init(void)
 
 int ddr3_if_ecc_enabled(void)
 {
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (DDR3_IS_ECC_PUP4_MODE(tm->bus_act_mask) ||
 	    DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask))
@@ -211,7 +211,7 @@ static int mv_ddr_training_params_set(u8 dev_num)
 {
 	struct tune_train_params params;
 	int status;
-	struct hws_topology_map *tm = ddr3_get_topology_map();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 if_id;
 	u32 cs_num;
 
