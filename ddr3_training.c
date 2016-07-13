@@ -181,6 +181,7 @@ void mv_ddr_ver_print(void)
 #if defined(CONFIG_DDR4)
 	printf(ddr4_sublib_version_get());
 #endif /* CONFIG_DDR4 */
+	printf("\n");
 }
 
 static int ddr3_tip_ddr3_training_main_flow(u32 dev_num);
