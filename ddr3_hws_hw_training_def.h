@@ -127,12 +127,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_DDR3_MODES_NUMBER		30
 
 /* MISC */
-/*TODO - change the base address per soc, consider to add file per soc*/
+/* TODO: consider to define base address per soc in a file per soc */
 #if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
 #define INTER_REGS_BASE			0xd0000000
-#elif defined(CONFIG_APN806)
-#define INTER_REGS_BASE			0xf0000000
 #endif
+
 /* DDR */
 #define REG_SDRAM_CONFIG_ADDR			0x1400
 #define REG_SDRAM_CONFIG_MASK			0x9fffffff

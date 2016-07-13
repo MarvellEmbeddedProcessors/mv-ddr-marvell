@@ -198,6 +198,41 @@ static u32 dq_bit_map_2_phy_pin[LAST_DDR_CFG_OPT][MAX_DQ_NUM] = {
 	{/* DDR3_BRD */}
 };
 
+/*
+ * Accessor functions for the registers
+ */
+void reg_write(u32 addr, u32 val)
+{
+	mmio_write_32(INTER_REGS_BASE + addr, val);
+}
+
+u32 reg_read(u32 addr)
+{
+	return mmio_read_32(INTER_REGS_BASE + addr);
+}
+
+void reg_bit_set(u32 addr, u32 mask)
+{
+	mmio_write_32(INTER_REGS_BASE + addr,
+		      mmio_read_32(INTER_REGS_BASE + addr) | mask);
+}
+
+void reg_bit_clr(u32 addr, u32 mask)
+{
+	mmio_write_32(INTER_REGS_BASE + addr,
+		      mmio_read_32(INTER_REGS_BASE + addr) & ~mask);
+}
+
+void reg_bit_clrset(u32 addr, u32 val, u32 mask)
+{
+	mmio_clrsetbits_32(INTER_REGS_BASE + addr, mask, val);
+}
+
+void mmio_write2_32(u32 val, u32 addr)
+{
+	mmio_write_32(addr, val);
+}
+
 static u8 mv_ddr_tip_clk_ratio_get(u32 freq)
 {
 	if ((freq == DDR_FREQ_LOW_FREQ) || (freq_val[freq] <= 400))

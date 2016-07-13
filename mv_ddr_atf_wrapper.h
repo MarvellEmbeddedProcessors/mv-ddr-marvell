@@ -239,37 +239,12 @@ typedef unsigned int u32;
 /*
  * Accessor functions for the registers
  */
-static inline void reg_write(u32 addr, u32 val)
-{
-	mmio_write_32(INTER_REGS_BASE + addr, val);
-}
-
-static inline u32 reg_read(u32 addr)
-{
-	return mmio_read_32(INTER_REGS_BASE + addr);
-}
-
-static inline void reg_bit_set(u32 addr, u32 mask)
-{
-	mmio_write_32(INTER_REGS_BASE + addr,
-		      mmio_read_32(INTER_REGS_BASE + addr) | mask);
-}
-
-static inline void reg_bit_clr(u32 addr, u32 mask)
-{
-	mmio_write_32(INTER_REGS_BASE + addr,
-		      mmio_read_32(INTER_REGS_BASE + addr) & ~mask);
-}
-
-static inline void reg_bit_clrset(u32 addr, u32 val, u32 mask)
-{
-	mmio_clrsetbits_32(INTER_REGS_BASE + addr, mask, val);
-}
-
-static inline void mmio_write2_32(u32 val, u32 addr)
-{
-	mmio_write_32(addr, val);
-}
+void reg_write(u32 addr, u32 val);
+u32 reg_read(u32 addr);
+void reg_bit_set(u32 addr, u32 mask);
+void reg_bit_clr(u32 addr, u32 mask);
+void reg_bit_clrset(u32 addr, u32 val, u32 mask);
+void mmio_write2_32(u32 val, u32 addr);
 
 #define writel mmio_write2_32
 #define readl mmio_read_32
