@@ -727,10 +727,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 			if (IS_BUS_ACTIVE(tm->bus_act_mask, pup_id) == 1)
 				continue;
 
-			for (index_cnt = (mask_dq_num_of_regs - pup_id * 8);
-			     index_cnt <
-				     (mask_dq_num_of_regs - (pup_id + 1) * 8);
-			     index_cnt++) {
+			for (index_cnt = (pup_id * 8); index_cnt < (pup_id + 1) * 8; index_cnt++) {
 				CHECK_STATUS(ddr3_tip_if_write
 					     (dev_num, access_type,
 					      interface_num,
