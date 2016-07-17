@@ -194,7 +194,8 @@ int ddr3_if_ecc_enabled(void)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (DDR3_IS_ECC_PUP4_MODE(tm->bus_act_mask) ||
-	    DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask))
+	    DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask) ||
+	    DDR3_IS_ECC_PUP8_MODE(tm->bus_act_mask))
 		return 1;
 	else
 		return 0;

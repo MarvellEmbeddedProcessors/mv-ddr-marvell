@@ -1180,7 +1180,8 @@ int ddr3_pre_algo_config(void)
 
 	/* Set regular ECC training mode (bus4 and bus 3) */
 	if ((DDR3_IS_ECC_PUP4_MODE(tm->bus_act_mask)) ||
-	    (DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask))) {
+	    (DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask)) ||
+	    (DDR3_IS_ECC_PUP8_MODE(tm->bus_act_mask))) {
 		/* Enable ECC Write MUX */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
@@ -1211,7 +1212,8 @@ int ddr3_post_algo_config(void)
 
 	/* Un_set ECC training mode */
 	if ((DDR3_IS_ECC_PUP4_MODE(tm->bus_act_mask)) ||
-	    (DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask))) {
+	    (DDR3_IS_ECC_PUP3_MODE(tm->bus_act_mask)) ||
+	    (DDR3_IS_ECC_PUP8_MODE(tm->bus_act_mask))) {
 		/* Disable ECC Write MUX */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
