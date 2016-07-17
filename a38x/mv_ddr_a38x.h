@@ -98,6 +98,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_A38X_H
 #define _MV_DDR_A38X_H
 
+#include "ddr3_hws_hw_training_def.h"
+
 #define MAX_INTERFACE_NUM		1
 #define MAX_BUS_NUM			5
 #define DDR_IF_CTRL_SUBPHYS_NUM		3
@@ -105,9 +107,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DFS_LOW_FREQ_VALUE		120
 #define SDRAM_CS_SIZE			0xfffffff	/* FIXME: implement a function for cs size for each platform */
 
-#include "ddr3_hws_hw_training_def.h"
-
-#define ECC_SUPPORT
+#define AP_INT_REG_START_ADDR		0xd0000000
+#define AP_INT_REG_END_ADDR		0xd0100000
 
 /* right now, we're not supporting this in mainline */
 #undef SUPPORT_STATIC_DUNIT_CONFIG
@@ -283,6 +284,7 @@ extern u16 odt_intercept[];
 
 int mv_ddr_pre_training_soc_config(const char *ddr_type);
 int mv_ddr_post_training_soc_config(const char *ddr_type);
+void mv_ddr_scrub(void);
 
 #ifdef CONFIG_MC_STATIC
 struct mv_ddr_mc_reg_config {

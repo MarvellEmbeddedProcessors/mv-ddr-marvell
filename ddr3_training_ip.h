@@ -283,5 +283,6 @@ int hws_ddr3_tip_read_training_result(u32 dev_num,
 int ddr3_tip_is_pup_lock(u32 *pup_buf, enum hws_training_result read_mode);
 u8 ddr3_tip_get_buf_min(u8 *buf_ptr);
 u8 ddr3_tip_get_buf_max(u8 *buf_ptr);
-
+uint64_t mv_ddr_get_memory_size_per_cs_in_bits(void);
+uint64_t mv_ddr_get_total_memory_size_in_bits(void);
 #endif /* _DDR3_TRAINING_IP_H_ */

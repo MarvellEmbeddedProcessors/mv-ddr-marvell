@@ -102,12 +102,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define NO_EFUSE
 #define IF_ID_0				0
-#define DEV_NUM_0			0
+
 #define MAX_INTERFACE_NUM		1
 #define MAX_BUS_NUM			9
 #define DDR_IF_CTRL_SUBPHYS_NUM		3
 
 #define MEM_TO_MC6_FREQ_RATIO		2
+
+#define AP_INT_REG_START_ADDR		0xf0000000ULL
+#define AP_INT_REG_END_ADDR		0x100000000ULL
 
 #define DSS_CR0_REG_ADDR		0x6f0100	/* TODO: put this register in ATF h file */
 #define IOMUX_SEL_OFFS			17
@@ -411,7 +414,6 @@ int mv_ddr_mc_static_config(void);
 #ifdef CONFIG_PHY_STATIC
 void mv_ddr_phy_static_config(void);
 #endif /* CONFIG_PHY_STATIC */
-
 /*
  * TODO: dq to pad mapping detection code to be relocated
  * to the generic part of mv_ddr code.
@@ -424,5 +426,5 @@ void mv_ddr_phy_static_config(void);
 #define MV_DDR_DQ_MAPPING_DETECT_VERBOSE 0
 int mv_ddr_dq_mapping_detect(u32 dev_num);
 #endif
-
+void mv_ddr_scrub(void);
 #endif /* _MV_DDR_AP806_H */

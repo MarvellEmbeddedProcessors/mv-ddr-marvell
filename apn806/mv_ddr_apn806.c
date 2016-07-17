@@ -233,6 +233,30 @@ void mmio_write2_32(u32 val, u32 addr)
 	mmio_write_32(addr, val);
 }
 
+void mv_ddr_scrub(void)
+{
+	uintptr_t i = 0;
+	uint64_t val_64bit = 0xDEADBEEFDEADBEEF;
+
+	uint64_t total_memory_size = mv_ddr_get_total_memory_size_in_bits();
+	total_memory_size = total_memory_size / BITS_IN_BYTE;
+
+	if (total_memory_size < AP_INT_REG_START_ADDR) {
+		for (i = 0; i < total_memory_size; i += 8)
+			mmio_write_64(i, val_64bit);
+	} else {
+		if (total_memory_size > AP_INT_REG_END_ADDR) {
+			for (i = 0; i < AP_INT_REG_START_ADDR; i += 8)
+				mmio_write_64(i, val_64bit);
+			for (i = AP_INT_REG_END_ADDR; i < total_memory_size; i += 8)
+				mmio_write_64(i, val_64bit);
+		} else {
+			for (i = 0; i < AP_INT_REG_START_ADDR; i += 8)
+				mmio_write_64(i, val_64bit);
+		}
+	}
+}
+
 static u8 mv_ddr_tip_clk_ratio_get(u32 freq)
 {
 	if ((freq == DDR_FREQ_LOW_FREQ) || (freq_val[freq] <= 400))
@@ -1124,4 +1148,5 @@ int mv_ddr_dq_mapping_detect(u32 dev_num)
 
 	return MV_OK;
 }
+
 #endif

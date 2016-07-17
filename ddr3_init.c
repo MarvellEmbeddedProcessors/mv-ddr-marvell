@@ -181,12 +181,62 @@ int ddr3_init(void)
 	/* Post MC/PHY initializations */
 	mv_ddr_post_training_soc_config(ddr_type);
 
-#if defined(ECC_SUPPORT)
-	if (ddr3_if_ecc_enabled())
-		ddr3_new_tip_ecc_scrub();
-#endif
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+
+	if (ddr3_if_ecc_enabled()) {
+		if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask) ||
+		    MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(tm->bus_act_mask, octets_per_if_num))
+			mv_ddr_scrub();
+		else
+			ddr3_new_tip_ecc_scrub();
+	}
 
 	return MV_OK;
+}
+
+uint64_t mv_ddr_get_memory_size_per_cs_in_bits(void)
+{
+	uint64_t memory_size_per_cs;
+
+	u32 bus_cnt, num_of_active_bus = 0;
+	u32 num_of_sub_phys_per_ddr_unit = 0;
+
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(DEV_NUM_0, MV_ATTR_OCTET_PER_INTERFACE);
+
+	/* count the number of active bus */
+	for (bus_cnt = 0; bus_cnt < octets_per_if_num - 1/* ignore ecc octet */; bus_cnt++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
+		num_of_active_bus++;
+	}
+
+	/* calculate number of sub-phys per ddr unit */
+	if (tm->interface_params[0].bus_width/* supports only single interface */ == BUS_WIDTH_16)
+		num_of_sub_phys_per_ddr_unit = TWO_SUB_PHYS;
+	if (tm->interface_params[0].bus_width/* supports only single interface */ == BUS_WIDTH_8)
+		num_of_sub_phys_per_ddr_unit = SINGLE_SUB_PHY;
+
+	/* calculate dram size per cs */
+	memory_size_per_cs = (uint64_t)mem_size[tm->interface_params[0].memory_size] * (uint64_t)num_of_active_bus
+		/ (uint64_t)num_of_sub_phys_per_ddr_unit * (uint64_t)BITS_IN_BYTE;
+
+	return memory_size_per_cs;
+}
+
+uint64_t mv_ddr_get_total_memory_size_in_bits(void)
+{
+	uint64_t total_memory_size = 0;
+	uint64_t memory_size_per_cs = 0;
+
+	/* get the number of cs */
+	u32 max_cs = ddr3_tip_max_cs_get(DEV_NUM_0);
+
+	memory_size_per_cs = mv_ddr_get_memory_size_per_cs_in_bits();
+	total_memory_size = (uint64_t)max_cs * memory_size_per_cs;
+
+	return total_memory_size;
 }
 
 int ddr3_if_ecc_enabled(void)

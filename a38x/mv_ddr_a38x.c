@@ -425,6 +425,10 @@ static u32 dq_bit_map_2_phy_pin[] = {
 	0, 1, 2, 9, 7, 8, 3, 6,	/* 4 */
 };
 
+void mv_ddr_scrub(void)
+{
+}
+
 static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 				     enum hws_ddr_freq freq);
 
