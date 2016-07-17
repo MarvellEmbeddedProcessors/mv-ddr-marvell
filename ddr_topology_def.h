@@ -115,6 +115,11 @@ enum hws_bus_width {
 	BUS_WIDTH_32
 };
 
+enum mv_ddr_num_of_sub_phys_per_ddr_unit {
+	SINGLE_SUB_PHY = 1,
+	TWO_SUB_PHYS = 2
+};
+
 enum mv_ddr_temperature {
 	MV_DDR_TEMP_LOW,
 	MV_DDR_TEMP_NORMAL,

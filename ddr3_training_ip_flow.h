@@ -147,15 +147,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 
 #define DDR3_IS_ECC_PUP3_MODE(if_mask) \
-	(((if_mask) == 0xb) ? 1 : 0)
+	(((if_mask) == BUS_MASK_16BIT_ECC_PUP3) ? 1 : 0)
+
 #define DDR3_IS_ECC_PUP4_MODE(if_mask) \
-	(((((if_mask) & 0x10) == 0)) ? 0 : 1)
+	((if_mask == BUS_MASK_32BIT_ECC || if_mask == BUS_MASK_16BIT_ECC) ? 1 : 0)
+
 #define DDR3_IS_16BIT_DRAM_MODE(mask) \
-	(((((mask) & 0x4) == 0)) ? 1 : 0)
+	((mask == BUS_MASK_16BIT || mask == BUS_MASK_16BIT_ECC || mask == BUS_MASK_16BIT_ECC_PUP3) ? 1 : 0)
+
+#define DDR3_IS_ECC_PUP8_MODE(if_mask) \
+	((if_mask == MV_DDR_32BIT_ECC_PUP8_BUS_MASK || if_mask == MV_DDR_64BIT_ECC_PUP8_BUS_MASK) ? 1 : 0)
 
 #define MV_DDR_IS_64BIT_DRAM_MODE(mask) \
-	((((mask) & MV_DDR_64BIT_BUS_MASK) == MV_DDR_64BIT_BUS_MASK) ? 1 : 0)
+	((((mask) & MV_DDR_64BIT_BUS_MASK) == MV_DDR_64BIT_BUS_MASK) || \
+	(((mask) & MV_DDR_64BIT_ECC_PUP8_BUS_MASK) == MV_DDR_64BIT_ECC_PUP8_BUS_MASK) ? 1 : 0)
 
+#define MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(mask, octets_per_if_num/* FIXME: get from ATF */) \
+	((octets_per_if_num == 9/* FIXME: get from ATF */) && \
+	((mask == BUS_MASK_32BIT) || \
+	(mask == MV_DDR_32BIT_ECC_PUP8_BUS_MASK)) ? 1 : 0)
+
+#define MV_DDR_IS_HALF_BUS_DRAM_MODE(mask, octets_per_if_num/* FIXME: get from ATF */) \
+	(MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(mask, octets_per_if_num) || DDR3_IS_16BIT_DRAM_MODE(mask))
+
+#define ECC_READ_BUS_0			0
+#define ECC_PHY_ACCESS_3		3
+#define ECC_PHY_ACCESS_4		4
+#define ECC_PHY_ACCESS_8		8
 #define MEGA				1000000
 #define BUS_WIDTH_IN_BITS		8
 
@@ -378,6 +396,7 @@ enum {
 #define CS_BYTE_GAP(cs_num)			((cs_num) * 0x4)
 #define CS_PBS_GAP(cs_num)			((cs_num) * 0x10)
 #define ADLL_LENGTH				32
+#define BITS_IN_BYTE				8
 
 #if defined(CONFIG_DDR4)
 /* DDR4 MRS */
