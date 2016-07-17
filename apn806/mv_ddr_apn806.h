@@ -212,6 +212,7 @@ enum{
 #endif
 
 #define DFS_LOW_FREQ_VALUE		100
+#define SDRAM_CS_SIZE			0x7fffffffUL	/* FIXME: implement a function for cs size for each platform */
 
 /* right now, we're not supporting this in mainline */
 #undef SUPPORT_STATIC_DUNIT_CONFIG

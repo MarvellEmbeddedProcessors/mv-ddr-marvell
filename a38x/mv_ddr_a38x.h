@@ -103,6 +103,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DDR_IF_CTRL_SUBPHYS_NUM		3
 
 #define DFS_LOW_FREQ_VALUE		120
+#define SDRAM_CS_SIZE			0xfffffff	/* FIXME: implement a function for cs size for each platform */
 
 #include "ddr3_hws_hw_training_def.h"
 
