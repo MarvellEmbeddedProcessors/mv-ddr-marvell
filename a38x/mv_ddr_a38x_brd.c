@@ -125,7 +125,7 @@ static struct mv_ddr_topology_map board_topology_map = {
 	    MEM_4G,			/* mem_size */
 	    DDR_FREQ_800,		/* frequency */
 	    0, 0,			/* cas_l, cas_wl */
-	    HWS_TEMP_LOW} },		/* temperature */
+	    MV_DDR_TEMP_LOW} },		/* temperature */
 	BUS_MASK_32BIT			/* Buses mask */
 };
 
@@ -144,7 +144,7 @@ static struct mv_ddr_topology_map board_topology_map = {
 	    MEM_4G,			/* mem_size */
 	    DDR_FREQ_800,		/* frequency */
 	    0, 0,			/* cas_l cas_wl */
-	    HWS_TEMP_LOW} },		/* temperature */
+	    MV_DDR_TEMP_LOW} },		/* temperature */
 	BUS_MASK_32BIT			/* Busses mask */
 };
 #endif

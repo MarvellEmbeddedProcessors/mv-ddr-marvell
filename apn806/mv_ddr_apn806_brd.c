@@ -117,7 +117,7 @@ static struct mv_ddr_topology_map board_topology_map = {
 	   MEM_4G,			/* mem_size */
 	   DDR_FREQ_800,		/* frequency */
 	   0, 0,			/* cas_l, cas_wl */
-	   HWS_TEMP_LOW} },		/* temperature */
+	   MV_DDR_TEMP_LOW} },		/* temperature */
 	BUS_MASK_32BIT			/* Buses mask */
 #elif defined(a70x0_cust)
 /* Customer board with 1CS 8Gb x4 devices of Samsung 2400 (17-17-17) */
@@ -132,7 +132,7 @@ static struct mv_ddr_topology_map board_topology_map = {
 	   MEM_8G,			/* mem_size */
 	   DDR_FREQ_800,		/* frequency */
 	   0, 0,			/* cas_l, cas_wl */
-	   HWS_TEMP_LOW} },		/* temperature */
+	   MV_DDR_TEMP_LOW} },		/* temperature */
 	BUS_MASK_32BIT			/* Buses mask */
 #elif defined(a80x0)
 	/* MISL board with 1CS 8Gb x4 devices of Micron 2400T */
@@ -151,7 +151,7 @@ static struct mv_ddr_topology_map board_topology_map = {
 	   MEM_8G,			/* mem_size */
 	   DDR_FREQ_800,		/* frequency */
 	   0, 0,			/* cas_l, cas_wl */
-	   HWS_TEMP_LOW} },		/* temperature */
+	   MV_DDR_TEMP_LOW} },		/* temperature */
 #if defined(CONFIG_64BIT)
 	MV_DDR_64BIT_BUS_MASK
 #else
@@ -174,7 +174,7 @@ static struct mv_ddr_topology_map board_topology_map = {
 	   MEM_8G,			/* mem_size */
 	   DDR_FREQ_800,		/* frequency */
 	   0, 0,			/* cas_l, cas_wl */
-	   HWS_TEMP_LOW} },		/* temperature */
+	   MV_DDR_TEMP_LOW} },		/* temperature */
 #if defined(CONFIG_64BIT)
 	MV_DDR_64BIT_BUS_MASK
 #else

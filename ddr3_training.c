@@ -564,7 +564,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 			t_refi =
 				(tm->interface_params[if_id].
 				 interface_temp ==
-				 HWS_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
+				 MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
 			t_refi *= 1000;	/* psec */
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE,
 					  ("memy_size %d speed_bin_ind %d freq %d t_refi %d\n",
@@ -763,7 +763,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 				data_value |=
 					((tm->interface_params[if_id].
 					  interface_temp ==
-					  HWS_TEMP_HIGH) ? (1 << 7) : 0);
+					  MV_DDR_TEMP_HIGH) ? (1 << 7) : 0);
 				data_value |= g_rtt_wr;
 				CHECK_STATUS(ddr3_tip_if_write
 					     (dev_num, access_type, if_id,
@@ -1855,7 +1855,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 
 		/* adjust t_refi to new frequency */
 		t_refi = (tm->interface_params[if_id].interface_temp ==
-			  HWS_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
+			  MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
 		t_refi *= 1000;	/*psec */
 
 		/* HCLK in[ps] */
@@ -2022,7 +2022,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		 * nklein 24.10.13 - should not be here - leave value as set in
 		 * the init configuration val |= (1 << 9);
 		 * val |= ((tm->interface_params[if_id].
-		 * interface_temp == HWS_TEMP_HIGH) ? (1 << 7) : 0);
+		 * interface_temp == MV_DDR_TEMP_HIGH) ? (1 << 7) : 0);
 		 */
 		/* nklein 24.10.13 - see above comment */
 		CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type,

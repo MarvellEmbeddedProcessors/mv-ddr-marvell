@@ -115,10 +115,10 @@ enum hws_bus_width {
 	BUS_WIDTH_32
 };
 
-enum hws_temperature {
-	HWS_TEMP_LOW,
-	HWS_TEMP_NORMAL,
-	HWS_TEMP_HIGH
+enum mv_ddr_temperature {
+	MV_DDR_TEMP_LOW,
+	MV_DDR_TEMP_NORMAL,
+	MV_DDR_TEMP_HIGH
 };
 
 enum hws_mem_size {
@@ -176,7 +176,7 @@ struct if_params {
 	u8 cas_l;
 
 	/* operation temperature */
-	enum hws_temperature interface_temp;
+	enum mv_ddr_temperature interface_temp;
 };
 
 struct mv_ddr_topology_map {
