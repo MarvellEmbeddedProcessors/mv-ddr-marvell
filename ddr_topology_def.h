@@ -192,7 +192,7 @@ struct mv_ddr_topology_map {
 	struct if_params interface_params[MAX_INTERFACE_NUM];
 
 	/* Bit mask for active buses */
-	u8 bus_act_mask;
+	u16 bus_act_mask;
 };
 
 /* DDR3 training global configuration parameters */
