@@ -112,6 +112,8 @@ u32 debug_dunit = 0;
 u32 odt_additional = 1;
 u32 *dq_map_table = NULL;
 u32 odt_config = 1;
+u32 nominal_avs;
+u32 extension_avs;
 
 u32 is_pll_before_init = 0, is_adll_calib_before_init = 1, is_dfs_in_init = 0;
 u32 dfs_low_freq;
@@ -2826,6 +2828,8 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 		 * which override the static parameters
 		 */
 		mv_ddr_mc_static_config();
+		reg_write(0x6f812c, extension_avs); /* FIXME: disable extension AVS */
+		reg_write(0x6f8130, nominal_avs); /* FIXME: back to nominal AVS */
 #endif /* #if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust) */
 		if (is_reg_dump != 0)
 			ddr3_tip_reg_dump(dev_num);

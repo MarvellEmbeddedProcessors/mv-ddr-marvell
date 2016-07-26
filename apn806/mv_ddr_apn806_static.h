@@ -389,6 +389,8 @@ struct mk6_reg_data ddr_static_setup[] = {
 	 */
 	/* {0xF0011480, 0x1},		Tipinit */
 	/* {0xF0020020, 0x13000001},	MCinit */
+	{0xf06f812C, 0xFDE1FFFF},	/* FIXME: extension avs */
+	{0xf06f8130, 0x1002f2f5},	/* FIXME: avs to 1.13V */
 	{-1, -1},
 };
 #endif /* CONFIG_DUNIT_STATIC */
@@ -583,6 +585,8 @@ struct mk6_reg_data ddr_static_setup[] = {
 	 */
 	/* {0xF0011480, 0x1},		Tipinit */
 	/* {0xF0020020, 0x13000001},	MCinit */
+	{0xf06f812C, 0xFDE1FFFF},	/* FIXME: extension avs */
+	{0xf06f8130, 0x1002f2f5},	/* FIXME: avs to 1.13V */
 	{-1, -1},
 };
 #endif
@@ -838,6 +842,8 @@ struct mk6_reg_data ddr_static_setup[] = {
 	 */
 	/* {0xF0011480, 0x1},		Tipinit */
 	/* {0xF0020020, 0x13000001},	MCinit */
+	{0xf06f812C, 0xFDE1FFFF},	/* FIXME: extension avs */
+	{0xf06f8130, 0x1002f2f5},	/* FIXME: avs to 1.13V */
 	{-1, -1},
 };
 #endif
