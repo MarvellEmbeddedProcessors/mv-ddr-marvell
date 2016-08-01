@@ -108,6 +108,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "mv_ddr_topology.h"
+#include "mv_ddr_spd.h"
 
 struct bus_params {
 	/* Chip Select (CS) bitmask (bits 0-CS0, bit 1- CS1 ...) */
@@ -170,6 +171,12 @@ struct mv_ddr_topology_map {
 
 	/* source of ddr configuration data */
 	enum mv_ddr_cfg_src cfg_src;
+
+	/* raw spd data */
+	union mv_ddr_spd_data spd_data;
+
+	/* timing parameters */
+	unsigned int timing_data[MV_DDR_TDATA_LAST];
 };
 
 /* DDR3 training global configuration parameters */
