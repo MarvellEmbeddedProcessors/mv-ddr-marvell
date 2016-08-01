@@ -167,6 +167,9 @@ struct mv_ddr_topology_map {
 
 	/* Bit mask for active buses */
 	u16 bus_act_mask;
+
+	/* source of ddr configuration data */
+	enum mv_ddr_cfg_src cfg_src;
 };
 
 /* DDR3 training global configuration parameters */

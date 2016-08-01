@@ -98,6 +98,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_TOPOLOGY_H
 #define _MV_DDR_TOPOLOGY_H
 
+/* source of ddr configuration data */
+enum mv_ddr_cfg_src {
+	MV_DDR_CFG_DEFAULT,	/* based on data in mv_ddr_topology_map structure */
+	MV_DDR_CFG_SPD,		/* based on data in spd */
+	MV_DDR_CFG_USER,	/* based on data from user */
+	MV_DDR_CFG_STATIC,	/* based on data from user in register-value format */
+	MV_DDR_CFG_LAST
+};
+
 enum mv_ddr_num_of_sub_phys_per_ddr_unit {
 	SINGLE_SUB_PHY = 1,
 	TWO_SUB_PHYS = 2
