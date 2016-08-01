@@ -247,7 +247,7 @@ struct mk6_reg_data ddr_static_setup[] = {
 	/* Traffic thru Mckinley 6::MC init for MISL BOARD 2CS 4Gb x8 devices of micron - 2133P */
 	{0xF00116D8, 0x3CC},
 	{0xF06F0100, 0x44C0006},
-	{0xF06F0108, 0xD88FFFF},	/* neg edge */
+	/*{0xF06F0108, 0xD88FFFF}, neg edge */
 	{0xF00119D4, 0x2},
 	{0xF06F8D38, 0xACAC0000},
 	{0xF06F4360, 0xFFFF0044},
