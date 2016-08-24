@@ -198,6 +198,32 @@ static u32 dq_bit_map_2_phy_pin[LAST_DDR_CFG_OPT][MAX_DQ_NUM] = {
 	{/* DDR3_BRD */}
 };
 
+static u8 bw_per_freq[DDR_FREQ_LAST] = {
+	0x3,	/* DDR_FREQ_100 */
+	0x5,	/* DDR_FREQ_650 */
+	0x5,	/* DDR_FREQ_667 */
+	0x5,	/* DDR_FREQ_800 */
+	0x5,	/* DDR_FREQ_933 */
+	0x5,	/* DDR_FREQ_1066 */
+	0x5,	/* DDR_FREQ_900 */
+	0x5,	/* DDR_FREQ_1000 */
+	0x5,	/* DDR_FREQ_1050 */
+	0x5,	/* DDR_FREQ_1200 */
+};
+
+static u8 rate_per_freq[DDR_FREQ_LAST] = {
+	0x1,	/* DDR_FREQ_100 */
+	0x2,	/* DDR_FREQ_650 */
+	0x2,	/* DDR_FREQ_667 */
+	0x2,	/* DDR_FREQ_800 */
+	0x3,	/* DDR_FREQ_933 */
+	0x3,	/* DDR_FREQ_1066 */
+	0x2,	/* DDR_FREQ_900 */
+	0x2,	/* DDR_FREQ_1000 */
+	0x2,	/* DDR_FREQ_1050 */
+	0x2,	/* DDR_FREQ_1200 */
+};
+
 /*
  * Accessor functions for the registers
  */
@@ -286,8 +312,8 @@ static int mv_ddr_tip_freq_config_get(u8 dev_num, enum hws_ddr_freq freq,
 	if (freq_config_info == NULL)
 		return MV_BAD_PARAM;
 
-	freq_config_info->bw_per_freq = 0xff; /* TODO: TBD */
-	freq_config_info->rate_per_freq = 0xff; /* TODO: TBD */
+	freq_config_info->bw_per_freq = bw_per_freq[freq];
+	freq_config_info->rate_per_freq = rate_per_freq[freq];
 	freq_config_info->is_supported = 1;
 
 	return MV_OK;
