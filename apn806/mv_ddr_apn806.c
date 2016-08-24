@@ -839,6 +839,21 @@ int mv_ddr_pre_training_soc_config(const char *ddr_type)
 	/* in case of running generic first write to avs */
 	reg_write(0x6f812C, 0xFDE1FFFF);	/* FIXME: extension avs */
 	reg_write(0x6f8130, 0x1002f2f5);	/* FIXME: avs to 1.13V */
+
+	reg_write(0x116D8, 0x3CC);
+#if defined(a80x0) || defined(a80x0_cust)
+	reg_write(0x6F0100, 0x4480006);	/* DSS_CR0_REG_ADDR: define dimm configuration */
+#endif
+#if defined(a70x0) || defined(a70x0_cust)
+	reg_write(0x6F0100, 0x44C0006);	/* DSS_CR0_REG_ADDR: define on-board configuration */
+#endif
+	reg_write(0x119D4, 0x2);	/* REG_SDRAM_PINS_MUX_ADDR: defines dimm or on-board, need to change in dimm */
+	reg_write(0x6F8D38, 0xACAC0000);	/* Vref calibration values */
+	reg_write(0x6F4360, 0xFFFF0044);	/* ref range select */
+	reg_write(0x11524, 0x8800);	/* REG_DDR_IO_ADDR: data and control CMOS buffer and clk dram phy clk ration */
+	reg_write(0x11400, 0x6b104c30);	/* Pup Rst Divider */
+	reg_write(0x11400, 0x7b104c30);	/* Pup Rst Divider */
+
 	return MV_OK;
 }
 
