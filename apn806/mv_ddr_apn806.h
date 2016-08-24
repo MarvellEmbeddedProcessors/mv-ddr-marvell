@@ -195,6 +195,10 @@ enum{
 #define MC6_CL_OFFS				0
 #define MC6_CL_MASK				0x3f
 
+#define MC6_REG_USER_CMD0		(MC6_BASE_ADDR + 0x20)
+#define MC6_USER_CS_OFFS		24
+#define MC6_USER_CS_MASK		0xf
+
 #ifdef NO_EFUSE
 #define	SAR_CPU1800_0X2	0x2
 #define	SAR_CPU1800_0X3	0x3

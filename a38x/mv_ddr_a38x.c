@@ -1585,6 +1585,20 @@ void mv_ddr_mc_config(void)
 	if (MV_OK != status) {
 		printf("DDR3 init controller - FAILED 0x%x\n", status);
 	}
+
+	status = mv_ddr_mc_init();
+	if (MV_OK != status) {
+		printf("DDR3 init_sequence - FAILED 0x%x\n", status);
+	}
+}
+/* function: mv_ddr_mc_init
+ * this function enables the dunit after init controller configuration
+ */
+int mv_ddr_mc_init(void)
+{
+	CHECK_STATUS(ddr3_tip_enable_init_sequence(0));
+
+	return MV_OK;
 }
 
 #ifdef CONFIG_MC_STATIC

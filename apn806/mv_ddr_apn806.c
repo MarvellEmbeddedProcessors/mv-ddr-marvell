@@ -915,6 +915,10 @@ void mv_ddr_mc_config(void)
 	status = mv_ddr_mc6_init_controller();
 	if (MV_OK != status)
 		printf("mv_ddr %s: failed: err code 0x%x\n", __FUNCTION__, status);
+
+	status = mv_ddr_mc_init();
+	if (MV_OK != status)
+		printf("mv_ddr %s: failed: err code 0x%x\n", __FUNCTION__, status);
 }
 
 /* FIXME: this is a place holder for the mc6 generic init currently hard coded */
@@ -1001,6 +1005,29 @@ int mv_ddr_mc6_init_controller(void)
 	reg_write(0x203bc, 0x1050505);
 	reg_write(0x203c4, 0x0);
 	reg_write(0x203cc, 0xf010345);
+
+	return MV_OK;
+}
+
+/* function: mv_ddr_mc_init
+ * enables the controllers dunit and mc6 in all relevant cs
+ */
+int mv_ddr_mc_init(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+
+	ddr3_tip_apn806_select_ddr_controller(DEV_NUM_0, ENABLE_TIP);
+
+	/* enable dunit - the init is per cs and reference to 15e0 'RANK_CTRL_REG' */
+	ddr3_tip_if_write(DEV_NUM_0, ACCESS_TYPE_UNICAST, IF_ID_0, SDRAM_INIT_CONTROL_REG, 0x1, 0x1);
+
+	/* enable mc6 - the init is per cs in mc6 and not referenced */
+	reg_write(MC6_REG_USER_CMD0, 0x10000001 |
+		  (tm->interface_params[IF_ID_0].as_bus_params[0].cs_bitmask << MC6_USER_CS_OFFS &
+		  MC6_USER_CS_MASK << MC6_USER_CS_OFFS));
+
+	/* FIXME: change the delay to polling on bit '0' */
+	mdelay(10);
 
 	return MV_OK;
 }

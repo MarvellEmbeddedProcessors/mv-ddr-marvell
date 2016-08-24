@@ -899,8 +899,6 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 	CHECK_STATUS(ddr4_tip_calibration_adjust(dev_num, 1, 0));
 #endif /* CONFIG_DDR4 */
 
-	CHECK_STATUS(ddr3_tip_enable_init_sequence(dev_num));
-
 	if (delay_enable != 0) {
 		adll_tap = MEGA / (freq_val[freq] * 64);
 		ddr3_tip_cmd_addr_init_delay(dev_num, adll_tap);
