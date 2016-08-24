@@ -910,11 +910,99 @@ void mv_ddr_mc_config(void)
 
 	status = hws_ddr3_tip_init_controller(0, &init_param);
 	if (MV_OK != status)
-		printf("mv_ddr: mc init failed: err code 0x%x\n", status);
+		printf("mv_ddr %s: failed: err code 0x%x\n", __FUNCTION__, status);
 
-	/* TODO: Add MC MUX setting */
+	status = mv_ddr_mc6_init_controller();
+	if (MV_OK != status)
+		printf("mv_ddr %s: failed: err code 0x%x\n", __FUNCTION__, status);
+}
 
-	/* TODO: Add McKinley6 init function */
+/* FIXME: this is a place holder for the mc6 generic init currently hard coded */
+int mv_ddr_mc6_init_controller(void)
+{
+	reg_write(0x20064, 0x606);		/* MC "readReady"+ MC2PHYlatency */
+	reg_write(0x21180, 0x500);
+	reg_write(0x21000, 0x60);		/* phy_rfifo_rptr_dly_val */
+	reg_write(0x210c0, 0x81000001);
+	reg_write(0x202c8, 0xfefe);
+	reg_write(0x20340, 0x0);
+	reg_write(0x20344, 0x30000000);
+	reg_write(0x20310, 0x21000000);
+	reg_write(0x20318, 0x0);
+	reg_write(0x2031c, 0x0);
+	reg_write(0x20304, 0x0);
+	reg_write(0x20308, 0x1);
+#if defined(a80x0) || defined(a80x0_cust)
+	reg_write(0x20314, 0x0);	/* TODO: for 2 cs add this configuration register */
+	reg_write(0x20200, 0x100001);	/* mmap0_low_ch0 */
+	reg_write(0x20204, 0x0);
+	reg_write(0x20208, 0x0);
+	reg_write(0x20400, 0x100001);
+	reg_write(0x20404, 0x1);
+	reg_write(0x20408, 0x0);
+	reg_write(0x2040c, 0x0);
+	reg_write(0x20224, 0x0);
+#if defined(CONFIG_64BIT)
+	reg_write(0x20044, 0x30400); /* mc control register 0 */
+#else
+	reg_write(0x20044, 0x30300);
+#endif	/* (CONFIG_64BIT) */
+	reg_write(0x20300, 0x90b);
+	reg_write(0x20394, 0x1180618);
+	reg_write(0x203ac, 0x11250b1B);	/* 0x11260C1B RAS fix*/
+	reg_write(0x203b8, 0x504);
+	reg_write(0x203c0, 0x10400);	/*0x30700*/
+#endif	/* #if defined(a80x0) || defined(a80x0_cust) */
+#if defined(a70x0) || defined(a70x0_cust)
+	reg_write(0x20314, 0x21010000);
+	reg_write(0x20200, 0xF0001);
+	reg_write(0x20204, 0x0);
+	reg_write(0x20208, 0x800F0001);
+	reg_write(0x20400, 0xF0001);
+	reg_write(0x20404, 0x1);
+	reg_write(0x20408, 0x800F0001);
+	reg_write(0x2040c, 0x1);
+	reg_write(0x20224, 0x5010539);
+	reg_write(0x20044, 0x30300);
+	reg_write(0x20300, 0x90c);
+	reg_write(0x20394, 0xd00618);
+	reg_write(0x203ac, 0x11260C1B);
+	reg_write(0x203b8, 0x404);
+	reg_write(0x203c0, 0x10400);
+#endif	/* #if defined(a70x0) || defined(a70x0_cust) */
+	reg_write(0x2020c, 0x0);
+	reg_write(0x20210, 0x0);
+	reg_write(0x20214, 0x0);
+	reg_write(0x20218, 0x0);
+	reg_write(0x2021c, 0x0);
+	reg_write(0x20220, 0x5010539);
+	reg_write(0x20228, 0x0);
+	reg_write(0x2022c, 0x0);
+	reg_write(0x202c0, 0x6000);
+	reg_write(0x202c4, 0x120030);
+	reg_write(0x20180, 0x30200);
+	reg_write(0x20050, 0xff);
+	reg_write(0x2004c, 0x0);
+	reg_write(0x20054, 0x4c0);
+	reg_write(0x20300, 0x90b);
+	reg_write(0x2030c, 0x90000);
+	reg_write(0x20380, 0x61a80);
+	reg_write(0x20384, 0x27100);
+	reg_write(0x20388, 0x960050);
+	reg_write(0x2038c, 0x400);
+	reg_write(0x20390, 0x800200);
+	reg_write(0x20398, 0x1680300);
+	reg_write(0x2039c, 0x200808);
+	reg_write(0x203a0, 0x1050600);
+	reg_write(0x203a4, 0x2);
+	reg_write(0x203a8, 0x1808);
+	reg_write(0x203b0, 0x0C0C060C);
+	reg_write(0x203b4, 0x06040602);
+	reg_write(0x203bc, 0x1050505);
+	reg_write(0x203c4, 0x0);
+	reg_write(0x203cc, 0xf010345);
+
+	return MV_OK;
 }
 
 #ifdef CONFIG_MC_STATIC

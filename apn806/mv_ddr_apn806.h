@@ -406,6 +406,7 @@ extern u16 odt_intercept[];
 
 int mv_ddr_pre_training_soc_config(const char *ddr_type);
 int mv_ddr_post_training_soc_config(const char *ddr_type);
+int mv_ddr_mc6_init_controller(void);	/* FIXME: remove to mc6 driver when implemented */
 
 #ifdef CONFIG_MC_STATIC
 int mv_ddr_mc_static_config(void);
