@@ -1692,6 +1692,64 @@ int ddr3_tip_configure_phy(u32 dev_num)
 	return MV_OK;
 }
 
+#if defined(CONFIG_DDR4)
+/* function: ddr4TipCalibrationValidate
+ * this function validates the calibration values
+ * the function is per soc due to the different processes the calibration values are different
+ */
+MV_STATUS ddr4_tip_calibration_validate(MV_U32 dev_num)
+{
+	MV_STATUS status = MV_OK;
+	MV_U8 if_id = 0;
+	MV_U32 read_data[MAX_INTERFACE_NUM];
+	MV_U32 cal_n = 0, cal_p = 0;
+
+	/* Read Cal value and set to manual val */
+	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1DC8, read_data, MASK_ALL_BITS));
+	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
+	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
+	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
+			  ("ddr4TipCalibrationValidate::DDR4 SSTL calib val - Pcal = 0x%x , Ncal = 0x%x\n",
+			   cal_p, cal_n));
+	if ((cal_n >= 56) || (cal_n <= 6) || (cal_p >= 59) || (cal_p <= 7)) {
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+				  ("ddr4TipCalibrationValidate: Error:DDR4 SSTL calib val - Pcal = 0x%x , \
+				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
+		status = MV_FAIL;
+	}
+
+	/* 14C8 - Vertical */
+	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x14C8, read_data, MASK_ALL_BITS));
+	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
+	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
+	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
+			  ("ddr4TipCalibrationValidate::DDR4 POD-V calib val - Pcal = 0x%x , Ncal = 0x%x \n",
+			  cal_p, cal_n));
+	if ((cal_n >= 56) || (cal_n <= 6) || (cal_p >= 59) || (cal_p <= 7)) {
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+				  ("ddr4TipCalibrationValidate: Error:DDR4 POD-V calib val - Pcal = 0x%x , Ncal= 0x%x \
+				   are out of range\n", cal_p, cal_n));
+		status = MV_FAIL;
+	}
+
+	/* 17C8 - Horizontal */
+	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x17C8, read_data, MASK_ALL_BITS));
+	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
+	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
+	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
+			  ("ddr4TipCalibrationValidate::DDR4 POD-H calib val - Pcal = 0x%x , Ncal = 0x%x \n",
+			  cal_p, cal_n));
+	if ((cal_n >= 56) || (cal_n <= 6) || (cal_p >= 59) || (cal_p <= 7)) {
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+				  ("ddr4TipCalibrationValidate: Error:DDR4 POD-H calib val - Pcal = 0x%x , \
+				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
+		status = MV_FAIL;
+	}
+
+	return status;
+}
+#endif /* CONFIG_DDR4 */
+
 #ifdef CONFIG_MC_STATIC
 int mv_ddr_mc_static_config(void)
 {

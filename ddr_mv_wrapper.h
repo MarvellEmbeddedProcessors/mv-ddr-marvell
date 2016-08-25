@@ -133,6 +133,7 @@ void mdelay(unsigned long);
 #define readl MV_MEMIO_LE32_READ
 
 #if defined(CONFIG_DDR4)
+#define ddr4_tip_calibration_validate ddr4TipCalibrationValidate
 #define vref_calibration_wa vrefCalibrationWA
 #define ddr4_sublib_version_get mvHwsDdr4SubLibVersionGet
 #define ddr4_tip_configure_phy ddr4TipConfigurePhy

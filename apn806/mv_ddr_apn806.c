@@ -1009,6 +1009,96 @@ int mv_ddr_mc6_init_controller(void)
 	return MV_OK;
 }
 
+#if defined(CONFIG_DDR4)
+/* function: ddr4TipCalibrationValidate
+ * this function validates the calibration values
+ * the function is per soc due to the different processes the calibration values are different
+ */
+MV_STATUS ddr4_tip_calibration_validate(MV_U32 dev_num)
+{
+	MV_STATUS status = MV_OK;
+	MV_U8 if_id = 0;
+	MV_U32 read_data[MAX_INTERFACE_NUM];
+	MV_U32 cal_n = 0, cal_p = 0;
+
+	/* Read Cal value and set to manual val */
+	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1DC8, read_data, MASK_ALL_BITS));
+	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
+	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
+	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
+			  ("ddr4TipCalibrationValidate::DDR4 SSTL calib val - Pcal = 0x%x , Ncal = 0x%x \n",
+			   cal_p, cal_n));
+	if ((cal_n >= 28) || (cal_n <= 4) || (cal_p >= 13) || (cal_p <= 3)) {
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+				  ("ddr4TipCalibrationValidate: DDR4 SSTL calib val - Pcal = 0x%x , Ncal = 0x%x \
+				   are out of range\n", cal_p, cal_n));
+		status = MV_FAIL;
+	}
+
+	/* 14C8 - Horizontal TODO: check if this is horizontal, in 380 it is vertical */
+	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x14C8, read_data, MASK_ALL_BITS));
+	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
+	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
+	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO, ("ddr4TipCalibrationValidate::DDR4 SSTL-H calib val - Pcal = 0x%x , \
+					     Ncal = 0x%x \n", cal_p, cal_n));
+	if ((cal_n >= 28) || (cal_n <= 4) || (cal_p >= 13) || (cal_p <= 3)) {
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+				  ("ddr4TipCalibrationValidate: DDR4 SSTL-H calib val - Pcal = 0x%x, \
+				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
+		status = MV_FAIL;
+	}
+
+	/* 17C8 - Horizontal */
+	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x17C8, read_data, MASK_ALL_BITS));
+	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
+	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
+	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
+			  ("ddr4TipCalibrationValidate::DDR4 POD-H calib val - Pcal = 0x%x , Ncal = 0x%x \n",
+			   cal_p, cal_n));
+	if ((cal_n >= 16) || (cal_n <= 3) || (cal_p >= 17) || (cal_p <= 4)) {
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+				  ("ddr4TipCalibrationValidate: DDR4 POD-H calib val - Pcal = 0x%x , \
+				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
+		status = MV_FAIL;
+	}
+
+	/* 1EC8 - Vertical */
+	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1EC8, read_data, MASK_ALL_BITS));
+	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
+	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
+	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
+			  ("ddr4TipCalibrationValidate::DDR4 POD-V calib val - Pcal = 0x%x , Ncal = 0x%x \n",
+			   cal_p, cal_n));
+	if ((cal_n >= 16) || (cal_n <= 3) || (cal_p >= 17) || (cal_p <= 4)) {
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+				  ("ddr4TipCalibrationValidate: DDR4 POD-V calib val - Pcal = 0x%x , \
+				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
+		status = MV_FAIL;
+	}
+
+	/* FIXME: in case calibration failure set static calibration values, remove this in next release (A0 only) */
+	if (status == MV_FAIL) {
+		status = MV_OK;
+#if defined(a70x0) || defined(a70x0_cust)
+		reg_write(0x114CC, 0x1200D);
+		reg_write(0x114C8, 0x1840008);
+		reg_write(0x117C8, 0x28A0008);
+		reg_write(0x11DC8, 0x1840008);
+		reg_write(0x11EC8, 0x28A0008);
+#endif
+#if defined(a80x0) || defined(a80x0_cust)
+		reg_write(0x114CC, 0x1200D);
+		reg_write(0x114C8, 0x1840008);
+		reg_write(0x117C8, 0x28A0008);
+		reg_write(0x11DC8, 0x1840008);
+		reg_write(0x11EC8, 0x28A0008);
+#endif
+	}
+
+	return status;
+}
+#endif /* CONFIG_DDR4 */
+
 /* function: mv_ddr_set_calib_controller
  * this function sets the controller which will control
  * the calibration cycle in the end of the training.
