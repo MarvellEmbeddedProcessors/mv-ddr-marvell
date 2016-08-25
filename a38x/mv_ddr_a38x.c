@@ -893,6 +893,17 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 	return MV_OK;
 }
 
+/* function: mv_ddr_set_calib_controller
+ * this function sets the controller which will control
+ * the calibration cycle in the end of the training.
+ * 1 - internal controller
+ * 2 - external controller
+ */
+void mv_ddr_set_calib_controller(void)
+{
+	calibration_update_control = CALIB_MACHINE_INT_CTRL;
+}
+
 static int ddr3_a38x_update_topology_map(u32 dev_num, struct mv_ddr_topology_map *tm)
 {
 	u32 if_id = 0;

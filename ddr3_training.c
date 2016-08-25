@@ -2390,6 +2390,8 @@ int ddr3_tip_restore_dunit_regs(u32 dev_num)
 {
 	u32 index_cnt;
 
+	mv_ddr_set_calib_controller();
+
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST,
 				       PARAM_NOT_CARE, CALIB_MACHINE_CTRL_REG,
 				       0x1, 0x1));

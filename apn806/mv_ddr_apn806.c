@@ -1009,6 +1009,17 @@ int mv_ddr_mc6_init_controller(void)
 	return MV_OK;
 }
 
+/* function: mv_ddr_set_calib_controller
+ * this function sets the controller which will control
+ * the calibration cycle in the end of the training.
+ * 1 - internal controller
+ * 2 - external controller
+ */
+void mv_ddr_set_calib_controller(void)
+{
+	calibration_update_control = CALIB_MACHINE_EXT_CTRL;
+}
+
 /* function: mv_ddr_mc_init
  * enables the controllers dunit and mc6 in all relevant cs
  */

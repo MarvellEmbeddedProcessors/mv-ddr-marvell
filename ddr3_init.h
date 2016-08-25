@@ -319,4 +319,5 @@ int ddr3_tip_static_round_trip_arr_build(u32 dev_num,
 u32 ddr3_tip_get_init_freq(void);
 void mv_ddr_mc_config(void);
 int mv_ddr_mc_init(void);
+void mv_ddr_set_calib_controller(void);
 #endif /* _DDR3_INIT_H */
