@@ -606,12 +606,6 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 				: speed_bin_table(speed_bin_index,
 						  SPEED_BIN_TFAW2K);
 
-#if defined(CONFIG_DDR4)
-			t_faw = GET_MAX_VALUE(t_ckclk *
-					      ((page_size == 1) ? 20 : 28),
-					      t_faw);
-#endif /* CONFIG_DDR4 */
-
 			data_value = TIME_2_CLOCK_CYCLES(t_faw, t_ckclk);
 			data_value = data_value << 24;
 			CHECK_STATUS(ddr3_tip_if_write
