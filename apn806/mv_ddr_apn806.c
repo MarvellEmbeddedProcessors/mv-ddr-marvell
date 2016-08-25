@@ -733,6 +733,11 @@ int ddr3_silicon_pre_init(void)
 	static int init_done;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
+	/* in case of calibration adjust
+	 * this flag checks if to run a workaround where v pod and v sstl are wired
+	 */
+	vref_calibration_wa = 0;
+
 	if (init_done == 1)
 		return MV_OK;
 
