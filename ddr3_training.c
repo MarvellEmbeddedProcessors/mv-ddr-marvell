@@ -1985,16 +1985,14 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		/* re-write CL */
 		val = ((cl_mask_table[cl_value] & 0x1) << 2) |
 			((cl_mask_table[cl_value] & 0xe) << 3);
-		CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST,
-					       0, MR0_REG, val,
-					       (0x7 << 4) | (1 << 2)));
+
+		CHECK_STATUS(ddr3_tip_write_mrs_cmd(dev_num, cs_mask, MR_CMD0,
+			val, (0x7 << 4) | (0x1 << 2)));
 
 		/* re-write CWL */
 		val = (cwl_mask_table[cwl_value] << 3) | g_rtt_wr;
 		CHECK_STATUS(ddr3_tip_write_mrs_cmd(dev_num, cs_mask, MR_CMD2,
-						    val, (0x7 << 3) | (0x3 << 9)));
-		CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST,
-					       0, MR2_REG, val, (0x7 << 3) | (0x3 << 9)));
+			val, (0x7 << 3) | (0x3 << 9)));
 
 		if (mem_mask != 0) {
 			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type,
