@@ -187,6 +187,7 @@ extern u32 g_dic;
 extern u32 g_odt_config;
 extern u32 g_rtt_nom;
 extern u32 g_rtt_wr;
+extern u32 g_rtt_park;
 
 extern u8 debug_training_access;
 extern u32 first_active_if;

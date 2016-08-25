@@ -1391,10 +1391,18 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 	}
 
 	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
-		/* Disable modt0 for CS0 training - need to adjust for multi-CS */
-		CHECK_STATUS(ddr3_tip_if_write
-			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, 0x1498,
-			      0x0, 0xf));
+		/* Disable modt0 for CS0 training - need to adjust for multi-CS
+		 * in case of ddr4 set 0xf else 0
+		 */
+		if (odt_config != 0) {
+			CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+						       SDRAM_ODT_CONTROL_HIGH_REG, 0x0, 0xf));
+		}
+		else {
+			CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+						       SDRAM_ODT_CONTROL_HIGH_REG, 0xf, 0xf));
+		}
+
 	}
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {

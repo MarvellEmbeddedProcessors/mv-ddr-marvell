@@ -211,6 +211,7 @@ struct tune_train_params {
 	u32 g_odt_config;
 	u32 g_rtt_nom;
 	u32 g_rtt_wr;
+	u32 g_rtt_park;
 };
 
 #endif /* _DDR_TOPOLOGY_DEF_H */

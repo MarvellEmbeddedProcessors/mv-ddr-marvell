@@ -1102,6 +1102,15 @@ int ddr3_silicon_pre_init(void)
 {
 	int result;
 
+	/* FIXME: change this configuration per ddr type
+	 * configure a380 and a390 to work with receiver odt timing
+	 * the odt_config is defined:
+	 * '1' in ddr4
+	 * '0' in ddr3
+	 * here the parameter is run over in ddr4 and ddr3 to '1' (in ddr4 the default is '1')
+	 * to configure the odt to work with timing restrictions
+	 */
+	odt_config = 1;
 	result = ddr3_silicon_init();
 
 	return result;

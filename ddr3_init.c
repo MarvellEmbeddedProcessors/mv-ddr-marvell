@@ -291,6 +291,7 @@ static int mv_ddr_training_params_set(u8 dev_num)
 	params.g_rtt_nom = TUNE_TRAINING_PARAMS_RTT_NOM_DDR4;
 	params.g_rtt_wr =  TUNE_TRAINING_PARAMS_RTT_WR;
 	params.g_dic = TUNE_TRAINING_PARAMS_DIC_DDR4;
+	params.g_rtt_park = TUNE_TRAINING_PARAMS_RTT_PARK;
 #else /* CONFIG_DDR4 */
 	params.g_zpodt_data = TUNE_TRAINING_PARAMS_P_ODT_DATA;
 	params.g_dic = TUNE_TRAINING_PARAMS_DIC;

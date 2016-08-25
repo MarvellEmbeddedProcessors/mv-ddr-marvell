@@ -111,7 +111,16 @@ enum hws_ddr_freq medium_freq;
 u32 debug_dunit = 0;
 u32 odt_additional = 1;
 u32 *dq_map_table = NULL;
+
+/* in case of ddr4 do not run ddr3_tip_write_additional_odt_setting function - mc odt always 'on'
+ * in ddr4 case the terminations are rttWR and rttPARK and the odt must be always 'on' 0x1498 = 0xf
+ */
+#if defined(CONFIG_DDR4)
+u32 odt_config = 0;
+#else
 u32 odt_config = 1;
+#endif
+
 u32 nominal_avs;
 u32 extension_avs;
 
@@ -162,6 +171,7 @@ u32 g_odt_config = PARAM_UNDEFINED;
 u32 g_rtt_nom = PARAM_UNDEFINED;
 u32 g_rtt_wr = PARAM_UNDEFINED;
 u32 g_dic = PARAM_UNDEFINED;
+u32 g_rtt_park = PARAM_UNDEFINED;
 
 u32 mask_tune_func = (SET_MEDIUM_FREQ_MASK_BIT |
 		      WRITE_LEVELING_MASK_BIT |
@@ -343,6 +353,8 @@ int ddr3_tip_tune_training_params(u32 dev_num,
 		g_zpodt_ctrl = params->g_zpodt_ctrl;
 	if (params->g_znodt_ctrl != PARAM_UNDEFINED)
 		g_znodt_ctrl = params->g_znodt_ctrl;
+	if (params->g_rtt_park != PARAM_UNDEFINED)
+		g_rtt_park = params->g_rtt_park;
 
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 			  ("DGL parameters: 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X\n",
@@ -1972,11 +1984,16 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 					       if_id, ODT_TIMING_HI_REG,
 					       val, 0xffff));
 
-		/* ODT Active */
-		CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type,
-					       if_id,
-					       DUNIT_ODT_CONTROL_REG,
-					       0xf, 0xf));
+		/* in case of ddr4 need to set the receiver to odt always 'on' (odt_config = '0')
+		 * in case of ddr3 configure the odt through the timing
+		 */
+		if (odt_config != 0) {
+			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id, DUNIT_ODT_CONTROL_REG, 0xf, 0xf));
+		}
+		else {
+			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id, DUNIT_ODT_CONTROL_REG,
+						       0x30f, 0x30f));
+		}
 
 		/* re-write CL */
 		val = ((cl_mask_table[cl_value] & 0x1) << 2) |
