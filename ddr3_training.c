@@ -1829,6 +1829,8 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
 				      0x1A74, g_rtt_nom_cs1, (0x7 << 8)));
+
+			ddr4_mode_regs_init(dev_num);
 #else /* CONFIG_DDR4 */
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id, 0x1874,
