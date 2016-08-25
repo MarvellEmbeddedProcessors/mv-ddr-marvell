@@ -228,7 +228,7 @@ endif
 CFLAGS = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2 -nostdinc
 CFLAGS += -march=armv8-a -fpie $(INCLUDE) -D$(PLATFORM)
 
-CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806 -DCONFIG_MC_STATIC
+CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806# -DCONFIG_MC_STATIC
 
 ifeq ($(MV_DDR4),y)
 CFLAGS += -DCONFIG_DDR4
