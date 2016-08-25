@@ -435,7 +435,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 	u32 cs_num;
 	u32 t_refi = 0, t_hclk = 0, t_ckclk = 0, t_faw = 0, t_pd = 0,
 		t_wr = 0, t2t = 0, txpdll = 0;
-	u32 data_value = 0, bus_width = 0, page_size = 0, cs_cnt = 0,
+	u32 data_value = 0, page_size = 0, cs_cnt = 0,
 		mem_mask = 0, bus_index = 0;
 	enum hws_speed_bin speed_bin_index = SPEED_BIN_DDR_2133N;
 	enum hws_mem_size memory_size = MEM_2G;
@@ -501,17 +501,11 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 			/* t_hclk is internal clock */
 			t_hclk = 2 * t_ckclk;
 			refresh_interval_cnt = t_refi / t_hclk;	/* no units */
-			bus_width =
-				(DDR3_IS_16BIT_DRAM_MODE(tm->bus_act_mask)
-				 == 1) ? (16) : (32);
 
-			if (init_cntr_prm->is_ctrl64_bit)
-				bus_width = 64;
-
-			data_value =
-				(refresh_interval_cnt | 0x4000 |
-				 ((bus_width ==
-				   32) ? 0x8000 : 0) | 0x1000000) & ~(1 << 26);
+			if (MV_DDR_IS_HALF_BUS_DRAM_MODE(tm->bus_act_mask, octets_per_if_num))
+				data_value = (refresh_interval_cnt | 0x4000 | 0 | 0x1000000) & ~(1 << 26);
+			else
+				data_value = (refresh_interval_cnt | 0x4000 | 0x8000 | 0x1000000) & ~(1 << 26);
 
 			/* Interface Bus Width */
 			/* SRMode */
@@ -709,16 +703,12 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 			} else {
 				CHECK_STATUS(ddr3_tip_if_write
 					     (dev_num, access_type, if_id,
-					      DUNIT_CONTROL_HIGH_REG, 0x177,
-					      0x1000177));
-			}
-
-			if (init_cntr_prm->is_ctrl64_bit) {
-				/* disable 0.25 cc delay */
-				CHECK_STATUS(ddr3_tip_if_write
-					     (dev_num, access_type, if_id,
-					      DUNIT_CONTROL_HIGH_REG, 0x0,
-					      0x800));
+					      DUNIT_CONTROL_HIGH_REG, 0x600177 |
+					      (init_cntr_prm->is_ctrl64_bit ?
+					      CPU_INTERJECTION_ENABLE_SPLIT << DUNIT_CTRL_HIGH_CPU_INTERJECTION_OFFS :
+					      CPU_INTERJECTION_DISABLE_SPLIT << DUNIT_CTRL_HIGH_CPU_INTERJECTION_OFFS),
+					      0x1600177 | DUNIT_CTRL_HIGH_CPU_INTERJECTION_MASK <<
+					      DUNIT_CTRL_HIGH_CPU_INTERJECTION_OFFS));
 			}
 
 			/* reset bit 7 */

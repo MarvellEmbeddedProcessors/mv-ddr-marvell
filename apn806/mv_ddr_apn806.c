@@ -904,7 +904,7 @@ void mv_ddr_mc_config(void)
 	int status;
 
 	init_param.do_mrs_phy = 1;
-	init_param.is_ctrl64_bit = 0;
+	init_param.is_ctrl64_bit = 1;
 	init_param.init_phy = 1;
 	init_param.msys_init = 1;
 
