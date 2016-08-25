@@ -427,6 +427,24 @@ enum {
 #define DRAM_PINS_MUX_REG			0x19D4
 #endif /* CONFIG_DDR4 */
 
+enum mr_number {
+	MR_CMD0,
+	MR_CMD1,
+	MR_CMD2,
+	MR_CMD3,
+#if defined(CONFIG_DDR4)
+	MR_CMD4,
+	MR_CMD5,
+	MR_CMD6,
+#endif
+	MR_LAST
+};
+
+struct mv_ddr_mr_data {
+	u32 cmd;
+	u32 reg_addr;
+};
+
 struct write_supp_result {
 	enum hws_wl_supp stage;
 	int is_pup_fail;
@@ -492,8 +510,7 @@ int ddr3_tip_configure_odpg(u32 dev_num, enum hws_access_type access_type,
 			    u32 delay_between_burst, u32 rd_mode, u32 cs_num,
 			    u32 addr_stress_jump, u32 single_pattern);
 int ddr3_tip_set_atr(u32 dev_num, u32 flag_id, u32 value);
-int ddr3_tip_write_mrs_cmd(u32 dev_num, u32 *cs_mask_arr, u32 cmd, u32 data,
-			   u32 mask);
+int ddr3_tip_write_mrs_cmd(u32 dev_num, u32 *cs_mask_arr, enum mr_number mr_num, u32 data, u32 mask);
 int ddr3_tip_write_cs_result(u32 dev_num, u32 offset);
 int ddr3_tip_get_first_active_if(u8 dev_num, u32 interface_mask, u32 *if_id);
 int ddr3_tip_reset_fifo_ptr(u32 dev_num);

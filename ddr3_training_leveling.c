@@ -1051,7 +1051,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 	for (effective_cs = 0; effective_cs < max_cs; effective_cs++) {
 		/*enable write leveling to all cs  - Q off , WL n */
 		/* calculate interface cs mask */
-		CHECK_STATUS(ddr3_tip_write_mrs_cmd(dev_num, cs_mask0, MRS1_CMD,
+		CHECK_STATUS(ddr3_tip_write_mrs_cmd(dev_num, cs_mask0, MR_CMD1,
 						    0x1000, 0x1080));
 
 		for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
@@ -1064,7 +1064,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
 			/* Enable Output buffer to relevant CS - Q on , WL on */
 			CHECK_STATUS(ddr3_tip_write_mrs_cmd
-				     (dev_num, cs_mask, MRS1_CMD, 0x80, 0x1080));
+				     (dev_num, cs_mask, MR_CMD1, 0x80, 0x1080));
 
 			/*enable odt for relevant CS */
 			CHECK_STATUS(ddr3_tip_if_write
@@ -1073,7 +1073,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 		} else {
 			/* FIXME: should be the same as _CPU case */
 			CHECK_STATUS(ddr3_tip_write_mrs_cmd
-				     (dev_num, cs_mask, MRS1_CMD, 0xc0, 0x12c4));
+				     (dev_num, cs_mask, MR_CMD1, 0xc0, 0x12c4));
 		}
 
 		/*
@@ -1263,17 +1263,17 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num)
 
 		/* Update MRS 1 (WL off) */
 		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
-			CHECK_STATUS(ddr3_tip_write_mrs_cmd(dev_num, cs_mask0, MRS1_CMD,
+			CHECK_STATUS(ddr3_tip_write_mrs_cmd(dev_num, cs_mask0, MR_CMD1,
 							    0x1000, 0x1080));
 		} else {
 			/* FIXME: should be same as _CPU case */
-			CHECK_STATUS(ddr3_tip_write_mrs_cmd(dev_num, cs_mask0, MRS1_CMD,
+			CHECK_STATUS(ddr3_tip_write_mrs_cmd(dev_num, cs_mask0, MR_CMD1,
 							    0x1000, 0x12c4));
 		}
 
 		/* Update MRS 1 (return to functional mode - Q on , WL off) */
 		CHECK_STATUS(ddr3_tip_write_mrs_cmd
-			     (dev_num, cs_mask0, MRS1_CMD, 0x0, 0x1080));
+			     (dev_num, cs_mask0, MR_CMD1, 0x0, 0x1080));
 
 		/* set phy to normal mode */
 		CHECK_STATUS(ddr3_tip_if_write

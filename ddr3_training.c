@@ -282,6 +282,26 @@ static struct reg_data odpg_default_value[] = {
 	{0x16fc, 0x0, MASK_ALL_BITS}
 };
 
+/* MR cmd and addr definitions */
+#if defined(CONFIG_DDR4)
+struct mv_ddr_mr_data mr_data[] = {
+	{MRS0_CMD, DDR4_MR0_REG},
+	{MRS1_CMD, DDR4_MR1_REG},
+	{MRS2_CMD, DDR4_MR2_REG},
+	{MRS3_CMD, DDR4_MR3_REG},
+	{MRS4_CMD, DDR4_MR4_REG},
+	{MRS5_CMD, DDR4_MR5_REG},
+	{MRS6_CMD, DDR4_MR6_REG}
+};
+#else
+struct mv_ddr_mr_data mr_data[] = {
+	{MRS0_CMD, MR0_REG},
+	{MRS1_CMD, MR1_REG},
+	{MRS2_CMD, MR2_REG},
+	{MRS3_CMD, MR3_REG}
+};
+#endif
+
 static int ddr3_tip_bus_access(u32 dev_num, enum hws_access_type interface_access,
 			       u32 if_id, enum hws_access_type phy_access,
 			       u32 phy_id, enum hws_ddr_phy phy_type, u32 reg_addr,
@@ -1971,7 +1991,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 
 		/* re-write CWL */
 		val = (cwl_mask_table[cwl_value] << 3) | g_rtt_wr;
-		CHECK_STATUS(ddr3_tip_write_mrs_cmd(dev_num, cs_mask, MRS2_CMD,
+		CHECK_STATUS(ddr3_tip_write_mrs_cmd(dev_num, cs_mask, MR_CMD2,
 						    val, (0x7 << 3) | (0x3 << 9)));
 		CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST,
 					       0, MR2_REG, val, (0x7 << 3) | (0x3 << 9)));
@@ -2235,25 +2255,19 @@ int ddr3_tip_write_cs_result(u32 dev_num, u32 offset)
 /*
  * Write MRS
  */
-int ddr3_tip_write_mrs_cmd(u32 dev_num, u32 *cs_mask_arr, u32 cmd,
-			   u32 data, u32 mask)
+int ddr3_tip_write_mrs_cmd(u32 dev_num, u32 *cs_mask_arr, enum mr_number mr_num, u32 data, u32 mask)
 {
-	u32 if_id, reg;
+	u32 if_id;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
-#if defined(CONFIG_DDR4)
-	reg = (cmd == MRS1_CMD) ? DDR4_MR1_REG : DDR4_MR2_REG;
-#else /* CONFIG_DDR4 */
-	reg = (cmd == MRS1_CMD) ? MR1_REG : MR2_REG;
-#endif /* CONFIG_DDR4 */
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST,
-				       PARAM_NOT_CARE, reg, data, mask));
+				       PARAM_NOT_CARE, mr_data[mr_num].reg_addr, data, mask));
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
 			      SDRAM_OPERATION_REG,
-			      (cs_mask_arr[if_id] << 8) | cmd, 0xf1f));
+			      (cs_mask_arr[if_id] << 8) | mr_data[mr_num].cmd, 0xf1f));
 	}
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
