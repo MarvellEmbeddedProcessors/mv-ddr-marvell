@@ -402,7 +402,11 @@ u16 rfc_table[] = {
 	110,			/* 1G */
 	160,			/* 2G */
 	260,			/* 4G */
-	350			/* 8G */
+	350,			/* 8G */
+	0,			/* TODO: placeholder for 16-Mbit dev width */
+	0,			/* TODO: placeholder for 32-Mbit dev width */
+	0,			/* TODO: placeholder for 12-Mbit dev width */
+	0			/* TODO: placeholder for 24-Mbit dev width */
 };
 
 u32 speed_bin_table_t_rc[] = {

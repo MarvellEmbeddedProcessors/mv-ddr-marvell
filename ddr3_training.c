@@ -224,16 +224,25 @@ static struct page_element page_param[] = {
 	/* 2G */
 	{ 1,		2,		4},
 	/* 4G */
-	{ 2,		2,		5}
+	{ 2,		2,		5},
 	/* 8G */
+	{0, 0, 0}, /* TODO: placeholder for 16-Mbit die capacity */
+	{0, 0, 0}, /* TODO: placeholder for 32-Mbit die capacity */
+	{0, 0, 0}, /* TODO: placeholder for 12-Mbit die capacity */
+	{0, 0, 0}  /* TODO: placeholder for 24-Mbit die capacity */
+
 };
 
-static u8 mem_size_config[MEM_SIZE_LAST] = {
+static u8 mem_size_config[MV_DDR_DIE_CAP_LAST] = {
 	0x2,			/* 512Mbit  */
 	0x3,			/* 1Gbit    */
 	0x0,			/* 2Gbit    */
 	0x4,			/* 4Gbit    */
-	0x5			/* 8Gbit    */
+	0x5,			/* 8Gbit    */
+	0x0, /* TODO: placeholder for 16-Mbit die capacity */
+	0x0, /* TODO: placeholder for 32-Mbit die capacity */
+	0x0, /* TODO: placeholder for 12-Mbit die capacity */
+	0x0  /* TODO: placeholder for 24-Mbit die capacity */
 };
 
 static u8 cs_mask2_num[] = { 0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3 };
@@ -470,7 +479,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 	u32 data_value = 0, page_size = 0, cs_cnt = 0,
 		mem_mask = 0, bus_index = 0;
 	enum hws_speed_bin speed_bin_index = SPEED_BIN_DDR_2133N;
-	enum hws_mem_size memory_size = MEM_2G;
+	enum mv_ddr_die_capacity memory_size = MV_DDR_DIE_CAP_2GBIT;
 	enum hws_ddr_freq freq = init_freq;
 	u32 cs_mask = 0;
 	u32 cl_value = 0, cwl_val = 0;
@@ -2063,7 +2072,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 		t_r2w_w2r = 0x3, t_r2w_w2r_high = 0x1, t_w2w = 0x3;
 	u32 val = 0, page_size = 0, mask = 0;
 	enum hws_speed_bin speed_bin_index;
-	enum hws_mem_size memory_size = MEM_2G;
+	enum mv_ddr_die_capacity memory_size = MV_DDR_DIE_CAP_2GBIT;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	speed_bin_index = tm->interface_params[if_id].speed_bin_index;
@@ -3139,7 +3148,7 @@ u32 hws_ddr3_get_device_size(u32 if_id)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	if (tm->interface_params[if_id].memory_size >=
-	    MEM_SIZE_LAST) {
+	    MV_DDR_DIE_CAP_LAST) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
 				  ("Error: Wrong device size of Cs: %d",
 				   tm->interface_params[if_id].memory_size));

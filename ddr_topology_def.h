@@ -136,8 +136,8 @@ struct if_params {
 	/* sdram device width */
 	enum mv_ddr_dev_width bus_width;
 
-	/* Bus memory size (MBit) */
-	enum hws_mem_size memory_size;
+	/* total sdram capacity per die, megabits */
+	enum mv_ddr_die_capacity memory_size;
 
 	/* The DDR frequency for each interfaces */
 	enum hws_ddr_freq memory_freq;

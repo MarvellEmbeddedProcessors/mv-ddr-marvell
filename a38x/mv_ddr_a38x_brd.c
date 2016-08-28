@@ -122,7 +122,7 @@ static struct mv_ddr_topology_map board_topology_map = {
 	      {0x3, 0x2, 0, 0} },
 	    SPEED_BIN_DDR_DB_68XX,	/* speed_bin */
 	    BUS_WIDTH_DB_68XX,		/* sdram device width */
-	    MEM_4G,			/* mem_size */
+	    MV_DDR_DIE_CAP_4GBIT,	/* die capacity */
 	    DDR_FREQ_800,		/* frequency */
 	    0, 0,			/* cas_l, cas_wl */
 	    MV_DDR_TEMP_LOW} },		/* temperature */
@@ -141,7 +141,7 @@ static struct mv_ddr_topology_map board_topology_map = {
 	      {0x1, 0, 0, 0} },
 	    SPEED_BIN_DDR_1866L,	/* speed_bin */
 	    MV_DDR_DEV_WIDTH_8BIT,	/* sdram device width */
-	    MEM_4G,			/* mem_size */
+	    MV_DDR_DIE_CAP_4GBIT,	/* die capacity */
 	    DDR_FREQ_800,		/* frequency */
 	    0, 0,			/* cas_l cas_wl */
 	    MV_DDR_TEMP_LOW} },		/* temperature */

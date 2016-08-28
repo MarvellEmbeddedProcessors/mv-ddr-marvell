@@ -109,15 +109,6 @@ enum mv_ddr_temperature {
 	MV_DDR_TEMP_HIGH
 };
 
-enum hws_mem_size {
-	MEM_512M,
-	MEM_1G,
-	MEM_2G,
-	MEM_4G,
-	MEM_8G,
-	MEM_SIZE_LAST
-};
-
 enum mv_ddr_timing_data {
 	MV_DDR_TCK_AVG_MIN, /* sdram min cycle time (t ck avg min) */
 	MV_DDR_TAA_MIN, /* min cas latency time (t aa min) */
@@ -145,7 +136,7 @@ enum mv_ddr_dev_width { /* sdram device width */
 
 enum mv_ddr_die_capacity { /* total sdram capacity per die, megabits */
 	MV_DDR_DIE_CAP_256MBIT,
-	MV_DDR_DIE_CAP_512MBIT,
+	MV_DDR_DIE_CAP_512MBIT = 0,
 	MV_DDR_DIE_CAP_1GBIT,
 	MV_DDR_DIE_CAP_2GBIT,
 	MV_DDR_DIE_CAP_4GBIT,
