@@ -98,6 +98,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_TOPOLOGY_H
 #define _MV_DDR_TOPOLOGY_H
 
+/* bus width in bits */
+enum hws_bus_width {
+	BUS_WIDTH_4,
+	BUS_WIDTH_8,
+	BUS_WIDTH_16,
+	BUS_WIDTH_32
+};
+
+enum mv_ddr_num_of_sub_phys_per_ddr_unit {
+	SINGLE_SUB_PHY = 1,
+	TWO_SUB_PHYS = 2
+};
+
+enum mv_ddr_temperature {
+	MV_DDR_TEMP_LOW,
+	MV_DDR_TEMP_NORMAL,
+	MV_DDR_TEMP_HIGH
+};
+
+enum hws_mem_size {
+	MEM_512M,
+	MEM_1G,
+	MEM_2G,
+	MEM_4G,
+	MEM_8G,
+	MEM_SIZE_LAST
+};
+
 enum mv_ddr_timing_data {
 	MV_DDR_TCK_AVG_MIN, /* sdram min cycle time (t ck avg min) */
 	MV_DDR_TAA_MIN, /* min cas latency time (t aa min) */
