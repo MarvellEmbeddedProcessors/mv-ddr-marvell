@@ -375,7 +375,7 @@ int ddr3_tip_configure_cs(u32 dev_num, u32 if_id, u32 cs_num, u32 enable)
 
 	if (enable == 1) {
 		data = (tm->interface_params[if_id].bus_width ==
-			BUS_WIDTH_8) ? 0 : 1;
+			MV_DDR_DEV_WIDTH_8BIT) ? 0 : 1;
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
 			      SDRAM_ACCESS_CONTROL_REG, (data << (cs_num * 4)),
@@ -608,7 +608,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 			page_size =
 				(tm->interface_params[if_id].
 				 bus_width ==
-				 BUS_WIDTH_8) ? page_param[memory_size].
+				 MV_DDR_DEV_WIDTH_8BIT) ? page_param[memory_size].
 				page_size_8bit : page_param[memory_size].
 				page_size_16bit;
 
@@ -627,7 +627,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 
 			data_value =
 				(tm->interface_params[if_id].
-				 bus_width == BUS_WIDTH_8) ? 0 : 1;
+				 bus_width == MV_DDR_DEV_WIDTH_8BIT) ? 0 : 1;
 
 			/* create merge cs mask for all cs available in dunit */
 			for (bus_cnt = 0;
@@ -2070,7 +2070,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	memory_size = tm->interface_params[if_id].memory_size;
 	page_size =
 		(tm->interface_params[if_id].bus_width ==
-		 BUS_WIDTH_8) ? page_param[memory_size].
+		 MV_DDR_DEV_WIDTH_8BIT) ? page_param[memory_size].
 		page_size_8bit : page_param[memory_size].page_size_16bit;
 	t_ckclk = (MEGA / freq_val[frequency]);
 	t_rrd =	(page_size == 1) ? speed_bin_table(speed_bin_index,
@@ -3131,7 +3131,7 @@ u32 hws_ddr3_get_device_width(u32 if_id)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	return (tm->interface_params[if_id].bus_width ==
-		BUS_WIDTH_8) ? 8 : 16;
+		MV_DDR_DEV_WIDTH_8BIT) ? 8 : 16;
 }
 
 u32 hws_ddr3_get_device_size(u32 if_id)

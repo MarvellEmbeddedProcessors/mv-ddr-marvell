@@ -133,8 +133,8 @@ struct if_params {
 	/* Speed Bin Table */
 	enum hws_speed_bin speed_bin_index;
 
-	/* bus width of memory */
-	enum hws_bus_width bus_width;
+	/* sdram device width */
+	enum mv_ddr_dev_width bus_width;
 
 	/* Bus memory size (MBit) */
 	enum hws_mem_size memory_size;

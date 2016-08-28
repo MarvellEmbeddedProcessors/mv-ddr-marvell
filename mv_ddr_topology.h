@@ -98,14 +98,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_TOPOLOGY_H
 #define _MV_DDR_TOPOLOGY_H
 
-/* bus width in bits */
-enum hws_bus_width {
-	BUS_WIDTH_4,
-	BUS_WIDTH_8,
-	BUS_WIDTH_16,
-	BUS_WIDTH_32
-};
-
 enum mv_ddr_num_of_sub_phys_per_ddr_unit {
 	SINGLE_SUB_PHY = 1,
 	TWO_SUB_PHYS = 2
