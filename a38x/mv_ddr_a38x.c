@@ -827,8 +827,9 @@ static int ddr3_tip_init_a38x_silicon(u32 dev_num, u32 board_id)
 			  READ_LEVELING_TF_MASK_BIT |
 			  RECEIVER_CALIBRATION_MASK_BIT |
 			  WL_PHASE_CORRECTION_MASK_BIT |
-			  DQ_VREF_CALIBRATION_MASK_BIT |
-			  DQ_MAPPING_MASK_BIT);
+			  DQ_VREF_CALIBRATION_MASK_BIT);
+	/* Temporarily disable the DQ_MAPPING stage */
+	/*		  DQ_MAPPING_MASK_BIT */
 	rl_mid_freq_wa = 0;
 
 	/* In case A382, Vref calibration workaround isn't required */
