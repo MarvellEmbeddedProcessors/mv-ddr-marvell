@@ -95,92 +95,64 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#ifndef _MV_DDR_TOPOLOGY_H
-#define _MV_DDR_TOPOLOGY_H
+#include "mv_ddr_topology.h"
+#include "mv_ddr_spd.h"
+#include "ddr3_init.h"
+#include "ddr_topology_def.h"
+#include "ddr3_training_ip_db.h"
 
-/* source of ddr configuration data */
-enum mv_ddr_cfg_src {
-	MV_DDR_CFG_DEFAULT,	/* based on data in mv_ddr_topology_map structure */
-	MV_DDR_CFG_SPD,		/* based on data in spd */
-	MV_DDR_CFG_USER,	/* based on data from user */
-	MV_DDR_CFG_STATIC,	/* based on data from user in register-value format */
-	MV_DDR_CFG_LAST
-};
+struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+	unsigned char val = 0;
+	int i;
 
-enum mv_ddr_num_of_sub_phys_per_ddr_unit {
-	SINGLE_SUB_PHY = 1,
-	TWO_SUB_PHYS = 2
-};
+	if (tm->cfg_src == MV_DDR_CFG_SPD) {
+		/* check dram device type */
+		val = mv_ddr_spd_dev_type_get(&tm->spd_data);
+		if (val != MV_DDR_SPD_DEV_TYPE_DDR4) {
+			printf("mv_ddr: unsupported dram device type found\n");
+			return NULL;
+		}
 
-enum mv_ddr_temperature {
-	MV_DDR_TEMP_LOW,
-	MV_DDR_TEMP_NORMAL,
-	MV_DDR_TEMP_HIGH
-};
+		/* update topology map with timing data */
+		if (mv_ddr_spd_timing_calc(&tm->spd_data, tm->timing_data) > 0) {
+			printf("mv_ddr: negative timing data found\n");
+			return NULL;
+		}
 
-enum mv_ddr_timing_data {
-	MV_DDR_TCK_AVG_MIN, /* sdram min cycle time (t ck avg min) */
-	MV_DDR_TAA_MIN, /* min cas latency time (t aa min) */
-	MV_DDR_TRFC1_MIN, /* min refresh recovery delay time (t rfc1 min) */
-	MV_DDR_TWR_MIN, /* min write recovery time (t wr min) */
-	MV_DDR_TRCD_MIN, /* min ras to cas delay time (t rcd min) */
-	MV_DDR_TRP_MIN, /* min row precharge delay time (t rp min) */
-	MV_DDR_TRC_MIN, /* min active to active/refresh delay time (t rc min) */
-	MV_DDR_TRAS_MIN, /* min active to precharge delay time (t ras min) */
-	MV_DDR_TRRD_S_MIN, /* min activate to activate delay time (t rrd_s min), diff bank group */
-	MV_DDR_TRRD_L_MIN, /* min activate to activate delay time (t rrd_l min), same bank group */
-	MV_DDR_TFAW_MIN, /* min four activate window delay time (t faw min) */
-	MV_DDR_TWTR_S_MIN, /* min write to read time (t wtr s min), diff bank group */
-	MV_DDR_TWTR_L_MIN, /* min write to read time (t wtr l min), same bank group */
-	MV_DDR_TDATA_LAST
-};
+		/* update device width in topology map */
+		tm->interface_params[0].bus_width = mv_ddr_spd_dev_width_get(&tm->spd_data);
 
-enum mv_ddr_dev_width { /* sdram device width */
-	MV_DDR_DEV_WIDTH_4BIT,
-	MV_DDR_DEV_WIDTH_8BIT,
-	MV_DDR_DEV_WIDTH_16BIT,
-	MV_DDR_DEV_WIDTH_32BIT,
-	MV_DDR_DEV_WIDTH_LAST
-};
+		/* update die capacity in topology map */
+		tm->interface_params[0].memory_size = mv_ddr_spd_die_capacity_get(&tm->spd_data);
 
-enum mv_ddr_die_capacity { /* total sdram capacity per die, megabits */
-	MV_DDR_DIE_CAP_256MBIT,
-	MV_DDR_DIE_CAP_512MBIT = 0,
-	MV_DDR_DIE_CAP_1GBIT,
-	MV_DDR_DIE_CAP_2GBIT,
-	MV_DDR_DIE_CAP_4GBIT,
-	MV_DDR_DIE_CAP_8GBIT,
-	MV_DDR_DIE_CAP_16GBIT,
-	MV_DDR_DIE_CAP_32GBIT,
-	MV_DDR_DIE_CAP_12GBIT,
-	MV_DDR_DIE_CAP_24GBIT,
-	MV_DDR_DIE_CAP_LAST
-};
+		/* update cs bit mask in topology map */
+		val = mv_ddr_spd_cs_bit_mask_get(&tm->spd_data);
+		for (i = 0; i < octets_per_if_num; i++)
+			tm->interface_params[0].as_bus_params[i].cs_bitmask = val;
 
-enum mv_ddr_pkg_rank { /* number of package ranks per dimm */
-	MV_DDR_PKG_RANK_1,
-	MV_DDR_PKG_RANK_2,
-	MV_DDR_PKG_RANK_3,
-	MV_DDR_PKG_RANK_4,
-	MV_DDR_PKG_RANK_5,
-	MV_DDR_PKG_RANK_6,
-	MV_DDR_PKG_RANK_7,
-	MV_DDR_PKG_RANK_8,
-	MV_DDR_PKG_RANK_LAST
-};
+		/* check dram module type */
+		val = mv_ddr_spd_module_type_get(&tm->spd_data);
+		switch (val) {
+		case MV_DDR_SPD_MODULE_TYPE_UDIMM:
+		case MV_DDR_SPD_MODULE_TYPE_SO_DIMM:
+		case MV_DDR_SPD_MODULE_TYPE_MINI_UDIMM:
+		case MV_DDR_SPD_MODULE_TYPE_72BIT_SO_UDIMM:
+		case MV_DDR_SPD_MODULE_TYPE_16BIT_SO_DIMM:
+		case MV_DDR_SPD_MODULE_TYPE_32BIT_SO_DIMM:
+			break;
+		default:
+			printf("mv_ddr: unsupported dram module type found\n");
+			return NULL;
+		}
 
-enum mv_ddr_die_count {
-	MV_DDR_DIE_CNT_1,
-	MV_DDR_DIE_CNT_2,
-	MV_DDR_DIE_CNT_3,
-	MV_DDR_DIE_CNT_4,
-	MV_DDR_DIE_CNT_5,
-	MV_DDR_DIE_CNT_6,
-	MV_DDR_DIE_CNT_7,
-	MV_DDR_DIE_CNT_8,
-	MV_DDR_DIE_CNT_LAST
-};
+		/* update mirror bit mask in topology map */
+		val = mv_ddr_spd_mem_mirror_get(&tm->spd_data);
+		for (i = 0; i < octets_per_if_num; i++)
+			tm->interface_params[0].as_bus_params[i].mirror_enable_bitmask = val << 1;
+	}
 
-struct mv_ddr_topology_map *mv_ddr_topology_map_update(void);
-
-#endif /* _MV_DDR_TOPOLOGY_H */
+	return tm;
+}
