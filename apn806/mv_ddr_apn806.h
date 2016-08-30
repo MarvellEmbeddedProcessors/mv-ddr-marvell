@@ -98,6 +98,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_AP806_H
 #define _MV_DDR_AP806_H
 
+#include "mv_ddr_mc6_drv.h"
+
 #define INTER_REGS_BASE	0xf0000000
 
 #define NO_EFUSE
@@ -129,7 +131,6 @@ enum{
 };
 
 #define DUNIT_BASE_ADDR		0x10000
-#define MC6_BASE_ADDR		0x20000
 
 #define SAR_REG_ADDR			0x6f4400
 #define RST2_CLOCK_FREQ_MODE_OFFS	0
@@ -182,18 +183,6 @@ enum{
 #define REG_RDP_CONTROL_ADDR		(MC6_BASE_ADDR + 0x64)
 #define MB_READ_DATA_LATENCY_CH0_OFFS	0
 #define MB_READ_DATA_LATENCY_CH0_MASK	0x3f
-
-#define MC6_REG_DRAM_CFG1			(MC6_BASE_ADDR + 0x300)
-#define MC6_CAP_LATENCY_OFFS		28
-#define MC6_CAP_LATENCY_MASK		0xf
-#define MC6_CA_LATENCY_OFFS			24
-#define MC6_CA_LATENCY_MASK			0xf
-#define MC6_WL_SELECT_OFFS			15
-#define MC6_WL_SELECT_MASK			0x1
-#define MC6_CWL_OFFS			8
-#define MC6_CWL_MASK			0x3f
-#define MC6_CL_OFFS				0
-#define MC6_CL_MASK				0x3f
 
 #define MC6_REG_USER_CMD0		(MC6_BASE_ADDR + 0x20)
 #define MC6_USER_CS_OFFS		24
