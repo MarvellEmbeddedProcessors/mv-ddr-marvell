@@ -156,6 +156,11 @@ int ddr3_init(void)
 	if (MV_OK != status)
 		return status;
 
+	if (mv_ddr_topology_map_update() == NULL) {
+		printf("mv_ddr: failed to update topology\n");
+		return MV_FAIL;
+	}
+
 #ifdef CONFIG_MC_STATIC
 	mv_ddr_mc_static_config();
 #else
