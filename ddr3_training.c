@@ -210,6 +210,10 @@ int adll_calibration(u32 dev_num, enum hws_access_type access_type,
 		     u32 if_id, enum hws_ddr_freq frequency);
 static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 			       u32 if_id, enum hws_ddr_freq frequency);
+#if defined(CONFIG_DDR4)
+static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
+			       u32 if_id, enum hws_ddr_freq frequency);
+#endif /* CONFIG_DDR4 */
 
 static struct page_element page_param[] = {
 	/*
@@ -2169,6 +2173,64 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 
 	return MV_OK;
 }
+
+#if defined(CONFIG_DDR4)
+static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
+			       u32 if_id, enum hws_ddr_freq frequency)
+{
+	u32 t_rrd_l = 0, t_wtr_l = 0, t_ckclk = 0, t_mod = 0, t_ccd = 0;
+	u32 page_size = 0, val = 0, mask = 0;
+	enum hws_speed_bin speed_bin_index;
+	enum mv_ddr_die_capacity memory_size;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+
+	speed_bin_index = tm->interface_params[if_id].speed_bin_index;
+	memory_size = tm->interface_params[if_id].memory_size;
+	page_size = (tm->interface_params[if_id].bus_width == MV_DDR_DEV_WIDTH_8BIT) ?
+		    page_param[memory_size].page_size_8bit :
+		    page_param[memory_size].page_size_16bit;
+
+	t_ckclk = (MEGA / freq_val[frequency]);
+
+	t_rrd_l = (page_size == 1) ? speed_bin_table(speed_bin_index, SPEED_BIN_TRRDL1K) :
+			speed_bin_table(speed_bin_index, SPEED_BIN_TRRDL2K);
+	t_rrd_l = GET_MAX_VALUE(t_ckclk * 4, t_rrd_l);
+
+	t_wtr_l = speed_bin_table(speed_bin_index, SPEED_BIN_TWTRL);
+	t_wtr_l = GET_MAX_VALUE(t_ckclk * 4, t_wtr_l);
+
+	t_rrd_l = TIME_2_CLOCK_CYCLES(t_rrd_l, t_ckclk);
+	t_wtr_l = TIME_2_CLOCK_CYCLES(t_wtr_l, t_ckclk);
+
+	val = ((t_rrd_l & DRAM_LONG_TIMING_DDR4_TRRD_L_MASK) << DRAM_LONG_TIMING_DDR4_TRRD_L_OFFS) |
+	      ((t_wtr_l & DRAM_LONG_TIMING_DDR4_TWTR_L_MASK) << DRAM_LONG_TIMING_DDR4_TWTR_L_OFFS);
+	mask = (DRAM_LONG_TIMING_DDR4_TRRD_L_MASK << DRAM_LONG_TIMING_DDR4_TRRD_L_OFFS) |
+	       (DRAM_LONG_TIMING_DDR4_TWTR_L_MASK << DRAM_LONG_TIMING_DDR4_TWTR_L_OFFS);
+	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+				       DRAM_LONG_TIMING_REG, val, mask));
+
+	val = 0;
+	mask = 0;
+	t_mod = speed_bin_table(speed_bin_index, SPEED_BIN_TMOD);
+	t_mod = GET_MAX_VALUE(t_ckclk * 24, t_mod);
+	t_mod = TIME_2_CLOCK_CYCLES(t_mod, t_ckclk);
+
+	val = ((t_mod & SDRAM_TIMING_HIGH_TMOD_MASK) << SDRAM_TIMING_HIGH_TMOD_OFFS) |
+	      (((t_mod >> 4) & SDRAM_TIMING_HIGH_TMOD_HIGH_MASK) << SDRAM_TIMING_HIGH_TMOD_HIGH_OFFS);
+	mask = (SDRAM_TIMING_HIGH_TMOD_MASK << SDRAM_TIMING_HIGH_TMOD_OFFS) |
+	       (SDRAM_TIMING_HIGH_TMOD_HIGH_MASK << SDRAM_TIMING_HIGH_TMOD_HIGH_OFFS);
+	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+				       SDRAM_TIMING_HIGH_REG, val, mask));
+
+	t_ccd = 4; /* per t_ccd_s value in DDR4 JEDEC Standard */
+	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+				       DDR_TIMING_REG,
+				       (t_ccd & DDR_TIMING_TCCD_MASK) << DDR_TIMING_TCCD_OFFS,
+				       DDR_TIMING_TCCD_MASK << DDR_TIMING_TCCD_OFFS));
+
+	return MV_OK;
+}
+#endif /* CONFIG_DDR4 */
 
 /*
  * Mode Read

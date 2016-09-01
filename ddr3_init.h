@@ -281,8 +281,6 @@ int ddr4_mode_regs_init(u8 dev_num);
 const char* ddr4_sublib_version_get(void);
 int ddr4_tip_configure_phy(u32 dev_num);
 int ddr4_tip_calibration_adjust(u32 dev_num, u8 vref_en, u8 pod_only);
-int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type interface_access,
-			u32 if_id, enum hws_ddr_freq frequency);
 int ddr3_tip_ddr4_ddr4_training_main_flow(u32 dev_num);
 #endif /* CONFIG_DDR4 */
 

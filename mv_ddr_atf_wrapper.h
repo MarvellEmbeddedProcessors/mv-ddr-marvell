@@ -256,7 +256,6 @@ void mmio_write2_32(u32 val, u32 addr);
 #define ddr4_sublib_version_get mvHwsDdr4SubLibVersionGet
 #define ddr4_tip_configure_phy ddr4TipConfigurePhy
 #define ddr4_tip_calibration_adjust ddr4TipCalibrationAdjust
-#define ddr4_tip_set_timing ddr4TipSetTiming
 #define ddr3_tip_ddr4_ddr4_training_main_flow ddr3TipDDR4Ddr4TrainingMainFlow
 #endif
 
