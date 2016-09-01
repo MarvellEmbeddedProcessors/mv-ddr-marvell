@@ -96,6 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ddr3_init.h"
+#include "mv_ddr_common.h"
 
 #define GET_CS_FROM_MASK(mask)	(cs_mask2_num[mask])
 #define CS_CBE_VALUE(cs_num)	(cs_cbe_reg[cs_num])
@@ -631,7 +632,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 				: speed_bin_table(speed_bin_index,
 						  SPEED_BIN_TFAW2K);
 
-			data_value = TIME_2_CLOCK_CYCLES(t_faw, t_ckclk);
+			data_value = time_to_nclk(t_faw, t_ckclk);
 			data_value = data_value << 24;
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
@@ -686,7 +687,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 						  ("cl_value 0x%x cwl_val 0x%x\n",
 						   cl_value, cwl_val));
 
-				t_wr = TIME_2_CLOCK_CYCLES(speed_bin_table
+				t_wr = time_to_nclk(speed_bin_table
 							   (speed_bin_index,
 							    SPEED_BIN_TWR), t_ckclk);
 
@@ -773,11 +774,11 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 			t_pd = GET_MAX_VALUE(t_ckclk * 3,
 					     speed_bin_table(speed_bin_index,
 							     SPEED_BIN_TPD));
-			t_pd = TIME_2_CLOCK_CYCLES(t_pd, t_ckclk);
+			t_pd = time_to_nclk(t_pd, t_ckclk);
 			txpdll = GET_MAX_VALUE(t_ckclk * 10,
 					       speed_bin_table(speed_bin_index,
 							       SPEED_BIN_TXPDLL));
-			txpdll = CEIL_DIVIDE((txpdll - 1), t_ckclk);
+			txpdll = time_to_nclk(txpdll, t_ckclk);
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
 				      DDR_TIMING_REG, txpdll << 4,
@@ -1831,7 +1832,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 			      (cwl_mask_table[cwl_value] << 12), 0x7000));
 
 		t_ckclk = (MEGA / freq_val[frequency]);
-		t_wr = TIME_2_CLOCK_CYCLES(speed_bin_table
+		t_wr = time_to_nclk(speed_bin_table
 					   (speed_bin_index,
 					    SPEED_BIN_TWR), t_ckclk);
 
@@ -2100,23 +2101,23 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	t_wtr = GET_MAX_VALUE(t_ckclk * 4, speed_bin_table(speed_bin_index,
 							   SPEED_BIN_TWTR));
 #endif /* CONFIG_DDR4 */
-	t_ras = TIME_2_CLOCK_CYCLES(speed_bin_table(speed_bin_index,
+	t_ras = time_to_nclk(speed_bin_table(speed_bin_index,
 						    SPEED_BIN_TRAS),
 				    t_ckclk);
-	t_rcd = TIME_2_CLOCK_CYCLES(speed_bin_table(speed_bin_index,
+	t_rcd = time_to_nclk(speed_bin_table(speed_bin_index,
 						    SPEED_BIN_TRCD),
 				    t_ckclk);
-	t_rp = TIME_2_CLOCK_CYCLES(speed_bin_table(speed_bin_index,
+	t_rp = time_to_nclk(speed_bin_table(speed_bin_index,
 						   SPEED_BIN_TRP),
 				   t_ckclk);
-	t_wr = TIME_2_CLOCK_CYCLES(speed_bin_table(speed_bin_index,
+	t_wr = time_to_nclk(speed_bin_table(speed_bin_index,
 						   SPEED_BIN_TWR),
 				   t_ckclk);
-	t_wtr = TIME_2_CLOCK_CYCLES(t_wtr, t_ckclk);
-	t_rrd = TIME_2_CLOCK_CYCLES(t_rrd, t_ckclk);
-	t_rtp = TIME_2_CLOCK_CYCLES(t_rtp, t_ckclk);
-	t_rfc = TIME_2_CLOCK_CYCLES(rfc_table[memory_size] * 1000, t_ckclk);
-	t_mod = TIME_2_CLOCK_CYCLES(t_mod, t_ckclk);
+	t_wtr = time_to_nclk(t_wtr, t_ckclk);
+	t_rrd = time_to_nclk(t_rrd, t_ckclk);
+	t_rtp = time_to_nclk(t_rtp, t_ckclk);
+	t_rfc = time_to_nclk(rfc_table[memory_size] * 1000, t_ckclk);
+	t_mod = time_to_nclk(t_mod, t_ckclk);
 
 	/* SDRAM Timing Low */
 	val = ((t_ras & SDRAM_TIMING_LOW_TRAS_MASK) << SDRAM_TIMING_LOW_TRAS_OFFS) |
@@ -2199,8 +2200,8 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	t_wtr_l = speed_bin_table(speed_bin_index, SPEED_BIN_TWTRL);
 	t_wtr_l = GET_MAX_VALUE(t_ckclk * 4, t_wtr_l);
 
-	t_rrd_l = TIME_2_CLOCK_CYCLES(t_rrd_l, t_ckclk);
-	t_wtr_l = TIME_2_CLOCK_CYCLES(t_wtr_l, t_ckclk);
+	t_rrd_l = time_to_nclk(t_rrd_l, t_ckclk);
+	t_wtr_l = time_to_nclk(t_wtr_l, t_ckclk);
 
 	val = ((t_rrd_l & DRAM_LONG_TIMING_DDR4_TRRD_L_MASK) << DRAM_LONG_TIMING_DDR4_TRRD_L_OFFS) |
 	      ((t_wtr_l & DRAM_LONG_TIMING_DDR4_TWTR_L_MASK) << DRAM_LONG_TIMING_DDR4_TWTR_L_OFFS);
@@ -2213,7 +2214,7 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	mask = 0;
 	t_mod = speed_bin_table(speed_bin_index, SPEED_BIN_TMOD);
 	t_mod = GET_MAX_VALUE(t_ckclk * 24, t_mod);
-	t_mod = TIME_2_CLOCK_CYCLES(t_mod, t_ckclk);
+	t_mod = time_to_nclk(t_mod, t_ckclk);
 
 	val = ((t_mod & SDRAM_TIMING_HIGH_TMOD_MASK) << SDRAM_TIMING_HIGH_TMOD_OFFS) |
 	      (((t_mod >> 4) & SDRAM_TIMING_HIGH_TMOD_HIGH_MASK) << SDRAM_TIMING_HIGH_TMOD_HIGH_OFFS);

@@ -136,10 +136,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define GET_MAX_VALUE(x, y)			\
 	((x) > (y)) ? (x) : (y)
-#define CEIL_DIVIDE(x, y)					\
-	((x - (x / y) * y) == 0) ? ((x / y) - 1) : (x / y)
-
-#define TIME_2_CLOCK_CYCLES	CEIL_DIVIDE
 
 #define SUB_VERSION	0
 
