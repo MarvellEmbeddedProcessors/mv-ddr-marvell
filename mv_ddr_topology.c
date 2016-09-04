@@ -96,15 +96,43 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "mv_ddr_topology.h"
+#include "mv_ddr_common.h"
 #include "mv_ddr_spd.h"
 #include "ddr3_init.h"
 #include "ddr_topology_def.h"
 #include "ddr3_training_ip_db.h"
 
+unsigned int mv_ddr_cl_calc(unsigned int taa_min, unsigned int tclk)
+{
+	unsigned int cl = ceil_div(taa_min, tclk);
+
+	return mv_ddr_spd_supported_cl_get(cl);
+
+}
+
+unsigned int mv_ddr_cwl_calc(unsigned int tclk)
+{
+	unsigned int cwl;
+
+	if (tclk >= 1250)
+		cwl = 9;
+	else if (tclk >= 1071)
+		cwl = 10;
+	else if (tclk >= 938)
+		cwl = 11;
+	else if (tclk >= 833)
+		cwl = 12;
+	else
+		cwl = 0;
+
+	return cwl;
+}
+
 struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	unsigned int octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+	unsigned int tclk;
 	unsigned char val = 0;
 	int i;
 
@@ -152,6 +180,24 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 		val = mv_ddr_spd_mem_mirror_get(&tm->spd_data);
 		for (i = 0; i < octets_per_if_num; i++)
 			tm->interface_params[0].as_bus_params[i].mirror_enable_bitmask = val << 1;
+
+		tclk = 1000000 / freq_val[tm->interface_params[0].memory_freq];
+		/* update cas write latency (cwl) */
+		val = mv_ddr_cwl_calc(tclk);
+		if (val == 0) {
+			printf("mv_ddr: unsupported cas write latency value found\n");
+			return NULL;
+		}
+		tm->interface_params[0].cas_wl = val;
+
+		/* update cas latency (cl) */
+		mv_ddr_spd_supported_cls_calc(&tm->spd_data);
+		val = mv_ddr_cl_calc(tm->timing_data[MV_DDR_TAA_MIN], tclk);
+		if (val == 0) {
+			printf("mv_ddr: unsupported cas latency value found\n");
+			return NULL;
+		}
+		tm->interface_params[0].cas_l = val;
 	}
 
 	return tm;

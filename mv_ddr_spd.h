@@ -373,5 +373,7 @@ unsigned char mv_ddr_spd_mem_mirror_get(union mv_ddr_spd_data *spd_data);
 unsigned char mv_ddr_spd_cs_bit_mask_get(union mv_ddr_spd_data *spd_data);
 unsigned char mv_ddr_spd_dev_type_get(union mv_ddr_spd_data *spd_data);
 unsigned char mv_ddr_spd_module_type_get(union mv_ddr_spd_data *spd_data);
+int mv_ddr_spd_supported_cls_calc(union mv_ddr_spd_data *spd_data);
+unsigned int mv_ddr_spd_supported_cl_get(unsigned int cl);
 
 #endif /* _MV_DDR_SPD_H */

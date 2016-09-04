@@ -101,6 +101,52 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_DDR_SPD_DATA_FTB		1	/* fine timebase, ps */
 #define MV_DDR_SPD_MSB_OFFS		8	/* most significant byte offset, bits */
 
+#define MV_DDR_SPD_SUPPORTED_CLS_NUM	30
+
+static unsigned int mv_ddr_spd_supported_cls[MV_DDR_SPD_SUPPORTED_CLS_NUM];
+
+int mv_ddr_spd_supported_cls_calc(union mv_ddr_spd_data *spd_data)
+{
+	unsigned int byte, bit, start_cl;
+
+	start_cl = (spd_data->all_bytes[23] & 0x8) ? 23 : 7;
+
+	for (byte = 20; byte < 23; byte++) {
+		for (bit = 0; bit < 8; bit++) {
+			if (spd_data->all_bytes[byte] & (1 << bit))
+				mv_ddr_spd_supported_cls[(byte - 20) * 8 + bit] = start_cl + (byte - 20) * 8 + bit;
+			else
+				mv_ddr_spd_supported_cls[(byte - 20) * 8 + bit] = 0;
+		}
+	}
+
+	for (byte = 23, bit = 0; bit < 6; bit++) {
+		if (spd_data->all_bytes[byte] & (1 << bit))
+			mv_ddr_spd_supported_cls[(byte - 20) * 8 + bit] = start_cl + (byte - 20) * 8 + bit;
+		else
+			mv_ddr_spd_supported_cls[(byte - 20) * 8 + bit] = 0;
+	}
+
+	return 0;
+}
+
+unsigned int mv_ddr_spd_supported_cl_get(unsigned int cl)
+{
+	unsigned int supported_cl;
+	int i = 0;
+
+	while (i < MV_DDR_SPD_SUPPORTED_CLS_NUM &&
+		mv_ddr_spd_supported_cls[i] < cl)
+		i++;
+
+	if (i < MV_DDR_SPD_SUPPORTED_CLS_NUM)
+		supported_cl = mv_ddr_spd_supported_cls[i];
+	else
+		supported_cl = 0;
+
+	return supported_cl;
+}
+
 int mv_ddr_spd_timing_calc(union mv_ddr_spd_data *spd_data, unsigned int timing_data[])
 {
 	int calc_val;

@@ -1634,6 +1634,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 	u32 cs_mask[MAX_INTERFACE_NUM];
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int tclk;
 
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE,
 			  ("dev %d access %d IF %d freq %d\n", dev_num,
@@ -1677,6 +1678,18 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 				tm->interface_params[if_id].cas_l;
 			cwl_value =
 				tm->interface_params[if_id].cas_wl;
+		} else if (tm->cfg_src == MV_DDR_CFG_SPD) {
+			tclk = 1000000 / freq_val[frequency];
+			cl_value = mv_ddr_cl_calc(tm->timing_data[MV_DDR_TAA_MIN], tclk);
+			if (cl_value == 0) {
+				printf("mv_ddr: unsupported cas latency value found\n");
+				return MV_FAIL;
+			}
+			cwl_value = mv_ddr_cwl_calc(tclk);
+			if (cwl_value == 0) {
+				printf("mv_ddr: unsupported cas write latency value found\n");
+				return MV_FAIL;
+			}
 		} else {
 			cl_value =
 				cas_latency_table[speed_bin_index].cl_val[frequency];
