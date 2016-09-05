@@ -216,7 +216,7 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 			       u32 if_id, enum hws_ddr_freq frequency);
 #endif /* CONFIG_DDR4 */
 
-static struct page_element page_param[] = {
+struct page_element page_param[] = {
 	/*
 	 * 8bits	16 bits
 	 * page-size(K)	page-size(K)	mask
