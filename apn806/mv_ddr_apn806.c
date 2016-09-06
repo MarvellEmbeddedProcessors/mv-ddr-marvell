@@ -929,38 +929,35 @@ void mv_ddr_mc_config(void)
 /* FIXME: this is a place holder for the mc6 generic init currently hard coded */
 int mv_ddr_mc6_init_controller(void)
 {
-	reg_write(0x20064, 0x606);		/* MC "readReady"+ MC2PHYlatency */
-	reg_write(0x21180, 0x500);
-	reg_write(0x21000, 0x60);		/* phy_rfifo_rptr_dly_val */
-	reg_write(0x210c0, 0x81000001);
-	reg_write(0x202c8, 0xfefe);
-	reg_write(0x20340, 0x0);
-	reg_write(0x20344, 0x30000000);
-	reg_write(0x20310, 0x21000000);
-	reg_write(0x20318, 0x0);
-	reg_write(0x2031c, 0x0);
-	reg_write(0x20304, 0x0);
-	reg_write(0x20308, 0x1);
+	mv_ddr_mc6_and_dram_timing_set();
+
+	reg_write(0x20064, 0x606);	/* MC "readReady"+ MC2PHYlatency */
+	reg_write(0x21180, 0x500);	/* PHY_RL_Control for CS0:phy_rl_cycle_dly and phy_rl_tap_dly*/
+	reg_write(0x21000, 0x60);	/* phy_rfifo_rptr_dly_val */
+	reg_write(0x210c0, 0x81000001);	/* PHY_WL_RL_Control: bit 31 phy_rdq_sel_u_en for pod '1' phy_rl_enable = '1' */
+	reg_write(0x202c8, 0xfefe);	/* MC_Control_3: phy_in_ff_bypass, phy_out_ff_bypass */
+	reg_write(0x20340, 0x0);	/* ODT_Control_1: ODT_write_en, ODT0_read_en */
+	reg_write(0x20344, 0x30000000);	/* ODT_Control_2: force_odt - always 'on' for cs0 and cs1*/
+	reg_write(0x20310, 0x21000000);	/* DRAM_Config_5 CS0: RTT_Park, RTT_WR */
+	reg_write(0x20318, 0x0);	/* DRAM_Config_5 CS2: RTT_Park, RTT_WR */
+	reg_write(0x2031c, 0x0);	/* DRAM_Config_5 CS3: RTT_Park, RTT_WR */
+	reg_write(0x20304, 0x0);	/* DRAM_Config_2 */
+	reg_write(0x20308, 0x1);	/* DRAM_Config_3 DLL_reset */
 #if defined(a80x0) || defined(a80x0_cust)
-	reg_write(0x20314, 0x0);	/* TODO: for 2 cs add this configuration register */
-	reg_write(0x20200, 0x100001);	/* mmap0_low_ch0 */
-	reg_write(0x20204, 0x0);
-	reg_write(0x20208, 0x0);
-	reg_write(0x20400, 0x100001);
-	reg_write(0x20404, 0x1);
-	reg_write(0x20408, 0x0);
-	reg_write(0x2040c, 0x0);
-	reg_write(0x20224, 0x0);
+	reg_write(0x20314, 0x0);	/* DRAM_Config_5 CS1: RTT_Park, RTT_WR - Diff1 */
+	reg_write(0x20200, 0x100001);	/* MMAP0_Low ch0 - diff2  size */
+	reg_write(0x20204, 0x0);	/* MMAP0_High_CH0 - diff2 size */
+	reg_write(0x20208, 0x0);	/* MMAP1_Low ch0 - diff2 size */
+	reg_write(0x20400, 0x100001);	/* MMAP0_Low ch1 - diff2 size */
+	reg_write(0x20404, 0x1);	/* MMAP0_High_CH1 - diff2 size */
+	reg_write(0x20408, 0x0);	/* MMAP1_Low ch1 - diff2 size */
+	reg_write(0x2040c, 0x0);	/* MMAP1_High_CH1 - diff2 - only 2 cs need 4 - size */
+	reg_write(0x20224, 0x0);	/* MC_CONFIG CS1:  mapping - diff3 size */
 #if defined(CONFIG_64BIT)
-	reg_write(0x20044, 0x30400); /* mc control register 0 */
+	reg_write(0x20044, 0x30400);	/* MC_Control_0 - bust length, data width need to configure - diff4 - config */
 #else
-	reg_write(0x20044, 0x30300);
+	reg_write(0x20044, 0x30300);	/* MC_Control_0 - bust length, data width need to configure - diff4 - config */
 #endif	/* (CONFIG_64BIT) */
-	reg_write(0x20300, 0x90b);
-	reg_write(0x20394, 0x1180618);
-	reg_write(0x203ac, 0x11250b1B);	/* 0x11260C1B RAS fix*/
-	reg_write(0x203b8, 0x504);
-	reg_write(0x203c0, 0x10400);	/*0x30700*/
 #endif	/* #if defined(a80x0) || defined(a80x0_cust) */
 #if defined(a70x0) || defined(a70x0_cust)
 	reg_write(0x20314, 0x21010000);
@@ -973,42 +970,23 @@ int mv_ddr_mc6_init_controller(void)
 	reg_write(0x2040c, 0x1);
 	reg_write(0x20224, 0x5010539);
 	reg_write(0x20044, 0x30300);
-	reg_write(0x20300, 0x90c);
-	reg_write(0x20394, 0xd00618);
-	reg_write(0x203ac, 0x11260C1B);
-	reg_write(0x203b8, 0x404);
-	reg_write(0x203c0, 0x10400);
 #endif	/* #if defined(a70x0) || defined(a70x0_cust) */
-	reg_write(0x2020c, 0x0);
-	reg_write(0x20210, 0x0);
-	reg_write(0x20214, 0x0);
-	reg_write(0x20218, 0x0);
-	reg_write(0x2021c, 0x0);
-	reg_write(0x20220, 0x5010539);
-	reg_write(0x20228, 0x0);
-	reg_write(0x2022c, 0x0);
-	reg_write(0x202c0, 0x6000);
-	reg_write(0x202c4, 0x120030);
-	reg_write(0x20180, 0x30200);
-	reg_write(0x20050, 0xff);
-	reg_write(0x2004c, 0x0);
-	reg_write(0x20054, 0x4c0);
-	reg_write(0x2030c, 0x90000);
-	reg_write(0x20380, 0x61a80);
-	reg_write(0x20384, 0x27100);
-	reg_write(0x20388, 0x960050);
-	reg_write(0x2038c, 0x400);
-	reg_write(0x20390, 0x800200);
-	reg_write(0x20398, 0x1680300);
-	reg_write(0x2039c, 0x200808);
-	reg_write(0x203a0, 0x1050600);
-	reg_write(0x203a4, 0x2);
-	reg_write(0x203a8, 0x1808);
-	reg_write(0x203b0, 0x0C0C060C);
-	reg_write(0x203b4, 0x06040602);
-	reg_write(0x203bc, 0x1050505);
-	reg_write(0x203c4, 0x0);
-	reg_write(0x203cc, 0xf010345);
+	reg_write(0x2020c, 0x0);	/* MMAP1_High_CH0 size */
+	reg_write(0x20210, 0x0);	/* MMAP2_Low_CH0 - size */
+	reg_write(0x20214, 0x0);	/* MMAP2_High_CH0 - size */
+	reg_write(0x20218, 0x0);	/* MMAP3_Low_CH0 - size */
+	reg_write(0x2021c, 0x0);	/* MMAP3_High_CH0 - size */
+	reg_write(0x20220, 0x5010539);	/* CH0_MC_CONFIG_CS0 - size */
+	reg_write(0x20228, 0x0);	/* CH0_MC_CONFIG_CS2 - size */
+	reg_write(0x2022c, 0x0);	/* CH0_MC_CONFIG_CS3 - size */
+	reg_write(0x202c0, 0x6000);	/* MC_Control_1 - tw2r_dis? , acs_exit_dly timing???, config?? */
+	reg_write(0x202c4, 0x120030);	/* MC_Control_2 - sdram typ, mode 2t, mirror en, rdimm mode - config */
+	reg_write(0x20180, 0x30200);	/* RPP_Starvation_Control - default */
+	reg_write(0x20050, 0xff);	/* Spool_Control default */
+	reg_write(0x2004c, 0x2);	/* RAS_Control: ecc_en - config */
+	reg_write(0x20054, 0x4c0);	/* MC_pwr_ctl - default */
+	reg_write(0x2030c, 0x90000);	/* DRAM_Config_4: vref training value, odt? - config */
+	reg_write(0x203bc, 0x1050505);	/* MC6_REG_OFF_SPEC_TIMING_0 */
 
 	return MV_OK;
 }
