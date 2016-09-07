@@ -97,7 +97,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mv_ddr_mc6_drv.h"
 #include "ddr3_init.h"
-#include "mv_ddr_common.h"
 
 /* extern */
 extern struct page_element page_param[];	/* FIXME: this data base should have get, set functions */
@@ -534,4 +533,515 @@ void mv_ddr_mc6_and_dram_timing_set(void)
 	freq_mhz = freq_val[tm->interface_params[IF_ID_0].memory_freq];
 
 	mv_ddr_mc6_timing_regs_cfg(freq_mhz);
+}
+
+
+struct mv_ddr_addressing_table mv_ddr_addresing_table_get(enum mv_ddr_die_capacity memory_size,
+						   enum mv_ddr_dev_width bus_width)
+{
+	struct mv_ddr_addressing_table addr_table;
+	switch (memory_size) {
+	case MV_DDR_DIE_CAP_2GBIT:
+	{
+		switch (bus_width) {
+		case MV_DDR_DEV_WIDTH_8BIT:
+			addr_table.num_of_bank_groups = 4;
+			addr_table.num_of_bank_addr_in_bank_group = 4;
+			addr_table.row_addr = 14;
+			addr_table.column_addr = 10;
+			addr_table.page_size_k_byte = 1;
+			break;
+
+		case MV_DDR_DEV_WIDTH_16BIT:
+			addr_table.num_of_bank_groups = 2;
+			addr_table.num_of_bank_addr_in_bank_group = 4;
+			addr_table.row_addr = 14;
+			addr_table.column_addr = 10;
+			addr_table.page_size_k_byte = 2;
+			break;
+
+		default:
+			printf("%s: the current bus width in not supported\n", __func__);
+		}
+	}
+		break;
+
+	case MV_DDR_DIE_CAP_4GBIT:
+	{
+		switch (bus_width) {
+		case MV_DDR_DEV_WIDTH_8BIT:
+			addr_table.num_of_bank_groups = 4;
+			addr_table.num_of_bank_addr_in_bank_group = 4;
+			addr_table.row_addr = 15;
+			addr_table.column_addr = 10;
+			addr_table.page_size_k_byte = 1;
+			break;
+
+		case MV_DDR_DEV_WIDTH_16BIT:
+			addr_table.num_of_bank_groups = 2;
+			addr_table.num_of_bank_addr_in_bank_group = 4;
+			addr_table.row_addr = 15;
+			addr_table.column_addr = 10;
+			addr_table.page_size_k_byte = 2;
+			break;
+
+		default:
+			printf("%s: the current bus width in not supported\n", __func__);
+		}
+	}
+		break;
+
+	case MV_DDR_DIE_CAP_8GBIT:
+	{
+		switch (bus_width) {
+		case MV_DDR_DEV_WIDTH_8BIT:
+			addr_table.num_of_bank_groups = 4;
+			addr_table.num_of_bank_addr_in_bank_group = 4;
+			addr_table.row_addr = 16;
+			addr_table.column_addr = 10;
+			addr_table.page_size_k_byte = 1;
+			break;
+
+		case MV_DDR_DEV_WIDTH_16BIT:
+			addr_table.num_of_bank_groups = 2;
+			addr_table.num_of_bank_addr_in_bank_group = 4;
+			addr_table.row_addr = 16;
+			addr_table.column_addr = 10;
+			addr_table.page_size_k_byte = 2;
+			break;
+
+		default:
+			printf("%s: the current bus width in not supported\n", __func__);
+		}
+	}
+		break;
+
+	case MV_DDR_DIE_CAP_16GBIT:
+	{
+		switch (bus_width) {
+		case MV_DDR_DEV_WIDTH_8BIT:
+			addr_table.num_of_bank_groups = 4;
+			addr_table.num_of_bank_addr_in_bank_group = 4;
+			addr_table.row_addr = 17;
+			addr_table.column_addr = 10;
+			addr_table.page_size_k_byte = 1;
+			break;
+
+		case MV_DDR_DEV_WIDTH_16BIT:
+			addr_table.num_of_bank_groups = 2;
+			addr_table.num_of_bank_addr_in_bank_group = 4;
+			addr_table.row_addr = 17;
+			addr_table.column_addr = 10;
+			addr_table.page_size_k_byte = 2;
+			break;
+
+		default:
+			printf("%s: the current bus width in not supported\n", __func__);
+		}
+	}
+		break;
+
+	default:
+		printf("%s: the current memory size in not supported\n", __func__);
+	}
+
+	return addr_table;
+}
+
+unsigned int mv_ddr_area_length_convert(unsigned int area_length)
+{
+	unsigned int area_length_map = 0xffffffff;
+
+	switch (area_length) {
+	case 384:
+		area_length_map = 0x0;
+		break;
+	case 768:
+		area_length_map = 0x1;
+		break;
+	case 1536:
+		area_length_map = 0x2;
+		break;
+	case 3072:
+		area_length_map = 0x3;
+		break;
+	case 8:
+		area_length_map = 0x7;
+		break;
+	case 16:
+		area_length_map = 0x8;
+		break;
+	case 32:
+		area_length_map = 0x9;
+		break;
+	case 64:
+		area_length_map = 0xA;
+		break;
+	case 128:
+		area_length_map = 0xB;
+		break;
+	case 256:
+		area_length_map = 0xC;
+		break;
+	case 512:
+		area_length_map = 0xD;
+		break;
+	case 1024:
+		area_length_map = 0xE;
+		break;
+	case 2048:
+		area_length_map = 0xF;
+		break;
+	case 4096:
+		area_length_map = 0x10;
+		break;
+	case 8192:
+		area_length_map = 0x11;
+		break;
+	case 16384:
+		area_length_map = 0x12;
+		break;
+	case 32768:
+		area_length_map = 0x13;
+		break;
+	default:
+		/* over than 32GB is not supported */
+		printf("%s: unsupported area length %d\n", __func__, area_length);
+	}
+
+	return area_length_map;
+}
+
+unsigned int mv_ddr_bank_addr_convert(unsigned int num_of_bank_addr_in_bank_group)
+{
+	unsigned int num_of_bank_addr_in_bank_group_map = 0xff;
+
+	switch (num_of_bank_addr_in_bank_group) {
+	case 2:
+		num_of_bank_addr_in_bank_group_map = 0x0;
+		break;
+	case 4:
+		num_of_bank_addr_in_bank_group_map = 0x1;
+		break;
+	case 8:
+		num_of_bank_addr_in_bank_group_map = 0x2;
+		break;
+	default:
+		printf("%s: number of bank address in bank group %d is not supported\n", __func__,
+		       num_of_bank_addr_in_bank_group);
+	}
+
+	return num_of_bank_addr_in_bank_group_map;
+}
+
+unsigned int mv_ddr_bank_groups_convert(unsigned int num_of_bank_groups)
+{
+	unsigned int num_of_bank_groups_map = 0xff;
+
+	switch (num_of_bank_groups) {
+	case 1:
+		num_of_bank_groups_map = 0x0;
+		break;
+	case 2:
+		num_of_bank_groups_map = 0x1;
+		break;
+	case 4:
+		num_of_bank_groups_map = 0x2;
+		break;
+	default:
+		printf("%s: number of bank group %d is not supported\n", __func__,
+		       num_of_bank_groups);
+	}
+
+	return num_of_bank_groups_map;
+}
+
+unsigned int mv_ddr_column_num_convert(unsigned int column_addr)
+{
+	unsigned int column_addr_map = 0xff;
+
+	switch (column_addr) {
+	case 8:
+		column_addr_map = 0x1;
+		break;
+	case 9:
+		column_addr_map = 0x2;
+		break;
+	case 10:
+		column_addr_map = 0x3;
+		break;
+	case 11:
+		column_addr_map = 0x4;
+		break;
+	case 12:
+		column_addr_map = 0x5;
+		break;
+	default:
+		printf("%s: number of columns %d is not supported\n", __func__,
+		       column_addr);
+	}
+
+	return column_addr_map;
+}
+
+unsigned int mv_ddr_row_num_convert(unsigned int row_addr)
+{
+	unsigned int row_addr_map = 0xff;
+
+	switch (row_addr) {
+	case 11:
+		row_addr_map = 0x1;
+		break;
+	case 12:
+		row_addr_map = 0x2;
+		break;
+	case 13:
+		row_addr_map = 0x3;
+		break;
+	case 14:
+		row_addr_map = 0x4;
+		break;
+	case 15:
+		row_addr_map = 0x5;
+		break;
+	case 16:
+		row_addr_map = 0x6;
+		break;
+	default:
+		printf("%s: number of rows %d is not supported\n", __func__,
+		       row_addr);
+	}
+
+	return row_addr_map;
+}
+
+unsigned int mv_ddr_stack_addr_num_convert(unsigned int stack_addr)
+{
+	unsigned int stack_addr_map = 0xff;
+
+	switch (stack_addr) {
+	case 1:
+		stack_addr_map = 0x0;
+		break;
+	case 2:
+		stack_addr_map = 0x1;
+		break;
+	case 4:
+		stack_addr_map = 0x2;
+		break;
+	case 8:
+		stack_addr_map = 0x3;
+		break;
+	default:
+		printf("%s: number of stacks %d is not supported\n", __func__,
+		       stack_addr);
+	}
+
+	return stack_addr_map;
+}
+
+unsigned int mv_ddr_device_type_convert(enum mv_ddr_dev_width bus_width)
+{
+	unsigned int device_type_map = 0xff;
+
+	switch (bus_width) {
+	case MV_DDR_DEV_WIDTH_8BIT:
+		device_type_map = 0x1;
+		break;
+	case MV_DDR_DEV_WIDTH_16BIT:
+		device_type_map = 0x2;
+		break;
+	default:
+		printf("%s: device type is not supported\n", __func__);
+	}
+
+	return device_type_map;
+}
+
+unsigned int mv_ddr_bank_map_convert(enum mv_ddr_mc6_bank_boundary mc6_bank_boundary)
+{
+	unsigned int mv_ddr_mc6_bank_boundary_map = 0xff;
+
+	switch (mc6_bank_boundary) {
+	case BANK_MAP_512B:
+		mv_ddr_mc6_bank_boundary_map = 0x2;
+		break;
+	case BANK_MAP_1KB:
+		mv_ddr_mc6_bank_boundary_map = 0x3;
+		break;
+	case BANK_MAP_2KB:
+		mv_ddr_mc6_bank_boundary_map = 0x4;
+		break;
+	case BANK_MAP_4KB:
+		mv_ddr_mc6_bank_boundary_map = 0x5;
+		break;
+	case BANK_MAP_8KB:
+		mv_ddr_mc6_bank_boundary_map = 0x6;
+		break;
+	case BANK_MAP_16KB:
+		mv_ddr_mc6_bank_boundary_map = 0x7;
+		break;
+	case BANK_MAP_32KB:
+		mv_ddr_mc6_bank_boundary_map = 0x8;
+		break;
+	case BANK_MAP_64KB:
+		mv_ddr_mc6_bank_boundary_map = 0x9;
+		break;
+	case BANK_MAP_128KB:
+		mv_ddr_mc6_bank_boundary_map = 0xa;
+		break;
+	case BANK_MAP_256KB:
+		mv_ddr_mc6_bank_boundary_map = 0xb;
+		break;
+	case BANK_MAP_512KB:
+		mv_ddr_mc6_bank_boundary_map = 0xc;
+		break;
+	case BANK_MAP_1MB:
+		mv_ddr_mc6_bank_boundary_map = 0xd;
+		break;
+	case BANK_MAP_2MB:
+		mv_ddr_mc6_bank_boundary_map = 0xe;
+		break;
+	case BANK_MAP_4MB:
+		mv_ddr_mc6_bank_boundary_map = 0xf;
+		break;
+	case BANK_MAP_8MB:
+		mv_ddr_mc6_bank_boundary_map = 0x10;
+		break;
+	case BANK_MAP_16MB:
+		mv_ddr_mc6_bank_boundary_map = 0x11;
+		break;
+	case BANK_MAP_32MB:
+		mv_ddr_mc6_bank_boundary_map = 0x12;
+		break;
+	case BANK_MAP_64MB:
+		mv_ddr_mc6_bank_boundary_map = 0x13;
+		break;
+	case BANK_MAP_128MB:
+		mv_ddr_mc6_bank_boundary_map = 0x14;
+		break;
+	case BANK_MAP_256MB:
+		mv_ddr_mc6_bank_boundary_map = 0x15;
+		break;
+	case BANK_MAP_512MB:
+		mv_ddr_mc6_bank_boundary_map = 0x16;
+		break;
+	case BANK_MAP_1GB:
+		mv_ddr_mc6_bank_boundary_map = 0x17;
+		break;
+	case BANK_MAP_2GB:
+		mv_ddr_mc6_bank_boundary_map = 0x18;
+		break;
+	case BANK_MAP_4GB:
+		mv_ddr_mc6_bank_boundary_map = 0x19;
+		break;
+	case BANK_MAP_8GB:
+		mv_ddr_mc6_bank_boundary_map = 0x1a;
+		break;
+	case BANK_MAP_16GB:
+		mv_ddr_mc6_bank_boundary_map = 0x1b;
+		break;
+	case BANK_MAP_32GB:
+		mv_ddr_mc6_bank_boundary_map = 0x1c;
+		break;
+	case BANK_MAP_64GB:
+		mv_ddr_mc6_bank_boundary_map = 0x1d;
+		break;
+	default:
+		printf("%s: bank_boundary is not supported\n", __func__);
+	}
+
+	return mv_ddr_mc6_bank_boundary_map;
+}
+
+void mv_ddr_mc6_sizes_cfg(void)
+{
+	unsigned int cs_idx;
+	unsigned int cs_num;
+	unsigned int reserved_mem_idx;
+	unsigned long long area_length_bits;
+	unsigned int are_length_mega_bytes;
+	unsigned long long start_addr_bytes;
+	unsigned int start_addr_low, start_addr_high;
+
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	calc_cs_num(DEV_NUM_0, IF_ID_0, &cs_num);
+
+	area_length_bits = mv_ddr_get_memory_size_per_cs_in_bits();
+	are_length_mega_bytes = area_length_bits / (MV_DDR_MEGA_BITS * MV_DDR_NUM_BITS_IN_BYTE);
+
+	struct mv_ddr_addressing_table addr_tbl = mv_ddr_addresing_table_get(tm->interface_params[IF_ID_0].memory_size,
+									     tm->interface_params[IF_ID_0].bus_width);
+	/* configure all length per cs here and activate the cs */
+	for (cs_idx = 0; cs_idx < cs_num; cs_idx++) {
+		start_addr_bytes = area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * cs_idx;
+		start_addr_low = start_addr_bytes & MV_DDR_32_BITS_MASK;
+		start_addr_high = (start_addr_bytes >> START_ADDR_HIGH_TO_LOW_OFFS) & MV_DDR_32_BITS_MASK;
+
+		reg_bit_clrset(MC6_REG_MMAP_LOW_CH0(cs_idx),
+			       ACTIVATE_CS << MC6_CS_VALID_OFFS |
+			       NON_INTERLEAVE << MC6_INTERLEAVE_OFFS |
+			       mv_ddr_area_length_convert(are_length_mega_bytes) << MC6_AREA_LENGTH_OFFS |
+			       start_addr_low,
+			       MC6_CS_VALID_MASK << MC6_CS_VALID_OFFS |
+			       MC6_INTERLEAVE_MASK << MC6_INTERLEAVE_OFFS |
+			       MC6_AREA_LENGTH_MASK << MC6_AREA_LENGTH_OFFS |
+			       MC6_START_ADDRESS_L_MASK << MC6_START_ADDRESS_L_OFFS);
+		/* printf("MC6_REG_MMAP_LOW_CH0(cs_idx) addr 0x%x, data 0x%x\n", MC6_REG_MMAP_LOW_CH0(cs_idx),
+			  reg_read(MC6_REG_MMAP_LOW_CH0(cs_idx))); */
+
+		reg_bit_clrset(MC6_REG_MMAP_HIGH_CH0(cs_idx),
+			       start_addr_high << MC6_START_ADDRESS_H_OFFS,
+			       MC6_START_ADDRESS_H_MASK << MC6_START_ADDRESS_H_OFFS);
+		/* printf("MC6_REG_MMAP_HIGH_CH0(cs_idx) addr 0x%x, data 0x%x\n", MC6_REG_MMAP_HIGH_CH0(cs_idx),
+			  reg_read(MC6_REG_MMAP_HIGH_CH0(cs_idx))); */
+
+		reg_bit_clrset(MC6_REG_MC_CONFIG(cs_idx),
+			       mv_ddr_bank_addr_convert(addr_tbl.num_of_bank_addr_in_bank_group) <<
+			       MC6_BA_NUM_OFFS |
+			       mv_ddr_bank_groups_convert(addr_tbl.num_of_bank_groups) <<
+			       MC6_BG_NUM_OFFS |
+			       mv_ddr_column_num_convert(addr_tbl.column_addr) <<
+			       MC6_CA_NUM_OFFS |
+			       mv_ddr_row_num_convert(addr_tbl.row_addr) <<
+			       MC6_RA_NUM_OFFS |
+			       mv_ddr_stack_addr_num_convert(SINGLE_STACK) <<
+			       MC6_SA_NUM_OFFS |
+			       mv_ddr_device_type_convert(tm->interface_params[IF_ID_0].bus_width) <<
+			       MC6_DEVICE_TYPE_OFFS |
+			       mv_ddr_bank_map_convert(BANK_MAP_4KB) <<
+			       MC6_BANK_MAP_OFFS,
+			       MC6_BA_NUM_MASK << MC6_BA_NUM_OFFS |
+			       MC6_BG_NUM_MASK << MC6_BG_NUM_OFFS |
+			       MC6_CA_NUM_MASK << MC6_CA_NUM_OFFS |
+			       MC6_RA_NUM_MASK << MC6_CA_NUM_OFFS |
+			       MC6_SA_NUM_MASK << MC6_SA_NUM_OFFS |
+			       MC6_DEVICE_TYPE_MASK << MC6_DEVICE_TYPE_OFFS |
+			       MC6_BANK_MAP_MASK << MC6_BANK_MAP_OFFS);
+	}
+
+	/* configure here the channel 1 reg_map_low and reg_map_high to unused memory area due to mc6 bug */
+	for (cs_idx = 0, reserved_mem_idx = cs_num; cs_idx < cs_num; cs_idx++, reserved_mem_idx++) {
+		start_addr_bytes = area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * reserved_mem_idx;
+		start_addr_low = start_addr_bytes & MV_DDR_32_BITS_MASK;
+		start_addr_high = (start_addr_bytes >> START_ADDR_HIGH_TO_LOW_OFFS) & MV_DDR_32_BITS_MASK;
+
+		reg_bit_clrset(MC6_REG_MMAP_LOW_CH1(cs_idx),
+			       ACTIVATE_CS << MC6_CS_VALID_OFFS |
+			       NON_INTERLEAVE << MC6_INTERLEAVE_OFFS |
+			       mv_ddr_area_length_convert(are_length_mega_bytes) << MC6_AREA_LENGTH_OFFS |
+			       start_addr_low,
+			       MC6_CS_VALID_MASK << MC6_CS_VALID_OFFS |
+			       MC6_INTERLEAVE_MASK << MC6_INTERLEAVE_OFFS |
+			       MC6_AREA_LENGTH_MASK << MC6_AREA_LENGTH_OFFS |
+			       MC6_START_ADDRESS_L_MASK << MC6_START_ADDRESS_L_OFFS);
+		/* printf("MC6_REG_MMAP_LOW_CH1(cs_idx) addr 0x%x, data 0x%x\n", MC6_REG_MMAP_LOW_CH1(cs_idx),
+			  reg_read(MC6_REG_MMAP_LOW_CH1(cs_idx))); */
+
+		reg_bit_clrset(MC6_REG_MMAP_HIGH_CH1(cs_idx),
+			       start_addr_high << MC6_START_ADDRESS_H_OFFS,
+			       MC6_START_ADDRESS_H_MASK << MC6_START_ADDRESS_H_OFFS);
+		/* printf("MC6_REG_MMAP_HIGH_CH1(cs_idx) addr 0x%x, data 0x%x\n", MC6_REG_MMAP_HIGH_CH1(cs_idx),
+			  reg_read(MC6_REG_MMAP_HIGH_CH1(cs_idx))); */
+	}
 }

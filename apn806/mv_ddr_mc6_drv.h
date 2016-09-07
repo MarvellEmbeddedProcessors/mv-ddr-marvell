@@ -100,6 +100,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* includes */
 #include "ddr3_topology_def.h"
+#include "mv_ddr_topology.h"
+#include "mv_ddr_common.h"
 
 /* fclk definition is used for trefi */
 #define MV_DDR_MC6_FCLK_200MHZ_IN_KILO	200000
@@ -294,6 +296,84 @@ enum {
 #define MC6_TMRD_PDA_OFFS		0
 #define MC6_TMRD_PDA_MASK		0x1f
 
+#define MC6_REG_MMAP_LOW_CH0(_cs_)	(MC6_BASE_ADDR + 0x200 + ((_cs_) * 8))
+#define MC6_REG_MMAP_LOW_CH1(_cs_)	(MC6_BASE_ADDR + 0x400 + ((_cs_) * 8))
+#define MC6_CS_VALID_OFFS		0
+#define MC6_CS_VALID_MASK		0x1
+enum {
+	DEACTIVATE_CS = 0,
+	ACTIVATE_CS = 1
+};
+#define MC6_INTERLEAVE_OFFS		1
+#define MC6_INTERLEAVE_MASK		0x1
+enum {
+	NON_INTERLEAVE = 0,
+	INTERLEAVE = 1
+};
+#define MC6_INTERLEAVE_SIZE_OFFS	8
+#define MC6_INTERLEAVE_SIZE_MASK	0x3
+#define MC6_AREA_LENGTH_OFFS		16
+#define MC6_AREA_LENGTH_MASK		0x1f
+#define MC6_START_ADDRESS_L_OFFS	23
+#define MC6_START_ADDRESS_L_MASK	0x1ff
+
+#define MC6_REG_MMAP_HIGH_CH0(_cs_)	(MC6_BASE_ADDR + 0x204 + ((_cs_) * 8))
+#define MC6_REG_MMAP_HIGH_CH1(_cs_)	(MC6_BASE_ADDR + 0x404 + ((_cs_) * 8))
+#define MC6_START_ADDRESS_H_OFFS	0
+#define MC6_START_ADDRESS_H_MASK	0xffffffff
+enum {
+	START_ADDR_HIGH_TO_LOW_OFFS = 32
+};
+
+#define MC6_REG_MC_CONFIG(_cs_)		(MC6_BASE_ADDR + 0x220 + ((_cs_) * 4))
+#define MC6_BA_NUM_OFFS			0
+#define MC6_BA_NUM_MASK			0x3
+#define MC6_BG_NUM_OFFS			2
+#define MC6_BG_NUM_MASK			0x3
+#define MC6_CA_NUM_OFFS			4
+#define MC6_CA_NUM_MASK			0xf
+#define MC6_RA_NUM_OFFS			8
+#define MC6_RA_NUM_MASK			0xf
+#define MC6_SA_NUM_OFFS			12
+#define MC6_SA_NUM_MASK			0x3
+enum {
+	SINGLE_STACK = 1
+};
+#define MC6_DEVICE_TYPE_OFFS		16
+#define MC6_DEVICE_TYPE_MASK		0x3
+#define MC6_BANK_MAP_OFFS		24
+#define MC6_BANK_MAP_MASK		0x1f
+enum mv_ddr_mc6_bank_boundary {
+	BANK_MAP_512B,
+	BANK_MAP_1KB,
+	BANK_MAP_2KB,
+	BANK_MAP_4KB,
+	BANK_MAP_8KB,
+	BANK_MAP_16KB,
+	BANK_MAP_32KB,
+	BANK_MAP_64KB,
+	BANK_MAP_128KB,
+	BANK_MAP_256KB,
+	BANK_MAP_512KB,
+	BANK_MAP_1MB,
+	BANK_MAP_2MB,
+	BANK_MAP_4MB,
+	BANK_MAP_8MB,
+	BANK_MAP_16MB,
+	BANK_MAP_32MB,
+	BANK_MAP_64MB,
+	BANK_MAP_128MB,
+	BANK_MAP_256MB,
+	BANK_MAP_512MB,
+	BANK_MAP_1GB,
+	BANK_MAP_2GB,
+	BANK_MAP_4GB,
+	BANK_MAP_8GB,
+	BANK_MAP_16GB,
+	BANK_MAP_32GB,
+	BANK_MAP_64GB
+};
+
 /* structures definitions */
 /* struct used for DLB configuration array */
 struct mv_ddr_mc6_timing {
@@ -345,7 +425,25 @@ struct mv_ddr_mc6_timing {
 	unsigned int t_mrd_pda;
 };
 
+struct mv_ddr_addressing_table {
+	unsigned int num_of_bank_groups;
+	unsigned int num_of_bank_addr_in_bank_group;
+	unsigned int row_addr;
+	unsigned int column_addr;
+	unsigned int page_size_k_byte;
+};
 /* function definitions */
 void mv_ddr_mc6_and_dram_timing_set(void);
 void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz);
+struct mv_ddr_addressing_table mv_ddr_addresing_table_get(enum mv_ddr_die_capacity memory_size,
+						   enum mv_ddr_dev_width bus_width);
+unsigned int mv_ddr_bank_addr_convert(unsigned int num_of_bank_addr_in_bank_group);
+unsigned int mv_ddr_bank_groups_convert(unsigned int num_of_bank_groups);
+unsigned int mv_ddr_column_num_convert(unsigned int column_addr);
+unsigned int mv_ddr_row_num_convert(unsigned int row_addr);
+unsigned int mv_ddr_stack_addr_num_convert(unsigned int stack_addr);
+unsigned int mv_ddr_device_type_convert(enum mv_ddr_dev_width bus_width);
+unsigned int mv_ddr_bank_map_convert(enum mv_ddr_mc6_bank_boundary mc6_bank_boundary);
+unsigned int mv_ddr_area_length_convert(unsigned int area_length);
+void mv_ddr_mc6_sizes_cfg(void);
 #endif	/* _MV_DDR_MC6_DRV_H */

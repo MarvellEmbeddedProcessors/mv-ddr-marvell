@@ -98,6 +98,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_COMMON_H
 #define _MV_DDR_COMMON_H
 
+#define MV_DDR_NUM_BITS_IN_BYTE	8
+#define MV_DDR_MEGA_BITS	(1024 * 1024)
+#define MV_DDR_32_BITS_MASK	0xffffffff
+
 unsigned int ceil_div(unsigned int x, unsigned int y);
 unsigned int time_to_nclk(unsigned int t, unsigned int tclk);
 
