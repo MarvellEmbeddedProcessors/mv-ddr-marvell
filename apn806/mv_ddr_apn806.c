@@ -930,6 +930,7 @@ void mv_ddr_mc_config(void)
 int mv_ddr_mc6_init_controller(void)
 {
 	mv_ddr_mc6_and_dram_timing_set();
+	mv_ddr_mc6_sizes_cfg();
 
 	reg_write(0x20064, 0x606);	/* MC "readReady"+ MC2PHYlatency */
 	reg_write(0x21180, 0x500);	/* PHY_RL_Control for CS0:phy_rl_cycle_dly and phy_rl_tap_dly*/
@@ -945,13 +946,6 @@ int mv_ddr_mc6_init_controller(void)
 	reg_write(0x20308, 0x1);	/* DRAM_Config_3 DLL_reset */
 #if defined(a80x0) || defined(a80x0_cust)
 	reg_write(0x20314, 0x0);	/* DRAM_Config_5 CS1: RTT_Park, RTT_WR - Diff1 */
-	reg_write(0x20200, 0x100001);	/* MMAP0_Low ch0 - diff2  size */
-	reg_write(0x20204, 0x0);	/* MMAP0_High_CH0 - diff2 size */
-	reg_write(0x20208, 0x0);	/* MMAP1_Low ch0 - diff2 size */
-	reg_write(0x20400, 0x100001);	/* MMAP0_Low ch1 - diff2 size */
-	reg_write(0x20404, 0x1);	/* MMAP0_High_CH1 - diff2 size */
-	reg_write(0x20408, 0x0);	/* MMAP1_Low ch1 - diff2 size */
-	reg_write(0x2040c, 0x0);	/* MMAP1_High_CH1 - diff2 - only 2 cs need 4 - size */
 	reg_write(0x20224, 0x0);	/* MC_CONFIG CS1:  mapping - diff3 size */
 #if defined(CONFIG_64BIT)
 	reg_write(0x20044, 0x30400);	/* MC_Control_0 - bust length, data width need to configure - diff4 - config */
@@ -961,24 +955,9 @@ int mv_ddr_mc6_init_controller(void)
 #endif	/* #if defined(a80x0) || defined(a80x0_cust) */
 #if defined(a70x0) || defined(a70x0_cust)
 	reg_write(0x20314, 0x21010000);
-	reg_write(0x20200, 0xF0001);
-	reg_write(0x20204, 0x0);
-	reg_write(0x20208, 0x800F0001);
-	reg_write(0x20400, 0xF0001);
-	reg_write(0x20404, 0x1);
-	reg_write(0x20408, 0x800F0001);
-	reg_write(0x2040c, 0x1);
 	reg_write(0x20224, 0x5010539);
 	reg_write(0x20044, 0x30300);
 #endif	/* #if defined(a70x0) || defined(a70x0_cust) */
-	reg_write(0x2020c, 0x0);	/* MMAP1_High_CH0 size */
-	reg_write(0x20210, 0x0);	/* MMAP2_Low_CH0 - size */
-	reg_write(0x20214, 0x0);	/* MMAP2_High_CH0 - size */
-	reg_write(0x20218, 0x0);	/* MMAP3_Low_CH0 - size */
-	reg_write(0x2021c, 0x0);	/* MMAP3_High_CH0 - size */
-	reg_write(0x20220, 0x5010539);	/* CH0_MC_CONFIG_CS0 - size */
-	reg_write(0x20228, 0x0);	/* CH0_MC_CONFIG_CS2 - size */
-	reg_write(0x2022c, 0x0);	/* CH0_MC_CONFIG_CS3 - size */
 	reg_write(0x202c0, 0x6000);	/* MC_Control_1 - tw2r_dis? , acs_exit_dly timing???, config?? */
 	reg_write(0x202c4, 0x120030);	/* MC_Control_2 - sdram typ, mode 2t, mirror en, rdimm mode - config */
 	reg_write(0x20180, 0x30200);	/* RPP_Starvation_Control - default */
