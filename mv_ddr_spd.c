@@ -173,6 +173,9 @@ int mv_ddr_spd_timing_calc(union mv_ddr_spd_data *spd_data, unsigned int timing_
 	timing_data[MV_DDR_TWR_MIN] = (spd_data->byte_fields.byte_42 +
 		(spd_data->byte_fields.byte_41.bit_fields.t_wr_min_msn << MV_DDR_SPD_MSB_OFFS)) *
 		MV_DDR_SPD_DATA_MTB;
+	/* FIXME: wa: set twr to a default value, if it's unset on spd */
+	if (timing_data[MV_DDR_TWR_MIN] == 0)
+		timing_data[MV_DDR_TWR_MIN] = 15000;
 
 	/* t rcd min, ps */
 	calc_val = spd_data->byte_fields.byte_25 * MV_DDR_SPD_DATA_MTB +
