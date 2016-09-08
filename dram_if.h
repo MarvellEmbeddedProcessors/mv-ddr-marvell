@@ -65,5 +65,6 @@ struct dram_config {
 };
 
 int dram_init(struct dram_config *cfg);
+struct dram_config *mv_ddr_dram_config_get(void);
 
 #endif /* _DRAM_IF_H_ */
