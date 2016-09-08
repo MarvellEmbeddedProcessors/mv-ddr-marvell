@@ -101,6 +101,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_init.h"
 #include "ddr_topology_def.h"
 #include "ddr3_training_ip_db.h"
+#include "dram_if.h"
+#include "ddr3_training_ip.h"
 
 unsigned int mv_ddr_cl_calc(unsigned int taa_min, unsigned int tclk)
 {
@@ -126,6 +128,20 @@ unsigned int mv_ddr_cwl_calc(unsigned int tclk)
 		cwl = 0;
 
 	return cwl;
+}
+
+struct dram_config *mv_ddr_dram_config_update(void)
+{
+	struct dram_config *dc = mv_ddr_dram_config_get();
+	uint64_t size_mb = mv_ddr_get_total_memory_size_in_bits();
+
+	/* convert total memory size from bits to megabytes */
+	size_mb /= (8 * 1024 * 1024);
+
+	/* set total memory size in megabytes in dram configuration */
+	dc->iface[0].bus[0].size_mb = size_mb;
+
+	return dc;
 }
 
 struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
