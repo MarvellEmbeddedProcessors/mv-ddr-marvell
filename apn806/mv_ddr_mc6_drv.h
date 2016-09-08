@@ -374,6 +374,15 @@ enum mv_ddr_mc6_bank_boundary {
 	BANK_MAP_64GB
 };
 
+#define MC6_REG_RAS_CTRL	(MC6_BASE_ADDR + 0x4c)
+#define MC6_ECC_ENABLE_OFFS	1
+#define MC6_ECC_ENABLE_MASK	0x1
+enum {
+	ECC_DISABLE,
+	ECC_ENABLE
+};
+
+
 /* structures definitions */
 /* struct used for DLB configuration array */
 struct mv_ddr_mc6_timing {
@@ -446,4 +455,5 @@ unsigned int mv_ddr_device_type_convert(enum mv_ddr_dev_width bus_width);
 unsigned int mv_ddr_bank_map_convert(enum mv_ddr_mc6_bank_boundary mc6_bank_boundary);
 unsigned int mv_ddr_area_length_convert(unsigned int area_length);
 void mv_ddr_mc6_sizes_cfg(void);
+void  mv_ddr_mc6_ecc_enable(void);
 #endif	/* _MV_DDR_MC6_DRV_H */

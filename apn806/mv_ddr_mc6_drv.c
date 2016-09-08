@@ -1045,3 +1045,11 @@ void mv_ddr_mc6_sizes_cfg(void)
 			  reg_read(MC6_REG_MMAP_HIGH_CH1(cs_idx))); */
 	}
 }
+
+void  mv_ddr_mc6_ecc_enable(void)
+{
+	reg_bit_clrset(MC6_REG_RAS_CTRL,
+		       ECC_ENABLE << MC6_ECC_ENABLE_OFFS,
+		       MC6_ECC_ENABLE_MASK << MC6_ECC_ENABLE_OFFS);
+}
+
