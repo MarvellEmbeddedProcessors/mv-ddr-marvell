@@ -930,7 +930,11 @@ void mv_ddr_mc_config(void)
 int mv_ddr_mc6_init_controller(void)
 {
 	mv_ddr_mc6_and_dram_timing_set();
+
 	mv_ddr_mc6_sizes_cfg();
+
+	if (ddr3_if_ecc_enabled())
+		mv_ddr_mc6_ecc_enable();
 
 	reg_write(0x20064, 0x606);	/* MC "readReady"+ MC2PHYlatency */
 	reg_write(0x21180, 0x500);	/* PHY_RL_Control for CS0:phy_rl_cycle_dly and phy_rl_tap_dly*/
@@ -962,7 +966,6 @@ int mv_ddr_mc6_init_controller(void)
 	reg_write(0x202c4, 0x120030);	/* MC_Control_2 - sdram typ, mode 2t, mirror en, rdimm mode - config */
 	reg_write(0x20180, 0x30200);	/* RPP_Starvation_Control - default */
 	reg_write(0x20050, 0xff);	/* Spool_Control default */
-	reg_write(0x2004c, 0x2);	/* RAS_Control: ecc_en - config */
 	reg_write(0x20054, 0x4c0);	/* MC_pwr_ctl - default */
 	reg_write(0x2030c, 0x90000);	/* DRAM_Config_4: vref training value, odt? - config */
 	reg_write(0x203bc, 0x1050505);	/* MC6_REG_OFF_SPEC_TIMING_0 */
