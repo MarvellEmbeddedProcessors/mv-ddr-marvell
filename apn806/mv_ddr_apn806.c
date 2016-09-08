@@ -990,7 +990,7 @@ MV_STATUS ddr4_tip_calibration_validate(MV_U32 dev_num)
 			  ("ddr4TipCalibrationValidate::DDR4 SSTL calib val - Pcal = 0x%x , Ncal = 0x%x \n",
 			   cal_p, cal_n));
 	if ((cal_n >= 28) || (cal_n <= 4) || (cal_p >= 13) || (cal_p <= 3)) {
-		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 				  ("ddr4TipCalibrationValidate: DDR4 SSTL calib val - Pcal = 0x%x , Ncal = 0x%x \
 				   are out of range\n", cal_p, cal_n));
 		status = MV_FAIL;
@@ -1003,7 +1003,7 @@ MV_STATUS ddr4_tip_calibration_validate(MV_U32 dev_num)
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO, ("ddr4TipCalibrationValidate::DDR4 SSTL-H calib val - Pcal = 0x%x , \
 					     Ncal = 0x%x \n", cal_p, cal_n));
 	if ((cal_n >= 28) || (cal_n <= 4) || (cal_p >= 13) || (cal_p <= 3)) {
-		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 				  ("ddr4TipCalibrationValidate: DDR4 SSTL-H calib val - Pcal = 0x%x, \
 				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
 		status = MV_FAIL;
@@ -1017,7 +1017,7 @@ MV_STATUS ddr4_tip_calibration_validate(MV_U32 dev_num)
 			  ("ddr4TipCalibrationValidate::DDR4 POD-H calib val - Pcal = 0x%x , Ncal = 0x%x \n",
 			   cal_p, cal_n));
 	if ((cal_n >= 16) || (cal_n <= 3) || (cal_p >= 17) || (cal_p <= 4)) {
-		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 				  ("ddr4TipCalibrationValidate: DDR4 POD-H calib val - Pcal = 0x%x , \
 				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
 		status = MV_FAIL;
@@ -1031,7 +1031,7 @@ MV_STATUS ddr4_tip_calibration_validate(MV_U32 dev_num)
 			  ("ddr4TipCalibrationValidate::DDR4 POD-V calib val - Pcal = 0x%x , Ncal = 0x%x \n",
 			   cal_p, cal_n));
 	if ((cal_n >= 16) || (cal_n <= 3) || (cal_p >= 17) || (cal_p <= 4)) {
-		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 				  ("ddr4TipCalibrationValidate: DDR4 POD-V calib val - Pcal = 0x%x , \
 				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
 		status = MV_FAIL;
