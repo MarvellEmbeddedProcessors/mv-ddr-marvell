@@ -161,7 +161,9 @@ int ddr3_init(void)
 		return MV_FAIL;
 	}
 
+#ifdef MV_DDR_ATF
 	mv_ddr_dram_config_update();
+#endif /* MV_DDR_ATF */
 
 #ifdef CONFIG_MC_STATIC
 	mv_ddr_mc_static_config();
