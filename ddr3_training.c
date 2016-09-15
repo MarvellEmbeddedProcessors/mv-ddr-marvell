@@ -479,7 +479,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 {
 	u32 if_id;
 	u32 cs_num;
-	u32 t_refi = 0, t_hclk = 0, t_ckclk = 0, t_faw = 0, t_pd = 0,
+	u32 t_ckclk = 0, t_faw = 0, t_pd = 0,
 		t_wr = 0, t2t = 0, txpdll = 0;
 	u32 data_value = 0, page_size = 0, cs_cnt = 0,
 		mem_mask = 0, bus_index = 0;
@@ -488,7 +488,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 	enum hws_ddr_freq freq = init_freq;
 	u32 cs_mask = 0;
 	u32 cl_value = 0, cwl_val = 0;
-	u32 refresh_interval_cnt = 0, bus_cnt = 0, adll_tap = 0;
+	u32 bus_cnt = 0, adll_tap = 0;
 	enum hws_access_type access_type = ACCESS_TYPE_UNICAST;
 	u32 data_read[MAX_INTERFACE_NUM];
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
@@ -532,33 +532,21 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 				tm->interface_params[if_id].
 				speed_bin_index;
 			freq = init_freq;
-			t_refi =
-				(tm->interface_params[if_id].
-				 interface_temp ==
-				 MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
-			t_refi *= 1000;	/* psec */
-			DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE,
-					  ("memy_size %d speed_bin_ind %d freq %d t_refi %d\n",
-					   memory_size, speed_bin_index, freq,
-					   t_refi));
-			/* HCLK & CK CLK in 2:1[ps] */
+
 			/* t_ckclk is external clock */
 			t_ckclk = (MEGA / freq_val[freq]);
-			/* t_hclk is internal clock */
-			t_hclk = 2 * t_ckclk;
-			refresh_interval_cnt = t_refi / t_hclk;	/* no units */
 
 			if (MV_DDR_IS_HALF_BUS_DRAM_MODE(tm->bus_act_mask, octets_per_if_num))
-				data_value = (refresh_interval_cnt | 0x4000 | 0 | 0x1000000) & ~(1 << 26);
+				data_value = (0x4000 | 0 | 0x1000000) & ~(1 << 26);
 			else
-				data_value = (refresh_interval_cnt | 0x4000 | 0x8000 | 0x1000000) & ~(1 << 26);
+				data_value = (0x4000 | 0x8000 | 0x1000000) & ~(1 << 26);
 
 			/* Interface Bus Width */
 			/* SRMode */
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
 				      SDRAM_CONFIGURATION_REG, data_value,
-				      0x100ffff));
+				      0x100c000));
 
 			/* Interleave first command pre-charge enable (TBD) */
 			CHECK_STATUS(ddr3_tip_if_write
@@ -1621,9 +1609,9 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		      u32 if_id, enum hws_ddr_freq frequency)
 {
 	u32 cl_value = 0, cwl_value = 0, mem_mask = 0, val = 0,
-		bus_cnt = 0, t_hclk = 0, t_wr = 0, t_ckclk = 0,
-		refresh_interval_cnt = 0, cnt_id;
-	u32 t_refi = 0, end_if, start_if;
+		bus_cnt = 0, t_wr = 0, t_ckclk = 0,
+		cnt_id;
+	u32 end_if, start_if;
 	u32 bus_index = 0;
 	int is_dll_off = 0;
 	enum hws_speed_bin speed_bin_index = 0;
@@ -1821,21 +1809,6 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		/* PLL configuration */
 		config_func_info[dev_num].tip_set_freq_divider_func(dev_num, if_id,
 								    frequency);
-
-		/* adjust t_refi to new frequency */
-		t_refi = (tm->interface_params[if_id].interface_temp ==
-			  MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
-		t_refi *= 1000;	/*psec */
-
-		/* HCLK in[ps] */
-		t_hclk = MEGA / (freq_val[frequency] /
-					config_func_info[dev_num].
-						tip_get_clock_ratio(frequency));
-		refresh_interval_cnt = t_refi / t_hclk;	/* no units */
-		val = 0x4000 | refresh_interval_cnt;
-		CHECK_STATUS(ddr3_tip_if_write
-			     (dev_num, access_type, if_id,
-			      SDRAM_CONFIGURATION_REG, val, 0x7fff));
 
 		/* DFS  - CL/CWL/WR parameters after exiting SR */
 		CHECK_STATUS(ddr3_tip_if_write
@@ -2089,6 +2062,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	u32 t_rcd = 0, t_rp = 0, t_wr = 0, t_wtr = 0, t_rrd = 0, t_rtp = 0,
 		t_rfc = 0, t_mod = 0, t_r2r = 0x3, t_r2r_high = 0,
 		t_r2w_w2r = 0x3, t_r2w_w2r_high = 0x1, t_w2w = 0x3;
+	u32 refresh_interval_cnt, t_hclk, t_refi;
 	u32 val = 0, page_size = 0, mask = 0;
 	enum hws_speed_bin speed_bin_index;
 	enum mv_ddr_die_capacity memory_size = MV_DDR_DIE_CAP_2GBIT;
@@ -2101,6 +2075,13 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 		 MV_DDR_DEV_WIDTH_8BIT) ? page_param[memory_size].
 		page_size_8bit : page_param[memory_size].page_size_16bit;
 	t_ckclk = (MEGA / freq_val[frequency]);
+	/* HCLK in[ps] */
+	t_hclk = MEGA / (freq_val[frequency] / config_func_info[dev_num].tip_get_clock_ratio(frequency));
+
+	t_refi = (tm->interface_params[if_id].interface_temp == MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
+	t_refi *= 1000;	/* psec */
+	refresh_interval_cnt = t_refi / t_hclk;	/* no units */
+
 	t_rrd =	(page_size == 1) ? speed_bin_table(speed_bin_index,
 						   SPEED_BIN_TRRD1K) :
 		speed_bin_table(speed_bin_index, SPEED_BIN_TRRD2K);
@@ -2181,6 +2162,11 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
 				       SDRAM_TIMING_HIGH_REG, val, mask));
+
+	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+				       SDRAM_CONFIGURATION_REG,
+				       refresh_interval_cnt << MV_DDR_REFRESH_OFFS,
+				       MV_DDR_REFRESH_MASK << MV_DDR_REFRESH_OFFS));
 
 #if defined(CONFIG_DDR4)
 	ddr4_tip_set_timing(dev_num, access_type, if_id, frequency);
