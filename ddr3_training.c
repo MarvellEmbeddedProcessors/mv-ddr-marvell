@@ -479,12 +479,11 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 {
 	u32 if_id;
 	u32 cs_num;
-	u32 t_ckclk = 0, t_faw = 0, t_pd = 0,
+	u32 t_ckclk = 0, t_pd = 0,
 		t_wr = 0, t2t = 0, txpdll = 0;
-	u32 data_value = 0, page_size = 0, cs_cnt = 0,
+	u32 data_value = 0, cs_cnt = 0,
 		mem_mask = 0, bus_index = 0;
 	enum hws_speed_bin speed_bin_index = SPEED_BIN_DDR_2133N;
-	enum mv_ddr_die_capacity memory_size = MV_DDR_DIE_CAP_2GBIT;
 	enum hws_ddr_freq freq = init_freq;
 	u32 cs_mask = 0;
 	u32 cl_value = 0, cwl_val = 0;
@@ -525,9 +524,6 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 					      0x8));
 			}
 
-			memory_size =
-				tm->interface_params[if_id].
-				memory_size;
 			speed_bin_index =
 				tm->interface_params[if_id].
 				speed_bin_index;
@@ -602,30 +598,9 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 			 * 2) Bus_width
 			 * 3) CS#
 			 * 4) Page Number
-			 * 5) t_faw
 			 * Per Dunit get from the Map_topology the parameters:
 			 * Bus_width
-			 * t_faw is per Dunit not per CS
 			 */
-			page_size =
-				(tm->interface_params[if_id].
-				 bus_width ==
-				 MV_DDR_DEV_WIDTH_8BIT) ? page_param[memory_size].
-				page_size_8bit : page_param[memory_size].
-				page_size_16bit;
-
-			t_faw =
-				(page_size == 1) ? speed_bin_table(speed_bin_index,
-								   SPEED_BIN_TFAW1K)
-				: speed_bin_table(speed_bin_index,
-						  SPEED_BIN_TFAW2K);
-
-			data_value = time_to_nclk(t_faw, t_ckclk);
-			data_value = data_value << 24;
-			CHECK_STATUS(ddr3_tip_if_write
-				     (dev_num, access_type, if_id,
-				      SDRAM_ACCESS_CONTROL_REG, data_value,
-				      0x7f000000));
 
 			data_value =
 				(tm->interface_params[if_id].
@@ -2062,7 +2037,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	u32 t_rcd = 0, t_rp = 0, t_wr = 0, t_wtr = 0, t_rrd = 0, t_rtp = 0,
 		t_rfc = 0, t_mod = 0, t_r2r = 0x3, t_r2r_high = 0,
 		t_r2w_w2r = 0x3, t_r2w_w2r_high = 0x1, t_w2w = 0x3;
-	u32 refresh_interval_cnt, t_hclk, t_refi;
+	u32 refresh_interval_cnt, t_hclk, t_refi, t_faw;
 	u32 val = 0, page_size = 0, mask = 0;
 	enum hws_speed_bin speed_bin_index;
 	enum mv_ddr_die_capacity memory_size = MV_DDR_DIE_CAP_2GBIT;
@@ -2081,6 +2056,10 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	t_refi = (tm->interface_params[if_id].interface_temp == MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
 	t_refi *= 1000;	/* psec */
 	refresh_interval_cnt = t_refi / t_hclk;	/* no units */
+	t_faw = (page_size == 1) ? speed_bin_table(speed_bin_index, SPEED_BIN_TFAW1K) :
+				   speed_bin_table(speed_bin_index, SPEED_BIN_TFAW2K);
+
+	t_faw = time_to_nclk(t_faw, t_ckclk);
 
 	t_rrd =	(page_size == 1) ? speed_bin_table(speed_bin_index,
 						   SPEED_BIN_TRRD1K) :
@@ -2167,6 +2146,9 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 				       SDRAM_CONFIGURATION_REG,
 				       refresh_interval_cnt << MV_DDR_REFRESH_OFFS,
 				       MV_DDR_REFRESH_MASK << MV_DDR_REFRESH_OFFS));
+	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+				       SDRAM_ACCESS_CONTROL_REG, t_faw << MV_DDR_T_FAW_OFFS,
+				       MV_DDR_T_FAW_MASK << MV_DDR_T_FAW_OFFS));
 
 #if defined(CONFIG_DDR4)
 	ddr4_tip_set_timing(dev_num, access_type, if_id, frequency);
