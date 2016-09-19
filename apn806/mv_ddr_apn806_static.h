@@ -245,19 +245,23 @@ struct mk6_reg_data ddr_static_setup[] = {
 #else /* ddr static configuratioin thru mk6 */
 struct mk6_reg_data ddr_static_setup[] = {
 	/* Traffic thru Mckinley 6::MC init for MISL BOARD 2CS 4Gb x8 devices of micron - 2133P */
-	{0xF00116D8, 0x3CC},
-	{0xF06F0100, 0x44C0006},
+	/*
+	 * the below section was remove to pre soc config
+	 * {0xF00116D8, 0x3CC},
+	 * {0xF06F0100, 0x44C0006},
+	 * {0xF00119D4, 0x2},
+	 * {0xF06F8D38, 0xACAC0000},
+	 * {0xF06F4360, 0xFFFF0044},
+	 * {0xF0011524, 0x8800},
+	 */
+
 	/*{0xF06F0108, 0xD88FFFF}, neg edge */
-	{0xF00119D4, 0x2},
-	{0xF06F8D38, 0xACAC0000},
-	{0xF06F4360, 0xFFFF0044},
 	{0xF00114C8, 0x1840008},
 	{0xF00117C8, 0x28A0008},
 	{0xF0011DC8, 0x1840008},
 	{0xF0011EC8, 0x28A0008},
 	{0xf00116a0, 0xE83F0001},
 	{0xF00114CC, 0x1200D},
-	{0xF0011524, 0x8800},
 	{0xF0011400, 0x6b144c30},
 	{0xF0011400, 0x7b144c30},
 	{0xF0011538, 0xD0D},
@@ -488,11 +492,15 @@ struct mk6_reg_data ddr_static_setup[] = {
 #else /* ddr static configuration thru mk6 */
 struct mk6_reg_data ddr_static_setup[] = {
 	/* Traffic thru Mckinley 6::MC init for CISCO with 1CS 8Gb devices of Samsung */
-	{0xF00116D8, 0x38A},
-	{0xF06F0100, 0x44C0000},
-	{0xF00119D4, 0x2},
-	{0xF06F8D36, 0xACAC0000},
-	{0xF06F4360, 0xFFFF0044},
+	/*
+	 * the below section was remove to pre soc config
+	 * {0xF00116D8, 0x3CC},
+	 * {0xF06F0100, 0x44C0006},
+	 * {0xF00119D4, 0x2},
+	 * {0xF06F8D38, 0xACAC0000},
+	 * {0xF06F4360, 0xFFFF0044},
+	 * {0xF0011524, 0x8800},
+	 */
 	{0xF00114C8, 0x5145941},
 	{0xF00117C8, 0x15145941},
 	{0xF0011DC8, 0x5145941},
@@ -668,20 +676,23 @@ struct mk6_reg_data ddr_static_setup[] = {
 #else /* ddr static configuration thru mk6 */
 struct mk6_reg_data ddr_static_setup[] = {
 	/* Traffic thru MC6::TIP init for Marvell with 1CS 8Gb x4 devices of Micron 2400T */
-	{0xF00116D8, 0x3CC},
-	{0xF06F0100, 0x4480006},
-	{0xF00119D4, 0x2},
-	{0xF06F8D38, 0xACAC0000},
-	{0xF06F4360, 0xFFFF0044},
+	/*
+	 * the below section was remove to pre soc config
+	 * {0xF00116D8, 0x3CC},
+	 * {0xF06F0100, 0x4480006},
+	 * {0xF00119D4, 0x2},
+	 * {0xF06F8D38, 0xACAC0000},
+	 * {0xF06F4360, 0xFFFF0044},
+	 * {0xF0011524, 0x8800},
+	 */
 	{0xF00114C8, 0x1840008},
 	{0xF00117C8, 0x28A0008},
 	{0xF0011DC8, 0x1840008},
 	{0xF0011EC8, 0x28A0008},
 	{0xf00116a0, 0xE83F0001},
 	{0xF00114CC, 0x1200D},
-	{0xF0011524, 0x8800},
 #if defined(CONFIG_64BIT)
-	{0xF0011400, 0x6b14cc30}, /* sdram configuration */
+	{0xF0011400, 0x6b14cc30},
 	{0xF0011400, 0x7b14cc30},
 #else
 	{0xF0011400, 0x6b144c30},
