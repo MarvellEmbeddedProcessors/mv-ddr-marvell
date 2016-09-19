@@ -878,8 +878,6 @@ int mv_ddr_pre_training_soc_config(const char *ddr_type)
 	reg_write(0x6F8D38, 0xACAC0000);	/* Vref calibration values */
 	reg_write(0x6F4360, 0xFFFF0044);	/* ref range select */
 	reg_write(0x11524, 0x8800);	/* REG_DDR_IO_ADDR: data and control CMOS buffer and clk dram phy clk ration */
-	reg_write(0x11400, 0x6b104c30);	/* Pup Rst Divider */
-	reg_write(0x11400, 0x7b104c30);	/* Pup Rst Divider */
 
 	return MV_OK;
 }

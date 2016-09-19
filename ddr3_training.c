@@ -549,6 +549,17 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 				      SDRAM_OPEN_PAGE_CONTROL_REG, (1 << 10),
 				      (1 << 10)));
 
+			/* Reset divider_b assert -> de-assert */
+			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+						       SDRAM_CONFIGURATION_REG,
+						       0x0 << MV_DDR_PUP_RST_DIVIDER_OFFS,
+						       MV_DDR_PUP_RST_DIVIDER_MASK << MV_DDR_PUP_RST_DIVIDER_OFFS));
+
+			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
+						       SDRAM_CONFIGURATION_REG,
+						       0x1 << MV_DDR_PUP_RST_DIVIDER_OFFS,
+						       MV_DDR_PUP_RST_DIVIDER_MASK << MV_DDR_PUP_RST_DIVIDER_OFFS));
+
 			/* PHY configuration */
 			/*
 			 * Postamble Length = 1.5cc, Addresscntl to clk skew
