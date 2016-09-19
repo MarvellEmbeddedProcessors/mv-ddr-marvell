@@ -1092,7 +1092,7 @@ int ddr3_pre_algo_config(void)
 		/* General ECC enable */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
-			      REG_SDRAM_CONFIG_ADDR, 0x40000, 0x40000));
+			      SDRAM_CONFIGURATION_REG, 0x40000, 0x40000));
 		/* Disable Read Data ECC MUX */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,

@@ -1129,7 +1129,7 @@ int ddr3_silicon_post_init(void)
 	if (DDR3_IS_16BIT_DRAM_MODE(tm->bus_act_mask)) {
 		CHECK_STATUS(ddr3_tip_if_write
 			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
-			      REG_SDRAM_CONFIG_ADDR, 0x0, 0x8000));
+			      SDRAM_CONFIGURATION_REG, 0x0, 0x8000));
 	}
 
 	return MV_OK;
@@ -1187,7 +1187,7 @@ static u32 ddr3_get_bus_width(void)
 {
 	u32 bus_width;
 
-	bus_width = (reg_read(REG_SDRAM_CONFIG_ADDR) & 0x8000) >>
+	bus_width = (reg_read(SDRAM_CONFIGURATION_REG) & 0x8000) >>
 		REG_SDRAM_CONFIG_WIDTH_OFFS;
 
 	return (bus_width == 0) ? 16 : 32;
