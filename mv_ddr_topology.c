@@ -113,10 +113,6 @@ struct dram_config *mv_ddr_dram_config_update(void)
 	/* convert total memory size from bits to megabytes */
 	size_mb /= (8 * 1024 * 1024);
 
-	/* FIXME: this patch sets the ddr size to 4Gbytes maximum size */
-	if (size_mb > 0x1000)
-		size_mb = 0x1000;
-
 	/* set total memory size in megabytes in dram configuration */
 	dc->iface[0].bus[0].size_mb = size_mb;
 

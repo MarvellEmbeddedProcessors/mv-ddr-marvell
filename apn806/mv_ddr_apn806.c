@@ -269,10 +269,6 @@ void mv_ddr_scrub(void)
 
 	printf("mv_ddr: scrubbing memory....\n");
 
-	/* Temporarily limit memory size to 4GB */
-	if (total_memory_size >= AP_INT_REG_START_ADDR)
-		total_memory_size = AP_INT_REG_START_ADDR;
-
 	if (total_memory_size < AP_INT_REG_START_ADDR) {
 		for (i = 0; i < total_memory_size; i += 8)
 			mmio_write_64(i, val_64bit);
