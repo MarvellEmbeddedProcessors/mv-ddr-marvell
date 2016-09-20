@@ -169,6 +169,13 @@ int ddr3_init(void)
 	mv_ddr_mc_static_config();
 #else
 	mv_ddr_mc_config();
+#if defined(CONFIG_DDR4)
+	status = ddr4_tip_calibration_adjust(0, 1, 0);
+	if (MV_OK != status) {
+		printf("calibration adjust - FAILED 0x%x\n", status);
+		return status;
+	}
+#endif
 #endif
 
 	status = ddr3_silicon_post_init();

@@ -849,7 +849,8 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 
 #if defined(CONFIG_DDR4)
 	/* dev_num, vref_en, pod_only */
-	CHECK_STATUS(ddr4_tip_calibration_adjust(dev_num, 1, 0));
+	CHECK_STATUS(ddr4_mode_regs_init(dev_num));
+	CHECK_STATUS(ddr4_sdram_config(dev_num));
 #endif /* CONFIG_DDR4 */
 
 	if (delay_enable != 0) {

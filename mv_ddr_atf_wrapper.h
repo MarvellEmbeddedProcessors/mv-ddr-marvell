@@ -251,6 +251,7 @@ void mmio_write2_32(u32 val, u32 addr);
 
 #if defined(CONFIG_DDR4)
 #define ddr4_mode_regs_init ddr4ModeRegsInit
+#define ddr4_sdram_config ddr4SdramConfig
 #define ddr4_tip_calibration_validate ddr4TipCalibrationValidate
 #define vref_calibration_wa vrefCalibrationWA
 #define ddr4_sublib_version_get mvHwsDdr4SubLibVersionGet

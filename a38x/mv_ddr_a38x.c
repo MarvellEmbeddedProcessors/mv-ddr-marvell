@@ -1713,6 +1713,58 @@ MV_STATUS ddr4_tip_calibration_validate(MV_U32 dev_num)
 	MV_U32 read_data[MAX_INTERFACE_NUM];
 	MV_U32 cal_n = 0, cal_p = 0;
 
+	/*
+	 * Pad calibration control enable: during training set the calibration to be internal
+	 * at the end of the training it should be fixed to external to be configured by the mc6
+	 * FIXME: set the calibration to external in the end of the training
+	 */
+
+	/* pad calibration control enable */
+	CHECK_STATUS(ddr3_tip_if_write
+			(DEV_NUM_0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, CALIB_MACHINE_CTRL_REG,
+			DYN_PAD_CALIB_ENABLE << MV_DDR_DYN_PADS_CALIB_EN_OFFS |
+			CALIB_MACHINE_INT_CTRL << MV_DDR_CALIB_UPDATE_CTRL_OFFS,
+			MV_DDR_RECALIBRATE_MASK << MV_DDR_DYN_PADS_CALIB_EN_OFFS |
+			MV_DDR_CALIB_UPDATE_CTRL_MASK << MV_DDR_CALIB_UPDATE_CTRL_OFFS));
+
+	/* Polling initial calibration is done*/
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,
+				CALIB_MACHINE_STATUS_READY << MV_DDR_CALIB_MACHINE_STATUS_OFFS,
+				MV_DDR_CALIB_MACHINE_STATUS_MASK << MV_DDR_CALIB_MACHINE_STATUS_OFFS,
+				CALIB_MACHINE_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(0)\n"));
+
+	/* Polling that calibration propagate to io */
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x3FFFFFF, 0x3FFFFFF, REG_PHY_LOCK_STATUS_ADDR,
+				MAX_POLLING_ITERATIONS) != MV_OK)
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(1)\n"));
+
+	/* TODO - debug why polling not enough*/
+	mdelay(10);
+
+	/* pad calibration control disable */
+	CHECK_STATUS(ddr3_tip_if_write
+			(DEV_NUM_0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, CALIB_MACHINE_CTRL_REG,
+			DYN_PAD_CALIB_DISABLE << MV_DDR_DYN_PADS_CALIB_EN_OFFS |
+			CALIB_MACHINE_INT_CTRL << MV_DDR_CALIB_UPDATE_CTRL_OFFS,
+			MV_DDR_RECALIBRATE_MASK << MV_DDR_DYN_PADS_CALIB_EN_OFFS |
+			MV_DDR_CALIB_UPDATE_CTRL_MASK << MV_DDR_CALIB_UPDATE_CTRL_OFFS));
+
+	/* Polling initial calibration is done */
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,
+				CALIB_MACHINE_STATUS_READY << MV_DDR_CALIB_MACHINE_STATUS_OFFS,
+				MV_DDR_CALIB_MACHINE_STATUS_MASK << MV_DDR_CALIB_MACHINE_STATUS_OFFS,
+				CALIB_MACHINE_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(0)\n"));
+
+	/* Polling that calibration propagate to io */
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x3FFFFFF, 0x3FFFFFF, REG_PHY_LOCK_STATUS_ADDR,
+				MAX_POLLING_ITERATIONS) != MV_OK)
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(1)\n"));
+
+	/* TODO - debug why polling not enough */
+	mdelay(10);
+
 	/* Read Cal value and set to manual val */
 	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1DC8, read_data, MASK_ALL_BITS));
 	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
@@ -1722,7 +1774,7 @@ MV_STATUS ddr4_tip_calibration_validate(MV_U32 dev_num)
 			   cal_p, cal_n));
 	if ((cal_n >= 56) || (cal_n <= 6) || (cal_p >= 59) || (cal_p <= 7)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
-				  ("ddr4TipCalibrationValidate: Error:DDR4 SSTL calib val - Pcal = 0x%x , \
+				  ("ddr4TipCalibrationValidate: Error:DDR4 SSTL calib val - Pcal = 0x%x,\
 				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
 		status = MV_FAIL;
 	}
@@ -1732,7 +1784,7 @@ MV_STATUS ddr4_tip_calibration_validate(MV_U32 dev_num)
 	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
 	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
-			  ("ddr4TipCalibrationValidate::DDR4 POD-V calib val - Pcal = 0x%x , Ncal = 0x%x \n",
+			  ("ddr4TipCalibrationValidate::DDR4 POD-V calib val - Pcal = 0x%x , Ncal = 0x%x\n",
 			  cal_p, cal_n));
 	if ((cal_n >= 56) || (cal_n <= 6) || (cal_p >= 59) || (cal_p <= 7)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
@@ -1750,7 +1802,7 @@ MV_STATUS ddr4_tip_calibration_validate(MV_U32 dev_num)
 			  cal_p, cal_n));
 	if ((cal_n >= 56) || (cal_n <= 6) || (cal_p >= 59) || (cal_p <= 7)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
-				  ("ddr4TipCalibrationValidate: Error:DDR4 POD-H calib val - Pcal = 0x%x , \
+				  ("ddr4TipCalibrationValidate: Error:DDR4 POD-H calib val - Pcal = 0x%x, \
 				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
 		status = MV_FAIL;
 	}
