@@ -111,8 +111,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MEM_TO_MC6_FREQ_RATIO		2
 
-#define AP_INT_REG_START_ADDR		0xf0000000ULL
-#define AP_INT_REG_END_ADDR		0x100000000ULL
+#define NON_DRAM_MEM_RGN_START_ADDR	0xf0000000ULL
+#define NON_DRAM_MEM_RGN_END_ADDR	0x100000000ULL
 
 #define DSS_CR0_REG_ADDR		0x6f0100	/* TODO: put this register in ATF h file */
 #define IOMUX_SEL_OFFS			17
@@ -421,5 +421,5 @@ void mv_ddr_phy_static_config(void);
 #define MV_DDR_DQ_MAPPING_DETECT_VERBOSE 0
 int mv_ddr_dq_mapping_detect(u32 dev_num);
 #endif
-void mv_ddr_scrub(void);
+void mv_ddr_mem_scrubbing(void);
 #endif /* _MV_DDR_AP806_H */

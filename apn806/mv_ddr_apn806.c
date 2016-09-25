@@ -259,30 +259,26 @@ void mmio_write2_32(u32 val, u32 addr)
 	mmio_write_32(addr, val);
 }
 
-void mv_ddr_scrub(void)
+void mv_ddr_mem_scrubbing(void)
 {
-	uintptr_t i = 0;
-	uint64_t val_64bit = 0xDEADBEEFDEADBEEF;
+	uintptr_t p = 0;
+	uint64_t val = 0xdeadbeefdeadbeef;
+	uint64_t tot_mem_sz;
 
-	uint64_t total_memory_size = mv_ddr_get_total_memory_size_in_bits();
-	total_memory_size = total_memory_size / BITS_IN_BYTE;
+	tot_mem_sz = mv_ddr_get_total_memory_size_in_bits() / BITS_IN_BYTE;
 
-	printf("mv_ddr: scrubbing memory....\n");
+	printf("mv_ddr: scrubbing memory...\n");
 
-	if (total_memory_size < AP_INT_REG_START_ADDR) {
-		for (i = 0; i < total_memory_size; i += 8)
-			mmio_write_64(i, val_64bit);
-	} else {
-		if (total_memory_size > AP_INT_REG_END_ADDR) {
-			for (i = 0; i < AP_INT_REG_START_ADDR; i += 8)
-				mmio_write_64(i, val_64bit);
-			for (i = AP_INT_REG_END_ADDR; i < total_memory_size; i += 8)
-				mmio_write_64(i, val_64bit);
-		} else {
-			for (i = 0; i < AP_INT_REG_START_ADDR; i += 8)
-				mmio_write_64(i, val_64bit);
-		}
-	}
+	if (tot_mem_sz < NON_DRAM_MEM_RGN_START_ADDR)
+		for (p = 0; p < tot_mem_sz; p += 8)
+			mmio_write_64(p, val);
+	else
+		for (p = 0; p < NON_DRAM_MEM_RGN_START_ADDR; p += 8)
+			mmio_write_64(p, val);
+
+	if (tot_mem_sz > NON_DRAM_MEM_RGN_END_ADDR)
+		for (p = NON_DRAM_MEM_RGN_END_ADDR; p < tot_mem_sz; p += 8)
+			mmio_write_64(p, val);
 }
 
 static u8 mv_ddr_tip_clk_ratio_get(u32 freq)

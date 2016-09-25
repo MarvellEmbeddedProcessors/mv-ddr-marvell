@@ -425,7 +425,7 @@ static u32 dq_bit_map_2_phy_pin[] = {
 	0, 1, 2, 9, 7, 8, 3, 6,	/* 4 */
 };
 
-void mv_ddr_scrub(void)
+void mv_ddr_mem_scrubbing(void)
 {
 }
 

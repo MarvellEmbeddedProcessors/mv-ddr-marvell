@@ -285,7 +285,7 @@ extern u16 odt_intercept[];
 
 int mv_ddr_pre_training_soc_config(const char *ddr_type);
 int mv_ddr_post_training_soc_config(const char *ddr_type);
-void mv_ddr_scrub(void);
+void mv_ddr_mem_scrubbing(void);
 
 #ifdef CONFIG_MC_STATIC
 struct mv_ddr_mc_reg_config {

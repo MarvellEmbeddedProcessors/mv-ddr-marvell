@@ -203,7 +203,7 @@ int ddr3_init(void)
 	if (ddr3_if_ecc_enabled()) {
 		if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask) ||
 		    MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(tm->bus_act_mask, octets_per_if_num))
-			mv_ddr_scrub();
+			mv_ddr_mem_scrubbing();
 		else
 			ddr3_new_tip_ecc_scrub();
 	}
