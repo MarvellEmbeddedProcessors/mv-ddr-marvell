@@ -153,108 +153,13 @@ struct mk6_reg_data {
 };
 
 #if defined(a70x0)
-#if defined(CONFIG_DUNIT_STATIC)
-struct mk6_reg_data ddr_static_setup[] = {
-	/* Traffic thru Tip::TIP init for MISL BOARD 2CS 4Gb x8 devices of micron - 2133P */
-	{0xF0000030, 0x00000003}, /* set private ID*/
-	{0xF000070C, 0x000000FF}, /* enable SMC for STX access */
-	{0xf00116d8, 0x000003cc},
-	{0xf06f0100, 0x044c0006},
-	{0xf00119d4, 0x00000002},
-	{0xf06f8d38, 0xacac0000},
-	{0xf06f4360, 0xffff0044},
-	{0xf00114c8, 0x01cb0008},
-	{0xf00117c8, 0x12c80008},
-	{0xf0011dc8, 0x01cb0008},
-	{0xf0011ec8, 0x12c80008},
-	{0xf00116a0, 0xe83f0001},
-	{0xf00114cc, 0x0001200d},
-	{0xf0011524, 0x00008800},
-	{0xf0011400, 0x6b14cc30},
-	{0xf0011400, 0x7b14cc30},
-	{0xf0011538, 0x00000d0d},
-	{0xf001153c, 0x00001515},
-	{0xf00116a0, 0xcc00000a},
-	{0xf00116a0, 0xc0006852},
-	{0xf00116a0, 0xc0402080},
-	{0xf00116a0, 0xc0808419},
-	{0xf00116a0, 0xc0c06010},
-	{0xf00116a0, 0xc002010d},
-	{0xf00116a0, 0xc042010e},
-	{0xf00116a0, 0xc08200d2},
-	{0xf00116a0, 0xc0c20103},
-	{0xf00116a0, 0xc003000a},
-	{0xf00116a0, 0xc043000a},
-	{0xf00116a0, 0xc083000a},
-	{0xf00116a0, 0xc0c3000a},
-	{0xf00116a0, 0xc0040044},
-	{0xf00116a0, 0xc044004e},
-	{0xf00116a0, 0xc0840010},
-	{0xf00116a0, 0xc0c4000b},
-	{0xf00116a0, 0xc006004b},
-	{0xf00116a0, 0xc046004c},
-	{0xf00116a0, 0xc0860015},
-	{0xf00116a0, 0xc0c60046},
-	{0xf00116a0, 0xc005000e},
-	{0xf00116a0, 0xc0450018},
-	{0xf00116a0, 0xc085001a},
-	{0xf00116a0, 0xc0c50015},
-	{0xf00116a0, 0xe8021503},
-	{0xf00116a0, 0xe8130050},
-	{0xf00116a0, 0xe8140012},
-	{0xf00116a0, 0xec021503},
-	{0xf00116a0, 0xec130050},
-	{0xf00116a0, 0xec140012},
-	{0xf00116a0, 0xf81b0020},
-	{0xf00116a0, 0xe8280427},
-	{0xf00116a0, 0xec24070e},
-	{0xf00116a0, 0xe824078f},
-	{0xf00116a0, 0xe8260200},
-	{0xf0011400, 0x7b144c30},
-	{0xf0011404, 0x36301848},
-	{0xf0011408, 0x5411cbb9},
-	{0xf001140c, 0x784a1f97},
-	{0xf0011410, 0x17114444},
-	{0xf0011414, 0x000007c8},
-	{0xf0011424, 0x0060f3f7},
-	{0xf001142c, 0x14c5138 },
-	{0xf0011498, 0x0000000f},
-	{0xf001149c, 0x00000303},
-	{0xf00114e0, 0x00000400},
-	{0xf00114e4, 0x000003ff},
-	{0xf00114e8, 0x007f01ff},
-	{0xf00114ec, 0x00000054},
-	{0xf00115e0, 0x00000023},
-	{0xf00115e4, 0x00203c18},
-	{0xf00115ec, 0xd9ff0029},
-	{0xf0011900, 0x00000314},
-	{0xf0011904, 0x00000001},
-	{0xf0011908, 0x00000200},
-	{0xf001190c, 0x00000800},
-	{0xf0011910, 0x00000000},
-	{0xf0011914, 0x000004a0},
-	{0xf0011918, 0x0000080a},
-	/* FIXME: add the two registers configuration below when fixing the timing
-	 * algorithm also remove it from the main flow function and from the
-	 * static function
-	 */
-	/* {0xF0011480, 0x1},		Tipinit */
-	/* {0xF0020020, 0x13000001},	MCinit */
-	{-1, -1},
-};
-#else /* ddr static configuratioin thru mk6 */
 struct mk6_reg_data ddr_static_setup[] = {
 	/* Traffic thru Mckinley 6::MC init for MISL BOARD 2CS 4Gb x8 devices of micron - 2133P */
 	/*
-	 * the below section was remove to pre soc config
-	 * {0xF00116D8, 0x3CC},
-	 * {0xF06F0100, 0x44C0006},
-	 * {0xF00119D4, 0x2},
-	 * {0xF06F8D38, 0xACAC0000},
-	 * {0xF06F4360, 0xFFFF0044},
-	 * {0xF0011524, 0x8800},
+	 * the two registers below are needed when enabling the training through the dunit
+	 * {0xF0000030, 0x00000003}, set private ID
+	 * {0xF000070C, 0x000000FF}, enable SMC for STX access
 	 */
-
 	/*{0xF06F0108, 0xD88FFFF}, neg edge */
 	{0xF00114C8, 0x1840008},
 	{0xF00117C8, 0x28A0008},
@@ -397,109 +302,13 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf06f8130, 0x1002f2f5},	/* FIXME: avs to 1.13V */
 	{-1, -1},
 };
-#endif /* CONFIG_DUNIT_STATIC */
 #elif defined(a70x0_cust)
-#if defined(CONFIG_DUNIT_STATIC)
-struct mk6_reg_data ddr_static_setup[] = {
-	/* Traffic thru DUNIT::DUNIT init for CISCO with 1CS 8Gb x4 devices of Samsung 2400 (17-17-17) */
-	/* the two following writes enable exclusive store with D-unit */
-	{0xf0000030, 0x3},
-	{0xf000070c, 0xff},
-	{0xf00116d8, 0x3cc},
-	{0xf06f0100, 0x44c0006},
-	{0xf00119d4, 0x2},
-	{0xf06f8d38, 0xacac0000},
-	{0xf06f4360, 0xffff0044},
-	{0xf00114c8, 0x1840008},
-	{0xf00117c8, 0x28a0008},
-	{0xf0011dc8, 0x1840008},
-	{0xf0011ec8, 0x28a0008},
-	{0xf00116a0, 0xe83f0001},
-	{0xf00114cc, 0x1200d},
-	{0xf0011524, 0x8800},
-	{0xf0011400, 0x6b104c30},
-	{0xf0011400, 0x7b104c30},
-	{0xf0011538, 0xd0d},
-	{0xf001153c, 0x1515},
-	{0xf00116a0, 0xcc00000a},	/* ck delay adll */
-	{0xf00116a0, 0xc0009c5f},	/* wl subphy 0 cs 0 */
-	{0xf00116a0, 0xc0405c8f},	/* wl subphy 1 */
-	{0xf00116a0, 0xc0804c4b},	/* wl subphy 2 */
-	{0xf00116a0, 0xc0c02040},	/* wl subphy 3 */
-	{0xf00116a0, 0xc0020104},	/* rl subphy 0 */
-	{0xf00116a0, 0xc0420105},	/* rl subphy 1 */
-	{0xf00116a0, 0xc08200c8},	/* rl subphy 2 */
-	{0xf00116a0, 0xc0c200c2},	/* rl subphy 3 */
-	{0xf00116a0, 0xc0030007},	/* ctx subphy 0 */
-	{0xf00116a0, 0xc043000a},	/* ctx subphy 1 */
-	{0xf00116a0, 0xc0830008},	/* ctx subphy 2 */
-	{0xf00116a0, 0xc0c30008},	/* ctx subphy 3 */
-	{0xf00116a0, 0xc0040044},	/* wl subphy 0 cs 1 */
-	{0xf00116a0, 0xc044004e},	/* wl subphy 1 */
-	{0xf00116a0, 0xc0840010},	/* wl subphy 2 */
-	{0xf00116a0, 0xc0c4000b},	/* wl subphy 3 */
-	{0xf00116a0, 0xc006004b},	/* rl subphy 0 */
-	{0xf00116a0, 0xc046004c},	/* rl subphy 1 */
-	{0xf00116a0, 0xc0860015},	/* rl subphy 2 */
-	{0xf00116a0, 0xc0c60046},	/* rl subphy 3 */
-	{0xf00116a0, 0xc005000e},	/* ctx subphy 0 */
-	{0xf00116a0, 0xc0450018},	/* ctx subphy 1 */
-	{0xf00116a0, 0xc085001a},	/* ctx subphy 2 */
-	{0xf00116a0, 0xc0c50015},	/* ctx subphy 3 */
-	{0xf00116a0, 0xe8021503},	/* adll 0x92 */
-	{0xf00116a0, 0xe8130050},	/* adll */
-	{0xf00116a0, 0xe8140012},	/* adll */
-	{0xf00116a0, 0xec021503},	/* adll */
-	{0xf00116a0, 0xec130050},	/* adll */
-	{0xf00116a0, 0xec140012},	/* adll */
-	{0xf00116a0, 0xf81b0020},	/* data receiver calibration bc */
-	{0xf00116a0, 0xe8280427},	/* vref configuration bc */
-	{0xf00116a0, 0xec24070c},	/* ctrl drive strength bc */
-	{0xf00116a0, 0xe824070e},	/* data drive strength bc */
-	{0xf00116a0, 0xe8260200},	/* data odt bc */
-	{0xf0011400, 0x7b144c30},
-	{0xf0011404, 0x36301848},
-	{0xf0011408, 0x5411cbb9},
-	{0xf001140c, 0x784a1f97},
-	{0xf0011410, 0x17114444},
-	{0xf0011414, 0x7c8},
-	{0xf0011424, 0x60f3f7},
-	{0xf001142c, 0x14c5138},
-	{0xf0011498, 0xf},
-	{0xf001149c, 0x303},
-	{0xf00114e0, 0x400},
-	{0xf00114e4, 0x3ff},
-	{0xf00114e8, 0x7f01ff},
-	{0xf00114ec, 0x54},
-	{0xf00115e0, 0x23},
-	{0xf00115e4, 0x203c18},
-	{0xf00115ec, 0xd9ff0029},
-	{0xf0011900, 0x314},		/* MR0 */
-	{0xf0011904, 0x001},		/* MR1 */
-	{0xf0011908, 0x200},		/* MR2 */
-	{0xf001190c, 0x800},		/* MR3 */
-	{0xf0011910, 0x0},		/* MR4 */
-	{0xf0011914, 0x4a0},		/* MR5 */
-	{0xf0011918, 0x80a},		/* MR6 */
-	/* FIXME: add the two registers configuration below when fixing the timing
-	 * algorithm also remove it from the main flow function and from the
-	 * static function
-	 */
-	/* {0xF0011480, 0x1},		Tipinit */
-	/* {0xF0020020, 0x13000001},	MCinit */
-	{-1, -1},
-};
-#else /* ddr static configuration thru mk6 */
 struct mk6_reg_data ddr_static_setup[] = {
 	/* Traffic thru Mckinley 6::MC init for CISCO with 1CS 8Gb devices of Samsung */
 	/*
-	 * the below section was remove to pre soc config
-	 * {0xF00116D8, 0x3CC},
-	 * {0xF06F0100, 0x44C0006},
-	 * {0xF00119D4, 0x2},
-	 * {0xF06F8D38, 0xACAC0000},
-	 * {0xF06F4360, 0xFFFF0044},
-	 * {0xF0011524, 0x8800},
+	 * the two registers below are needed when enabling the training through the dunit
+	 * {0xF0000030, 0x00000003}, set private ID
+	 * {0xF000070C, 0x000000FF}, enable SMC for STX access
 	 */
 	{0xF00114C8, 0x5145941},
 	{0xF00117C8, 0x15145941},
@@ -597,93 +406,13 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf06f8130, 0x1002f2f5},	/* FIXME: avs to 1.13V */
 	{-1, -1},
 };
-#endif
 #elif defined(a80x0)
-#if defined(CONFIG_DUNIT_STATIC)
-struct mk6_reg_data ddr_static_setup[] = {
-	/* Traffic thru Tip::TIP init for Marvell with 1CS 8Gb x4 devices of Micron 2400 (17-17-17) */
-	{0xF0000030, 0x00000003}, /* set private ID*/
-	{0xF000070C, 0x000000FF}, /* enable SMC for STX access */
-	{0xF00116D8, 0x3CA},
-	{0xF06F0100, 0x4480000},
-	{0xF00119D4, 0x2},
-	{0xF06F8D36, 0xACAC0000},
-	{0xF06F4360, 0xFFFF0044},
-	{0xF00114C8, 0x5145941},
-	{0xF00117C8, 0x15145941},
-	{0xF0011DC8, 0x5145941},
-	{0xF0011EC8, 0x15145941},
-	{0xF00114CC, 0x1200D},
-	{0xF0011538, 0xB},
-	{0xF001153C, 0x13},
-	{0xf00116a0, 0xcc000000},	/* CKdelayADLL */
-	{0xf00116a0, 0xc0000017},	/* WLpup0 */
-	{0xf00116a0, 0xc0400012},	/* WLpup1 */
-	{0xf00116a0, 0xc080000d},	/* WLpup2 */
-	{0xf00116a0, 0xc0c00018},	/* WLpup3 */
-	{0xf00116a0, 0xc0020059},	/* RLpup0 */
-	{0xf00116a0, 0xc0420053},	/* RLpup1 */
-	{0xf00116a0, 0xc082004d},	/* RLpup2 */
-	{0xf00116a0, 0xc0c20084},	/* RLpup3 */
-	{0xf00116a0, 0xc0010021},	/* Ctxpup0 */
-	{0xf00116a0, 0xc041001c},	/* Ctxpup1 */
-	{0xf00116a0, 0xc0810017},	/* Ctxpup2 */
-	{0xf00116a0, 0xc0c1002a},	/* Ctxpup3 */
-	{0xf00116a0, 0xE8021503},	/* ADLL 0x92 */
-	{0xf00116a0, 0xE8130050},	/* ADLL */
-	{0xf00116a0, 0xE8140012},	/* ADLL */
-	{0xf00116a0, 0xEC021503},	/* ADLL */
-	{0xf00116a0, 0xEC130050},	/* ADLL */
-	{0xf00116a0, 0xEC140012},	/* ADLL */
-	{0xf00116a0, 0xF81B0020},	/* datareceivercalibrationBC */
-	{0xf00116a0, 0xE8280429},	/* vrefconfigurationBC */
-	{0xf00116a0, 0xEC24070C},	/* ctrldrivestrengthBC */
-	{0xf00116a0, 0xE824070E},	/* datadrivestrengthBC */
-	{0xf00116a0, 0xE82600C0},	/* dataODTBC */
-	{0xF0011400, 0x7b14cc30},
-	{0xF0011404, 0x36300848},
-	{0xF0011408, 0x5411cbb9},
-	{0xF001140c, 0x384A1f97},
-	{0xF0011410, 0x17114444},
-	{0xF0011414, 0x7c8},
-	{0xF0011424, 0x60f3f7},
-	{0xF001142c, 0x14c5138},
-	{0xF0011498, 0x3},
-	{0xF001149c, 0x301},
-	{0xF00114e0, 0x400},
-	{0xF00114e4, 0x3ff},
-	{0xF00114e8, 0x7f01ff},
-	{0xF00114ec, 0x54},
-	{0xF0011524, 0x8800},
-	{0xF00115e0, 0x1},
-	{0xF00115e4, 0x203c18},
-	{0xF00115ec, 0xd9ff0029},
-	{0xF0011900, 0x310},	/* MR0 */
-	{0xF0011904, 0x001},	/* MR1 */
-	{0xF0011908, 0x000},	/* MR2 */
-	{0xF001190c, 0x800},	/* MR3 */
-	{0xF0011910, 0x0},	/* MR4 */
-	{0xF0011914, 0x5A0},	/* MR5 */
-	{0xF0011918, 0x806},	/* MR6 */
-	/* FIXME: add the two registers configuration below when fixing the timing
-	 * algorithm also remove it from the main flow function and from the
-	 * static function
-	 */
-	/* {0xF0011480, 0x1},		Tipinit */
-	/* {0xF0020020, 0x13000001},	MCinit */
-	{-1, -1},
-};
-#else /* ddr static configuration thru mk6 */
 struct mk6_reg_data ddr_static_setup[] = {
 	/* Traffic thru MC6::TIP init for Marvell with 1CS 8Gb x4 devices of Micron 2400T */
 	/*
-	 * the below section was remove to pre soc config
-	 * {0xF00116D8, 0x3CC},
-	 * {0xF06F0100, 0x4480006},
-	 * {0xF00119D4, 0x2},
-	 * {0xF06F8D38, 0xACAC0000},
-	 * {0xF06F4360, 0xFFFF0044},
-	 * {0xF0011524, 0x8800},
+	 * the two registers below are needed when enabling the training through the dunit
+	 * {0xF0000030, 0x00000003}, set private ID
+	 * {0xF000070C, 0x000000FF}, enable SMC for STX access
 	 */
 	{0xF00114C8, 0x1840008},
 	{0xF00117C8, 0x28A0008},
@@ -857,17 +586,10 @@ struct mk6_reg_data ddr_static_setup[] = {
 	{0xf06f8130, 0x1002f2f5},	/* FIXME: avs to 1.13V */
 	{-1, -1},
 };
-#endif
 #elif defined(a80x0_cust)
-#if defined(CONFIG_DUNIT_STATIC)
 struct mk6_reg_data ddr_static_setup[] = {
 	{-1, -1},
 };
-#else /* ddr static configuration thru mk6 */
-struct mk6_reg_data ddr_static_setup[] = {
-	{-1, -1},
-};
-#endif /* CONFIG_DUNIT_STATIC */
 #endif /* a80x0_cust */
 #endif /* defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC) */
 #endif /* _MV_DDR_APN806_STATIC_H */
