@@ -130,7 +130,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_refi = %d\n", mc6_timing.t_refi); */
 	mc6_timing.t_wr = speed_bin_table(speed_bin_index, SPEED_BIN_TWR);
 	/* printf("t_wr = %d\n", mc6_timing.t_wr); */
-	mc6_timing.t_wr = ceil_div(mc6_timing.t_wr, mc6_timing.t_ckclk);
+	mc6_timing.t_wr = time_to_nclk(mc6_timing.t_wr, mc6_timing.t_ckclk);
 	/* printf("t_wr = %d\n", mc6_timing.t_wr); */
 
 	/* calculate t_rrd */
@@ -139,14 +139,14 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_rrd = %d\n", mc6_timing.t_rrd); */
 	mc6_timing.t_rrd = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_rrd);
 	/* printf("t_rrd = %d\n", mc6_timing.t_rrd); */
-	mc6_timing.t_rrd = ceil_div(mc6_timing.t_rrd, mc6_timing.t_ckclk);
+	mc6_timing.t_rrd = time_to_nclk(mc6_timing.t_rrd, mc6_timing.t_ckclk);
 	/* printf("t_rrd = %d\n", mc6_timing.t_rrd); */
 
 	/* calculate t_faw */
 	mc6_timing.t_faw = (page_size == 1) ? speed_bin_table(speed_bin_index, SPEED_BIN_TFAW1K):
 		speed_bin_table(speed_bin_index, SPEED_BIN_TFAW2K);
 	/* printf("t_faw = %d\n", mc6_timing.t_faw); */
-	mc6_timing.t_faw = ceil_div(mc6_timing.t_faw, mc6_timing.t_ckclk);
+	mc6_timing.t_faw = time_to_nclk(mc6_timing.t_faw, mc6_timing.t_ckclk);
 	/* printf("t_faw = %d\n", mc6_timing. t_faw); */
 
 	/* calculate t_rtp */
@@ -154,7 +154,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_rtp = %d\n", mc6_timing.t_rtp); */
 	mc6_timing.t_rtp = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_rtp);
 	/* printf("t_rtp = %d\n", mc6_timing.t_rtp); */
-	mc6_timing.t_rtp = ceil_div(mc6_timing.t_rtp, mc6_timing.t_ckclk);
+	mc6_timing.t_rtp = time_to_nclk(mc6_timing.t_rtp, mc6_timing.t_ckclk);
 	/* printf("t_rtp = %d\n", mc6_timing.t_rtp); */
 
 	/* calculate t_mode */
@@ -162,7 +162,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_mod = %d\n", mc6_timing.t_mod); */
 	mc6_timing.t_mod = GET_MAX_VALUE(mc6_timing.t_ckclk * 24, mc6_timing.t_mod);
 	/* printf("t_mod = %d\n", mc6_timing.t_mod); */
-	mc6_timing.t_mod = ceil_div(mc6_timing.t_mod, mc6_timing.t_ckclk);
+	mc6_timing.t_mod = time_to_nclk(mc6_timing.t_mod, mc6_timing.t_ckclk);
 	/* printf("t_mod = %d\n",mc6_timing. t_mod); */
 
 	/* calculate t_wtr */
@@ -170,7 +170,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_wtr = %d\n", mc6_timing.t_wtr); */
 	mc6_timing.t_wtr = GET_MAX_VALUE(mc6_timing.t_ckclk * 2, mc6_timing.t_wtr);
 	/* printf("t_wtr = %d\n", mc6_timing.t_wtr); */
-	mc6_timing.t_wtr = ceil_div(mc6_timing.t_wtr, mc6_timing.t_ckclk);
+	mc6_timing.t_wtr = time_to_nclk(mc6_timing.t_wtr, mc6_timing.t_ckclk);
 	/* printf("t_wtr = %d\n", mc6_timing.t_wtr); */
 
 	/* calculate t_wtr_l */
@@ -178,7 +178,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_wtr_l = %d\n", mc6_timing.t_wtr_l); */
 	mc6_timing.t_wtr_l = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_wtr_l);
 	/* printf("t_wtr_l = %d\n", mc6_timing.t_wtr_l); */
-	mc6_timing.t_wtr_l = ceil_div(mc6_timing.t_wtr_l, mc6_timing.t_ckclk);
+	mc6_timing.t_wtr_l = time_to_nclk(mc6_timing.t_wtr_l, mc6_timing.t_ckclk);
 	/* printf("t_wtr_l = %d\n", mc6_timing.t_wtr_l); */
 
 	/* calculate t_xp */
@@ -186,17 +186,17 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_xp = %d\n", mc6_timing.t_xp); */
 	mc6_timing.t_xp = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_xp);
 	/* printf("t_xp = %d\n", mc6_timing.t_xp); */
-	mc6_timing.t_xp = ceil_div(mc6_timing.t_xp, mc6_timing.t_ckclk);
+	mc6_timing.t_xp = time_to_nclk(mc6_timing.t_xp, mc6_timing.t_ckclk);
 	/* printf("t_xp = %d\n", mc6_timing.t_xp); */
 
 	/* calculate t_xs_fast */
 	/* printf("t_xs_fast = %d\n", MV_DDR_MC6_TIMING_T_XS_FAST); */
-	mc6_timing.t_xs_fast = ceil_div(MV_DDR_MC6_TIMING_T_XS_FAST, mc6_timing.t_ckclk);
+	mc6_timing.t_xs_fast = time_to_nclk(MV_DDR_MC6_TIMING_T_XS_FAST, mc6_timing.t_ckclk);
 	/* printf("t_xs_fast = %d\n", mc6_timing.t_xs_fast); */
 
 	/* calculate t_xs */
 	/* printf("t_xs = %d\n", MV_DDR_MC6_TIMING_T_XS); */
-	mc6_timing.t_xs = ceil_div(MV_DDR_MC6_TIMING_T_XS, mc6_timing.t_ckclk);
+	mc6_timing.t_xs = time_to_nclk(MV_DDR_MC6_TIMING_T_XS, mc6_timing.t_ckclk);
 	/* printf("t_xs = %d\n", mc6_timing.t_xs); */
 
 	/* calculate t_cke */
@@ -204,7 +204,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_cke = %d\n", mc6_timing.t_cke); */
 	mc6_timing.t_cke = GET_MAX_VALUE(mc6_timing.t_ckclk * 3, mc6_timing.t_cke);
 	/* printf("t_cke = %d\n", mc6_timing.t_cke); */
-	mc6_timing.t_cke = ceil_div(mc6_timing.t_cke, mc6_timing.t_ckclk);
+	mc6_timing.t_cke = time_to_nclk(mc6_timing.t_cke, mc6_timing.t_ckclk);
 	/* printf("t_cke = %d\n", mc6_timing.t_cke); */
 
 	/* calculate t_ckesr */
@@ -216,7 +216,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_cksrx = %d\n", mc6_timing.t_cksrx); */
 	mc6_timing.t_cksrx = GET_MAX_VALUE(mc6_timing.t_ckclk * 5, mc6_timing.t_cksrx);
 	/* printf("t_cksrx = %d\n", mc6_timing.t_cksrx); */
-	mc6_timing.t_cksrx = ceil_div(mc6_timing.t_cksrx, mc6_timing.t_ckclk);
+	mc6_timing.t_cksrx = time_to_nclk(mc6_timing.t_cksrx, mc6_timing.t_ckclk);
 	/* printf("t_cksrx = %d\n", mc6_timing.t_cksrx); */
 
 	/* calculate t_cksre */
@@ -226,23 +226,23 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* calculate t_ras */
 	mc6_timing.t_ras = speed_bin_table(speed_bin_index, SPEED_BIN_TRAS);
 	/* printf("t_ras = %d\n", mc6_timing.t_ras); */
-	mc6_timing.t_ras = ceil_div(mc6_timing.t_ras, mc6_timing.t_ckclk);
+	mc6_timing.t_ras = time_to_nclk(mc6_timing.t_ras, mc6_timing.t_ckclk);
 	/* printf("t_ras = %d\n", mc6_timing.t_ras); */
 
 	/* calculate t_rcd */
 	mc6_timing.t_rcd = speed_bin_table(speed_bin_index, SPEED_BIN_TRCD);
 	/* printf("t_rcd = %d\n", mc6_timing.t_rcd); */
-	mc6_timing.t_rcd = ceil_div(mc6_timing.t_rcd, mc6_timing.t_ckclk);
+	mc6_timing.t_rcd = time_to_nclk(mc6_timing.t_rcd, mc6_timing.t_ckclk);
 	/* printf("t_rcd = %d\n", mc6_timing.t_rcd); */
 
 	/* calculate t_rp */
 	mc6_timing.t_rp = speed_bin_table(speed_bin_index, SPEED_BIN_TRP);
 	/* printf("t_rp = %d\n", mc6_timing.t_rp); */
-	mc6_timing.t_rp = ceil_div(mc6_timing.t_rp, mc6_timing.t_ckclk);
+	mc6_timing.t_rp = time_to_nclk(mc6_timing.t_rp, mc6_timing.t_ckclk);
 	/* printf("t_rp = %d\n", mc6_timing.t_rp); */
 
 	/*calculate t_rfc */
-	mc6_timing.t_rfc = ceil_div(rfc_table[memory_size] * 1000, mc6_timing.t_ckclk);
+	mc6_timing.t_rfc = time_to_nclk(rfc_table[memory_size] * 1000, mc6_timing.t_ckclk);
 	/* printf("t_rfc = %d\n", mc6_timing.t_rfc); */
 
 	/* calculate t_rrd_l */
@@ -250,7 +250,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_rrd_l = %d\n", mc6_timing.t_rrd_l); */
 	mc6_timing.t_rrd_l = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_rrd_l);
 	/* printf("t_rrd_l = %d\n", mc6_timing. t_rrd_l); */
-	mc6_timing.t_rrd_l = ceil_div(mc6_timing.t_rrd_l, mc6_timing.t_ckclk);
+	mc6_timing.t_rrd_l = time_to_nclk(mc6_timing.t_rrd_l, mc6_timing.t_ckclk);
 	/* printf("t_rrd_l = %d\n", mc6_timing.t_rrd_l); */
 
 	/* calculate t_ccd_l */
@@ -260,7 +260,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* calculate t_rc */
 	mc6_timing.t_rc = speed_bin_table(speed_bin_index, SPEED_BIN_TRC);
 	/* printf("t_rc = %d\n", mc6_timing.t_rc); */
-	mc6_timing.t_rc = ceil_div(mc6_timing.t_rc, mc6_timing.t_ckclk);
+	mc6_timing.t_rc = time_to_nclk(mc6_timing.t_rc, mc6_timing.t_ckclk);
 	/* printf("t_rc = %d\n", mc6_timing.t_rc); */
 
 	/* constant timing parameters */
@@ -272,17 +272,17 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 
 	mc6_timing.t_res = MV_DDR_MC6_TIMING_T_RES;
 	/* printf("t_res = %d\n", mc6_timing.t_res); */
-	mc6_timing.t_res = ceil_div(mc6_timing.t_res, mc6_timing.t_ckclk);
+	mc6_timing.t_res = time_to_nclk(mc6_timing.t_res, mc6_timing.t_ckclk);
 	/* printf("t_res = %d\n", mc6_timing.t_res); */
 
 	mc6_timing.t_resinit = MV_DDR_MC6_TIMING_T_RESINIT;
 	/* printf("t_resinit = %d\n", mc6_timing.t_resinit); */
-	mc6_timing.t_resinit = ceil_div(mc6_timing.t_resinit, mc6_timing.t_ckclk);
+	mc6_timing.t_resinit = time_to_nclk(mc6_timing.t_resinit, mc6_timing.t_ckclk);
 	/* printf("t_resinit = %d\n", mc6_timing.t_resinit); */
 
 	mc6_timing.t_restcke = MV_DDR_MC6_TIMING_T_RESTCKE;
 	/* printf("t_restcke = %d\n", mc6_timing.t_restcke); */
-	mc6_timing.t_restcke = ceil_div(mc6_timing.t_restcke, mc6_timing.t_ckclk);
+	mc6_timing.t_restcke = time_to_nclk(mc6_timing.t_restcke, mc6_timing.t_ckclk);
 	/* printf("t_restcke = %d\n", mc6_timing.t_restcke); */
 
 	mc6_timing.t_actpden = MV_DDR_MC6_TIMING_T_ACTPDEN;
