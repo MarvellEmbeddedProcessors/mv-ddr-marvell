@@ -968,7 +968,7 @@ int mv_ddr_mc6_init_controller(void)
  * this function validates the calibration values
  * the function is per soc due to the different processes the calibration values are different
  */
-MV_STATUS ddr4_tip_calibration_validate(MV_U32 dev_num)
+MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 {
 	MV_STATUS status = MV_OK;
 	MV_U8 if_id = 0;

@@ -132,15 +132,4 @@ void mdelay(unsigned long);
 #define writel MV_MEMIO_LE32_WRITE2
 #define readl MV_MEMIO_LE32_READ
 
-#if defined(CONFIG_DDR4)
-#define ddr4_mode_regs_init ddr4ModeRegsInit
-#define ddr4_sdram_config ddr4SdramConfig
-#define ddr4_tip_calibration_validate ddr4TipCalibrationValidate
-#define vref_calibration_wa vrefCalibrationWA
-#define ddr4_sublib_version_get mvHwsDdr4SubLibVersionGet
-#define ddr4_tip_configure_phy ddr4TipConfigurePhy
-#define ddr4_tip_calibration_adjust ddr4TipCalibrationAdjust
-#define ddr3_tip_ddr4_ddr4_training_main_flow ddr3TipDDR4Ddr4TrainingMainFlow
-#endif
-
 #endif /* _DDR_MV_WRAPPER_H */

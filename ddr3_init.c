@@ -170,7 +170,7 @@ int ddr3_init(void)
 #else
 	mv_ddr_mc_config();
 #if defined(CONFIG_DDR4)
-	status = ddr4_tip_calibration_adjust(0, 1, 0);
+	status = mv_ddr4_calibration_adjust(0, 1, 0);
 	if (MV_OK != status) {
 		printf("calibration adjust - FAILED 0x%x\n", status);
 		return status;

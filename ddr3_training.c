@@ -192,7 +192,7 @@ void mv_ddr_ver_print(void)
 {
 	printf(MV_DDR_VERSION);
 #if defined(CONFIG_DDR4)
-	printf(ddr4_sublib_version_get());
+	printf(mv_ddr4_version_get());
 #endif /* CONFIG_DDR4 */
 	printf("\n");
 }
@@ -809,8 +809,8 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 
 #if defined(CONFIG_DDR4)
 	/* dev_num, vref_en, pod_only */
-	CHECK_STATUS(ddr4_mode_regs_init(dev_num));
-	CHECK_STATUS(ddr4_sdram_config(dev_num));
+	CHECK_STATUS(mv_ddr4_mode_regs_init(dev_num));
+	CHECK_STATUS(mv_ddr4_sdram_config(dev_num));
 #endif /* CONFIG_DDR4 */
 
 	if (delay_enable != 0) {
@@ -1809,7 +1809,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 				     (dev_num, access_type, if_id,
 				      0x1A74, g_rtt_nom_cs1, (0x7 << 8)));
 
-			ddr4_mode_regs_init(dev_num);
+			mv_ddr4_mode_regs_init(dev_num);
 #else /* CONFIG_DDR4 */
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id, 0x1874,
@@ -2960,7 +2960,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 
 #if defined(CONFIG_DDR4)
 	for (effective_cs = 0; effective_cs < max_cs; effective_cs++)
-		CHECK_STATUS(ddr3_tip_ddr4_ddr4_training_main_flow(dev_num));
+		CHECK_STATUS(mv_ddr4_training_main_flow(dev_num));
 #endif /* CONFIG_DDR4 */
 
 #if !defined(CONFIG_DDR4)
