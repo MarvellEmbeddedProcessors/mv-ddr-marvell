@@ -739,6 +739,19 @@ int ddr3_silicon_pre_init(void)
 	hws_ddr3_tip_load_topology_map(dev_num, tm);
 	ddr3_tip_init_apn806_silicon(dev_num, board_id);
 
+	/*
+	 * this patch ensures command/address will be sent properly to the memory
+	 * when triggering init controller according to the revision id (A0 or A1).
+	 */
+	int rev_id = apn806_rev_id_get();
+	if (rev_id == APN806_REV_ID_A0) {
+		reg_write(0x114cc, 0x1200d);
+		reg_write(0x114c8, 0x1840008);
+		reg_write(0x117c8, 0x28a0008);
+		reg_write(0x11dc8, 0x1840008);
+		reg_write(0x11ec8, 0x28a0008);
+	}
+
 	init_done = 1;
 	return MV_OK;
 }
@@ -1467,3 +1480,8 @@ int mv_ddr_dq_mapping_detect(u32 dev_num)
 }
 
 #endif
+
+int apn806_rev_id_get(void)
+{
+	return (mmio_read_32(MVEBU_CSS_GWD_CTRL_IIDR2_REG) >> GWD_IIDR2_REV_ID_OFFSET) & GWD_IIDR2_REV_ID_MASK;
+}

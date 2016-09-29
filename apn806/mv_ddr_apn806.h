@@ -101,6 +101,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_mc6_drv.h"
 
 #define INTER_REGS_BASE	0xf0000000
+/* revision id register address */
+#define MVEBU_CSS_GWD_CTRL_IIDR2_REG	(INTER_REGS_BASE + 0x610fcc)
+#define GWD_IIDR2_REV_ID_OFFSET		12
+#define GWD_IIDR2_REV_ID_MASK		0xf
+#define APN806_REV_ID_A0		0
+#define APN806_REV_ID_A1		1
 
 #define NO_EFUSE
 #define IF_ID_0				0
@@ -422,4 +428,5 @@ void mv_ddr_phy_static_config(void);
 int mv_ddr_dq_mapping_detect(u32 dev_num);
 #endif
 void mv_ddr_mem_scrubbing(void);
+int apn806_rev_id_get(void);
 #endif /* _MV_DDR_AP806_H */
