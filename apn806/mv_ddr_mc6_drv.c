@@ -189,16 +189,6 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_xp = time_to_nclk(mc6_timing.t_xp, mc6_timing.t_ckclk);
 	/* printf("t_xp = %d\n", mc6_timing.t_xp); */
 
-	/* calculate t_xs_fast */
-	/* printf("t_xs_fast = %d\n", MV_DDR_MC6_TIMING_T_XS_FAST); */
-	mc6_timing.t_xs_fast = time_to_nclk(MV_DDR_MC6_TIMING_T_XS_FAST, mc6_timing.t_ckclk);
-	/* printf("t_xs_fast = %d\n", mc6_timing.t_xs_fast); */
-
-	/* calculate t_xs */
-	/* printf("t_xs = %d\n", MV_DDR_MC6_TIMING_T_XS); */
-	mc6_timing.t_xs = time_to_nclk(MV_DDR_MC6_TIMING_T_XS, mc6_timing.t_ckclk);
-	/* printf("t_xs = %d\n", mc6_timing.t_xs); */
-
 	/* calculate t_cke */
 	mc6_timing.t_cke = MV_DDR_MC6_TIMING_T_CKE;
 	/* printf("t_cke = %d\n", mc6_timing.t_cke); */
@@ -210,6 +200,10 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* calculate t_ckesr */
 	mc6_timing.t_ckesr = mc6_timing.t_cke + 1;
 	/* printf("t_ckesr = %d\n", mc6_timing.t_ckesr); */
+
+	/* calculate t_cpded */
+	mc6_timing.t_cpded = mc6_timing.t_ckclk * 4;
+	/* printf("t_cpded = %d\n", mc6_timing.t_cpded); */
 
 	/* calculate t_cksrx */
 	mc6_timing.t_cksrx = MV_DDR_MC6_TIMING_T_CKSRX;
@@ -244,6 +238,10 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/*calculate t_rfc */
 	mc6_timing.t_rfc = time_to_nclk(rfc_table[memory_size] * 1000, mc6_timing.t_ckclk);
 	/* printf("t_rfc = %d\n", mc6_timing.t_rfc); */
+
+	/* calculate t_xs */
+	mc6_timing.t_xs = mc6_timing.t_rfc + time_to_nclk(MV_DDR_MC6_TIMING_T_XS_OVER_TRFC, mc6_timing.t_ckclk);
+	/* printf("t_xs = %d\n", mc6_timing.t_xs); */
 
 	/* calculate t_rrd_l */
 	mc6_timing.t_rrd_l = MV_DDR_MC6_TIMING_T_RRDL;
@@ -291,9 +289,6 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_zqinit = MV_DDR_MC6_TIMING_T_ZQINIT;
 	/* printf("t_zqinit = %d\n", mc6_timing.t_zqinit); */
 
-	mc6_timing.t_zqcr = MV_DDR_MC6_TIMING_T_ZQCR;
-	/* printf("t_zqcr = %d\n", mc6_timing.t_zqcr); */
-
 	mc6_timing.t_zqcs = MV_DDR_MC6_TIMING_T_ZQCS;
 	/* printf("t_zqcs = %d\n", mc6_timing.t_zqcs); */
 
@@ -303,29 +298,28 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_mrd = MV_DDR_MC6_TIMING_T_MRD;
 	/* printf("t_mrd = %d\n", mc6_timing.t_mrd); */
 
-	mc6_timing.t_caext = MV_DDR_MC6_TIMING_T_CAEXT;
-	/* printf("t_caext = %d\n", mc6_timing.t_caext); */
-
-	mc6_timing.t_cackel = MV_DDR_MC6_TIMING_T_CACKEL;
-	/* printf("t_cackel = %d\n", mc6_timing.t_cackel); */
-
 	mc6_timing.t_mpx_lh = MV_DDR_MC6_TIMING_T_MPX_LH;
 	/* printf("t_mpx_lh = %d\n", mc6_timing.t_mpx_lh); */
 
 	mc6_timing.t_mpx_s = MV_DDR_MC6_TIMING_T_MPX_S;
 	/* printf("t_mpx_s = %d\n", mc6_timing.t_mpx_s); */
 
-	mc6_timing.t_xmp = MV_DDR_MC6_TIMING_T_XMP;
+	mc6_timing.t_xmp = mc6_timing.t_rfc + time_to_nclk(MV_DDR_MC6_TIMING_T_XMP_OVER_TRFC, mc6_timing.t_ckclk);
 	/* printf("t_xmp = %d\n", mc6_timing.t_xmp); */
 
 	mc6_timing.t_mrd_pda = MV_DDR_MC6_TIMING_T_MRD_PDA;
 	/* printf("t_mrd_pda = %d\n", mc6_timing.t_mrd_pda); */
+	mc6_timing.t_mrd_pda = GET_MAX_VALUE(mc6_timing.t_ckclk * 16, mc6_timing.t_mrd_pda);
+	/* printf("t_mrd_pda = %d\n", mc6_timing. t_mrd_pda); */
 
-	mc6_timing.t_xsdll = MV_DDR_MC6_TIMING_T_XSDLL;
+	mc6_timing.t_xsdll = speed_bin_table(speed_bin_index, SPEED_BIN_TXSDLL);
 	/* printf("t_xsdll = %d\n", mc6_timing.t_xsdll); */
 
 	mc6_timing.t_rwd_ext_dly = MV_DDR_MC6_TIMING_T_RWD_EXT_DLY;
 	/* printf("t_rwd_ext_dly = %d\n", mc6_timing.t_rwd_ext_dly); */
+
+	mc6_timing.t_wl_early = MV_DDR_MC6_TIMING_T_WL_EARLY;
+	/* printf("t_wl_early = %d\n", mc6_timing.t_wl_early); */
 
 	mc6_timing.t_ccd_ccs_wr_ext_dly = MV_DDR_MC6_TIMMING_T_CCD_CCS_WR_EXT_DLY;
 	/* printf("t_ccd_ccs_wr_ext_dly = %d\n", mc6_timing.t_ccd_ccs_wr_ext_dly); */
@@ -402,10 +396,12 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	reg_bit_clrset(MC6_REG_POWER_DOWN_TIMING_0,
 		       TXARDS << MC6_TCKSRX_OFFS |
 		       mc6_timing.t_xp << MC6_TXP_OFFS |
-		       mc6_timing.t_ckesr << MC6_TCKESR_OFFS,
+		       mc6_timing.t_ckesr << MC6_TCKESR_OFFS |
+		       mc6_timing.t_cpded << MC6_TCPDED_OFFS,
 		       MC6_TXARDS_MASK << MC6_TCKSRX_OFFS |
 		       MC6_TXP_MASK << MC6_TXP_OFFS |
-		       MC6_TCKESR_MASK << MC6_TCKESR_OFFS);
+		       MC6_TCKESR_MASK << MC6_TCKESR_OFFS |
+		       MC6_TCPDED_MASK << MC6_TCPDED_OFFS);
 	/* printf("MC6_REG_POWER_DOWN_TIMING_0 addr 0x%x, data 0x%x\n", MC6_REG_POWER_DOWN_TIMING_0,
 	       reg_read(MC6_REG_POWER_DOWN_TIMING_0)); */
 
@@ -473,10 +469,12 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	reg_bit_clrset(MC6_REG_OFF_SPEC_TIMING_0,
 		       mc6_timing.t_ccd_ccs_ext_dly << MC6_TCCD_CCS_EXT_DLY_OFFS |
 		       mc6_timing.t_ccd_ccs_wr_ext_dly << MC6_TCCD_CCS_WR_EXT_DLY_OFFS |
-		       mc6_timing.t_rwd_ext_dly << MC6_TRWD_EXT_DLY_OFFS,
+		       mc6_timing.t_rwd_ext_dly << MC6_TRWD_EXT_DLY_OFFS |
+		       mc6_timing.t_wl_early << MC6_TWL_EARLY_OFFS,
 		       MC6_TCCD_CCS_EXT_DLY_MASK << MC6_TCCD_CCS_EXT_DLY_OFFS |
 		       MC6_TCCD_CCS_WR_EXT_DLY_MASK << MC6_TCCD_CCS_WR_EXT_DLY_OFFS |
-		       MC6_TRWD_EXT_DLY_MASK << MC6_TRWD_EXT_DLY_OFFS);
+		       MC6_TRWD_EXT_DLY_MASK << MC6_TRWD_EXT_DLY_OFFS |
+		       MC6_TWL_EARLY_MASK << MC6_TWL_EARLY_OFFS);
 	/* printf("MC6_REG_OFF_SPEC_TIMING_0 addr 0x%x, data 0x%x\n", MC6_REG_OFF_SPEC_TIMING_0,
 	       reg_read(MC6_REG_OFF_SPEC_TIMING_0)); */
 
@@ -496,15 +494,6 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 		       MC6_TDQSCK_MASK << MC6_TDQSCK_OFFS);
 	/* printf("MC6_REG_DRAM_READ_TIMING addr 0x%x, data 0x%x\n", MC6_REG_DRAM_READ_TIMING,
 	       reg_read(MC6_REG_DRAM_READ_TIMING)); */
-
-	/* TODO: check why 0x3c8 register is missing from spec */
-	reg_bit_clrset(MC6_REG_CA_TRAIN_TIMING,
-		       mc6_timing.t_cackel << MC6_TCACKEL_OFFS |
-		       mc6_timing.t_caext << MC6_TCAEXT_OFFS,
-		       MC6_TCACKEL_MASK << MC6_TCACKEL_OFFS |
-		       MC6_TCAEXT_MASK << MC6_TCAEXT_OFFS);
-	/* printf("MC6_REG_CA_TRAIN_TIMING addr 0x%x, data 0x%x\n", MC6_REG_CA_TRAIN_TIMING,
-	       reg_read(MC6_REG_CA_TRAIN_TIMING)); */
 
 	reg_bit_clrset(MC6_REG_MPD_TIMING,
 		       mc6_timing.t_xmp << MC6_TXMP_OFFS |

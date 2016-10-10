@@ -971,7 +971,6 @@ int mv_ddr_mc6_init_controller(void)
 	reg_write(0x20050, 0xff);	/* Spool_Control default */
 	reg_write(0x20054, 0x4c0);	/* MC_pwr_ctl - default */
 	reg_write(0x2030c, 0x90000);	/* DRAM_Config_4: vref training value, odt? - config */
-	reg_write(0x203bc, 0x1050505);	/* MC6_REG_OFF_SPEC_TIMING_0 */
 
 	return MV_OK;
 }

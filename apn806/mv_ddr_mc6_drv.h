@@ -113,27 +113,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_DDR_MC6_TIMING_T_ACTPDEN	2
 #define MV_DDR_MC6_TIMING_T_ZQOPER	512
 #define MV_DDR_MC6_TIMING_T_ZQINIT	1024
-#define MV_DDR_MC6_TIMING_T_ZQCR	0
 #define MV_DDR_MC6_TIMING_T_ZQCS	128
 #define MV_DDR_MC6_TIMING_T_CCD		4
 #define MV_DDR_MC6_TIMING_T_MRD		8
-#define MV_DDR_MC6_TIMING_T_CAEXT	0
-#define MV_DDR_MC6_TIMING_T_CACKEL	0
-#define MV_DDR_MC6_TIMING_T_MPX_LH	0
-#define MV_DDR_MC6_TIMING_T_MPX_S	0
-#define MV_DDR_MC6_TIMING_T_XMP		0
-#define MV_DDR_MC6_TIMING_T_MRD_PDA	0
+#define MV_DDR_MC6_TIMING_T_MPX_LH	12000
+#define MV_DDR_MC6_TIMING_T_MPX_S	1
+#define MV_DDR_MC6_TIMING_T_XMP_OVER_TRFC	10000
+#define MV_DDR_MC6_TIMING_T_MRD_PDA	10000
 #define MV_DDR_MC6_TIMING_T_XSDLL	768 /* worst case */
 #define MV_DDR_MC6_TIMING_T_XP		6000
 #define MV_DDR_MC6_TIMING_T_RRDL	4900
 #define MV_DDR_MC6_TIMING_T_CKSRX	10000
 #define MV_DDR_MC6_TIMING_T_CKE		3000
-#define MV_DDR_MC6_TIMING_T_XS		170000
-#define MV_DDR_MC6_TIMING_T_XS_FAST	170000
-#define	MV_DDR_MC6_TIMING_T_RWD_EXT_DLY		1
-#define MV_DDR_MC6_TIMMING_T_CCD_CCS_WR_EXT_DLY	1
-#define MV_DDR_MC6_TIMING_T_CCD_CCS_EXT_DLY	0
-#define	MV_DDR_MC6_TIMING_READ_GAP_EXTEND	0
+#define MV_DDR_MC6_TIMING_T_XS_OVER_TRFC	10000
+#define	MV_DDR_MC6_TIMING_T_RWD_EXT_DLY		5
+#define MV_DDR_MC6_TIMING_T_WL_EARLY		1
+#define MV_DDR_MC6_TIMMING_T_CCD_CCS_WR_EXT_DLY	5
+#define MV_DDR_MC6_TIMING_T_CCD_CCS_EXT_DLY	5
+#define	MV_DDR_MC6_TIMING_READ_GAP_EXTEND	4	/* for dual cs */
 
 /* registers definition */
 #define MC6_BASE_ADDR			0x20000
@@ -203,6 +200,8 @@ enum {
 #define MC6_TXP_MASK			0x1f
 #define MC6_TCKESR_OFFS			16
 #define MC6_TCKESR_MASK			0x1f
+#define MC6_TCPDED_OFFS			24
+#define MC6_TCPDED_MASK			0x1f
 
 #define MC6_REG_POWER_DOWN_TIMING_1	(MC6_BASE_ADDR + 0x3A4)
 #define MC6_TPDEN_OFFS			0
@@ -262,6 +261,8 @@ enum {
 #define MC6_TCCD_CCS_WR_EXT_DLY_MASK	0x7
 #define MC6_TRWD_EXT_DLY_OFFS		16
 #define MC6_TRWD_EXT_DLY_MASK		0x7
+#define MC6_TWL_EARLY_OFFS		24
+#define MC6_TWL_EARLY_MASK		0x3
 
 #define MC6_REG_OFF_SPEC_TIMING_1	(MC6_BASE_ADDR + 0x3C0)
 #define MC6_READ_GAP_EXTEND_OFFS	0
@@ -399,6 +400,7 @@ struct mv_ddr_mc6_timing {
 	unsigned int t_xs;
 	unsigned int t_xs_fast;
 	unsigned int t_ckesr;
+	unsigned int t_cpded;
 	unsigned int t_cksrx;
 	unsigned int t_cksre;
 	unsigned int t_cke;
@@ -414,7 +416,6 @@ struct mv_ddr_mc6_timing {
 	unsigned int t_ccd_l;
 	unsigned int t_mrd;
 	unsigned int t_xsdll;
-	unsigned int t_zqcr;
 	unsigned int t_zqcs;
 	unsigned int t_zqoper;
 	unsigned int t_zqinit;
@@ -423,11 +424,10 @@ struct mv_ddr_mc6_timing {
 	unsigned int t_res;
 	unsigned int t_restcke;
 	unsigned int t_rwd_ext_dly;
+	unsigned int t_wl_early;
 	unsigned int t_ccd_ccs_wr_ext_dly;
 	unsigned int t_ccd_ccs_ext_dly;
 	unsigned int read_gap_extend;
-	unsigned int t_caext;
-	unsigned int t_cackel;
 	unsigned int t_mpx_lh;
 	unsigned int t_mpx_s;
 	unsigned int t_xmp;
