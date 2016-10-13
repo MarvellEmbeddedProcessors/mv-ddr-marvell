@@ -229,7 +229,11 @@ struct page_element page_param[] = {
 	/* 2G */
 	{ 1,		2,		4},
 	/* 4G */
+#if defined(CONFIG_DDR4)
+	{ 1,		2,		5},
+#else
 	{ 2,		2,		5},
+#endif
 	/* 8G */
 	{0, 0, 0}, /* TODO: placeholder for 16-Mbit die capacity */
 	{0, 0, 0}, /* TODO: placeholder for 32-Mbit die capacity */
@@ -2053,10 +2057,17 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	t_refi = (tm->interface_params[if_id].interface_temp == MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
 	t_refi *= 1000;	/* psec */
 	refresh_interval_cnt = t_refi / t_hclk;	/* no units */
-	t_faw = (page_size == 1) ? speed_bin_table(speed_bin_index, SPEED_BIN_TFAW1K) :
-				   speed_bin_table(speed_bin_index, SPEED_BIN_TFAW2K);
 
-	t_faw = time_to_nclk(t_faw, t_ckclk);
+	if (page_size == 1) {
+		t_faw = speed_bin_table(speed_bin_index, SPEED_BIN_TFAW1K);
+		t_faw = time_to_nclk(t_faw, t_ckclk);
+		t_faw = GET_MAX_VALUE(t_ckclk * 20, t_faw);
+	} else {	/* page size =2, we do not support page size 0.5k */
+		t_faw = speed_bin_table(speed_bin_index, SPEED_BIN_TFAW2K);
+		t_faw = time_to_nclk(t_faw, t_ckclk);
+		t_faw = GET_MAX_VALUE(t_ckclk * 28, t_faw);
+	}
+
 	t_pd = GET_MAX_VALUE(t_ckclk * 3, speed_bin_table(speed_bin_index, SPEED_BIN_TPD));
 	t_pd = time_to_nclk(t_pd, t_ckclk);
 
