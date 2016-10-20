@@ -2834,8 +2834,10 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 					tm->interface_params[first_active_if].
 					memory_freq);
 #if defined(a70x0) || defined(a70x0_cust) || defined(a80x0) || defined(a80x0_cust)
-		reg_write(0x6f812c, extension_avs); /* FIXME: disable extension AVS */
-		reg_write(0x6f8130, nominal_avs); /* FIXME: back to nominal AVS */
+	if (apn806_rev_id_get() == APN806_REV_ID_A0) {
+		reg_write(0x6f812c, extension_avs);
+		reg_write(0x6f8130, nominal_avs);
+	}
 #if defined(CONFIG_MC_STATIC)
 		/* FIXME: remove this configuration
 		 * this is a patch due to the DFS algorithm

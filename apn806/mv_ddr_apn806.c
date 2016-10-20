@@ -868,13 +868,15 @@ int ddr3_silicon_post_init(void)
 
 int mv_ddr_pre_training_soc_config(const char *ddr_type)
 {
-	/* read the avs volatage and save it for later: FIXME: remove after fixed */
-	nominal_avs = reg_read(0x6f8130);
-	extension_avs = reg_read(0x6f812c);
+	if (apn806_rev_id_get() == APN806_REV_ID_A0) {
+		/* read the avs volatage and save it for later */
+		nominal_avs = reg_read(0x6f8130);
+		extension_avs = reg_read(0x6f812c);
 
-	/* in case of running generic first write to avs */
-	reg_write(0x6f812C, 0xFDE1FFFF);	/* FIXME: extension avs */
-	reg_write(0x6f8130, 0x1002f2f5);	/* FIXME: avs to 1.13V */
+		/* in case of running generic first write to avs */
+		reg_write(0x6f812C, 0xFDE1FFFF);
+		reg_write(0x6f8130, 0x1002f2f5);
+	}
 
 	reg_write(0x116D8, 0x3CC);
 #if defined(a80x0) || defined(a80x0_cust)
