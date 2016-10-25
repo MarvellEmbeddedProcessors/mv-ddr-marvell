@@ -1190,6 +1190,10 @@ int ddr3_tip_configure_phy(u32 dev_num)
 					PARAM_NOT_CARE, DDR_PHY_DATA,/* PAD_ODT_CALIB_PHY_REG */ 0xA6, 0x200));
 	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 					PARAM_NOT_CARE, DDR_PHY_DATA,/* TEST_ADLL_REG */ 0xBF, 0x1));
+	/* set the phy register core_tx_data_samp_edge to posadge */
+	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+					PARAM_NOT_CARE, DDR_PHY_DATA, PHY_CONTROL_PHY_REG, 0x6002));
+
 
 	return MV_OK;
 }
