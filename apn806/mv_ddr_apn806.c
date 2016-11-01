@@ -218,10 +218,10 @@ static u8 rate_per_freq[DDR_FREQ_LAST] = {
 	0x2,	/* DDR_FREQ_800 */
 	0x3,	/* DDR_FREQ_933 */
 	0x3,	/* DDR_FREQ_1066 */
-	0x2,	/* DDR_FREQ_900 */
-	0x2,	/* DDR_FREQ_1000 */
-	0x2,	/* DDR_FREQ_1050 */
-	0x2,	/* DDR_FREQ_1200 */
+	0x3,	/* DDR_FREQ_900 */
+	0x3,	/* DDR_FREQ_1000 */
+	0x3,	/* DDR_FREQ_1050 */
+	0x3,	/* DDR_FREQ_1200 */
 };
 
 /*

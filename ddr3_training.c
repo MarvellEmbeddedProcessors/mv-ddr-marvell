@@ -2061,11 +2061,11 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	if (page_size == 1) {
 		t_faw = speed_bin_table(speed_bin_index, SPEED_BIN_TFAW1K);
 		t_faw = time_to_nclk(t_faw, t_ckclk);
-		t_faw = GET_MAX_VALUE(t_ckclk * 20, t_faw);
+		t_faw = GET_MAX_VALUE(20, t_faw);
 	} else {	/* page size =2, we do not support page size 0.5k */
 		t_faw = speed_bin_table(speed_bin_index, SPEED_BIN_TFAW2K);
 		t_faw = time_to_nclk(t_faw, t_ckclk);
-		t_faw = GET_MAX_VALUE(t_ckclk * 28, t_faw);
+		t_faw = GET_MAX_VALUE(28, t_faw);
 	}
 
 	t_pd = GET_MAX_VALUE(t_ckclk * 3, speed_bin_table(speed_bin_index, SPEED_BIN_TPD));
@@ -2109,7 +2109,11 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	/* SDRAM Timing Low */
 	val = (((t_ras - 1) & SDRAM_TIMING_LOW_TRAS_MASK) << SDRAM_TIMING_LOW_TRAS_OFFS) |
 	      (((t_rcd - 1) & SDRAM_TIMING_LOW_TRCD_MASK) << SDRAM_TIMING_LOW_TRCD_OFFS) |
+	      (((t_rcd - 1) >> SDRAM_TIMING_LOW_TRCD_OFFS & SDRAM_TIMING_HIGH_TRCD_MASK)
+	      << SDRAM_TIMING_LOW_TRCD_OFFS) |
 	      (((t_rp - 1) & SDRAM_TIMING_LOW_TRP_MASK) << SDRAM_TIMING_LOW_TRP_OFFS) |
+	      (((t_rp - 1) >> SDRAM_TIMING_LOW_TRP_MASK & SDRAM_TIMING_HIGH_TRP_MASK)
+	      << SDRAM_TIMING_HIGH_TRP_OFFS) |
 	      (((t_wr - 1) & SDRAM_TIMING_LOW_TWR_MASK) << SDRAM_TIMING_LOW_TWR_OFFS) |
 	      (((t_wtr - 1) & SDRAM_TIMING_LOW_TWTR_MASK) << SDRAM_TIMING_LOW_TWTR_OFFS) |
 	      ((((t_ras - 1) >> 4) & SDRAM_TIMING_LOW_TRAS_HIGH_MASK) << SDRAM_TIMING_LOW_TRAS_HIGH_OFFS) |
@@ -2118,7 +2122,9 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 
 	mask = (SDRAM_TIMING_LOW_TRAS_MASK << SDRAM_TIMING_LOW_TRAS_OFFS) |
 	       (SDRAM_TIMING_LOW_TRCD_MASK << SDRAM_TIMING_LOW_TRCD_OFFS) |
+	       (SDRAM_TIMING_HIGH_TRCD_MASK << SDRAM_TIMING_HIGH_TRCD_OFFS) |
 	       (SDRAM_TIMING_LOW_TRP_MASK << SDRAM_TIMING_LOW_TRP_OFFS) |
+	       (SDRAM_TIMING_HIGH_TRP_MASK << SDRAM_TIMING_HIGH_TRP_OFFS) |
 	       (SDRAM_TIMING_LOW_TWR_MASK << SDRAM_TIMING_LOW_TWR_OFFS) |
 	       (SDRAM_TIMING_LOW_TWTR_MASK << SDRAM_TIMING_LOW_TWTR_OFFS) |
 	       (SDRAM_TIMING_LOW_TRAS_HIGH_MASK << SDRAM_TIMING_LOW_TRAS_HIGH_OFFS) |
@@ -2227,7 +2233,7 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	t_ccd = 4; /* per t_ccd_s value in DDR4 JEDEC Standard */
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
 				       DDR_TIMING_REG,
-				       (t_ccd & DDR_TIMING_TCCD_MASK) << DDR_TIMING_TCCD_OFFS,
+				       ((t_ccd - 1) & DDR_TIMING_TCCD_MASK) << DDR_TIMING_TCCD_OFFS,
 				       DDR_TIMING_TCCD_MASK << DDR_TIMING_TCCD_OFFS));
 
 	return MV_OK;
