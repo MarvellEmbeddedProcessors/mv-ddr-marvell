@@ -183,7 +183,7 @@ clean:
 # *******************
 # MARVELL ATF SUPPORT
 # *******************
-else # ifeq ($(DDR3LIB), 3)
+else
 CROSS    = $(CROSS_COMPILE)
 
 LD       = $(CROSS)ld
@@ -203,90 +203,84 @@ CAT      = @cat
 PWD      = @pwd
 ECHO     = @echo
 
-OBJ_DIR ?= . # set to $(CUR_DIR)/$(BUILD_PLAT)/ble in ble/ble.mk
-SRCDIRS = . ./apn806
+# OBJ_DIR set in ble/ble.mk
+OBJ_DIR ?= .
 MV_DDR4 = y
 
-ifeq ($(MV_DDR4),y)
-SRCDIR4 = ../mv_ddr4
+MV_DDR_SRCPATH = . ./apn806
+ifeq ($(MV_DDR4_BUILD),y)
+# MV_DDR4_PATH may be set externally
+MV_DDR4_PATH ?= ../mv_ddr4
+MV_DDR4_SRCPATH = $(MV_DDR4_PATH)
 endif
 
-INCPATH = $(SRCDIRS) ./include
-ifeq ($(MV_DDR4),y)
-INCPATH += ../mv_ddr4
+INCPATH = $(MV_DDR_SRCPATH)
+ifeq ($(MV_DDR4_BUILD),y)
+INCPATH += $(MV_DDR4_SRCPATH)
 endif
-INCLUDE = $(addprefix -I, $(INCPATH))
+INCLUDE = $(addprefix -I,$(INCPATH))
+# PLAT_INCLUDES set in ble/ble.mk
 INCLUDE += $(PLAT_INCLUDES)
 
-LIBNAME = mv_ddr_lib.a
-LIB = $(OBJ_DIR)/$(LIBNAME)
-ifeq ($(MV_DDR4),y)
-LIBNAME4 = mv_ddr4_lib.a
-LIB4 = ./$(LIBNAME4)
-endif
+MV_DDR_LIBNAME = mv_ddr_lib.a
+MV_DDR_LIB = $(OBJ_DIR)/$(MV_DDR_LIBNAME)
+MV_DDR4_LIBNAME = mv_ddr4_lib.a
+MV_DDR4_LIB = ./$(MV_DDR4_LIBNAME)
 
 CFLAGS = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2 -nostdinc
+# PLATFORM is set in ble/ble.mk
 CFLAGS += -march=armv8-a -fpie $(INCLUDE) -D$(PLATFORM)
-
 CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806# -DCONFIG_MC_STATIC
-
 ifeq ($(MV_DDR4),y)
 CFLAGS += -DCONFIG_DDR4
 endif
-
-ifeq ($(PLAT),$(filter $(PLAT),a80x0 a80x0_cust))
+ifeq ($(PLATFORM),$(filter $(PLATFORM),a80x0 a80x0_cust))
 CFLAGS += -DCONFIG_64BIT
 endif
 
-LDFLAGS  = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
+LDFLAGS = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
-CSRC  = $(foreach DIR, $(SRCDIRS), $(wildcard $(DIR)/*.c))
-ifeq ($(MV_DDR4),y)
-CSRC4 = $(wildcard $(SRCDIR4)/*.c)
+MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_SRCPATH),$(wildcard $(DIR)/*.c))
+ifeq ($(MV_DDR4_BUILD),y)
+MV_DDR4_CSRC = $(wildcard $(MV_DDR4_SRCPATH)/*.c)
 endif
-ASRC = $(foreach DIR, $(SRCDIRS), $(wildcard $(DIR)/*.S))
 
-COBJ  = $(patsubst %.c,$(OBJ_DIR)/%.o,$(CSRC))
-ifeq ($(MV_DDR4),y)
-COBJ4 = $(CSRC4:.c=.o)
+MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
+ifeq ($(MV_DDR4_BUILD),y)
+MV_DDR4_COBJ = $(MV_DDR4_CSRC:.c=.o)
 endif
-COBJ += $(patsubst %.S,$(OBJ_DIR)/%.o,$(ASRC))
 
 .SILENT:
 
-ifeq ($(MV_DDR4),y)
-all: check_env header create_dir $(LIB) $(LIB4)
-else
-all: check_env header create_dir $(LIB)
-endif
+all: check_env header create_dir $(MV_DDR4_LIB) $(MV_DDR_LIB)
 
+# mv_ddr4 code compilation
 %.o: %.c
+	$(ECHO) "  CC      $<"
 	$(CC) -c $(CFLAGS) -o $@ $<
 
+# mv_ddr code compilation
 $(OBJ_DIR)/%.o: %.c
 	$(ECHO) "  CC      $<"
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-$(OBJ_DIR)/%.o: %.S
-	$(ECHO) "  AS      $<"
-	$(CC) -c $(CFLAGS) -o $@ $<
-
-$(LIB): $(COBJ)
-	$(ECHO) "  AR      $(LIBNAME)"
-	$(AR) rcs $(LIB) $(COBJ)
+$(MV_DDR_LIB): $(MV_DDR_COBJ)
+	$(ECHO) "  AR      $(MV_DDR_LIBNAME)"
+	$(AR) rcs $(MV_DDR_LIB) $(MV_DDR_COBJ)
 
 ifeq ($(MV_DDR4_BUILD),y)
-$(LIB4): $(COBJ4)
-	$(RM) $(LIB4)
-	$(ECHO) "  AR      $(LIBNAME4)"
-	$(AR) rcs $(LIB4) $(COBJ4)
-	$(STRIP) --strip-unneeded $(LIB4)
-	$(CP) $(LIB4) $(OBJ_DIR)
-	$(RM) $(COBJ4)
+$(MV_DDR4_LIB): $(MV_DDR4_COBJ)
+	$(RM) $(MV_DDR4_LIB)
+	$(ECHO) "  AR      $(MV_DDR4_LIBNAME)"
+	$(AR) rcs $(MV_DDR4_LIB) $(MV_DDR4_COBJ)
+	$(STRIP) --strip-unneeded $(MV_DDR4_LIB)
+	$(ECHO) "  CP      $(MV_DDR4_LIBNAME)"
+	$(CP) $(MV_DDR4_LIB) $(OBJ_DIR)
+	$(RM) $(MV_DDR4_COBJ)
 else
-$(LIB4): $(OBJ_DIR)
-	$(ECHO) "  CP      $(LIBNAME4)"
-	$(CP) $(LIB4) $(OBJ_DIR)
+$(MV_DDR4_LIB): $(OBJ_DIR)
+	$(ECHO) "  CP      $(MV_DDR4_LIBNAME)"
+	$(CP) $(MV_DDR4_LIB) $(OBJ_DIR)
 endif
 
 create_dir:
@@ -302,6 +296,6 @@ endif
 
 clean:
 	$(ECHO) "  CLEAN"
-	@$(RM) $(COBJ) $(LIB)
+	@$(RM) $(MV_DDR_COBJ) $(MV_DDR_LIB)
 
-endif # ifeq ($(DDR3LIB), 3)
+endif
