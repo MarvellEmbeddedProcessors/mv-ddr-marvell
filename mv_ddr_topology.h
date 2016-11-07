@@ -169,6 +169,20 @@ enum mv_ddr_pkg_rank { /* number of package ranks per dimm */
 	MV_DDR_PKG_RANK_LAST
 };
 
+enum mv_ddr_pri_bus_width { /* number of primary bus width bits */
+	MV_DDR_PRI_BUS_WIDTH_8,
+	MV_DDR_PRI_BUS_WIDTH_16,
+	MV_DDR_PRI_BUS_WIDTH_32,
+	MV_DDR_PRI_BUS_WIDTH_64,
+	MV_DDR_PRI_BUS_WIDTH_LAST
+};
+
+enum mv_ddr_bus_width_ext { /* number of extension bus width bits */
+	MV_DDR_BUS_WIDTH_EXT_0,
+	MV_DDR_BUS_WIDTH_EXT_8,
+	MV_DDR_BUS_WIDTH_EXT_LAST
+};
+
 enum mv_ddr_die_count {
 	MV_DDR_DIE_CNT_1,
 	MV_DDR_DIE_CNT_2,
@@ -185,5 +199,6 @@ unsigned int mv_ddr_cl_calc(unsigned int taa_min, unsigned int tclk);
 unsigned int mv_ddr_cwl_calc(unsigned int tclk);
 struct mv_ddr_topology_map *mv_ddr_topology_map_update(void);
 struct dram_config *mv_ddr_dram_config_update(void);
+unsigned short mv_ddr_bus_bit_mask_get(void);
 
 #endif /* _MV_DDR_TOPOLOGY_H */

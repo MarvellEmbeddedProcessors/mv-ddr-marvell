@@ -375,5 +375,7 @@ unsigned char mv_ddr_spd_dev_type_get(union mv_ddr_spd_data *spd_data);
 unsigned char mv_ddr_spd_module_type_get(union mv_ddr_spd_data *spd_data);
 int mv_ddr_spd_supported_cls_calc(union mv_ddr_spd_data *spd_data);
 unsigned int mv_ddr_spd_supported_cl_get(unsigned int cl);
+enum mv_ddr_pkg_rank mv_ddr_spd_pri_bus_width_get(union mv_ddr_spd_data *spd_data);
+enum mv_ddr_pkg_rank mv_ddr_spd_bus_width_ext_get(union mv_ddr_spd_data *spd_data);
 
 #endif /* _MV_DDR_SPD_H */

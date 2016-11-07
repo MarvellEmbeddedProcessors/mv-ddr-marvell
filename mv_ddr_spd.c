@@ -317,6 +317,51 @@ unsigned char mv_ddr_spd_mem_mirror_get(union mv_ddr_spd_data *spd_data)
 
 	return mem_mirror;
 }
+
+enum mv_ddr_pkg_rank mv_ddr_spd_pri_bus_width_get(union mv_ddr_spd_data *spd_data)
+{
+	unsigned char pri_bus_width = spd_data->byte_fields.byte_13.bit_fields.primary_bus_width;
+	enum mv_ddr_pri_bus_width ret_val;
+
+	switch (pri_bus_width) {
+	case 0x00:
+		ret_val = MV_DDR_PRI_BUS_WIDTH_8;
+		break;
+	case 0x01:
+		ret_val = MV_DDR_PRI_BUS_WIDTH_16;
+		break;
+	case 0x02:
+		ret_val = MV_DDR_PRI_BUS_WIDTH_32;
+		break;
+	case 0x03:
+		ret_val = MV_DDR_PRI_BUS_WIDTH_64;
+		break;
+	default:
+		ret_val = MV_DDR_PRI_BUS_WIDTH_LAST;
+	}
+
+	return ret_val;
+}
+
+enum mv_ddr_pkg_rank mv_ddr_spd_bus_width_ext_get(union mv_ddr_spd_data *spd_data)
+{
+	unsigned char bus_width_ext = spd_data->byte_fields.byte_13.bit_fields.bus_width_ext;
+	enum mv_ddr_bus_width_ext ret_val;
+
+	switch (bus_width_ext) {
+	case 0x00:
+		ret_val = MV_DDR_BUS_WIDTH_EXT_0;
+		break;
+	case 0x01:
+		ret_val = MV_DDR_BUS_WIDTH_EXT_8;
+		break;
+	default:
+		ret_val = MV_DDR_BUS_WIDTH_EXT_LAST;
+	}
+
+	return ret_val;
+}
+
 static enum mv_ddr_pkg_rank mv_ddr_spd_pkg_rank_get(union mv_ddr_spd_data *spd_data)
 {
 	unsigned char pkg_rank = spd_data->byte_fields.byte_12.bit_fields.dimm_pkg_ranks_num;

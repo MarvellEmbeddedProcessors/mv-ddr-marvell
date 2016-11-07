@@ -174,6 +174,9 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 		/* update die capacity in topology map */
 		tm->interface_params[0].memory_size = mv_ddr_spd_die_capacity_get(&tm->spd_data);
 
+		/* update bus bit mask in topology map */
+		tm->bus_act_mask = mv_ddr_bus_bit_mask_get();
+
 		/* update cs bit mask in topology map */
 		val = mv_ddr_spd_cs_bit_mask_get(&tm->spd_data);
 #ifdef CONFIG_APN806
@@ -234,4 +237,35 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 	}
 
 	return tm;
+}
+
+unsigned short mv_ddr_bus_bit_mask_get(void)
+{
+	unsigned short pri_and_ext_bus_width = 0x0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+
+	if (tm->cfg_src == MV_DDR_CFG_SPD) {
+		enum mv_ddr_pri_bus_width pri_bus_width = mv_ddr_spd_pri_bus_width_get(&tm->spd_data);
+		enum mv_ddr_bus_width_ext bus_width_ext = mv_ddr_spd_bus_width_ext_get(&tm->spd_data);
+
+		switch (pri_bus_width) {
+		case MV_DDR_PRI_BUS_WIDTH_16:
+			pri_and_ext_bus_width = BUS_MASK_16BIT;
+			break;
+		case MV_DDR_PRI_BUS_WIDTH_32:
+			pri_and_ext_bus_width = BUS_MASK_32BIT;
+			break;
+		case MV_DDR_PRI_BUS_WIDTH_64:
+			pri_and_ext_bus_width = MV_DDR_64BIT_BUS_MASK;
+			break;
+		default:
+			pri_and_ext_bus_width = 0x0;
+		}
+
+		if (bus_width_ext == MV_DDR_BUS_WIDTH_EXT_8)
+			pri_and_ext_bus_width |= 1 << (octets_per_if_num - 1);
+	}
+
+	return pri_and_ext_bus_width;
 }
