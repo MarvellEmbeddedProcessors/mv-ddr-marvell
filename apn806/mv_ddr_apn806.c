@@ -723,6 +723,7 @@ int ddr3_silicon_pre_init(void)
 {
 	int dev_num = 0;
 	int board_id = 0;
+	int subphy_num;
 	static int init_done;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
@@ -746,6 +747,11 @@ int ddr3_silicon_pre_init(void)
 	 */
 	int rev_id = apn806_rev_id_get();
 	if (rev_id == APN806_REV_ID_A0) {
+		/* update the number of cs to be 'single cs in case of A0 */
+		for (subphy_num = 0; subphy_num < MAX_BUS_NUM; subphy_num++) {
+			tm->interface_params[IF_ID_0].as_bus_params[subphy_num].cs_bitmask = 0x1;
+			tm->interface_params[IF_ID_0].as_bus_params[subphy_num].mirror_enable_bitmask = 0x0;
+		}
 		reg_write(0x114cc, 0x1200d);
 		reg_write(0x114c8, 0x1840008);
 		reg_write(0x117c8, 0x28a0008);
