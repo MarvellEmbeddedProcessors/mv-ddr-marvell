@@ -426,6 +426,18 @@ enum {
 #define ODPG_BIST_DONE_BIT_VALUE_REV3		0
 
 #define WL_PHY_REG				0x0
+#define WR_LVL_PH_SEL_OFFS			6
+#define WR_LVL_PH_SEL_MASK			0x7
+enum {
+	FIRST_PHASE = 0x1,
+	SECOND_PHASE,
+	THIRD_PHASE,
+	FOURTH_PHASE,
+	FIFTH_PHASE,
+	SIXTH_PHASE,
+	SEVENTH_PHASE
+};
+
 #define WRITE_CENTRALIZATION_PHY_REG		0x1
 #define RL_PHY_REG				0x2
 #define READ_CENTRALIZATION_PHY_REG		0x3
@@ -572,7 +584,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 ui_freq);
 int ddr3_tip_legacy_dynamic_read_leveling(u32 dev_num);
 int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 ui_freq);
 int ddr3_tip_legacy_dynamic_write_leveling(u32 dev_num);
-int ddr3_tip_dynamic_write_leveling(u32 dev_num);
+int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove);
 int ddr3_tip_dynamic_write_leveling_supp(u32 dev_num);
 int ddr3_tip_static_init_controller(u32 dev_num);
 int ddr3_tip_configure_phy(u32 dev_num);

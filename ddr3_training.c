@@ -2661,6 +2661,21 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 		}
 	}
 
+	if (mask_tune_func & WRITE_LEVELING_LF_MASK_BIT) {
+		training_stage = WRITE_LEVELING_LF;
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
+			("WRITE_LEVELING_LF_MASK_BIT\n"));
+		ret = ddr3_tip_dynamic_write_leveling(dev_num, 1);
+		if (is_reg_dump != 0)
+			ddr3_tip_reg_dump(dev_num);
+		if (ret != MV_OK) {
+			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
+				("ddr3_tip_dynamic_write_leveling LF failure\n"));
+			if (debug_mode == 0)
+				return MV_FAIL;
+		}
+	}
+
 	for (effective_cs = 0; effective_cs < max_cs; effective_cs++) {
 		if (mask_tune_func & LOAD_PATTERN_MASK_BIT) {
 			training_stage = LOAD_PATTERN;
@@ -2713,7 +2728,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 				  ("WRITE_LEVELING_MASK_BIT\n"));
 		if ((rl_mid_freq_wa == 0) || (freq_val[medium_freq] == 533)) {
-			ret = ddr3_tip_dynamic_write_leveling(dev_num);
+			ret = ddr3_tip_dynamic_write_leveling(dev_num, 0);
 		} else {
 			/* Use old WL */
 			ret = ddr3_tip_legacy_dynamic_write_leveling(dev_num);
@@ -2866,7 +2881,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 		training_stage = WRITE_LEVELING_TF;
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 				  ("WRITE_LEVELING_TF_MASK_BIT\n"));
-		ret = ddr3_tip_dynamic_write_leveling(dev_num);
+		ret = ddr3_tip_dynamic_write_leveling(dev_num, 0);
 		if (is_reg_dump != 0)
 			ddr3_tip_reg_dump(dev_num);
 		if (ret != MV_OK) {
