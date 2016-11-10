@@ -663,6 +663,7 @@ static int ddr3_tip_init_apn806_silicon(u32 dev_num, u32 board_id)
 
 #if defined(CONFIG_DDR4)
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
+			  WRITE_LEVELING_LF_MASK_BIT |
 			  LOAD_PATTERN_MASK_BIT |
 			  SET_TARGET_FREQ_MASK_BIT |
 			  WRITE_LEVELING_TF_MASK_BIT |
