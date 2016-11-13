@@ -1011,7 +1011,7 @@ void mv_ddr_mc6_sizes_cfg(void)
 			       MC6_BA_NUM_MASK << MC6_BA_NUM_OFFS |
 			       MC6_BG_NUM_MASK << MC6_BG_NUM_OFFS |
 			       MC6_CA_NUM_MASK << MC6_CA_NUM_OFFS |
-			       MC6_RA_NUM_MASK << MC6_CA_NUM_OFFS |
+			       MC6_RA_NUM_MASK << MC6_RA_NUM_OFFS |
 			       MC6_SA_NUM_MASK << MC6_SA_NUM_OFFS |
 			       MC6_DEVICE_TYPE_MASK << MC6_DEVICE_TYPE_OFFS |
 			       MC6_BANK_MAP_MASK << MC6_BANK_MAP_OFFS);
