@@ -109,5 +109,5 @@ unsigned int ceil_div(unsigned int x, unsigned int y)
 unsigned int time_to_nclk(unsigned int t, unsigned int tclk)
 {
 	/* t & tclk parameters are in ps */
-	return (t * 1000 / tclk + 974) / 1000;
+	return ((unsigned long)t * 1000 / tclk + 974) / 1000;
 }
