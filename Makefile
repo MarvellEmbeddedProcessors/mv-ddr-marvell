@@ -131,16 +131,7 @@ ifeq "$(CONFIG_ARMADA_39X)"  "y"
   INCLUDE += -I$(BH_ROOT_DIR)/src_ddr/mv_ddr/a38x
 endif
 
-ifeq ($(DDRTYPE),ddr4)
-	INCLUDE += -I$(BH_ROOT_DIR)/src_ddr/mv_ddr4
-endif
-
 TLIB = ./$(DDRTYPE)_training_$(LIBNAME).lib
-
-TDDR4SUBLIB = ./$(DDRTYPE)_training_$(LIBNAME)sub.lib
-
-TSRCDDR4 = $(wildcard ../mv_ddr4/*.c)
-
 
 TSRC = $(wildcard ./*.c)
 # A38x
@@ -153,24 +144,13 @@ ifeq "$(CONFIG_ARMADA_39X)"  "y"
 endif
 
 TOBJ = $(TSRC:.c=.o)
-TOBJDDR4 = $(TSRCDDR4:.c=.o)
 
-ifeq ($(DDR4SUBLIB),yes)
-	TARGETS = $(TLIB) $(TDDR4SUBLIB)
-else
-	TARGETS = $(TLIB)
-endif
-
+TARGETS = $(TLIB)
 
 all:   $(TARGETS)
 
 %.o: %.c
 	$(CC) $(INCLUDE) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
-
-$(TDDR4SUBLIB): $(TOBJDDR4)
-	$(RM) ./$@
-	ar rcs $(TDDR4SUBLIB) $(TOBJDDR4)
-	$(CP) ./$@ ../lib
 
 $(TLIB): $(TOBJ)
 	$(RM) ./$@
@@ -208,24 +188,14 @@ OBJ_DIR ?= .
 MV_DDR4 = y
 
 MV_DDR_SRCPATH = . ./apn806
-ifeq ($(MV_DDR4_BUILD),y)
-# MV_DDR4_PATH may be set externally
-MV_DDR4_PATH ?= ../mv_ddr4
-MV_DDR4_SRCPATH = $(MV_DDR4_PATH)
-endif
 
 INCPATH = $(MV_DDR_SRCPATH)
-ifeq ($(MV_DDR4_BUILD),y)
-INCPATH += $(MV_DDR4_SRCPATH)
-endif
 INCLUDE = $(addprefix -I,$(INCPATH))
 # PLAT_INCLUDES set in ble/ble.mk
 INCLUDE += $(PLAT_INCLUDES)
 
 MV_DDR_LIBNAME = mv_ddr_lib.a
 MV_DDR_LIB = $(OBJ_DIR)/$(MV_DDR_LIBNAME)
-MV_DDR4_LIBNAME = mv_ddr4_lib.a
-MV_DDR4_LIB = ./$(MV_DDR4_LIBNAME)
 
 CFLAGS = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2 -nostdinc
 # PLATFORM is set in ble/ble.mk
@@ -241,23 +211,12 @@ endif
 LDFLAGS = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
 MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_SRCPATH),$(wildcard $(DIR)/*.c))
-ifeq ($(MV_DDR4_BUILD),y)
-MV_DDR4_CSRC = $(wildcard $(MV_DDR4_SRCPATH)/*.c)
-endif
 
 MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
-ifeq ($(MV_DDR4_BUILD),y)
-MV_DDR4_COBJ = $(MV_DDR4_CSRC:.c=.o)
-endif
 
 .SILENT:
 
-all: check_env header create_dir $(MV_DDR4_LIB) $(MV_DDR_LIB)
-
-# mv_ddr4 code compilation
-%.o: %.c
-	$(ECHO) "  CC      $<"
-	$(CC) -c $(CFLAGS) -o $@ $<
+all: check_env header create_dir $(MV_DDR_LIB)
 
 # mv_ddr code compilation
 $(OBJ_DIR)/%.o: %.c
@@ -267,21 +226,6 @@ $(OBJ_DIR)/%.o: %.c
 $(MV_DDR_LIB): $(MV_DDR_COBJ)
 	$(ECHO) "  AR      $(MV_DDR_LIBNAME)"
 	$(AR) rcs $(MV_DDR_LIB) $(MV_DDR_COBJ)
-
-ifeq ($(MV_DDR4_BUILD),y)
-$(MV_DDR4_LIB): $(MV_DDR4_COBJ)
-	$(RM) $(MV_DDR4_LIB)
-	$(ECHO) "  AR      $(MV_DDR4_LIBNAME)"
-	$(AR) rcs $(MV_DDR4_LIB) $(MV_DDR4_COBJ)
-	$(STRIP) --strip-unneeded $(MV_DDR4_LIB)
-	$(ECHO) "  CP      $(MV_DDR4_LIBNAME)"
-	$(CP) $(MV_DDR4_LIB) $(OBJ_DIR)
-	$(RM) $(MV_DDR4_COBJ)
-else
-$(MV_DDR4_LIB): $(OBJ_DIR)
-	$(ECHO) "  CP      $(MV_DDR4_LIBNAME)"
-	$(CP) $(MV_DDR4_LIB) $(OBJ_DIR)
-endif
 
 create_dir:
 	$(MKDIR) $(OBJ_DIR)/apn806
