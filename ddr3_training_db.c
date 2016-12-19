@@ -998,6 +998,12 @@ u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 					pattern = ((index % 2) == 0) ? 0xffffffff : 0x00000000;
 			}
 			break;
+		case PATTERN_ZERO:
+			pattern = PATTERN_00;
+			break;
+		case PATTERN_ONE:
+			pattern = PATTERN_FF;
+			break;
 		case PATTERN_VREF_INV:
 			pattern = ~pattern_table_get_vref_word(index);
 			break;
