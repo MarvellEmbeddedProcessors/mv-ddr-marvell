@@ -526,3 +526,53 @@ int mv_ddr_bist_tx(enum hws_access_type access_type)
 
 	return MV_OK;
 }
+
+/* TODO: to be defined as static when in use by another function */
+/* prepare odpg for bist operation */
+#define WR_OP_ODPG_DATA_CMD_BURST_DLY	2
+int mv_ddr_odpg_bist_prepare(enum hws_pattern pattern, enum hws_access_type access_type,
+			     enum hws_dir dir, enum hws_stress_jump stress_jump_addr,
+			     enum hws_pattern_duration duration, u32 offset, u32 cs,
+			     u32 pattern_addr_len, enum dm_direction dm_dir)
+{
+	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
+	u32 tx_burst_size;
+	u32 burst_delay;
+	u32 rd_mode;
+
+	/* odpg bist write enable */
+	ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_CTRL_REG,
+			  (ODPG_WRBUF_WR_CTRL_ENA << ODPG_WRBUF_WR_CTRL_OFFS),
+			  (ODPG_WRBUF_WR_CTRL_MASK << ODPG_WRBUF_WR_CTRL_OFFS));
+
+	/* odpg bist read enable/disable */
+	ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_CTRL_REG,
+			  (dir == OPER_READ) ? (ODPG_WRBUF_RD_CTRL_ENA << ODPG_WRBUF_RD_CTRL_OFFS) :
+					       (ODPG_WRBUF_RD_CTRL_DIS << ODPG_WRBUF_RD_CTRL_OFFS),
+			  (ODPG_WRBUF_RD_CTRL_MASK << ODPG_WRBUF_RD_CTRL_OFFS));
+
+#if defined(CONFIG_DDR4)
+	if (pattern == PATTERN_ZERO || pattern == PATTERN_ONE)
+#else
+	if (pattern == PATTERN_00 || pattern == PATTERN_FF)
+#endif
+		ddr3_tip_load_pattern_to_odpg(0, access_type, 0, pattern, offset);
+	else
+		mv_ddr_load_dm_pattern_to_odpg(access_type, pattern, dm_dir);
+
+	ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_BUFFER_SIZE_REG, pattern_addr_len, MASK_ALL_BITS);
+	if (dir == OPER_WRITE) {
+		tx_burst_size = pattern_table[pattern].tx_burst_size;
+		burst_delay = WR_OP_ODPG_DATA_CMD_BURST_DLY;
+		rd_mode = ODPG_MODE_TX;
+	} else {
+		tx_burst_size = 0;
+		burst_delay = 0;
+		rd_mode = ODPG_MODE_RX;
+	}
+	ddr3_tip_configure_odpg(0, access_type, 0, dir, pattern_table[pattern].num_of_phases_tx,
+				tx_burst_size, pattern_table[pattern].num_of_phases_rx, burst_delay,
+				rd_mode, cs, stress_jump_addr, duration);
+
+	return MV_OK;
+}

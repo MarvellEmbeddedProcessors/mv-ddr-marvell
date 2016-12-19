@@ -372,6 +372,12 @@ enum {
 #define ODPG_WRBUF_RD_CTRL_MASK			0x1
 #define ODPG_WRBUF_RD_CTRL_DIS			0
 #define ODPG_WRBUF_RD_CTRL_ENA			1
+#define ODPG_DATA_CBDEL_OFFS			15
+#define ODPG_DATA_CBDEL_MASK			0x3f
+#define ODPG_MODE_OFFS				25
+#define ODPG_MODE_MASK				0x1
+#define ODPG_MODE_RX				0
+#define ODPG_MODE_TX				1
 #define ODPG_DATA_CS_OFFS			26
 #define ODPG_DATA_CS_MASK			0x3
 #define ODPG_DISABLE_OFFS			30
