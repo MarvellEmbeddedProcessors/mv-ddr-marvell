@@ -306,3 +306,30 @@ void ddr3_tip_print_bist_res(void)
 			 st_bist_result[i].bist_last_fail_addr));
 	}
 }
+
+enum {
+	PASS,
+	FAIL
+};
+/* TODO: to be defined as static when in use by another function */
+#define TIP_ITERATION_NUM	31
+int mv_ddr_tip_bist(enum hws_dir dir, u32 val, enum hws_pattern pattern, u32 cs, u32 *result)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum hws_training_ip_stat training_result;
+	u16 *reg_map = ddr3_tip_get_mask_results_pup_reg_map();
+	u32 max_subphy = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 subphy, read_data;
+
+	ddr3_tip_ip_training(0, ACCESS_TYPE_MULTICAST, 0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+			     RESULT_PER_BYTE, HWS_CONTROL_ELEMENT_ADLL, HWS_LOW2HIGH, dir, tm->if_act_mask, val,
+			     TIP_ITERATION_NUM, pattern, EDGE_FP, CS_SINGLE, cs, &training_result);
+
+	for (subphy = 0; subphy < max_subphy; subphy++) {
+		ddr3_tip_if_read(0, ACCESS_TYPE_UNICAST, 0, reg_map[subphy], &read_data, MASK_ALL_BITS);
+		if (((read_data >> BLOCK_STATUS_OFFS) & BLOCK_STATUS_MASK) == BLOCK_STATUS_NOT_LOCKED)
+			*result |= (FAIL << subphy);
+	}
+
+	return MV_OK;
+}

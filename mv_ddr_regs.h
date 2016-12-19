@@ -433,6 +433,12 @@ enum {
 #define ODPG_DONE_STATUS_BIT_CLR		0
 #define ODPG_DONE_STATUS_BIT_SET		1
 
+#define RESULT_CTRL_BASE			0x1830
+#define BLOCK_STATUS_OFFS			25
+#define BLOCK_STATUS_MASK			0x1
+#define BLOCK_STATUS_LOCK			1
+#define BLOCK_STATUS_NOT_LOCKED			0
+
 #define MR0_REG					0x15d0
 #define MR1_REG					0x15d4
 #define MR2_REG					0x15d8
