@@ -333,3 +333,181 @@ int mv_ddr_tip_bist(enum hws_dir dir, u32 val, enum hws_pattern pattern, u32 cs,
 
 	return MV_OK;
 }
+
+struct interval {
+	u8 *vector;
+	u8 lendpnt;		/* interval's left endpoint */
+	u8 rendpnt;		/* interval's right endpoint */
+	u8 size;		/* interval's size */
+	u8 lmarker;		/* left marker */
+	u8 rmarker;		/* right marker */
+	u8 pass_lendpnt;	/* left endpoint of internal pass interval */
+	u8 pass_rendpnt;	/* right endpoint of internal pass interval */
+};
+
+static int interval_init(u8 *vector, u8 lendpnt, u8 rendpnt,
+			 u8 lmarker, u8 rmarker, struct interval *intrvl)
+{
+	if (intrvl == NULL) {
+		printf("%s: NULL intrvl pointer found\n", __func__);
+		return MV_FAIL;
+	}
+
+	if (vector == NULL) {
+		printf("%s: NULL vector pointer found\n", __func__);
+		return MV_FAIL;
+	}
+	intrvl->vector = vector;
+
+	if (lendpnt >= rendpnt) {
+		printf("%s: incorrect lendpnt and/or rendpnt parameters found\n", __func__);
+		return MV_FAIL;
+	}
+	intrvl->lendpnt = lendpnt;
+	intrvl->rendpnt = rendpnt;
+	intrvl->size = rendpnt - lendpnt + 1;
+
+	if ((lmarker < lendpnt) || (lmarker > rendpnt)) {
+		printf("%s: incorrect lmarker parameter found\n", __func__);
+		return MV_FAIL;
+	}
+	intrvl->lmarker = lmarker;
+
+	if ((rmarker < lmarker) || (rmarker > (intrvl->rendpnt + intrvl->size))) {
+		printf("%s: incorrect rmarker parameter found\n", __func__);
+		return MV_FAIL;
+	}
+	intrvl->rmarker = rmarker;
+
+	return MV_OK;
+}
+static int interval_set(u8 pass_lendpnt, u8 pass_rendpnt, struct interval *intrvl)
+{
+	if (intrvl == NULL) {
+		printf("%s: NULL intrvl pointer found\n", __func__);
+		return MV_FAIL;
+	}
+
+	intrvl->pass_lendpnt = pass_lendpnt;
+	intrvl->pass_rendpnt = pass_rendpnt;
+
+	return MV_OK;
+}
+
+static int interval_proc(struct interval *intrvl)
+{
+	int curr;
+	int pass_lendpnt, pass_rendpnt;
+	int lmt;
+	int fcnt = 0, pcnt = 0;
+
+	if (intrvl == NULL) {
+		printf("%s: NULL intrvl pointer found\n", __func__);
+		return MV_FAIL;
+	}
+
+	/* count fails and passes */
+	curr = intrvl->lendpnt;
+	while (curr <= intrvl->rendpnt) {
+		if (intrvl->vector[curr] == PASS)
+			pcnt++;
+		else
+			fcnt++;
+		curr++;
+	}
+
+	/* check for all fail */
+	if (fcnt == intrvl->size) {
+		printf("%s: no pass found\n", __func__);
+		return MV_FAIL;
+	}
+
+	/* check for all pass */
+	if (pcnt == intrvl->size) {
+		if (interval_set(intrvl->lendpnt, intrvl->rendpnt, intrvl) != MV_OK)
+			return MV_FAIL;
+		return MV_OK;
+	}
+
+	/* proceed with rmarker */
+	curr = intrvl->rmarker;
+	if (intrvl->vector[curr % intrvl->size] == PASS) { /* pass at rmarker */
+		/* search for fail on right */
+		if (intrvl->rmarker > intrvl->rendpnt)
+			lmt = intrvl->rendpnt + intrvl->size;
+		else
+			lmt = intrvl->rmarker + intrvl->size - 1;
+		while ((curr <= lmt) &&
+		       (intrvl->vector[curr % intrvl->size] == PASS))
+			curr++;
+		if (curr > lmt) { /* fail not found */
+			printf("%s: rmarker: fail following pass not found\n", __func__);
+			return MV_FAIL;
+		}
+		/* fail found */
+		pass_rendpnt = curr - 1;
+	} else { /* fail at rmarker */
+		/* search for pass on left */
+		if (intrvl->rmarker > intrvl->rendpnt)
+			lmt = intrvl->rmarker - intrvl->size + 1;
+		else
+			lmt = intrvl->lendpnt;
+		while ((curr >= lmt) &&
+		       (intrvl->vector[curr % intrvl->size] == FAIL))
+			curr--;
+		if (curr < lmt) { /* pass not found */
+			printf("%s: rmarker: pass preceding fail not found\n", __func__);
+			return MV_FAIL;
+		}
+		/* pass found */
+		pass_rendpnt = curr;
+	}
+
+	/* search for fail on left */
+	curr = pass_rendpnt;
+	if (pass_rendpnt > intrvl->rendpnt)
+		lmt =  pass_rendpnt - intrvl->size + 1;
+	else
+		lmt = intrvl->lendpnt;
+	while ((curr >= lmt) &&
+	       (intrvl->vector[curr % intrvl->size] == PASS))
+		curr--;
+	if (curr < lmt) { /* fail not found */
+		printf("%s: rmarker: fail preceding pass not found\n", __func__);
+		return MV_FAIL;
+	}
+	/* fail found */
+	pass_lendpnt = curr + 1;
+	if (interval_set(pass_lendpnt, pass_rendpnt, intrvl) != MV_OK)
+		return MV_FAIL;
+
+	return MV_OK;
+}
+
+#define ADLL_TAPS_PER_PERIOD	64
+int mv_ddr_dm_to_dq_diff_get(u8 vw_sphy_hi_lmt, u8 vw_sphy_lo_lmt, u8 *vw_vector,
+			     int *vw_sphy_hi_diff, int *vw_sphy_lo_diff)
+{
+	struct interval intrvl;
+
+	/* init interval structure */
+	if (interval_init(vw_vector, 0, ADLL_TAPS_PER_PERIOD - 1,
+			  vw_sphy_lo_lmt, vw_sphy_hi_lmt, &intrvl) != MV_OK)
+		return MV_FAIL;
+
+	/* find pass sub-interval */
+	if (interval_proc(&intrvl) != MV_OK)
+		return MV_FAIL;
+
+	/* check for all pass */
+	if ((intrvl.pass_rendpnt == intrvl.rendpnt) &&
+	    (intrvl.pass_lendpnt == intrvl.lendpnt)) {
+		printf("%s: no fail found\n", __func__);
+		return MV_FAIL;
+	}
+
+	*vw_sphy_hi_diff = intrvl.pass_rendpnt - vw_sphy_hi_lmt;
+	*vw_sphy_lo_diff = vw_sphy_lo_lmt - intrvl.pass_lendpnt;
+
+	return MV_OK;
+}
