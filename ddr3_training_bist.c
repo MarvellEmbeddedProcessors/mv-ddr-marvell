@@ -511,3 +511,18 @@ int mv_ddr_dm_to_dq_diff_get(u8 vw_sphy_hi_lmt, u8 vw_sphy_lo_lmt, u8 *vw_vector
 
 	return MV_OK;
 }
+
+/* TODO: to be defined as static when in use by another function */
+int mv_ddr_bist_tx(enum hws_access_type access_type)
+{
+	ddr3_tip_bist_operation(0, access_type, 0, BIST_START);
+
+	if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK)
+		return MV_FAIL;
+
+	ddr3_tip_bist_operation(0, access_type, 0, BIST_STOP);
+
+	ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS);
+
+	return MV_OK;
+}
