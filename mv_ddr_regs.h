@@ -406,7 +406,13 @@ enum {
 #define PRFA_REQ_ENA				0x1
 
 #define TRAINING_WL_REG				0x16ac
+
 #define ODPG_DATA_WR_ADDR_REG			0x16b0
+#define ODPG_DATA_WR_ACK_OFFS			0
+#define ODPG_DATA_WR_ACK_MASK			0x7f
+#define ODPG_DATA_WR_DATA_OFFS			8
+#define ODPG_DATA_WR_DATA_MASK			0xff
+
 #define ODPG_DATA_WR_DATA_HIGH_REG		0x16b4
 #define ODPG_DATA_WR_DATA_LOW_REG		0x16b8
 #define ODPG_DATA_RX_WORD_ERR_ADDR_REG		0x16bc

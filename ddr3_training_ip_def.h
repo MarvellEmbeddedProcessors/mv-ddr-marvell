@@ -278,4 +278,9 @@ struct reg_data {
 	u32 reg_mask;
 };
 
+enum dm_direction {
+	DM_DIR_INVERSE,
+	DM_DIR_DIRECT
+};
+
 #endif /* _DDR3_TRAINING_IP_DEF_H */

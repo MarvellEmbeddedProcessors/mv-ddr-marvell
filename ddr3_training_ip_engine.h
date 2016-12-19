@@ -171,5 +171,7 @@ void ddr3_tip_print_bist_res(void);
 struct pattern_info *ddr3_tip_get_pattern_table(void);
 u16 *ddr3_tip_get_mask_results_dq_reg(void);
 u16 *ddr3_tip_get_mask_results_pup_reg_map(void);
+int mv_ddr_load_dm_pattern_to_odpg(enum hws_access_type access_type, enum hws_pattern pattern,
+				   enum dm_direction dm_dir);
 
 #endif /* _DDR3_TRAINING_IP_ENGINE_H_ */

@@ -1856,3 +1856,42 @@ u16 *ddr3_tip_get_mask_results_pup_reg_map()
 #endif
 		return mask_results_pup_reg_map;
 }
+
+/* load expected dm pattern to odpg */
+#define LOW_NIBBLE_BYTE_MASK	0xf
+#define HIGH_NIBBLE_BYTE_MASK	0xf0
+int mv_ddr_load_dm_pattern_to_odpg(enum hws_access_type access_type, enum hws_pattern pattern,
+				   enum dm_direction dm_dir)
+{
+	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	u32 pattern_len = 0;
+	u32 data_low, data_high;
+	u8 dm_data;
+
+	for (pattern_len = 0;
+	     pattern_len < pattern_table[pattern].pattern_len;
+	     pattern_len++) {
+		if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask)) {
+			data_low = pattern_table_get_word(0, pattern, (u8)pattern_len);
+			data_high = data_low;
+		} else {
+			data_low = pattern_table_get_word(0, pattern, (u8)(pattern_len * 2));
+			data_high = pattern_table_get_word(0, pattern, (u8)(pattern_len * 2 + 1));
+		}
+
+		/* odpg mbus dm definition is opposite to ddr4 protocol */
+		if (dm_dir == DM_DIR_INVERSE)
+			dm_data = ~((data_low & LOW_NIBBLE_BYTE_MASK) | (data_high & HIGH_NIBBLE_BYTE_MASK));
+		else
+			dm_data = (data_low & LOW_NIBBLE_BYTE_MASK) | (data_high & HIGH_NIBBLE_BYTE_MASK);
+
+		ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_WR_DATA_LOW_REG, data_low, MASK_ALL_BITS);
+		ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_WR_DATA_HIGH_REG, data_high, MASK_ALL_BITS);
+		ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_WR_ADDR_REG,
+				  pattern_len | ((dm_data & ODPG_DATA_WR_DATA_MASK) << ODPG_DATA_WR_DATA_OFFS),
+				  MASK_ALL_BITS);
+	}
+
+	return MV_OK;
+}
