@@ -1821,6 +1821,13 @@ int ddr3_tip_training_ip_test(u32 dev_num, enum hws_training_result result_type,
 	return MV_OK;
 }
 
+int mv_ddr_pattern_start_addr_set(struct pattern_info *pattern_tbl, enum hws_pattern pattern, u32 addr)
+{
+	pattern_tbl[pattern].start_addr = addr;
+
+	return 0;
+}
+
 struct pattern_info *ddr3_tip_get_pattern_table()
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();

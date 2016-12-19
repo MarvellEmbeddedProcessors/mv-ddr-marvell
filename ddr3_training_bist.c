@@ -311,9 +311,8 @@ enum {
 	PASS,
 	FAIL
 };
-/* TODO: to be defined as static when in use by another function */
 #define TIP_ITERATION_NUM	31
-int mv_ddr_tip_bist(enum hws_dir dir, u32 val, enum hws_pattern pattern, u32 cs, u32 *result)
+static int mv_ddr_tip_bist(enum hws_dir dir, u32 val, enum hws_pattern pattern, u32 cs, u32 *result)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	enum hws_training_ip_stat training_result;
@@ -512,8 +511,7 @@ int mv_ddr_dm_to_dq_diff_get(u8 vw_sphy_hi_lmt, u8 vw_sphy_lo_lmt, u8 *vw_vector
 	return MV_OK;
 }
 
-/* TODO: to be defined as static when in use by another function */
-int mv_ddr_bist_tx(enum hws_access_type access_type)
+static int mv_ddr_bist_tx(enum hws_access_type access_type)
 {
 	ddr3_tip_bist_operation(0, access_type, 0, BIST_START);
 
@@ -527,10 +525,9 @@ int mv_ddr_bist_tx(enum hws_access_type access_type)
 	return MV_OK;
 }
 
-/* TODO: to be defined as static when in use by another function */
 /* prepare odpg for bist operation */
 #define WR_OP_ODPG_DATA_CMD_BURST_DLY	2
-int mv_ddr_odpg_bist_prepare(enum hws_pattern pattern, enum hws_access_type access_type,
+static int mv_ddr_odpg_bist_prepare(enum hws_pattern pattern, enum hws_access_type access_type,
 			     enum hws_dir dir, enum hws_stress_jump stress_jump_addr,
 			     enum hws_pattern_duration duration, u32 offset, u32 cs,
 			     u32 pattern_addr_len, enum dm_direction dm_dir)
@@ -573,6 +570,135 @@ int mv_ddr_odpg_bist_prepare(enum hws_pattern pattern, enum hws_access_type acce
 	ddr3_tip_configure_odpg(0, access_type, 0, dir, pattern_table[pattern].num_of_phases_tx,
 				tx_burst_size, pattern_table[pattern].num_of_phases_rx, burst_delay,
 				rd_mode, cs, stress_jump_addr, duration);
+
+	return MV_OK;
+}
+
+#define BYTES_PER_BURST_64BIT	0x20
+#define BYTES_PER_BURST_32BIT	0x10
+int mv_ddr_dm_vw_get(enum hws_pattern pattern, u32 cs, u8 *vw_vector)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
+	u32 adll_tap;
+	u32 wr_ctrl_adll[MAX_BUS_NUM] = {0};
+	u32 rd_ctrl_adll[MAX_BUS_NUM] = {0};
+	u32 subphy;
+	u32 subphy_max = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 odpg_addr = 0x0;
+	u32 result;
+	u32 idx;
+	/* burst length in bytes */
+	u32 burst_len = (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask) ?
+			BYTES_PER_BURST_64BIT : BYTES_PER_BURST_32BIT);
+
+	/* save dqs values to restore after algorithm's run */
+	ddr3_tip_read_adll_value(0, wr_ctrl_adll, CTX_PHY_REG(cs), MASK_ALL_BITS);
+	ddr3_tip_read_adll_value(0, rd_ctrl_adll, CRX_PHY_REG(cs), MASK_ALL_BITS);
+
+	/* fill memory with base pattern */
+	ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS);
+	mv_ddr_odpg_bist_prepare(pattern, ACCESS_TYPE_UNICAST, OPER_WRITE, STRESS_NONE, DURATION_SINGLE,
+				 bist_offset, cs, pattern_table[pattern].num_of_phases_tx,
+#if defined(CONFIG_DDR4)
+				 (pattern == PATTERN_ZERO) ? DM_DIR_DIRECT : DM_DIR_INVERSE);
+#else
+				 (pattern == PATTERN_00) ? DM_DIR_DIRECT : DM_DIR_INVERSE);
+#endif
+
+	for (adll_tap = 0; adll_tap < ADLL_TAPS_PER_PERIOD; adll_tap++) {
+		/* change target odpg address */
+		odpg_addr = adll_tap * burst_len;
+		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_DATA_BUFFER_OFFS_REG,
+				  odpg_addr, MASK_ALL_BITS);
+
+		ddr3_tip_configure_odpg(0, ACCESS_TYPE_UNICAST, 0, OPER_WRITE,
+					pattern_table[pattern].num_of_phases_tx,
+					pattern_table[pattern].tx_burst_size,
+					pattern_table[pattern].num_of_phases_rx,
+					WR_OP_ODPG_DATA_CMD_BURST_DLY,
+					ODPG_MODE_TX, cs, STRESS_NONE, DURATION_SINGLE);
+
+		/* odpg bist write enable */
+		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_DATA_CTRL_REG,
+				  (ODPG_WRBUF_WR_CTRL_ENA << ODPG_WRBUF_WR_CTRL_OFFS),
+				  (ODPG_WRBUF_WR_CTRL_MASK << ODPG_WRBUF_WR_CTRL_OFFS));
+
+		/* odpg bist read disable */
+		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_DATA_CTRL_REG,
+				  (ODPG_WRBUF_RD_CTRL_DIS << ODPG_WRBUF_RD_CTRL_OFFS),
+				  (ODPG_WRBUF_RD_CTRL_MASK << ODPG_WRBUF_RD_CTRL_OFFS));
+
+		/* trigger odpg */
+		mv_ddr_bist_tx(ACCESS_TYPE_MULTICAST);
+	}
+
+	/* fill memory with vref pattern to increment addr using odpg bist */
+	mv_ddr_odpg_bist_prepare(PATTERN_VREF, ACCESS_TYPE_UNICAST, OPER_WRITE, STRESS_NONE, DURATION_SINGLE,
+				 bist_offset, cs, pattern_table[pattern].num_of_phases_tx,
+#if defined(CONFIG_DDR4)
+				 (pattern == PATTERN_ZERO) ? DM_DIR_DIRECT : DM_DIR_INVERSE);
+#else
+				 (pattern == PATTERN_00) ? DM_DIR_DIRECT : DM_DIR_INVERSE);
+#endif
+
+	for (adll_tap = 0; adll_tap < ADLL_TAPS_PER_PERIOD; adll_tap++) {
+		ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_MULTICAST, 0,
+				   DDR_PHY_DATA, CTX_PHY_REG(cs), adll_tap);
+		/* change target odpg address */
+		odpg_addr = adll_tap * burst_len;
+		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_DATA_BUFFER_OFFS_REG,
+				  odpg_addr, MASK_ALL_BITS);
+		ddr3_tip_configure_odpg(0, ACCESS_TYPE_UNICAST, 0, OPER_WRITE,
+					pattern_table[pattern].num_of_phases_tx,
+					pattern_table[pattern].tx_burst_size,
+					pattern_table[pattern].num_of_phases_rx,
+					WR_OP_ODPG_DATA_CMD_BURST_DLY,
+					ODPG_MODE_TX, cs, STRESS_NONE, DURATION_SINGLE);
+
+		/* odpg bist write enable */
+		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_DATA_CTRL_REG,
+				  (ODPG_WRBUF_WR_CTRL_ENA << ODPG_WRBUF_WR_CTRL_OFFS),
+				  (ODPG_WRBUF_WR_CTRL_MASK << ODPG_WRBUF_WR_CTRL_OFFS));
+
+		/* odpg bist read disable */
+		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_DATA_CTRL_REG,
+				  (ODPG_WRBUF_RD_CTRL_DIS << ODPG_WRBUF_RD_CTRL_OFFS),
+				  (ODPG_WRBUF_RD_CTRL_MASK << ODPG_WRBUF_RD_CTRL_OFFS));
+
+		/* trigger odpg */
+		mv_ddr_bist_tx(ACCESS_TYPE_MULTICAST);
+	}
+
+	/* restore subphy's tx adll_tap to its position */
+	for (subphy = 0; subphy < subphy_max; subphy++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy);
+		ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST,
+				   subphy, DDR_PHY_DATA, CTX_PHY_REG(cs),
+				   wr_ctrl_adll[subphy]);
+	}
+
+	/* read and validate bist (comparing with the base pattern) */
+	for (adll_tap = 0; adll_tap < ADLL_TAPS_PER_PERIOD; adll_tap++) {
+		result = 0;
+		odpg_addr = adll_tap * burst_len;
+		/* change addr to fit write */
+		mv_ddr_pattern_start_addr_set(pattern_table, pattern, odpg_addr);
+		mv_ddr_tip_bist(OPER_READ, 0, pattern, 0, &result);
+		for (subphy = 0; subphy < subphy_max; subphy++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy);
+			idx = ADLL_TAPS_PER_PERIOD * subphy + adll_tap;
+			vw_vector[idx] |= ((result >> subphy) & 0x1);
+		}
+	}
+
+	/* restore subphy's rx adll_tap to its position */
+	for (subphy = 0; subphy < subphy_max; subphy++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy);
+		ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST,
+				   subphy, DDR_PHY_DATA, CRX_PHY_REG(cs),
+				   rd_ctrl_adll[subphy]);
+	}
 
 	return MV_OK;
 }
