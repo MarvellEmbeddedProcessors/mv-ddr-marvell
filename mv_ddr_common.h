@@ -107,5 +107,6 @@ extern const char mv_ddr_version_string[];
 
 unsigned int ceil_div(unsigned int x, unsigned int y);
 unsigned int time_to_nclk(unsigned int t, unsigned int tclk);
+int round_div(unsigned int dividend, unsigned int divisor, unsigned int *quotient);
 
 #endif /* _MV_DDR_COMMON_H */

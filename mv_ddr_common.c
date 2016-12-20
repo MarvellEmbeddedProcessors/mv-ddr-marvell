@@ -125,3 +125,21 @@ unsigned int time_to_nclk(unsigned int t, unsigned int tclk)
 	/* t & tclk parameters are in ps */
 	return ((unsigned long)t * 1000 / tclk + 974) / 1000;
 }
+
+/* round division of two positive integers to the nearest whole number */
+int round_div(unsigned int dividend, unsigned int divisor, unsigned int *quotient)
+{
+	if (quotient == NULL) {
+		printf("%s: error: NULL quotient pointer found\n", __func__);
+		return MV_FAIL;
+	}
+
+	if (divisor == 0) {
+		printf("%s: error: division by zero\n", __func__);
+		return MV_FAIL;
+	} else {
+		*quotient = (dividend + divisor / 2) / divisor;
+	}
+
+	return MV_OK;
+}
