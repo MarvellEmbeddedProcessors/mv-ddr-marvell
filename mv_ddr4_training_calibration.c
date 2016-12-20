@@ -2098,4 +2098,309 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 
     return MV_OK;
 }
+
+#define MAX_LOOPS			2 /* maximum number of loops to get to solution */
+#define LEAST_SIGNIFICANT_BYTE_MASK	0xff
+#define VW_SUBPHY_LIMIT_MIN		0
+#define VW_SUBPHY_LIMIT_MAX		127
+#define MAX_PBS_NUM			31 /* TODO: added by another patch */
+enum{
+	LOCKED,
+	UNLOCKED
+};
+enum {
+	PASS,
+	FAIL
+};
+
+int mv_ddr4_dm_tuning(u32 cs, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WIDTH_IN_BITS])
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum hws_training_ip_stat training_result;
+	enum hws_training_result result_type = RESULT_PER_BIT;
+	enum hws_search_dir search_dir;
+	enum hws_dir dir = OPER_WRITE;
+	int vw_sphy_hi_diff = 0;
+	int vw_sphy_lo_diff = 0;
+	int x, y;
+	int status;
+	unsigned int a, b, c;
+	u32 ctx_vector[MAX_BUS_NUM];
+	u32 subphy, bit, pattern;
+	u32 *result[MAX_BUS_NUM][HWS_SEARCH_DIR_LIMIT];
+	u32 max_win_size = MAX_WINDOW_SIZE_TX;
+	u32 dm_lambda[MAX_BUS_NUM] = {0};
+	u32 loop;
+	u32 adll_tap;
+	u32 dm_pbs, max_pbs;
+	u32 dq_pbs[BUS_WIDTH_IN_BITS];
+	u32 new_dq_pbs[BUS_WIDTH_IN_BITS];
+	u32 dq, pad;
+	u32 dq_pbs_diff;
+	u32 byte_center, dm_center;
+	u32 idx, reg_val;
+	u32 dm_pad = mv_ddr_dm_pad_get();
+	u8 subphy_max = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+	u8 dm_vw_vector[MAX_BUS_NUM * ADLL_TAPS_PER_PERIOD];
+	u8 vw_sphy_lo_lmt[MAX_BUS_NUM];
+	u8 vw_sphy_hi_lmt[MAX_BUS_NUM];
+	u8 dm_status[MAX_BUS_NUM];
+
+	/* init */
+	for (subphy = 0; subphy < subphy_max; subphy++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy);
+		dm_status[subphy] = UNLOCKED;
+		for (bit = 0 ; bit < BUS_WIDTH_IN_BITS; bit++)
+			dm_lambda[subphy] += pbs_tap_factor[0][subphy][bit];
+		dm_lambda[subphy] /= BUS_WIDTH_IN_BITS;
+	}
+
+	/* get algorithm's adll result */
+	for (subphy = 0; subphy < subphy_max; subphy++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy);
+		ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
+				  CTX_PHY_REG(cs), &reg_val);
+		ctx_vector[subphy] = reg_val;
+	}
+
+	for (loop = 0; loop < MAX_LOOPS; loop++) {
+		for (subphy = 0; subphy < subphy_max; subphy++) {
+			vw_sphy_lo_lmt[subphy] = VW_SUBPHY_LIMIT_MIN;
+			vw_sphy_hi_lmt[subphy] = VW_SUBPHY_LIMIT_MAX;
+			for (adll_tap = 0; adll_tap < ADLL_TAPS_PER_PERIOD; adll_tap++) {
+				idx = subphy * ADLL_TAPS_PER_PERIOD + adll_tap;
+				dm_vw_vector[idx] = PASS;
+			}
+		}
+
+		/* get valid window of dm signal */
+		mv_ddr_dm_vw_get(PATTERN_ZERO, cs, dm_vw_vector);
+		mv_ddr_dm_vw_get(PATTERN_ONE, cs, dm_vw_vector);
+
+		/* get vw for dm disable */
+		pattern = MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask) ? 73 : 23;
+		ddr3_tip_ip_training_wrapper(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+					     PARAM_NOT_CARE, result_type, HWS_CONTROL_ELEMENT_ADLL, PARAM_NOT_CARE,
+					     dir, tm->if_act_mask, 0x0, max_win_size - 1, max_win_size - 1, pattern,
+					     EDGE_FPF, CS_SINGLE, PARAM_NOT_CARE, &training_result);
+
+		/* find skew of dm signal vs. dq data bits using its valid window */
+		for (subphy = 0; subphy < subphy_max; subphy++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy);
+			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
+					   CTX_PHY_REG(cs), ctx_vector[subphy]);
+
+			for (search_dir = HWS_LOW2HIGH; search_dir <= HWS_HIGH2LOW; search_dir++) {
+				ddr3_tip_read_training_result(0, 0, ACCESS_TYPE_UNICAST, subphy,
+							      ALL_BITS_PER_PUP, search_dir, dir, result_type,
+							      TRAINING_LOAD_OPERATION_UNLOAD, CS_SINGLE,
+							      &(result[subphy][search_dir]),
+							      MV_TRUE, 0, MV_FALSE);
+				DEBUG_DM_TUNING(DEBUG_LEVEL_INFO,
+						("dm cs %d if %d subphy %d result: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",
+						 cs, 0, subphy,
+						 result[subphy][search_dir][0],
+						 result[subphy][search_dir][1],
+						 result[subphy][search_dir][2],
+						 result[subphy][search_dir][3],
+						 result[subphy][search_dir][4],
+						 result[subphy][search_dir][5],
+						 result[subphy][search_dir][6],
+						 result[subphy][search_dir][7]));
+			}
+
+			if (dm_status[subphy] == LOCKED)
+				continue;
+
+			for (bit = 0; bit < BUS_WIDTH_IN_BITS; bit++) {
+				result[subphy][HWS_LOW2HIGH][bit] &= LEAST_SIGNIFICANT_BYTE_MASK;
+				result[subphy][HWS_HIGH2LOW][bit] &= LEAST_SIGNIFICANT_BYTE_MASK;
+
+				if (result[subphy][HWS_LOW2HIGH][bit] > vw_sphy_lo_lmt[subphy])
+					vw_sphy_lo_lmt[subphy] = result[subphy][HWS_LOW2HIGH][bit];
+
+				if (result[subphy][HWS_HIGH2LOW][bit] < vw_sphy_hi_lmt[subphy])
+					vw_sphy_hi_lmt[subphy] = result[subphy][HWS_HIGH2LOW][bit];
+			}
+
+			DEBUG_DM_TUNING(DEBUG_LEVEL_INFO,
+					("loop %d, dm subphy %d, vw %d, %d\n", loop, subphy,
+					 vw_sphy_lo_lmt[subphy], vw_sphy_hi_lmt[subphy]));
+
+			idx = subphy * ADLL_TAPS_PER_PERIOD;
+			status = mv_ddr_dm_to_dq_diff_get(vw_sphy_hi_lmt[subphy], vw_sphy_lo_lmt[subphy],
+							  &dm_vw_vector[idx], &vw_sphy_hi_diff, &vw_sphy_lo_diff);
+			if (status != MV_OK)
+				return MV_FAIL;
+			DEBUG_DM_TUNING(DEBUG_LEVEL_INFO,
+					("vw_sphy_lo_diff %d, vw_sphy_hi_diff %d\n",
+					 vw_sphy_lo_diff, vw_sphy_hi_diff));
+
+			/* dm is the strongest signal */
+			if ((vw_sphy_hi_diff >= 0) &&
+			    (vw_sphy_lo_diff >= 0)) {
+				dm_status[subphy] = LOCKED;
+			} else if ((vw_sphy_hi_diff >= 0) &&
+				   (vw_sphy_lo_diff < 0) &&
+				   (loop == 0)) { /* update dm only */
+				ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
+						  PBS_TX_PHY_REG(cs, dm_pad), &dm_pbs);
+				x = -vw_sphy_lo_diff; /* get positive x */
+				a = (unsigned int)x * PBS_VAL_FACTOR;
+				b = dm_lambda[subphy];
+				if (round_div(a, b, &c) != MV_OK)
+					return MV_FAIL;
+				dm_pbs += (u32)c;
+				dm_pbs = (dm_pbs > MAX_PBS_NUM) ? MAX_PBS_NUM : dm_pbs;
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST,
+						   subphy, DDR_PHY_DATA,
+						   PBS_TX_PHY_REG(cs, dm_pad), dm_pbs);
+			} else if ((vw_sphy_hi_diff < 0) &&
+				   (vw_sphy_lo_diff >= 0) &&
+				   (loop == 0)) { /* update dq and c_opt */
+				max_pbs = 0;
+				for (dq = 0; dq < BUS_WIDTH_IN_BITS; dq++) {
+					idx = dq + subphy * BUS_WIDTH_IN_BITS;
+					pad = dq_map_table[idx];
+					ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
+							  PBS_TX_PHY_REG(cs, pad), &reg_val);
+					dq_pbs[dq] = reg_val;
+					x = -vw_sphy_hi_diff; /* get positive x */
+					a = (unsigned int)x * PBS_VAL_FACTOR;
+					b = pbs_tap_factor[0][subphy][dq];
+					if (round_div(a, b, &c) != MV_OK)
+						return MV_FAIL;
+					new_dq_pbs[dq] = dq_pbs[dq] + (u32)c;
+					if (max_pbs < new_dq_pbs[dq])
+						max_pbs = new_dq_pbs[dq];
+				}
+
+				dq_pbs_diff = (max_pbs > MAX_PBS_NUM) ? (max_pbs - MAX_PBS_NUM) : 0;
+				for (dq = 0; dq < BUS_WIDTH_IN_BITS; dq++) {
+					idx = dq + subphy * BUS_WIDTH_IN_BITS;
+					reg_val = new_dq_pbs[dq] - dq_pbs_diff;
+					if (reg_val < 0) {
+						DEBUG_DM_TUNING(DEBUG_LEVEL_ERROR,
+								("unexpected negative value found\n"));
+						return MV_FAIL;
+					}
+					pad = dq_map_table[idx];
+					ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0,
+							   ACCESS_TYPE_UNICAST, subphy,
+							   DDR_PHY_DATA,
+							   PBS_TX_PHY_REG(cs, pad),
+							   reg_val);
+				}
+
+				a = dm_lambda[subphy];
+				b = dq_pbs_diff * PBS_VAL_FACTOR;
+				if (b > 0) {
+					if (round_div(a, b, &c) != MV_OK)
+						return MV_FAIL;
+					dq_pbs_diff = (u32)c;
+				}
+
+				x = (int)ctx_vector[subphy];
+				if (x < 0) {
+					DEBUG_DM_TUNING(DEBUG_LEVEL_ERROR,
+							("unexpected negative value found\n"));
+					return MV_FAIL;
+				}
+				y = (int)dq_pbs_diff;
+				if (y < 0) {
+					DEBUG_DM_TUNING(DEBUG_LEVEL_ERROR,
+							("unexpected negative value found\n"));
+					return MV_FAIL;
+				}
+				x += (y + vw_sphy_hi_diff) / 2;
+				x %= ADLL_TAPS_PER_PERIOD;
+				ctx_vector[subphy] = (u32)x;
+			} else if (((vw_sphy_hi_diff < 0) && (vw_sphy_lo_diff < 0)) ||
+				   (loop == 1)) { /* dm is the weakest signal */
+				/* update dq and c_opt */
+				dm_status[subphy] = LOCKED;
+				byte_center = (vw_sphy_lo_lmt[subphy] + vw_sphy_hi_lmt[subphy]) / 2;
+				x = (int)byte_center;
+				if (x < 0) {
+					DEBUG_DM_TUNING(DEBUG_LEVEL_ERROR,
+							("unexpected negative value found\n"));
+					return MV_FAIL;
+				}
+				x += (vw_sphy_hi_diff - vw_sphy_lo_diff) / 2;
+				if (x < 0) {
+					DEBUG_DM_TUNING(DEBUG_LEVEL_ERROR,
+							("unexpected negative value found\n"));
+					return MV_FAIL;
+				}
+				dm_center = (u32)x;
+
+				if (byte_center > dm_center) {
+					max_pbs = 0;
+					for (dq = 0; dq < BUS_WIDTH_IN_BITS; dq++) {
+						pad = dq_map_table[dq + subphy * BUS_WIDTH_IN_BITS];
+						ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST,
+								  subphy, DDR_PHY_DATA,
+								  PBS_TX_PHY_REG(cs, pad),
+								  &reg_val);
+						dq_pbs[dq] = reg_val;
+						a = (byte_center - dm_center) * PBS_VAL_FACTOR;
+						b = pbs_tap_factor[0][subphy][dq];
+						if (round_div(a, b, &c) != MV_OK)
+							return MV_FAIL;
+						new_dq_pbs[dq] = dq_pbs[dq] + (u32)c;
+						if (max_pbs < new_dq_pbs[dq])
+							max_pbs = new_dq_pbs[dq];
+					}
+
+					dq_pbs_diff = (max_pbs > MAX_PBS_NUM) ? (max_pbs - MAX_PBS_NUM) : 0;
+					for (int dq = 0; dq < BUS_WIDTH_IN_BITS; dq++) {
+						idx = dq + subphy * BUS_WIDTH_IN_BITS;
+						pad = dq_map_table[idx];
+						reg_val = new_dq_pbs[dq] - dq_pbs_diff;
+						if (reg_val < 0) {
+							DEBUG_DM_TUNING(DEBUG_LEVEL_ERROR,
+									("unexpected negative value found\n"));
+							return MV_FAIL;
+						}
+						ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0,
+								   ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
+								   PBS_TX_PHY_REG(cs, pad),
+								   reg_val);
+					}
+					ctx_vector[subphy] = dm_center % ADLL_TAPS_PER_PERIOD;
+				} else {
+					ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
+							  PBS_TX_PHY_REG(cs, dm_pad), &dm_pbs);
+					a = (dm_center - byte_center) * PBS_VAL_FACTOR;
+					b = dm_lambda[subphy];
+					if (round_div(a, b, &c) != MV_OK)
+						return MV_FAIL;
+					dm_pbs += (u32)c;
+					ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0,
+							   ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
+							   PBS_TX_PHY_REG(cs, dm_pad), dm_pbs);
+				}
+			} else {
+				/* below is the check whether dm signal per subphy converged or not */
+			}
+		}
+	}
+
+	for (subphy = 0; subphy < subphy_max; subphy++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy);
+		ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
+				   CTX_PHY_REG(cs), ctx_vector[subphy]);
+	}
+
+	for (subphy = 0; subphy < subphy_max; subphy++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy);
+		if (dm_status[subphy] != LOCKED) {
+			DEBUG_DM_TUNING(DEBUG_LEVEL_ERROR,
+					("no convergence for dm signal[%u] found\n", subphy));
+			return MV_FAIL;
+		}
+	}
+
+	return MV_OK;
+}
 #endif /* CONFIG_DDR4 */

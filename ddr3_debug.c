@@ -124,6 +124,7 @@ u8 debug_training_device = DEBUG_LEVEL_ERROR;
 u8 debug_tap_tuning = DEBUG_LEVEL_ERROR;
 u8 debug_calibration = DEBUG_LEVEL_ERROR;
 u8 debug_ddr4_centralization = DEBUG_LEVEL_ERROR;
+u8 debug_dm_tuning = DEBUG_LEVEL_ERROR;
 #endif /* CONFIG_DDR4 */
 
 void mv_ddr_user_log_level_set(enum ddr_lib_debug_block block)

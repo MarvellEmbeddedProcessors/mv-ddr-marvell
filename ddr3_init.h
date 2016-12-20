@@ -151,7 +151,7 @@ enum log_level  {
 
 /* Globals */
 extern u8 debug_training, debug_calibration, debug_ddr4_centralization,
-	debug_tap_tuning;
+	debug_tap_tuning, debug_dm_tuning;
 extern u8 is_reg_dump;
 extern u8 generic_init_controller;
 /* list of allowed frequency listed in order of enum hws_ddr_freq */

@@ -590,6 +590,12 @@ int mv_ddr_is_training_done(u32 count, u32 *result)
 	return MV_OK;
 }
 
+#define DM_PAD	10
+u32 mv_ddr_dm_pad_get()
+{
+	return DM_PAD;
+}
+
 /*
  * Name:     ddr3_tip_a38x_select_ddr_controller.
  * Desc:     Enable/Disable access to Marvell's server.

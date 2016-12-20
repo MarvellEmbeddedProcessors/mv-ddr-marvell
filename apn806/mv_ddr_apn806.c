@@ -457,6 +457,13 @@ int mv_ddr_is_training_done(u32 count, u32 *result)
 	return MV_OK;
 }
 
+#define DM_PAD	3
+u32 mv_ddr_dm_pad_get()
+{
+	return DM_PAD;
+}
+
+
 /* return ddr frequency from sar */
 static int mv_ddr_sar_freq_get(int dev_num, enum hws_ddr_freq *freq)
 {

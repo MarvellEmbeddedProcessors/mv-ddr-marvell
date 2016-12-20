@@ -112,4 +112,7 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num);
 /* calibrate receiver (receiver duty cycle) */
 int mv_ddr4_receiver_calibration(u8 dev_num);
 
+/* tune dm signal */
+int mv_ddr4_dm_tuning(u32 cs, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WIDTH_IN_BITS]);
+
 #endif /* _MV_DDR4_TRAINING_CALIBRATION_H */
