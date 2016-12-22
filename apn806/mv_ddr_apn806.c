@@ -99,6 +99,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_xor_v2.h"
 #include "mv_ddr_validate.h"
 
+#undef mdelay
+#define mdelay mdelay_full
+
 #define DDR_INTERFACES_NUM		1
 #define DDR_INTERFACE_OCTETS_NUM	9
 
