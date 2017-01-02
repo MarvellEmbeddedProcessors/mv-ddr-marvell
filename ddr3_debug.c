@@ -898,7 +898,7 @@ int ddr3_tip_register_xsb_info(u32 dev_num, struct hws_xsb_info *xsb_info_table)
  * Read ADLL Value
  */
 int ddr3_tip_read_adll_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
-		    int reg_addr, u32 mask)
+			     u32 reg_addr, u32 mask)
 {
 	u32 data_value;
 	u32 if_id = 0, bus_id = 0;
@@ -932,7 +932,7 @@ int ddr3_tip_read_adll_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MAX
  * Write ADLL Value
  */
 int ddr3_tip_write_adll_value(u32 dev_num, u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
-		     int reg_addr)
+			      u32 reg_addr)
 {
 	u32 if_id = 0, bus_id = 0;
 	u32 data;
@@ -1544,7 +1544,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 	u32 res[MAX_INTERFACE_NUM] = { 0 };
 	int if_id = 0;
 	u32 adll_value = 0;
-	int reg;
+	u32 reg;
 	enum hws_access_type pup_access;
 	u32 cs;
 	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
@@ -1691,7 +1691,7 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 	u32 res[MAX_INTERFACE_NUM] = { 0 };
 	int if_id = 0, gap = 0;
 	u32 adll_value = 0;
-	int reg;
+	u32 reg;
 	enum hws_access_type pup_access;
 	u32 cs;
 	u32 max_cs = ddr3_tip_max_cs_get(dev_num);

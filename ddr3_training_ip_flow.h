@@ -281,10 +281,10 @@ int ddr3_tip_read_pup_value(u32 dev_num,
 			    int reg_addr, u32 mask);
 int ddr3_tip_read_adll_value(u32 dev_num,
 			     u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
-			     int reg_addr, u32 mask);
+			     u32 reg_addr, u32 mask);
 int ddr3_tip_write_adll_value(u32 dev_num,
 			      u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
-			      int reg_addr);
+			      u32 reg_addr);
 int ddr3_tip_tune_training_params(u32 dev_num,
 				  struct tune_train_params *params);
 

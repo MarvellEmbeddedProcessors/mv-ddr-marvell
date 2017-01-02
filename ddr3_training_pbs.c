@@ -135,7 +135,7 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 	int init_val = (search_dir == HWS_LOW2HIGH) ? 0 : iterations;
 	enum hws_edge_compare search_edge = EDGE_FP;
 	u32 pup = 0, bit = 0, if_id = 0, all_lock = 0, cs_num = 0;
-	int reg_addr = 0;
+	u32 reg_addr = 0;
 	u32 validation_val = 0;
 	u32 cs_enable_reg_val[MAX_INTERFACE_NUM];
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
