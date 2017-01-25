@@ -191,8 +191,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num);
 static int ddr3_tip_write_odt(u32 dev_num, enum hws_access_type access_type,
 			      u32 if_id, u32 cl_value, u32 cwl_value);
 static int ddr3_tip_ddr3_auto_tune(u32 dev_num);
-static int is_bus_access_done(u32 dev_num, u32 if_id,
-			      u32 dunit_reg_adrr, u32 bit);
+
 #ifdef ODT_TEST_SUPPORT
 static int odt_test(u32 dev_num, enum hws_algo_type algo_type);
 #endif
@@ -320,10 +319,6 @@ struct mv_ddr_mr_data mr_data[] = {
 };
 #endif
 
-static int ddr3_tip_bus_access(u32 dev_num, enum hws_access_type interface_access,
-			       u32 if_id, enum hws_access_type phy_access,
-			       u32 phy_id, enum hws_ddr_phy phy_type, u32 reg_addr,
-			       u32 data_value, enum hws_operation oper_type);
 static int ddr3_tip_pad_inv(u32 dev_num, u32 if_id);
 static int ddr3_tip_rank_control(u32 dev_num, u32 if_id);
 
@@ -1003,10 +998,14 @@ int ddr3_tip_validate_algo_components(u8 dev_num)
 	/* Check functions pointers */
 	status &= ddr3_tip_validate_algo_ptr(config_func_info[dev_num].tip_dunit_mux_select_func,
 					     NULL, "tip_dunit_mux_select_func");
-	status &= ddr3_tip_validate_algo_ptr(config_func_info[dev_num].tip_dunit_write_func,
-					     NULL, "tip_dunit_write_func");
-	status &= ddr3_tip_validate_algo_ptr(config_func_info[dev_num].tip_dunit_write_func,
-					     NULL, "tip_dunit_write_func");
+	status &= ddr3_tip_validate_algo_ptr(config_func_info[dev_num].mv_ddr_dunit_write,
+					     NULL, "mv_ddr_dunit_write");
+	status &= ddr3_tip_validate_algo_ptr(config_func_info[dev_num].mv_ddr_dunit_read,
+					     NULL, "mv_ddr_dunit_read");
+	status &= ddr3_tip_validate_algo_ptr(config_func_info[dev_num].mv_ddr_phy_write,
+					     NULL, "mv_ddr_phy_write");
+	status &= ddr3_tip_validate_algo_ptr(config_func_info[dev_num].mv_ddr_phy_read,
+					     NULL, "mv_ddr_phy_read");
 	status &= ddr3_tip_validate_algo_ptr(config_func_info[dev_num].tip_get_freq_config_info_func,
 					     NULL, "tip_get_freq_config_info_func");
 	status &= ddr3_tip_validate_algo_ptr(config_func_info[dev_num].tip_set_freq_divider_func,
@@ -1201,10 +1200,9 @@ int hws_ddr3_tip_select_ddr_controller(u32 dev_num, int enable)
 int ddr3_tip_if_write(u32 dev_num, enum hws_access_type interface_access,
 		      u32 if_id, u32 reg_addr, u32 data_value, u32 mask)
 {
-	return config_func_info[dev_num].
-		tip_dunit_write_func((u8)dev_num, interface_access,
-				     if_id, reg_addr,
-				     data_value, mask);
+	config_func_info[dev_num].mv_ddr_dunit_write(reg_addr, mask, data_value);
+
+	return MV_OK;
 }
 
 /*
@@ -1213,10 +1211,9 @@ int ddr3_tip_if_write(u32 dev_num, enum hws_access_type interface_access,
 int ddr3_tip_if_read(u32 dev_num, enum hws_access_type interface_access,
 		     u32 if_id, u32 reg_addr, u32 *data, u32 mask)
 {
-	return config_func_info[dev_num].
-		tip_dunit_read_func((u8)dev_num, interface_access,
-				    if_id, reg_addr,
-				    data, mask);
+	config_func_info[dev_num].mv_ddr_dunit_read(reg_addr, mask, data);
+
+	return MV_OK;
 }
 
 /*
@@ -1278,43 +1275,8 @@ int ddr3_tip_bus_read(u32 dev_num, u32 if_id,
 		      enum hws_access_type phy_access, u32 phy_id,
 		      enum hws_ddr_phy phy_type, u32 reg_addr, u32 *data)
 {
-	u32 bus_index = 0;
-	u32 data_read[MAX_INTERFACE_NUM];
-	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-
-	if (phy_access == ACCESS_TYPE_MULTICAST) {
-		for (bus_index = 0; bus_index < octets_per_if_num;
-		     bus_index++) {
-			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_index);
-			CHECK_STATUS(ddr3_tip_bus_access
-				     (dev_num, ACCESS_TYPE_UNICAST,
-				      if_id, ACCESS_TYPE_UNICAST,
-				      bus_index, phy_type, reg_addr, 0,
-				      OPERATION_READ));
-			CHECK_STATUS(ddr3_tip_if_read
-				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-				      PHY_REG_FILE_ACCESS, data_read,
-				      MASK_ALL_BITS));
-			data[bus_index] = (data_read[if_id] & 0xffff);
-		}
-	} else {
-		CHECK_STATUS(ddr3_tip_bus_access
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      phy_access, phy_id, phy_type, reg_addr, 0,
-			      OPERATION_READ));
-		CHECK_STATUS(ddr3_tip_if_read
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      PHY_REG_FILE_ACCESS, data_read, MASK_ALL_BITS));
-
-		/*
-		 * only 16 lsb bit are valid in Phy (each register is different,
-		 * some can actually be less than 16 bits)
-		 */
-		*data = (data_read[if_id] & 0xffff);
-	}
-
-	return MV_OK;
+	return config_func_info[dev_num].
+		mv_ddr_phy_read(phy_access, phy_id, phy_type, reg_addr, data);
 }
 
 /*
@@ -1325,88 +1287,10 @@ int ddr3_tip_bus_write(u32 dev_num, enum hws_access_type interface_access,
 		       u32 phy_id, enum hws_ddr_phy phy_type, u32 reg_addr,
 		       u32 data_value)
 {
-	CHECK_STATUS(ddr3_tip_bus_access
-		     (dev_num, interface_access, if_id, phy_access,
-		      phy_id, phy_type, reg_addr, data_value, OPERATION_WRITE));
-
-	return MV_OK;
+	return config_func_info[dev_num].
+		mv_ddr_phy_write(phy_access, phy_id, phy_type, reg_addr, data_value, OPERATION_WRITE);
 }
 
-/*
- * Bus access routine (relevant for both read & write)
- */
-static int ddr3_tip_bus_access(u32 dev_num, enum hws_access_type interface_access,
-			       u32 if_id, enum hws_access_type phy_access,
-			       u32 phy_id, enum hws_ddr_phy phy_type, u32 reg_addr,
-			       u32 data_value, enum hws_operation oper_type)
-{
-	u32 addr_low = 0x3f & reg_addr;
-	u32 addr_hi = ((0xc0 & reg_addr) >> 6);
-	u32 data_p1 =
-		(oper_type << 30) + (addr_hi << 28) + (phy_access << 27) +
-		(phy_type << 26) + (phy_id << 22) + (addr_low << 16) +
-		(data_value & 0xffff);
-	u32 data_p2 = data_p1 + (1 << 31);
-	u32 start_if, end_if;
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-
-	CHECK_STATUS(ddr3_tip_if_write
-		     (dev_num, interface_access, if_id, PHY_REG_FILE_ACCESS,
-		      data_p1, MASK_ALL_BITS));
-	CHECK_STATUS(ddr3_tip_if_write
-		     (dev_num, interface_access, if_id, PHY_REG_FILE_ACCESS,
-		      data_p2, MASK_ALL_BITS));
-
-	if (interface_access == ACCESS_TYPE_UNICAST) {
-		start_if = if_id;
-		end_if = if_id;
-	} else {
-		start_if = 0;
-		end_if = MAX_INTERFACE_NUM - 1;
-	}
-
-	/* polling for read/write execution done */
-	for (if_id = start_if; if_id <= end_if; if_id++) {
-		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		CHECK_STATUS(is_bus_access_done
-			     (dev_num, if_id, PHY_REG_FILE_ACCESS, 31));
-	}
-
-	return MV_OK;
-}
-
-/*
- * Check bus access done
- */
-static int is_bus_access_done(u32 dev_num, u32 if_id, u32 dunit_reg_adrr,
-			      u32 bit)
-{
-	u32 rd_data = 1;
-	u32 cnt = 0;
-	u32 data_read[MAX_INTERFACE_NUM];
-
-	CHECK_STATUS(ddr3_tip_if_read
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, dunit_reg_adrr,
-		      data_read, MASK_ALL_BITS));
-	rd_data = data_read[if_id];
-	rd_data &= (1 << bit);
-
-	while (rd_data != 0) {
-		if (cnt++ >= MAX_POLLING_ITERATIONS)
-			break;
-
-		CHECK_STATUS(ddr3_tip_if_read
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      dunit_reg_adrr, data_read, MASK_ALL_BITS));
-		rd_data = data_read[if_id];
-		rd_data &= (1 << bit);
-	}
-
-	if (cnt < MAX_POLLING_ITERATIONS)
-		return MV_OK;
-	else
-		return MV_FAIL;
-}
 
 /*
  * Phy read-modify-write

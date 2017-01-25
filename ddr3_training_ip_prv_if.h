@@ -179,8 +179,8 @@ typedef u8 (*HWS_TRAINING_IP_GET_RATIO)(u32 freq);
 
 struct hws_tip_config_func_db {
 	HWS_TIP_DUNIT_MUX_SELECT_FUNC_PTR tip_dunit_mux_select_func;
-	HWS_TIP_DUNIT_REG_READ_FUNC_PTR tip_dunit_read_func;
-	HWS_TIP_DUNIT_REG_WRITE_FUNC_PTR tip_dunit_write_func;
+	void (*mv_ddr_dunit_read)(u32 addr, u32 mask, u32 *data);
+	void (*mv_ddr_dunit_write)(u32 addr, u32 mask, u32 data);
 	HWS_TIP_GET_FREQ_CONFIG_INFO tip_get_freq_config_info_func;
 	HWS_TIP_GET_DEVICE_INFO tip_get_device_info_func;
 	HWS_SET_FREQ_DIVIDER_FUNC_PTR tip_set_freq_divider_func;
@@ -189,6 +189,13 @@ struct hws_tip_config_func_db {
 	HWS_TRAINING_IP_GET_RATIO tip_get_clock_ratio;
 	HWS_TRAINING_IP_EXTERNAL_READ_PTR tip_external_read;
 	HWS_TRAINING_IP_EXTERNAL_WRITE_PTR tip_external_write;
+	int (*mv_ddr_phy_read)(enum hws_access_type phy_access,
+			       u32 phy, enum hws_ddr_phy phy_type,
+			       u32 reg_addr, u32 *data);
+	int (*mv_ddr_phy_write)(enum hws_access_type phy_access,
+				u32 phy, enum hws_ddr_phy phy_type,
+				u32 reg_addr, u32 data,
+				enum hws_operation op_type);
 };
 
 int ddr3_tip_init_config_func(u32 dev_num,

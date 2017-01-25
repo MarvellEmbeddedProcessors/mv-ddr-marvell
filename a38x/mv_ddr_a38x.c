@@ -486,44 +486,22 @@ static int ddr3_tip_a38x_get_freq_config(u8 dev_num, enum hws_ddr_freq freq,
 	return MV_OK;
 }
 
-/*
- * Name:     ddr3_tip_a38x_if_read.
- * Desc:
- * Args:
- * Notes:
- * Returns:  MV_OK if success, other error code if fail.
- */
-static int ddr3_tip_a38x_if_read(u8 dev_num, enum hws_access_type interface_access,
-			  u32 if_id, u32 reg_addr, u32 *data, u32 mask)
+static void dunit_read(u32 addr, u32 mask, u32 *data)
 {
-	*data = reg_read(reg_addr) & mask;
-
-	return MV_OK;
+	*data = reg_read(addr) & mask;
 }
 
-/*
- * Name:     ddr3_tip_a38x_if_write.
- * Desc:
- * Args:
- * Notes:
- * Returns:  MV_OK if success, other error code if fail.
- */
-static int ddr3_tip_a38x_if_write(u8 dev_num, enum hws_access_type interface_access,
-			   u32 if_id, u32 reg_addr, u32 data_value,
-			   u32 mask)
+static void dunit_write(u32 addr, u32 mask, u32 data)
 {
-	u32 ui_data_read;
+	u32 reg_val = data;
 
 	if (mask != MASK_ALL_BITS) {
-		CHECK_STATUS(ddr3_tip_a38x_if_read
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id, reg_addr,
-			      &ui_data_read, MASK_ALL_BITS));
-		data_value = (ui_data_read & (~mask)) | (data_value & mask);
+		dunit_read(addr, MASK_ALL_BITS, &reg_val);
+		reg_val &= (~mask);
+		reg_val |= (data & mask);
 	}
 
-	reg_write(reg_addr, data_value);
-
-	return MV_OK;
+	reg_write(addr, reg_val);
 }
 
 /*
@@ -751,13 +729,81 @@ static int ddr3_tip_a38x_get_device_info(u8 dev_num, struct ddr3_device_info *in
 	return MV_OK;
 }
 
+/* check indirect access to phy register file completed */
+static int is_prfa_done(void)
+{
+	u32 reg_val;
+	u32 iter = 0;
+
+	do {
+		if (iter++ > MAX_POLLING_ITERATIONS) {
+			printf("error: %s: polling timeout\n", __func__);
+			return MV_FAIL;
+		}
+		dunit_read(PHY_REG_FILE_ACCESS, MASK_ALL_BITS, &reg_val);
+		reg_val >>= PRFA_REQ_OFFS;
+		reg_val &= PRFA_REQ_MASK;
+	} while (reg_val == PRFA_REQ_ENA); /* request pending */
+
+	return MV_OK;
+}
+
+/* write to phy register thru indirect access */
+static int prfa_write(enum hws_access_type phy_access, u32 phy,
+		      enum hws_ddr_phy phy_type, u32 addr,
+		      u32 data, enum hws_operation op_type)
+{
+	u32 reg_val = ((data & PRFA_DATA_MASK) << PRFA_DATA_OFFS) |
+		      ((addr & PRFA_REG_NUM_MASK) << PRFA_REG_NUM_OFFS) |
+		      ((phy & PRFA_PUP_NUM_MASK) << PRFA_PUP_NUM_OFFS) |
+		      ((phy_type & PRFA_PUP_CTRL_DATA_MASK) << PRFA_PUP_CTRL_DATA_OFFS) |
+		      ((phy_access & PRFA_PUP_BCAST_WR_ENA_MASK) << PRFA_PUP_BCAST_WR_ENA_OFFS) |
+		      (((addr >> 6) & PRFA_REG_NUM_HI_MASK) << PRFA_REG_NUM_HI_OFFS) |
+		      ((op_type & PRFA_TYPE_MASK) << PRFA_TYPE_OFFS);
+	dunit_write(PHY_REG_FILE_ACCESS, MASK_ALL_BITS, reg_val);
+	reg_val |= (PRFA_REQ_ENA << PRFA_REQ_OFFS);
+	dunit_write(PHY_REG_FILE_ACCESS, MASK_ALL_BITS, reg_val);
+
+	/* polling for prfa request completion */
+	if (is_prfa_done() != MV_OK)
+		return MV_FAIL;
+
+	return MV_OK;
+}
+
+/* read from phy register thru indirect access */
+static int prfa_read(enum hws_access_type phy_access, u32 phy,
+		     enum hws_ddr_phy phy_type, u32 addr, u32 *data)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	u32 max_phy = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 i, reg_val;
+
+	if (phy_access == ACCESS_TYPE_MULTICAST) {
+		for (i = 0; i < max_phy; i++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, i);
+			if (prfa_write(ACCESS_TYPE_UNICAST, i, phy_type, addr, 0, OPERATION_READ) != MV_OK)
+				return MV_FAIL;
+			dunit_read(PHY_REG_FILE_ACCESS, MASK_ALL_BITS, &reg_val);
+			data[i] = (reg_val >> PRFA_DATA_OFFS) & PRFA_DATA_MASK;
+		}
+	} else {
+		if (prfa_write(phy_access, phy, phy_type, addr, 0, OPERATION_READ) != MV_OK)
+			return MV_FAIL;
+		dunit_read(PHY_REG_FILE_ACCESS, MASK_ALL_BITS, &reg_val);
+		*data = (reg_val >> PRFA_DATA_OFFS) & PRFA_DATA_MASK;
+	}
+
+	return MV_OK;
+}
+
 static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 {
 	struct hws_tip_config_func_db config_func;
 
 	/* new read leveling version */
-	config_func.tip_dunit_read_func = ddr3_tip_a38x_if_read;
-	config_func.tip_dunit_write_func = ddr3_tip_a38x_if_write;
+	config_func.mv_ddr_dunit_read = dunit_read;
+	config_func.mv_ddr_dunit_write = dunit_write;
 	config_func.tip_dunit_mux_select_func =
 		ddr3_tip_a38x_select_ddr_controller;
 	config_func.tip_get_freq_config_info_func =
@@ -768,6 +814,8 @@ static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 	config_func.tip_get_clock_ratio = ddr3_tip_clock_mode;
 	config_func.tip_external_read = ddr3_tip_ext_read;
 	config_func.tip_external_write = ddr3_tip_ext_write;
+	config_func.mv_ddr_phy_read = prfa_read;
+	config_func.mv_ddr_phy_write = prfa_write;
 
 	ddr3_tip_init_config_func(dev_num, &config_func);
 
@@ -921,12 +969,8 @@ static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 
 	if ((async_mode_at_tf == 1) && (freq_val[frequency] > 400)) {
 		/* Set async mode */
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0x20220, 0x1000, 0x1000));
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0xe42f4, 0x200, 0x200));
+		dunit_write(0x20220, 0x1000, 0x1000);
+		dunit_write(0xe42f4, 0x200, 0x200);
 
 		/* Wait for async mode setup */
 		mdelay(5);
@@ -971,71 +1015,43 @@ static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 			/* set DDR_FREQ_667 as default */
 			async_val = 0x809f012;
 		}
-		ddr3_tip_a38x_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, 0xe42f0, async_val, 0xffffffff);
+		dunit_write(0xe42f0, 0xffffffff, async_val);
 	} else {
 		/* Set sync mode */
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0x20220, 0x0, 0x1000));
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0xe42f4, 0x0, 0x200));
+		dunit_write(0x20220, 0x1000, 0x0);
+		dunit_write(0xe42f4, 0x200, 0x0);
 
 		/* cpupll_clkdiv_reset_mask */
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0xe4264, 0x1f, 0xff));
+		dunit_write(0xe4264, 0xff, 0x1f);
 
 		/* cpupll_clkdiv_reload_smooth */
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0xe4260, (0x2 << 8), (0xff << 8)));
+		dunit_write(0xe4260, (0xff << 8), (0x2 << 8));
 
 		/* cpupll_clkdiv_relax_en */
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0xe4260, (0x2 << 24), (0xff << 24)));
+		dunit_write(0xe4260, (0xff << 24), (0x2 << 24));
 
 		/* write the divider */
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0xe4268, (divider << 8), (0x3f << 8)));
+		dunit_write(0xe4268, (0x3f << 8), (divider << 8));
 
 		/* set cpupll_clkdiv_reload_ratio */
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0xe4264, (1 << 8), (1 << 8)));
+		dunit_write(0xe4264, (1 << 8), (1 << 8));
 
 		/* undet cpupll_clkdiv_reload_ratio */
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0xe4264, 0, (1 << 8)));
+		dunit_write(0xe4264, (1 << 8), 0x0);
 
 		/* clear cpupll_clkdiv_reload_force */
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0xe4260, 0, (0xff << 8)));
+		dunit_write(0xe4260, (0xff << 8), 0x0);
 
 		/* clear cpupll_clkdiv_relax_en */
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0xe4260, 0, (0xff << 24)));
+		dunit_write(0xe4260, (0xff << 24), 0x0);
 
 		/* clear cpupll_clkdiv_reset_mask */
-		CHECK_STATUS(ddr3_tip_a38x_if_write
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      0xe4264, 0, 0xff));
+		dunit_write(0xe4264, 0xff, 0x0);
 	}
 
 	/* Dunit training clock + 1:1/2:1 mode */
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0x18488,
-		      ((ddr3_tip_clock_mode(frequency) & 0x1) << 16),
-		      (1 << 16)));
-	CHECK_STATUS(ddr3_tip_a38x_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1524,
-		      ((ddr3_tip_clock_mode(frequency) - 1) << 15),
-		      (1 << 15)));
+	dunit_write(0x18488, (1 << 16), ((ddr3_tip_clock_mode(frequency) & 0x1) << 16));
+	dunit_write(0x1524, (1 << 15), ((ddr3_tip_clock_mode(frequency) - 1) << 15));
 
 	return MV_OK;
 }
