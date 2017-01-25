@@ -579,6 +579,7 @@ int ddr3_tip_ext_write(u32 dev_num, u32 if_id, u32 reg_addr,
 	return MV_OK;
 }
 
+#ifdef MV_DDR_PRFA
 /* check indirect access to phy register file completed */
 static int is_prfa_done(void)
 {
@@ -646,6 +647,77 @@ static int prfa_read(enum hws_access_type phy_access, u32 phy,
 
 	return MV_OK;
 }
+#else /* MV_DDR_PRDA */
+#define PRDA_DATA_OFFS			0
+#define PRDA_DATA_MASK			0xffff
+#define PRDA_BIT15			0x1
+#define PRDA_BIT15_OFFS			15
+#define PRDA_BIT15_MASK			0x1
+#define PRDA_REG_NUM_OFFS		2
+#define PRDA_REG_NUM_MASK		0xff
+#define PRDA_PUP_NUM_OFFS		10
+#define PRDA_PUP_NUM_MASK		0xf
+#define PRDA_PUP_CTRL_DATA_OFFS		14
+#define PRDA_PUP_CTRL_DATA_MASK		0x1
+#define PRDA_PUP_CTRL_BCAST		0x1e
+#define PRDA_PUP_DATA_BCAST		0x1d
+/* write to phy register thru direct access */
+static int prda_write(enum hws_access_type phy_access, u32 phy,
+		     enum hws_ddr_phy phy_type, u32 addr,
+		     u32 data, enum hws_operation op_type)
+{
+	u32 reg_addr = (PRDA_BIT15 << PRDA_BIT15_OFFS) |
+		       ((addr & PRDA_REG_NUM_MASK) << PRDA_REG_NUM_OFFS);
+	u32 reg_val = (data & PRDA_DATA_MASK) << PRDA_DATA_OFFS;
+
+	if (phy_access == ACCESS_TYPE_MULTICAST) {
+		if (phy_type == DDR_PHY_DATA)
+			reg_addr |= (PRDA_PUP_DATA_BCAST << PRDA_PUP_NUM_OFFS);
+		else
+			reg_addr |= (PRDA_PUP_CTRL_BCAST << PRDA_PUP_NUM_OFFS);
+	} else { /* unicast access type */
+		reg_addr |= ((phy & PRDA_PUP_NUM_MASK) << PRDA_PUP_NUM_OFFS);
+		reg_addr |= ((phy_access & PRDA_PUP_CTRL_DATA_MASK) <<
+			     PRDA_PUP_CTRL_DATA_OFFS);
+	}
+
+	dunit_write(reg_addr, MASK_ALL_BITS, reg_val);
+
+	return MV_OK;
+}
+
+/* read from phy register thry direct access */
+static int prda_read(enum hws_access_type phy_access, u32 phy,
+		    enum hws_ddr_phy phy_type, u32 addr, u32 *data)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	u32 max_phy = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 i, reg_val;
+	u32 reg_addr = (PRDA_BIT15 << PRDA_BIT15_OFFS) |
+		       ((addr & PRDA_REG_NUM_MASK) << PRDA_REG_NUM_OFFS);
+
+	if (phy_access == ACCESS_TYPE_MULTICAST) {
+		for (i = 0; i < max_phy; i++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, i);
+			reg_addr |= ((i & PRDA_PUP_NUM_MASK) << PRDA_PUP_NUM_OFFS);
+			reg_addr |= ((phy_access & PRDA_PUP_CTRL_DATA_MASK) <<
+				     PRDA_PUP_CTRL_DATA_OFFS);
+			dunit_read(reg_addr, MASK_ALL_BITS, &reg_val);
+			data[i] = (reg_val >> PRDA_DATA_OFFS) & PRDA_DATA_MASK;
+			reg_addr = (PRDA_BIT15 << PRDA_BIT15_OFFS) |
+				   ((addr & PRDA_REG_NUM_MASK) << PRDA_REG_NUM_OFFS);
+		}
+	} else { /* unicast type access */
+		reg_addr |= ((phy & PRDA_PUP_NUM_MASK) << PRDA_PUP_NUM_OFFS);
+		reg_addr |= ((phy_access & PRDA_PUP_CTRL_DATA_MASK) <<
+			     PRDA_PUP_CTRL_DATA_OFFS);
+		dunit_read(reg_addr, MASK_ALL_BITS, &reg_val);
+		*data = (reg_val >> PRDA_DATA_OFFS) & PRDA_DATA_MASK;
+	}
+
+	return MV_OK;
+}
+#endif
 
 static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 {
@@ -666,9 +738,13 @@ static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 	config_func.tip_get_clock_ratio = mv_ddr_tip_clk_ratio_get;
 	config_func.tip_external_read = ddr3_tip_ext_read;
 	config_func.tip_external_write = ddr3_tip_ext_write;
+#ifdef MV_DDR_PRFA
 	config_func.mv_ddr_phy_read = prfa_read;
 	config_func.mv_ddr_phy_write = prfa_write;
-
+#else
+	config_func.mv_ddr_phy_read = prda_read;
+	config_func.mv_ddr_phy_write = prda_write;
+#endif
 	ddr3_tip_init_config_func(dev_num, &config_func);
 
 #if defined(a80x0) || defined(a80x0_cust)
