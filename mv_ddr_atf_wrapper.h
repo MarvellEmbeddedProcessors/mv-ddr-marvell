@@ -234,8 +234,6 @@ typedef unsigned int u32;
 /* memcpy function */
 #include "../../../include/lib/mmio.h"
 
-#include "ddr3_hws_hw_training_def.h"
-
 /*
  * Accessor functions for the registers
  */

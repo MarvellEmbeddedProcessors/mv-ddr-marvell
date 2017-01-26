@@ -128,36 +128,36 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(CONFIG_DDR4)
 struct dlb_config ddr3_dlb_config_table[] = {
-	{REG_STATIC_DRAM_DLB_CONTROL, 0x2000005f},
-	{DLB_BUS_OPTIMIZATION_WEIGHTS_REG, 0x00880000},
-	{DLB_AGING_REGISTER, 0x3f7f007f},
-	{DLB_EVICTION_CONTROL_REG, 0x0000129f},
-	{DLB_EVICTION_TIMERS_REGISTER_REG, 0x00ff0000},
-	{DLB_BUS_WEIGHTS_DIFF_CS, 0x04030803},
-	{DLB_BUS_WEIGHTS_DIFF_BG, 0x00000A02},
-	{DLB_BUS_WEIGHTS_SAME_BG, 0x08000901},
-	{DLB_BUS_WEIGHTS_RD_WR,  0x00020005},
-	{DLB_BUS_WEIGHTS_ATTR_SYS_PRIO, 0x00060f10},
-	{DLB_MAIN_QUEUE_MAP, 0x00000543},
-	{DLB_LINE_SPLIT, 0x0000000f},
-	{DLB_USER_COMMAND_REG, 0x00000000},
+	{DLB_CTRL_REG, 0x2000005f},
+	{DLB_BUS_OPT_WT_REG, 0x00880000},
+	{DLB_AGING_REG, 0x3f7f007f},
+	{DLB_EVICTION_CTRL_REG, 0x0000129f},
+	{DLB_EVICTION_TIMERS_REG, 0x00ff0000},
+	{DLB_WTS_DIFF_CS_REG, 0x04030803},
+	{DLB_WTS_DIFF_BG_REG, 0x00000A02},
+	{DLB_WTS_SAME_BG_REG, 0x08000901},
+	{DLB_WTS_CMDS_REG,  0x00020005},
+	{DLB_WTS_ATTR_PRIO_REG, 0x00060f10},
+	{DLB_QUEUE_MAP_REG, 0x00000543},
+	{DLB_SPLIT_REG, 0x0000000f},
+	{DLB_USER_CMD_REG, 0x00000000},
 	{0x0, 0x0}
 };
 #else /* CONFIG_DDR4 */
 struct dlb_config ddr3_dlb_config_table[] = {
-	{REG_STATIC_DRAM_DLB_CONTROL, 0x2000005c},
-	{DLB_BUS_OPTIMIZATION_WEIGHTS_REG, 0x00880000},
-	{DLB_AGING_REGISTER, 0x0f7f007f},
-	{DLB_EVICTION_CONTROL_REG, 0x0000129f},
-	{DLB_EVICTION_TIMERS_REGISTER_REG, 0x00ff0000},
-	{DLB_BUS_WEIGHTS_DIFF_CS, 0x04030802},
-	{DLB_BUS_WEIGHTS_DIFF_BG, 0x00000a02},
-	{DLB_BUS_WEIGHTS_SAME_BG, 0x09000a01},
-	{DLB_BUS_WEIGHTS_RD_WR, 0x00020005},
-	{DLB_BUS_WEIGHTS_ATTR_SYS_PRIO, 0x00060f10},
-	{DLB_MAIN_QUEUE_MAP, 0x00000543},
-	{DLB_LINE_SPLIT, 0x00000000},
-	{DLB_USER_COMMAND_REG, 0x00000000},
+	{DLB_CTRL_REG, 0x2000005c},
+	{DLB_BUS_OPT_WT_REG, 0x00880000},
+	{DLB_AGING_REG, 0x0f7f007f},
+	{DLB_EVICTION_CTRL_REG, 0x0000129f},
+	{DLB_EVICTION_TIMERS_REG, 0x00ff0000},
+	{DLB_WTS_DIFF_CS_REG, 0x04030802},
+	{DLB_WTS_DIFF_BG_REG, 0x00000a02},
+	{DLB_WTS_SAME_BG_REG, 0x09000a01},
+	{DLB_WTS_CMDS_REG, 0x00020005},
+	{DLB_WTS_ATTR_PRIO_REG, 0x00060f10},
+	{DLB_QUEUE_MAP_REG, 0x00000543},
+	{DLB_SPLIT_REG, 0x00000000},
+	{DLB_USER_CMD_REG, 0x00000000},
 	{0x0, 0x0}
 };
 #endif /* CONFIG_DDR4 */
@@ -516,14 +516,14 @@ static int ddr3_tip_a38x_select_ddr_controller(u8 dev_num, int enable)
 {
 	u32 reg;
 
-	reg = reg_read(CS_ENABLE_REG);
+	reg = reg_read(DUAL_DUNIT_CFG_REG);
 
 	if (enable)
 		reg |= (1 << 6);
 	else
 		reg &= ~(1 << 6);
 
-	reg_write(CS_ENABLE_REG, reg);
+	reg_write(DUAL_DUNIT_CFG_REG, reg);
 
 	return MV_OK;
 }
@@ -740,7 +740,7 @@ static int is_prfa_done(void)
 			printf("error: %s: polling timeout\n", __func__);
 			return MV_FAIL;
 		}
-		dunit_read(PHY_REG_FILE_ACCESS, MASK_ALL_BITS, &reg_val);
+		dunit_read(PHY_REG_FILE_ACCESS_REG, MASK_ALL_BITS, &reg_val);
 		reg_val >>= PRFA_REQ_OFFS;
 		reg_val &= PRFA_REQ_MASK;
 	} while (reg_val == PRFA_REQ_ENA); /* request pending */
@@ -760,9 +760,9 @@ static int prfa_write(enum hws_access_type phy_access, u32 phy,
 		      ((phy_access & PRFA_PUP_BCAST_WR_ENA_MASK) << PRFA_PUP_BCAST_WR_ENA_OFFS) |
 		      (((addr >> 6) & PRFA_REG_NUM_HI_MASK) << PRFA_REG_NUM_HI_OFFS) |
 		      ((op_type & PRFA_TYPE_MASK) << PRFA_TYPE_OFFS);
-	dunit_write(PHY_REG_FILE_ACCESS, MASK_ALL_BITS, reg_val);
+	dunit_write(PHY_REG_FILE_ACCESS_REG, MASK_ALL_BITS, reg_val);
 	reg_val |= (PRFA_REQ_ENA << PRFA_REQ_OFFS);
-	dunit_write(PHY_REG_FILE_ACCESS, MASK_ALL_BITS, reg_val);
+	dunit_write(PHY_REG_FILE_ACCESS_REG, MASK_ALL_BITS, reg_val);
 
 	/* polling for prfa request completion */
 	if (is_prfa_done() != MV_OK)
@@ -784,13 +784,13 @@ static int prfa_read(enum hws_access_type phy_access, u32 phy,
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, i);
 			if (prfa_write(ACCESS_TYPE_UNICAST, i, phy_type, addr, 0, OPERATION_READ) != MV_OK)
 				return MV_FAIL;
-			dunit_read(PHY_REG_FILE_ACCESS, MASK_ALL_BITS, &reg_val);
+			dunit_read(PHY_REG_FILE_ACCESS_REG, MASK_ALL_BITS, &reg_val);
 			data[i] = (reg_val >> PRFA_DATA_OFFS) & PRFA_DATA_MASK;
 		}
 	} else {
 		if (prfa_write(phy_access, phy, phy_type, addr, 0, OPERATION_READ) != MV_OK)
 			return MV_FAIL;
-		dunit_read(PHY_REG_FILE_ACCESS, MASK_ALL_BITS, &reg_val);
+		dunit_read(PHY_REG_FILE_ACCESS_REG, MASK_ALL_BITS, &reg_val);
 		*data = (reg_val >> PRFA_DATA_OFFS) & PRFA_DATA_MASK;
 	}
 
@@ -938,7 +938,7 @@ static int mv_ddr_training_mask_set(void)
  */
 void mv_ddr_set_calib_controller(void)
 {
-	calibration_update_control = CALIB_MACHINE_INT_CTRL;
+	calibration_update_control = CAL_UPDATE_CTRL_INT;
 }
 
 static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
@@ -1124,7 +1124,7 @@ int ddr3_silicon_post_init(void)
 	if (DDR3_IS_16BIT_DRAM_MODE(tm->bus_act_mask)) {
 		CHECK_STATUS(ddr3_tip_if_write
 			     (0, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
-			      SDRAM_CONFIGURATION_REG, 0x0, 0x8000));
+			      SDRAM_CFG_REG, 0x0, 0x8000));
 	}
 
 	return MV_OK;
@@ -1170,8 +1170,8 @@ static u32 ddr3_get_bus_width(void)
 {
 	u32 bus_width;
 
-	bus_width = (reg_read(SDRAM_CONFIGURATION_REG) & 0x8000) >>
-		REG_SDRAM_CONFIG_WIDTH_OFFS;
+	bus_width = (reg_read(SDRAM_CFG_REG) & 0x8000) >>
+		BUS_IN_USE_OFFS;
 
 	return (bus_width == 0) ? 16 : 32;
 }
@@ -1180,9 +1180,9 @@ static u32 ddr3_get_device_width(u32 cs)
 {
 	u32 device_width;
 
-	device_width = (reg_read(REG_SDRAM_ADDRESS_CTRL_ADDR) &
-			(0x3 << (REG_SDRAM_ADDRESS_CTRL_STRUCT_OFFS * cs))) >>
-		(REG_SDRAM_ADDRESS_CTRL_STRUCT_OFFS * cs);
+	device_width = (reg_read(SDRAM_ADDR_CTRL_REG) &
+			(CS_STRUCT_MASK << CS_STRUCT_OFFS(cs))) >>
+			CS_STRUCT_OFFS(cs);
 
 	return (device_width == 0) ? 8 : 16;
 }
@@ -1192,11 +1192,10 @@ static float ddr3_get_device_size(u32 cs)
 	u32 device_size_low, device_size_high, device_size;
 	u32 data, cs_low_offset, cs_high_offset;
 
-	cs_low_offset = REG_SDRAM_ADDRESS_SIZE_OFFS + cs * 4;
-	cs_high_offset = REG_SDRAM_ADDRESS_SIZE_OFFS +
-		REG_SDRAM_ADDRESS_SIZE_HIGH_OFFS + cs;
+	cs_low_offset = CS_SIZE_OFFS(cs);
+	cs_high_offset = CS_SIZE_HIGH_OFFS(cs);
 
-	data = reg_read(REG_SDRAM_ADDRESS_CTRL_ADDR);
+	data = reg_read(SDRAM_ADDR_CTRL_REG);
 	device_size_low = (data >> cs_low_offset) & 0x3;
 	device_size_high = (data >> cs_high_offset) & 0x1;
 
@@ -1272,7 +1271,7 @@ static int ddr3_fast_path_dynamic_cs_size_config(u32 cs_ena)
 #endif
 
 	/* Open fast path windows */
-	for (cs = 0; cs < MAX_CS; cs++) {
+	for (cs = 0; cs < MAX_CS_NUM; cs++) {
 		if (cs_ena & (1 << cs)) {
 			/* get CS size */
 			if (ddr3_calc_mem_cs_size(cs, &cs_mem_size) != MV_OK)
@@ -1361,14 +1360,14 @@ static int ddr3_restore_and_set_final_windows(u32 *win, const char *ddr_type)
 #else
 	u32 reg, cs;
 	reg = 0x1fffffe1;
-	for (cs = 0; cs < MAX_CS; cs++) {
+	for (cs = 0; cs < MAX_CS_NUM; cs++) {
 		if (cs_ena & (1 << cs)) {
 			reg |= (cs << 2);
 			break;
 		}
 	}
 	/* Open fast path Window to - 0.5G */
-	reg_write(REG_FASTPATH_WIN_0_CTRL_ADDR, reg);
+	reg_write(REG_FASTPATH_WIN_CTRL_ADDR(0), reg);
 #endif
 
 	return MV_OK;
@@ -1408,7 +1407,7 @@ static int ddr3_save_and_set_training_windows(u32 *win)
 	/* Open XBAR Windows 4-7 or 16-19 for other CS */
 	reg = 0;
 	tmp_count = 0;
-	for (cs = 0; cs < MAX_CS; cs++) {
+	for (cs = 0; cs < MAX_CS_NUM; cs++) {
 		if (cs_ena & (1 << cs)) {
 			switch (cs) {
 			case 0:
@@ -1474,8 +1473,8 @@ int mv_ddr_pre_training_soc_config(const char *ddr_type)
 	 */
 	if (sys_env_suspend_wakeup_check() ==
 	    SUSPEND_WAKEUP_ENABLED_GPIO_DETECTED) {
-		reg_bit_set(REG_SDRAM_INIT_CTRL_ADDR,
-			    1 << REG_SDRAM_INIT_RESET_MASK_OFFS);
+		reg_bit_set(SDRAM_INIT_CTRL_REG,
+			    DRAM_RESET_MASK_MASKED << DRAM_RESET_MASK_OFFS);
 	}
 
 	/* Check if DRAM is already initialized  */
@@ -1486,18 +1485,24 @@ int mv_ddr_pre_training_soc_config(const char *ddr_type)
 	}
 
 	/* Fix read ready phases for all SOC in reg 0x15c8 */
-	reg_val = reg_read(REG_TRAINING_DEBUG_3_ADDR);
-	reg_val &= ~(REG_TRAINING_DEBUG_3_MASK);
-	reg_val |= 0x4;		/* Phase 0 */
-	reg_val &= ~(REG_TRAINING_DEBUG_3_MASK << REG_TRAINING_DEBUG_3_OFFS);
-	reg_val |= (0x4 << (1 * REG_TRAINING_DEBUG_3_OFFS));	/* Phase 1 */
-	reg_val &= ~(REG_TRAINING_DEBUG_3_MASK << (3 * REG_TRAINING_DEBUG_3_OFFS));
-	reg_val |= (0x6 << (3 * REG_TRAINING_DEBUG_3_OFFS));	/* Phase 3 */
-	reg_val &= ~(REG_TRAINING_DEBUG_3_MASK << (4 * REG_TRAINING_DEBUG_3_OFFS));
-	reg_val |= (0x6 << (4 * REG_TRAINING_DEBUG_3_OFFS));
-	reg_val &= ~(REG_TRAINING_DEBUG_3_MASK << (5 * REG_TRAINING_DEBUG_3_OFFS));
-	reg_val |= (0x6 << (5 * REG_TRAINING_DEBUG_3_OFFS));
-	reg_write(REG_TRAINING_DEBUG_3_ADDR, reg_val);
+	reg_val = reg_read(TRAINING_DBG_3_REG);
+
+	reg_val &= ~(TRN_DBG_RDY_INC_PH_2TO1_MASK << TRN_DBG_RDY_INC_PH_2TO1_OFFS(0));
+	reg_val |= (0x4 << TRN_DBG_RDY_INC_PH_2TO1_OFFS(0));	/* phase 0 */
+
+	reg_val &= ~(TRN_DBG_RDY_INC_PH_2TO1_MASK << TRN_DBG_RDY_INC_PH_2TO1_OFFS(1));
+	reg_val |= (0x4 << TRN_DBG_RDY_INC_PH_2TO1_OFFS(1));	/* phase 1 */
+
+	reg_val &= ~(TRN_DBG_RDY_INC_PH_2TO1_MASK << TRN_DBG_RDY_INC_PH_2TO1_OFFS(3));
+	reg_val |= (0x6 << TRN_DBG_RDY_INC_PH_2TO1_OFFS(3));	/* phase 3 */
+
+	reg_val &= ~(TRN_DBG_RDY_INC_PH_2TO1_MASK << TRN_DBG_RDY_INC_PH_2TO1_OFFS(4));
+	reg_val |= (0x6 << TRN_DBG_RDY_INC_PH_2TO1_OFFS(4));	/* phase 4 */
+
+	reg_val &= ~(TRN_DBG_RDY_INC_PH_2TO1_MASK << TRN_DBG_RDY_INC_PH_2TO1_OFFS(5));
+	reg_val |= (0x6 << TRN_DBG_RDY_INC_PH_2TO1_OFFS(5));	/* phase 5 */
+
+	reg_write(TRAINING_DBG_3_REG, reg_val);
 
 	/*
 	 * Axi_bresp_mode[8] = Compliant,
@@ -1505,7 +1510,7 @@ int mv_ddr_pre_training_soc_config(const char *ddr_type)
 	 * Axi_data_bus_width[0] = 128bit
 	 * */
 	/* 0x14a8 - AXI Control Register */
-	reg_write(REG_DRAM_AXI_CTRL_ADDR, 0);
+	reg_write(AXI_CTRL_REG, 0);
 
 	/*
 	 * Stage 2 - Training Values Setup
@@ -1542,16 +1547,27 @@ static int ddr3_new_tip_dlb_config(void)
 	}
 
 #if defined(CONFIG_DDR4)
-	reg = reg_read(REG_DDR_CONT_HIGH_ADDR);
-	reg |= DLB_INTERJECTION_ENABLE;
-	reg_write(REG_DDR_CONT_HIGH_ADDR, reg);
+	reg = reg_read(DUNIT_CTRL_HIGH_REG);
+	reg &= ~(CPU_INTERJECTION_ENA_MASK << CPU_INTERJECTION_ENA_OFFS);
+	reg |= CPU_INTERJECTION_ENA_SPLIT_DIS << CPU_INTERJECTION_ENA_OFFS;
+	reg_write(DUNIT_CTRL_HIGH_REG, reg);
 #endif /* CONFIG_DDR4 */
 
 	/* Enable DLB */
-	reg = reg_read(REG_STATIC_DRAM_DLB_CONTROL);
-	reg |= DLB_ENABLE | DLB_WRITE_COALESING | DLB_AXI_PREFETCH_EN |
-		DLB_MBUS_PREFETCH_EN | PREFETCH_N_LN_SZ_TR;
-	reg_write(REG_STATIC_DRAM_DLB_CONTROL, reg);
+	reg = reg_read(DLB_CTRL_REG);
+	reg &= ~(DLB_EN_MASK << DLB_EN_OFFS) &
+	       ~(WR_COALESCE_EN_MASK << WR_COALESCE_EN_OFFS) &
+	       ~(AXI_PREFETCH_EN_MASK << AXI_PREFETCH_EN_OFFS) &
+	       ~(MBUS_PREFETCH_EN_MASK << MBUS_PREFETCH_EN_OFFS) &
+	       ~(PREFETCH_NXT_LN_SZ_TRIG_MASK << PREFETCH_NXT_LN_SZ_TRIG_OFFS);
+
+	reg |= (DLB_EN_ENA << DLB_EN_OFFS) |
+	       (WR_COALESCE_EN_ENA << WR_COALESCE_EN_OFFS) |
+	       (AXI_PREFETCH_EN_ENA << AXI_PREFETCH_EN_OFFS) |
+	       (MBUS_PREFETCH_EN_ENA << MBUS_PREFETCH_EN_OFFS) |
+	       (PREFETCH_NXT_LN_SZ_TRIG_ENA << PREFETCH_NXT_LN_SZ_TRIG_OFFS);
+
+	reg_write(DLB_CTRL_REG, reg);
 
 	return MV_OK;
 }
@@ -1616,22 +1632,22 @@ int ddr3_tip_configure_phy(u32 dev_num)
 	CHECK_STATUS(ddr3_tip_bus_write
 		(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
-		PAD_ZRI_CALIB_PHY_REG,
+		PAD_ZRI_CAL_PHY_REG,
 		((0x7f & g_zpri_data) << 7 | (0x7f & g_znri_data))));
 	CHECK_STATUS(ddr3_tip_bus_write
 		(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_CONTROL,
-		PAD_ZRI_CALIB_PHY_REG,
+		PAD_ZRI_CAL_PHY_REG,
 		((0x7f & g_zpri_ctrl) << 7 | (0x7f & g_znri_ctrl))));
 	CHECK_STATUS(ddr3_tip_bus_write
 		(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
-		PAD_ODT_CALIB_PHY_REG,
+		PAD_ODT_CAL_PHY_REG,
 		((0x3f & g_zpodt_data) << 6 | (0x3f & g_znodt_data))));
 	CHECK_STATUS(ddr3_tip_bus_write
 		(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 		ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_CONTROL,
-		PAD_ODT_CALIB_PHY_REG,
+		PAD_ODT_CAL_PHY_REG,
 		((0x3f & g_zpodt_ctrl) << 6 | (0x3f & g_znodt_ctrl))));
 
 	CHECK_STATUS(ddr3_tip_bus_write
@@ -1659,14 +1675,14 @@ int ddr3_tip_configure_phy(u32 dev_num)
 				CHECK_STATUS(ddr3_tip_bus_read_modify_write
 					(dev_num, ACCESS_TYPE_UNICAST,
 					if_id, phy_id, DDR_PHY_DATA,
-					PAD_CONFIG_PHY_REG,
+					PAD_CFG_PHY_REG,
 					((clamp_tbl[if_id] << 4) | vref_init_val),
 					((0x7 << 4) | 0x7)));
 				/* clamp not relevant for control */
 				CHECK_STATUS(ddr3_tip_bus_read_modify_write
 					(dev_num, ACCESS_TYPE_UNICAST,
 					if_id, phy_id, DDR_PHY_CONTROL,
-					PAD_CONFIG_PHY_REG, 0x4, 0x7));
+					PAD_CFG_PHY_REG, 0x4, 0x7));
 		}
 	}
 
@@ -1704,21 +1720,21 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 
 	/* pad calibration control enable */
 	CHECK_STATUS(ddr3_tip_if_write
-			(DEV_NUM_0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, CALIB_MACHINE_CTRL_REG,
-			DYN_PAD_CALIB_ENABLE << MV_DDR_DYN_PADS_CALIB_EN_OFFS |
-			CALIB_MACHINE_INT_CTRL << MV_DDR_CALIB_UPDATE_CTRL_OFFS,
-			MV_DDR_RECALIBRATE_MASK << MV_DDR_DYN_PADS_CALIB_EN_OFFS |
-			MV_DDR_CALIB_UPDATE_CTRL_MASK << MV_DDR_CALIB_UPDATE_CTRL_OFFS));
+			(DEV_NUM_0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, MAIN_PADS_CAL_MACH_CTRL_REG,
+			DYN_PADS_CAL_ENABLE_ENA << DYN_PADS_CAL_ENABLE_OFFS |
+			CAL_UPDATE_CTRL_INT << CAL_UPDATE_CTRL_OFFS,
+			DYN_PADS_CAL_ENABLE_MASK << DYN_PADS_CAL_ENABLE_OFFS |
+			CAL_UPDATE_CTRL_MASK << CAL_UPDATE_CTRL_OFFS));
 
 	/* Polling initial calibration is done*/
 	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,
-				CALIB_MACHINE_STATUS_READY << MV_DDR_CALIB_MACHINE_STATUS_OFFS,
-				MV_DDR_CALIB_MACHINE_STATUS_MASK << MV_DDR_CALIB_MACHINE_STATUS_OFFS,
-				CALIB_MACHINE_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
+				CAL_MACH_RDY << CAL_MACH_STATUS_OFFS,
+				CAL_MACH_STATUS_MASK << CAL_MACH_STATUS_OFFS,
+				MAIN_PADS_CAL_MACH_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(0)\n"));
 
 	/* Polling that calibration propagate to io */
-	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x3FFFFFF, 0x3FFFFFF, REG_PHY_LOCK_STATUS_ADDR,
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x3FFFFFF, 0x3FFFFFF, PHY_LOCK_STATUS_REG,
 				MAX_POLLING_ITERATIONS) != MV_OK)
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(1)\n"));
 
@@ -1727,21 +1743,21 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 
 	/* pad calibration control disable */
 	CHECK_STATUS(ddr3_tip_if_write
-			(DEV_NUM_0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, CALIB_MACHINE_CTRL_REG,
-			DYN_PAD_CALIB_DISABLE << MV_DDR_DYN_PADS_CALIB_EN_OFFS |
-			CALIB_MACHINE_INT_CTRL << MV_DDR_CALIB_UPDATE_CTRL_OFFS,
-			MV_DDR_RECALIBRATE_MASK << MV_DDR_DYN_PADS_CALIB_EN_OFFS |
-			MV_DDR_CALIB_UPDATE_CTRL_MASK << MV_DDR_CALIB_UPDATE_CTRL_OFFS));
+			(DEV_NUM_0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, MAIN_PADS_CAL_MACH_CTRL_REG,
+			DYN_PADS_CAL_ENABLE_DIS << DYN_PADS_CAL_ENABLE_OFFS |
+			CAL_UPDATE_CTRL_INT << CAL_UPDATE_CTRL_OFFS,
+			DYN_PADS_CAL_ENABLE_MASK << DYN_PADS_CAL_ENABLE_OFFS |
+			CAL_UPDATE_CTRL_MASK << CAL_UPDATE_CTRL_OFFS));
 
 	/* Polling initial calibration is done */
 	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,
-				CALIB_MACHINE_STATUS_READY << MV_DDR_CALIB_MACHINE_STATUS_OFFS,
-				MV_DDR_CALIB_MACHINE_STATUS_MASK << MV_DDR_CALIB_MACHINE_STATUS_OFFS,
-				CALIB_MACHINE_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
+				CAL_MACH_RDY << CAL_MACH_STATUS_OFFS,
+				CAL_MACH_STATUS_MASK << CAL_MACH_STATUS_OFFS,
+				MAIN_PADS_CAL_MACH_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(0)\n"));
 
 	/* Polling that calibration propagate to io */
-	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x3FFFFFF, 0x3FFFFFF, REG_PHY_LOCK_STATUS_ADDR,
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x3FFFFFF, 0x3FFFFFF, PHY_LOCK_STATUS_REG,
 				MAX_POLLING_ITERATIONS) != MV_OK)
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(1)\n"));
 

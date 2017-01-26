@@ -752,7 +752,7 @@ int ddr3_tip_print_stability_log(u32 dev_num)
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST,
 						  bus_id, DDR_PHY_DATA,
-						  RESULT_DB_PHY_REG_ADDR +
+						  RESULT_PHY_REG +
 						  csindex, &reg_data);
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST,
@@ -768,7 +768,7 @@ int ddr3_tip_print_stability_log(u32 dev_num)
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST,
 						  bus_id, DDR_PHY_DATA,
-						  RESULT_DB_PHY_REG_ADDR +
+						  RESULT_PHY_REG +
 						  csindex + 4, &reg_data);
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST,
@@ -784,7 +784,7 @@ int ddr3_tip_print_stability_log(u32 dev_num)
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST,
 						  bus_id, DDR_PHY_DATA,
-						  RESULT_DB_PHY_REG_ADDR +
+						  RESULT_PHY_REG +
 						  csindex, &reg_data);
 				printf("%d,%d,", (reg_data & 0x1f),
 				       ((reg_data & 0x3e0) >> 5));
@@ -793,8 +793,8 @@ int ddr3_tip_print_stability_log(u32 dev_num)
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST,
 						  bus_id, DDR_PHY_DATA,
-						  WL_PHY_BASE +
-						  csindex * 4, &reg_data);
+						  WL_PHY_REG(csindex),
+						  &reg_data);
 				printf("%d,%d,%d,",
 				       (reg_data & 0x1f) +
 				       ((reg_data & 0x1c0) >> 6) * 32,
@@ -804,7 +804,7 @@ int ddr3_tip_print_stability_log(u32 dev_num)
 				CHECK_STATUS(ddr3_tip_if_read
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id,
-					      READ_DATA_SAMPLE_DELAY,
+					      RD_DATA_SMPL_DLYS_REG,
 					      read_data, MASK_ALL_BITS));
 				read_data[if_id] =
 					(read_data[if_id] &
@@ -813,7 +813,7 @@ int ddr3_tip_print_stability_log(u32 dev_num)
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST, bus_id,
 						  DDR_PHY_DATA,
-						  RL_PHY_BASE + csindex * 4,
+						  RL_PHY_REG(csindex),
 						  &reg_data);
 				printf("%d,%d,%d,%d,",
 				       (reg_data & 0x1f) +
@@ -826,20 +826,20 @@ int ddr3_tip_print_stability_log(u32 dev_num)
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST, bus_id,
 						  DDR_PHY_DATA,
-						  WRITE_CENTRALIZATION_PHY_REG
-						  + csindex * 4, &reg_data);
+						  CTX_PHY_REG(csindex),
+						  &reg_data);
 				printf("%d,", (reg_data & 0x3f));
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST, bus_id,
 						  DDR_PHY_DATA,
-						  READ_CENTRALIZATION_PHY_REG
-						  + csindex * 4, &reg_data);
+						  CRX_PHY_REG(csindex),
+						   &reg_data);
 				printf("%d,", (reg_data & 0x1f));
 				/* Vref */
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST, bus_id,
 						  DDR_PHY_DATA,
-						  PAD_CONFIG_PHY_REG,
+						  PAD_CFG_PHY_REG,
 						  &reg_data);
 				printf("%d,", (reg_data & 0x7));
 				/* DQVref */
@@ -1544,8 +1544,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 	u32 res[MAX_INTERFACE_NUM] = { 0 };
 	int if_id = 0;
 	u32 adll_value = 0;
-	int reg = (direction == 0) ? WRITE_CENTRALIZATION_PHY_REG :
-		READ_CENTRALIZATION_PHY_REG;
+	int reg;
 	enum hws_access_type pup_access;
 	u32 cs;
 	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
@@ -1566,6 +1565,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 	}
 
 	for (cs = 0; cs < max_cs; cs++) {
+		reg = (direction == 0) ? CTX_PHY_REG(cs) : CRX_PHY_REG(cs);
 		for (adll = 0; adll < ADLL_LENGTH; adll++) {
 			for (if_id = 0;
 			     if_id <= MAX_INTERFACE_NUM - 1;
@@ -1582,10 +1582,9 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 
 		for (adll = 0; adll < (MAX_INTERFACE_NUM * MAX_BUS_NUM); adll++)
 			ctrl_adll[adll] = 0;
-		/* Save DQS value(after algorithm run) */
-		ddr3_tip_read_adll_value(dev_num, ctrl_adll,
-					 (reg + (cs * CS_REGISTER_ADDR_OFFSET)),
-					 MASK_ALL_BITS);
+			/* Save DQS value(after algorithm run) */
+			ddr3_tip_read_adll_value(dev_num, ctrl_adll,
+						 reg, MASK_ALL_BITS);
 
 		/*
 		 * Sweep ADLL  from 0:31 on all I/F on all Pup and perform
@@ -1602,8 +1601,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 						CHECK_STATUS(ddr3_tip_bus_write
 							     (dev_num, ACCESS_TYPE_MULTICAST, 0,
 							      pup_access, pup, DDR_PHY_DATA,
-							      reg + CS_BYTE_GAP(cs),
-							      adll_value));
+							      reg, adll_value));
 						hws_ddr3_run_bist(dev_num, sweep_pattern, res,
 								  cs);
 						/* ddr3_tip_reset_fifo_ptr(dev_num); */
@@ -1624,7 +1622,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 									  ACCESS_TYPE_UNICAST,
 									  pup,
 									  DDR_PHY_DATA,
-									  reg + CS_BYTE_GAP(cs),
+									  reg,
 									  ctrl_adll[if_id *
 										    cs *
 										    octets_per_if_num
@@ -1672,12 +1670,9 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 		 * Write back to the phy the Rx DQS value, we store in
 		 * the beginning.
 		 */
-		ddr3_tip_write_adll_value(dev_num, ctrl_adll,
-					  (reg + cs * CS_REGISTER_ADDR_OFFSET));
+		ddr3_tip_write_adll_value(dev_num, ctrl_adll, reg);
 		/* print adll results */
-		ddr3_tip_read_adll_value(dev_num, ctrl_adll,
-					 (reg + cs * CS_REGISTER_ADDR_OFFSET),
-					 MASK_ALL_BITS);
+		ddr3_tip_read_adll_value(dev_num, ctrl_adll, reg, MASK_ALL_BITS);
 		printf("%s, DQS, ADLL,,,", (direction == 0) ? "Tx" : "Rx");
 		print_adll(dev_num, ctrl_adll);
 	}
@@ -1696,7 +1691,7 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 	u32 res[MAX_INTERFACE_NUM] = { 0 };
 	int if_id = 0, gap = 0;
 	u32 adll_value = 0;
-	int reg = (direction == 0) ? WL_PHY_BASE : RL_PHY_BASE;
+	int reg;
 	enum hws_access_type pup_access;
 	u32 cs;
 	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
@@ -1714,6 +1709,7 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 	}
 
 	for (cs = 0; cs < max_cs; cs++) {
+		reg = (direction == 0) ? WL_PHY_REG(cs) : RL_PHY_REG(cs);
 		for (adll = 0; adll < ADLL_LENGTH; adll++) {
 			for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 				VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
@@ -1729,13 +1725,12 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 		}
 
 		/* save leveling value after running algorithm */
-		ddr3_tip_read_adll_value(dev_num, ctrl_adll,
-					 (reg + (cs * CS_REGISTER_ADDR_OFFSET)), 0x1F);
-		read_phase_value(dev_num, ctrl_level_phase, (reg + (cs * CS_REGISTER_ADDR_OFFSET)), 0x7 << 6);
+		ddr3_tip_read_adll_value(dev_num, ctrl_adll, reg, 0x1f);
+		read_phase_value(dev_num, ctrl_level_phase, reg, 0x7 << 6);
 
 		if (direction == 0)
 			ddr3_tip_read_adll_value(dev_num, ctrl_adll1,
-						 (0x1 + (cs * CS_REGISTER_ADDR_OFFSET)), MASK_ALL_BITS);
+						 CTX_PHY_REG(cs), MASK_ALL_BITS);
 
 		/* Sweep ADLL from 0 to 31 on all interfaces, all pups,
 		 * and perform BIST on each stage
@@ -1770,7 +1765,7 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 										pup_access,
 										pup,
 										DDR_PHY_DATA,
-										reg + CS_BYTE_GAP(cs),
+										reg,
 										adll_value));
 						if (direction == 0)
 							CHECK_STATUS(ddr3_tip_bus_write(dev_num,
@@ -1779,7 +1774,7 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 											pup_access,
 											pup,
 											DDR_PHY_DATA,
-											0x1 + CS_BYTE_GAP(cs),
+											CTX_PHY_REG(cs),
 											gap));
 					}
 
@@ -1822,7 +1817,7 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 				start_adll = ctrl_adll[if_id * cs * octets_per_if_num + pup] +
 					     ctrl_level_phase[if_id * cs * octets_per_if_num + pup];
 				CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, pup_access, pup,
-								DDR_PHY_DATA, reg + CS_BYTE_GAP(cs), start_adll));
+								DDR_PHY_DATA, reg, start_adll));
 				if (direction == 0)
 					CHECK_STATUS(ddr3_tip_bus_write(dev_num,
 									ACCESS_TYPE_UNICAST,
@@ -1830,7 +1825,7 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 									pup_access,
 									pup,
 									DDR_PHY_DATA,
-									0x1 + CS_BYTE_GAP(cs),
+									CTX_PHY_REG(cs),
 									ctrl_adll1[if_id *
 										   cs *
 										   octets_per_if_num +
@@ -1866,14 +1861,12 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 		}
 
 		/* write back to the phy the Rx DQS value, we store in the beginning */
-		write_leveling_value(dev_num, ctrl_adll, ctrl_level_phase, (reg +  cs * CS_REGISTER_ADDR_OFFSET));
+		write_leveling_value(dev_num, ctrl_adll, ctrl_level_phase, reg);
 		if (direction == 0)
-			ddr3_tip_write_adll_value(dev_num, ctrl_adll1,
-						  (0x1 + (cs * CS_REGISTER_ADDR_OFFSET)));
+			ddr3_tip_write_adll_value(dev_num, ctrl_adll1, CTX_PHY_REG(cs));
 
 		/* print adll results */
-		ddr3_tip_read_adll_value(dev_num, ctrl_adll,
-					 (reg + cs * CS_REGISTER_ADDR_OFFSET), MASK_ALL_BITS);
+		ddr3_tip_read_adll_value(dev_num, ctrl_adll, reg, MASK_ALL_BITS);
 		printf("%s,DQS,Leveling,,,", (direction == 0) ? "Tx" : "Rx");
 		print_adll(dev_num, ctrl_adll);
 		print_ph(dev_num, ctrl_level_phase);

@@ -141,7 +141,7 @@ int mv_ddr4_sdram_config(u32 dev_num)
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 
 		/* dtype: 0x3 for DDR4, 0x1 for DDR3 */
-		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, SDRAM_CONFIGURATION_REG,
+		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, SDRAM_CFG_REG,
 					   (0x1 << 14) | (0x1 << 20), (0x1 << 14) | (0x1 << 20));
 		if (status != MV_OK)
 			return status;
@@ -183,7 +183,7 @@ int mv_ddr4_sdram_config(u32 dev_num)
 		 * set registered dimm to unbuffered dimm
 		 * TODO: support registered dimm
 		 */
-		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, SDRAM_CONFIGURATION_REG,
+		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, SDRAM_CFG_REG,
 					   0x0, 0x1 << 17);
 		if (status != MV_OK)
 			return status;
@@ -322,11 +322,11 @@ int mv_ddr4_phy_config(u32 dev_num)
 	upper_ncal = 0;
 
 	status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-				    PARAM_NOT_CARE, DDR_PHY_DATA, TEST_ADLL_REG, pod_val);
+				    PARAM_NOT_CARE, DDR_PHY_DATA, TEST_ADLL_PHY_REG, pod_val);
 	if (status != MV_OK)
 		return status;
 
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, GENERAL_PURPOSE_RESERVED0_REG,
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, GP_RSVD0_REG,
 				   (upper_pcal << 12) | (left_pcal << 6) | (upper_ncal << 5), 0x1060);
 	if (status != MV_OK)
 		return status;
@@ -341,17 +341,17 @@ int mv_ddr4_phy_config(u32 dev_num)
 	 */
 	for (i = 0; i < subphy_max; i++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, i);
-		ddr3_tip_bus_read_modify_write(dev_num, ACCESS_TYPE_UNICAST, 0, i, DDR_PHY_DATA, PAD_CONFIG_PHY_REG,
+		ddr3_tip_bus_read_modify_write(dev_num, ACCESS_TYPE_UNICAST, 0, i, DDR_PHY_DATA, PAD_CFG_PHY_REG,
 					       (0 << 4) | 4, ((0x7 << 4) | 0x7));
 	}
 
 	for (i = 0; i < 3; i++)
-		ddr3_tip_bus_read_modify_write(dev_num, ACCESS_TYPE_UNICAST, 0, i, DDR_PHY_CONTROL, PAD_CONFIG_PHY_REG,
+		ddr3_tip_bus_read_modify_write(dev_num, ACCESS_TYPE_UNICAST, 0, i, DDR_PHY_CONTROL, PAD_CFG_PHY_REG,
 					       (0 << 4) | 4 , ((0x7 << 4) | 0x7));
 
 	/* phy register 0xa4, bits [13:7] - configure to 0x7c zpri /znri */
 	status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-				    PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ZRI_CALIB_PHY_REG,
+				    PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ZRI_CAL_PHY_REG,
 				    ((0x7f & g_zpri_data) << 7) | (0x7f & g_znri_data));
 	if (status != MV_OK)
 		return status;
@@ -361,7 +361,7 @@ int mv_ddr4_phy_config(u32 dev_num)
 	 * phy register 0xa6 bits [11:6] - configure to zpodt (60Ohm, 0x1d)
 	 */
 	status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-				    PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ODT_CALIB_PHY_REG, g_zpodt_data << 6);
+				    PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ODT_CAL_PHY_REG, g_zpodt_data << 6);
 	if (status != MV_OK)
 		return status;
 
@@ -373,7 +373,7 @@ int mv_ddr4_phy_config(u32 dev_num)
 		 * broadcast to all bits cs0 (0x26)
 		 */
 		status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					    PARAM_NOT_CARE, DDR_PHY_DATA, CSN_IOB_VREF_REG(cs), rc_tap);
+					    PARAM_NOT_CARE, DDR_PHY_DATA, VREF_BCAST_PHY_REG(cs), rc_tap);
 		if (status != MV_OK)
 			return status;
 	}
@@ -404,28 +404,29 @@ int mv_ddr4_calibration_adjust(u32 dev_num, u8 vref_en, u8 pod_only)
 		for (i = 0; i < subphy_max; i++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, i);
 			ddr3_tip_bus_read_modify_write(dev_num, ACCESS_TYPE_UNICAST, 0, i, DDR_PHY_DATA,
-						       PAD_CONFIG_PHY_REG, (0 << 4) | vref_idx, ((0x7 << 4) | 0x7));
+						       PAD_CFG_PHY_REG, (0 << 4) | vref_idx, ((0x7 << 4) | 0x7));
 		}
 
 		for (i = 0; i < 3; i++)
 			ddr3_tip_bus_read_modify_write(dev_num, ACCESS_TYPE_UNICAST, 0, i, DDR_PHY_CONTROL,
-						       PAD_CONFIG_PHY_REG, (0 << 4) | vref_idx, ((0x7 << 4) | 0x7));
+						       PAD_CFG_PHY_REG, (0 << 4) | vref_idx, ((0x7 << 4) | 0x7));
 	}
 
 	/* pad calibration control - enable */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, CALIB_MACHINE_CTRL_REG,
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, MAIN_PADS_CAL_MACH_CTRL_REG,
 				   (calibration_update_control << 3) | 0x1, (0x3 << 3) | 0x1);
 	if (status != MV_OK)
 		return status;
 
 	/* calibration update external */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, CALIB_MACHINE_CTRL_REG, 0x2 << 3, 0x3 << 3);
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
+				   MAIN_PADS_CAL_MACH_CTRL_REG, 0x2 << 3, 0x3 << 3);
 	if (status != MV_OK)
 		return status;
 
 	/* poll init calibration done */
 	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x80000000, 0x80000000,
-				CALIB_MACHINE_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
+				MAIN_PADS_CAL_MACH_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
 				  ("mv_ddr4_calibration_adjust: calibration polling failed (0)\n"));
 
@@ -438,13 +439,13 @@ int mv_ddr4_calibration_adjust(u32 dev_num, u8 vref_en, u8 pod_only)
 	mdelay(10); /* TODO: check it */
 
 	/* disable dynamic */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, CALIB_MACHINE_CTRL_REG, 0, 0x1);
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, MAIN_PADS_CAL_MACH_CTRL_REG, 0, 0x1);
 	if (status != MV_OK)
 		return status;
 
 	/* poll initial calibration done*/
 	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x80000000, 0x80000000,
-				CALIB_MACHINE_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
+				MAIN_PADS_CAL_MACH_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
 				  ("mv_ddr4_calibration_adjust: calibration polling failed (2)\n"));
 
@@ -485,36 +486,36 @@ int mv_ddr4_calibration_adjust(u32 dev_num, u8 vref_en, u8 pod_only)
 
 		/* configure to pod mode (0x1) */
 		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-					   GENERAL_PURPOSE_RESERVED0_REG,
+					   GP_RSVD0_REG,
 					   (0x1 << 12) | (0x1 << 6) | (0x1 << 5), 0x1060);
 		if (status != MV_OK)
 			return status;
 
 		status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					    PARAM_NOT_CARE, DDR_PHY_DATA, TEST_ADLL_REG, 0x1);
+					    PARAM_NOT_CARE, DDR_PHY_DATA, TEST_ADLL_PHY_REG, 0x1);
 		if (status != MV_OK)
 			return status;
 
 		status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					    PARAM_NOT_CARE, DDR_PHY_CONTROL, TEST_ADLL_REG, 0x1);
+					    PARAM_NOT_CARE, DDR_PHY_CONTROL, TEST_ADLL_PHY_REG, 0x1);
 		if (status != MV_OK)
 			return status;
 
 		/* pad calibration control - enable */
-		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, CALIB_MACHINE_CTRL_REG,
+		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, MAIN_PADS_CAL_MACH_CTRL_REG,
 					   0x1, 0x1);
 		if (status != MV_OK)
 			return status;
 
 		/* poll initial calibration done*/
 		if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x80000000, 0x80000000,
-					CALIB_MACHINE_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
+					MAIN_PADS_CAL_MACH_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
 					  ("mv_ddr4_calibration_adjust: calibration polling failed (4)\n"));
 	}
 
 	/* calibration update internal */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, CALIB_MACHINE_CTRL_REG,
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, MAIN_PADS_CAL_MACH_CTRL_REG,
 				   calibration_update_control << 3, 0x3 << 3);
 	if (status != MV_OK)
 		return status;
@@ -551,7 +552,7 @@ int mv_ddr4_calibration_adjust(u32 dev_num, u8 vref_en, u8 pod_only)
 		status = MV_FAIL;
 	}
 	/* pad calibration control - disable */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, CALIB_MACHINE_CTRL_REG,
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, MAIN_PADS_CAL_MACH_CTRL_REG,
 				   (calibration_update_control << 3) | 0x0, (0x3 << 3) | 0x1);
 	if (status != MV_OK)
 		return status;

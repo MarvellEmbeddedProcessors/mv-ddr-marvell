@@ -148,7 +148,7 @@ static u8 mv_ddr4_xsb_comp_test(u32 dev_num, u32 subphy_num, u32 if_id,
 	int edge = 0;
 	/* write and read data */
 	if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask)) {
-		status = ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CONTROL_REG,
+		status = ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CTRL_REG,
 					   effective_cs << ODPG_DATA_CS_OFFS,
 					   ODPG_DATA_CS_MASK << ODPG_DATA_CS_OFFS);
 		if (status != MV_OK)
@@ -175,7 +175,7 @@ static u8 mv_ddr4_xsb_comp_test(u32 dev_num, u32 subphy_num, u32 if_id,
 			ddr3_tip_load_pattern_to_mem(dev_num, PATTERN_TEST);
 
 	} else if (MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(tm->bus_act_mask, subphy_max)) {
-		status = ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CONTROL_REG,
+		status = ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CTRL_REG,
 					       effective_cs << ODPG_DATA_CS_OFFS,
 					       ODPG_DATA_CS_MASK << ODPG_DATA_CS_OFFS);
 		if (status != MV_OK)
@@ -221,7 +221,7 @@ static u8 mv_ddr4_xsb_comp_test(u32 dev_num, u32 subphy_num, u32 if_id,
 	}
 
 	if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask)) {
-		status = ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CONTROL_REG,
+		status = ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CTRL_REG,
 					       effective_cs << ODPG_DATA_CS_OFFS,
 					       ODPG_DATA_CS_MASK << ODPG_DATA_CS_OFFS);
 		if (status != MV_OK)
@@ -242,7 +242,7 @@ static u8 mv_ddr4_xsb_comp_test(u32 dev_num, u32 subphy_num, u32 if_id,
 			DEBUG_LEVELING(DEBUG_LEVEL_INFO, ("0x%16jx\n", read_pattern_64[edge]));
 		DEBUG_LEVELING(DEBUG_LEVEL_INFO, ("\n"));
 	} else if (MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(tm->bus_act_mask, subphy_max)) {
-		status = ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CONTROL_REG,
+		status = ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CTRL_REG,
 					       effective_cs << ODPG_DATA_CS_OFFS,
 					       ODPG_DATA_CS_MASK << ODPG_DATA_CS_OFFS);
 		if (status != MV_OK)
@@ -270,7 +270,7 @@ static u8 mv_ddr4_xsb_comp_test(u32 dev_num, u32 subphy_num, u32 if_id,
 
 	/* read centralization result to decide on half phase by inverse bit */
 	status = ddr3_tip_bus_read(dev_num, if_id, ACCESS_TYPE_UNICAST, subphy_num, DDR_PHY_DATA,
-				   WRITE_CENTRALIZATION_PHY_REG, &wl_invert);
+				   CTX_PHY_REG(0), &wl_invert);
 	if (status != MV_OK)
 		return status;
 
@@ -402,7 +402,7 @@ static int mv_ddr4_dynamic_pb_wl_supp(u32 dev_num, enum mv_wl_supp_mode ecc_mode
 
 		/* disable ecc mode*/
 		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
-					   SDRAM_CONFIGURATION_REG, 0, 0x40000);
+					   SDRAM_CFG_REG, 0, 0x40000);
 		if (status != MV_OK)
 			return status;
 
@@ -424,7 +424,7 @@ static int mv_ddr4_dynamic_pb_wl_supp(u32 dev_num, enum mv_wl_supp_mode ecc_mode
 			flag = 1;
 			step = 0;
 			status = ddr3_tip_bus_read(dev_num, if_id, ACCESS_TYPE_UNICAST, subphy_num, DDR_PHY_DATA,
-						   WL_PHY_BASE + effective_cs * 4, &rd_data);
+						   WL_PHY_REG(effective_cs), &rd_data);
 			if (status != MV_OK)
 				return status;
 			orig_phase = (rd_data >> 6) & 0x7;
@@ -444,14 +444,14 @@ static int mv_ddr4_dynamic_pb_wl_supp(u32 dev_num, enum mv_wl_supp_mode ecc_mode
 							ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 									   ACCESS_TYPE_UNICAST, subphy_num,
 									   DDR_PHY_DATA,
-									   WL_PHY_BASE + effective_cs * 4, wr_data);
+									   WL_PHY_REG(effective_cs), wr_data);
 					} else if (step == 2) { /* shift phase to +1 */
 						if (orig_phase <= 5) {
 							wr_data = (rd_data & ~0x1c0) | ((orig_phase + 2) << 6);
 							ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 									   ACCESS_TYPE_UNICAST, subphy_num,
 									   DDR_PHY_DATA,
-									   WL_PHY_BASE + effective_cs * 4, wr_data);
+									   WL_PHY_REG(effective_cs), wr_data);
 						}
 					} else if (step == 3) {
 						if (orig_phase <= 3) {
@@ -459,7 +459,7 @@ static int mv_ddr4_dynamic_pb_wl_supp(u32 dev_num, enum mv_wl_supp_mode ecc_mode
 							ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 									   ACCESS_TYPE_UNICAST, subphy_num,
 									   DDR_PHY_DATA,
-									   WL_PHY_BASE + effective_cs * 4, wr_data);
+									   WL_PHY_REG(effective_cs), wr_data);
 						}
 					} else { /* error */
 						flag = 0;
@@ -483,7 +483,7 @@ static int mv_ddr4_dynamic_pb_wl_supp(u32 dev_num, enum mv_wl_supp_mode ecc_mode
 
 		/* enable ecc mode*/
 		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, PARAM_NOT_CARE,
-					   SDRAM_CONFIGURATION_REG, 0x40000, 0x40000);
+					   SDRAM_CFG_REG, 0x40000, 0x40000);
 		if (status != MV_OK)
 			return status;
 	} else if (ecc_mode == WRITE_LEVELING_SUPP_ECC_MODE_ECC_PUP4 ||

@@ -95,7 +95,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include "mv_ddr_mc6_drv.h"
+#include "mv_ddr_mc6.h"
 #include "ddr3_init.h"
 
 /* extern */
@@ -126,7 +126,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_refi = (tm->interface_params[IF_ID_0].interface_temp == MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
 
 	/* the t_refi is in nsec */
-	mc6_timing.t_refi = mc6_timing.t_refi / (MEGA / MV_DDR_MC6_FCLK_200MHZ_IN_KILO);
+	mc6_timing.t_refi = mc6_timing.t_refi / (MEGA / FCLK_KHZ);
 	/* printf("t_refi = %d\n", mc6_timing.t_refi); */
 	mc6_timing.t_wr = speed_bin_table(speed_bin_index, SPEED_BIN_TWR);
 	/* printf("t_wr = %d\n", mc6_timing.t_wr); */
@@ -190,7 +190,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_wtr_l = %d\n", mc6_timing.t_wtr_l); */
 
 	/* calculate t_xp */
-	mc6_timing.t_xp = MV_DDR_MC6_TIMING_T_XP;
+	mc6_timing.t_xp = TIMING_T_XP;
 	/* printf("t_xp = %d\n", mc6_timing.t_xp); */
 	mc6_timing.t_xp = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_xp);
 	/* printf("t_xp = %d\n", mc6_timing.t_xp); */
@@ -198,7 +198,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_xp = %d\n", mc6_timing.t_xp); */
 
 	/* calculate t_cke */
-	mc6_timing.t_cke = MV_DDR_MC6_TIMING_T_CKE;
+	mc6_timing.t_cke = TIMING_T_CKE;
 	/* printf("t_cke = %d\n", mc6_timing.t_cke); */
 	mc6_timing.t_cke = GET_MAX_VALUE(mc6_timing.t_ckclk * 3, mc6_timing.t_cke);
 	/* printf("t_cke = %d\n", mc6_timing.t_cke); */
@@ -214,7 +214,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_cpded = %d\n", mc6_timing.t_cpded); */
 
 	/* calculate t_cksrx */
-	mc6_timing.t_cksrx = MV_DDR_MC6_TIMING_T_CKSRX;
+	mc6_timing.t_cksrx = TIMING_T_CKSRX;
 	/* printf("t_cksrx = %d\n", mc6_timing.t_cksrx); */
 	mc6_timing.t_cksrx = GET_MAX_VALUE(mc6_timing.t_ckclk * 5, mc6_timing.t_cksrx);
 	/* printf("t_cksrx = %d\n", mc6_timing.t_cksrx); */
@@ -248,11 +248,11 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_rfc = %d\n", mc6_timing.t_rfc); */
 
 	/* calculate t_xs */
-	mc6_timing.t_xs = mc6_timing.t_rfc + time_to_nclk(MV_DDR_MC6_TIMING_T_XS_OVER_TRFC, mc6_timing.t_ckclk);
+	mc6_timing.t_xs = mc6_timing.t_rfc + time_to_nclk(TIMING_T_XS_OVER_TRFC, mc6_timing.t_ckclk);
 	/* printf("t_xs = %d\n", mc6_timing.t_xs); */
 
 	/* calculate t_rrd_l */
-	mc6_timing.t_rrd_l = MV_DDR_MC6_TIMING_T_RRDL;
+	mc6_timing.t_rrd_l = TIMING_T_RRDL;
 	/* printf("t_rrd_l = %d\n", mc6_timing.t_rrd_l); */
 	mc6_timing.t_rrd_l = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_rrd_l);
 	/* printf("t_rrd_l = %d\n", mc6_timing. t_rrd_l); */
@@ -270,52 +270,52 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_rc = %d\n", mc6_timing.t_rc); */
 
 	/* constant timing parameters */
-	mc6_timing.read_gap_extend = MV_DDR_MC6_TIMING_READ_GAP_EXTEND;
+	mc6_timing.read_gap_extend = TIMING_READ_GAP_EXTEND;
 	/* printf("read_gap_extend = %d\n", mc6_timing.read_gap_extend); */
 
-	mc6_timing.t_zqoper = MV_DDR_MC6_TIMING_T_ZQOPER;
+	mc6_timing.t_zqoper = TIMING_T_ZQOPER;
 	/* printf("t_zqoper = %d\n", mc6_timing.t_zqoper); */
 
-	mc6_timing.t_res = MV_DDR_MC6_TIMING_T_RES;
+	mc6_timing.t_res = TIMING_T_RES;
 	/* printf("t_res = %d\n", mc6_timing.t_res); */
 	mc6_timing.t_res = time_to_nclk(mc6_timing.t_res, mc6_timing.t_ckclk);
 	/* printf("t_res = %d\n", mc6_timing.t_res); */
 
-	mc6_timing.t_resinit = MV_DDR_MC6_TIMING_T_RESINIT;
+	mc6_timing.t_resinit = TIMING_T_RESINIT;
 	/* printf("t_resinit = %d\n", mc6_timing.t_resinit); */
 	mc6_timing.t_resinit = time_to_nclk(mc6_timing.t_resinit, mc6_timing.t_ckclk);
 	/* printf("t_resinit = %d\n", mc6_timing.t_resinit); */
 
-	mc6_timing.t_restcke = MV_DDR_MC6_TIMING_T_RESTCKE;
+	mc6_timing.t_restcke = TIMING_T_RESTCKE;
 	/* printf("t_restcke = %d\n", mc6_timing.t_restcke); */
 	mc6_timing.t_restcke = time_to_nclk(mc6_timing.t_restcke, mc6_timing.t_ckclk);
 	/* printf("t_restcke = %d\n", mc6_timing.t_restcke); */
 
-	mc6_timing.t_actpden = MV_DDR_MC6_TIMING_T_ACTPDEN;
+	mc6_timing.t_actpden = TIMING_T_ACTPDEN;
 	/* printf("t_actpden = %d\n", mc6_timing.t_actpden); */
 
-	mc6_timing.t_zqinit = MV_DDR_MC6_TIMING_T_ZQINIT;
+	mc6_timing.t_zqinit = TIMING_T_ZQINIT;
 	/* printf("t_zqinit = %d\n", mc6_timing.t_zqinit); */
 
-	mc6_timing.t_zqcs = MV_DDR_MC6_TIMING_T_ZQCS;
+	mc6_timing.t_zqcs = TIMING_T_ZQCS;
 	/* printf("t_zqcs = %d\n", mc6_timing.t_zqcs); */
 
-	mc6_timing.t_ccd = MV_DDR_MC6_TIMING_T_CCD;
+	mc6_timing.t_ccd = TIMING_T_CCD;
 	/* printf("t_ccd = %d\n", mc6_timing.t_ccd); */
 
-	mc6_timing.t_mrd = MV_DDR_MC6_TIMING_T_MRD;
+	mc6_timing.t_mrd = TIMING_T_MRD;
 	/* printf("t_mrd = %d\n", mc6_timing.t_mrd); */
 
-	mc6_timing.t_mpx_lh = MV_DDR_MC6_TIMING_T_MPX_LH;
+	mc6_timing.t_mpx_lh = TIMING_T_MPX_LH;
 	/* printf("t_mpx_lh = %d\n", mc6_timing.t_mpx_lh); */
 
-	mc6_timing.t_mpx_s = MV_DDR_MC6_TIMING_T_MPX_S;
+	mc6_timing.t_mpx_s = TIMING_T_MPX_S;
 	/* printf("t_mpx_s = %d\n", mc6_timing.t_mpx_s); */
 
-	mc6_timing.t_xmp = mc6_timing.t_rfc + time_to_nclk(MV_DDR_MC6_TIMING_T_XMP_OVER_TRFC, mc6_timing.t_ckclk);
+	mc6_timing.t_xmp = mc6_timing.t_rfc + time_to_nclk(TIMING_T_XMP_OVER_TRFC, mc6_timing.t_ckclk);
 	/* printf("t_xmp = %d\n", mc6_timing.t_xmp); */
 
-	mc6_timing.t_mrd_pda = MV_DDR_MC6_TIMING_T_MRD_PDA;
+	mc6_timing.t_mrd_pda = TIMING_T_MRD_PDA;
 	/* printf("t_mrd_pda = %d\n", mc6_timing.t_mrd_pda); */
 	mc6_timing.t_mrd_pda = GET_MAX_VALUE(mc6_timing.t_ckclk * 16, mc6_timing.t_mrd_pda);
 	/* printf("t_mrd_pda = %d\n", mc6_timing. t_mrd_pda); */
@@ -323,201 +323,201 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_xsdll = speed_bin_table(speed_bin_index, SPEED_BIN_TXSDLL);
 	/* printf("t_xsdll = %d\n", mc6_timing.t_xsdll); */
 
-	mc6_timing.t_rwd_ext_dly = MV_DDR_MC6_TIMING_T_RWD_EXT_DLY;
+	mc6_timing.t_rwd_ext_dly = TIMING_T_RWD_EXT_DLY;
 	/* printf("t_rwd_ext_dly = %d\n", mc6_timing.t_rwd_ext_dly); */
 
-	mc6_timing.t_wl_early = MV_DDR_MC6_TIMING_T_WL_EARLY;
+	mc6_timing.t_wl_early = TIMING_T_WL_EARLY;
 	/* printf("t_wl_early = %d\n", mc6_timing.t_wl_early); */
 
-	mc6_timing.t_ccd_ccs_wr_ext_dly = MV_DDR_MC6_TIMMING_T_CCD_CCS_WR_EXT_DLY;
+	mc6_timing.t_ccd_ccs_wr_ext_dly = TIMING_T_CCD_CCS_WR_EXT_DLY;
 	/* printf("t_ccd_ccs_wr_ext_dly = %d\n", mc6_timing.t_ccd_ccs_wr_ext_dly); */
 
-	mc6_timing.t_ccd_ccs_ext_dly = MV_DDR_MC6_TIMING_T_CCD_CCS_EXT_DLY;
+	mc6_timing.t_ccd_ccs_ext_dly = TIMING_T_CCD_CCS_EXT_DLY;
 	/* printf("t_ccd_ccs_ext_dly = %d\n", mc6_timing.t_ccd_ccs_ext_dly); */
 
 	mc6_timing.cl = tm->interface_params[IF_ID_0].cas_l;
 	mc6_timing.cwl = tm->interface_params[IF_ID_0].cas_wl;
 
 	/* configure the timing registers */
-		reg_bit_clrset(MC6_REG_DRAM_CFG1,
-			       mc6_timing.cwl << MC6_CWL_OFFS | mc6_timing.cl << MC6_CL_OFFS,
-			       MC6_CWL_MASK << MC6_CWL_OFFS | MC6_CL_MASK << MC6_CL_OFFS);
-	/* printf("MC6_REG_DRAM_CFG1 addr 0x%x, data 0x%x\n", MC6_REG_DRAM_CFG1,
-	       reg_read(MC6_REG_DRAM_CFG1)); */
+		reg_bit_clrset(MC6_CH0_DRAM_CFG1_REG,
+			       mc6_timing.cwl << CWL_OFFS | mc6_timing.cl << CL_OFFS,
+			       CWL_MASK << CWL_OFFS | CL_MASK << CL_OFFS);
+	/* printf("MC6_CH0_DRAM_CFG1_REG addr 0x%x, data 0x%x\n", MC6_CH0_DRAM_CFG1_REG,
+	       reg_read(MC6_CH0_DRAM_CFG1_REG)); */
 
-	reg_bit_clrset(MC6_REG_INIT_TIMING_CTRL_0,
-		       mc6_timing.t_restcke << MC6_INIT_COUNT_NOP_OFFS,
-		       MC6_INIT_COUNT_NOP_MASK << MC6_INIT_COUNT_NOP_OFFS);
-	/* printf("MC6_REG_INIT_TIMING_CTRL_0 addr 0x%x, data 0x%x\n", MC6_REG_INIT_TIMING_CTRL_0,
-	       reg_read(MC6_REG_INIT_TIMING_CTRL_0)); */
+	reg_bit_clrset(MC6_CH0_DDR_INIT_TIMING_CTRL0_REG,
+		       mc6_timing.t_restcke << INIT_COUNT_NOP_OFFS,
+		       INIT_COUNT_NOP_MASK << INIT_COUNT_NOP_OFFS);
+	/* printf("MC6_CH0_DDR_INIT_TIMING_CTRL0_REG addr 0x%x, data 0x%x\n", MC6_CH0_DDR_INIT_TIMING_CTRL0_REG,
+	       reg_read(MC6_CH0_DDR_INIT_TIMING_CTRL0_REG)); */
 
-	reg_bit_clrset(MC6_REG_INIT_TIMING_CTRL_1,
-		       mc6_timing.t_resinit << MC6_INIT_COUNT_OFFS,
-		       MC6_INIT_COUNT_MASK << MC6_INIT_COUNT_OFFS);
-	/* printf("MC6_REG_INIT_TIMING_CTRL_1 addr 0x%x, data 0x%x\n", MC6_REG_INIT_TIMING_CTRL_1,
-	       reg_read(MC6_REG_INIT_TIMING_CTRL_1)); */
+	reg_bit_clrset(MC6_CH0_DDR_INIT_TIMING_CTRL1_REG,
+		       mc6_timing.t_resinit << INIT_COUNT_OFFS,
+		       INIT_COUNT_MASK << INIT_COUNT_OFFS);
+	/* printf("MC6_CH0_DDR_INIT_TIMING_CTRL1_REG addr 0x%x, data 0x%x\n", MC6_CH0_DDR_INIT_TIMING_CTRL1_REG,
+	       reg_read(MC6_CH0_DDR_INIT_TIMING_CTRL1_REG)); */
 
-	reg_bit_clrset(MC6_REG_INIT_TIMING_CTRL_2,
-		       mc6_timing.t_res << MC6_RESET_COUNT_OFFS,
-		       MC6_RESET_COUNT_MASK << MC6_RESET_COUNT_OFFS);
-	/* printf("MC6_REG_INIT_TIMING_CTRL_2 addr 0x%x, data 0x%x\n", MC6_REG_INIT_TIMING_CTRL_2,
-	       reg_read(MC6_REG_INIT_TIMING_CTRL_2)); */
+	reg_bit_clrset(MC6_CH0_DDR_INIT_TIMING_CTRL2_REG,
+		       mc6_timing.t_res << RESET_COUNT_OFFS,
+		       RESET_COUNT_MASK << RESET_COUNT_OFFS);
+	/* printf("MC6_CH0_DDR_INIT_TIMING_CTRL2_REG addr 0x%x, data 0x%x\n", MC6_CH0_DDR_INIT_TIMING_CTRL2_REG,
+	       reg_read(MC6_CH0_DDR_INIT_TIMING_CTRL2_REG)); */
 
-	reg_bit_clrset(MC6_REG_ZQC_TIMING_0,
-		       mc6_timing.t_zqinit << MC6_TZQINIT_OFFS,
-		       MC6_TZQINIT_MASK << MC6_TZQINIT_OFFS);
-	/* printf("MC6_REG_ZQC_TIMING_0 addr 0x%x, data 0x%x\n", MC6_REG_ZQC_TIMING_0,
-	       reg_read(MC6_REG_ZQC_TIMING_0)); */
+	reg_bit_clrset(MC6_CH0_ZQC_TIMING0_REG,
+		       mc6_timing.t_zqinit << TZQINIT_OFFS,
+		       TZQINIT_MASK << TZQINIT_OFFS);
+	/* printf("MC6_CH0_ZQC_TIMING0_REG addr 0x%x, data 0x%x\n", MC6_CH0_ZQC_TIMING0_REG,
+	       reg_read(MC6_CH0_ZQC_TIMING0_REG)); */
 
-	reg_bit_clrset(MC6_REG_ZQC_TIMING_1,
-		       mc6_timing.t_zqoper << MC6_TZQCL_OFFS |
-		       mc6_timing.t_zqcs << MC6_TZQCS_OFFS,
-		       MC6_TZQCL_MASK << MC6_TZQCL_OFFS |
-		       MC6_TZQCS_MASK << MC6_TZQCS_OFFS);
-	/* printf("MC6_REG_ZQC_TIMING_1 addr 0x%x, data 0x%x\n", MC6_REG_ZQC_TIMING_1,
-	       reg_read(MC6_REG_ZQC_TIMING_1)); */
+	reg_bit_clrset(MC6_CH0_ZQC_TIMING1_REG,
+		       mc6_timing.t_zqoper << TZQCL_OFFS |
+		       mc6_timing.t_zqcs << TZQCS_OFFS,
+		       TZQCL_MASK << TZQCL_OFFS |
+		       TZQCS_MASK << TZQCS_OFFS);
+	/* printf("MC6_CH0_ZQC_TIMING1_REG addr 0x%x, data 0x%x\n", MC6_CH0_ZQC_TIMING1_REG,
+	       reg_read(MC6_CH0_ZQC_TIMING1_REG)); */
 
-	reg_bit_clrset(MC6_REG_REFRESH_TIMING,
-		       mc6_timing.t_refi << MC6_TREFI_OFFS |
-		       mc6_timing.t_rfc << MC6_TRFC_OFFS,
-		       MC6_TREFI_MASK << MC6_TREFI_OFFS |
-		       MC6_TRFC_MASK << MC6_TRFC_OFFS);
-	/* printf("MC6_REG_REFRESH_TIMING addr 0x%x, data 0x%x\n", MC6_REG_REFRESH_TIMING,
-	       reg_read(MC6_REG_REFRESH_TIMING)); */
+	reg_bit_clrset(MC6_CH0_REFRESH_TIMING_REG,
+		       mc6_timing.t_refi << TREFI_OFFS |
+		       mc6_timing.t_rfc << TRFC_OFFS,
+		       TREFI_MASK << TREFI_OFFS |
+		       TRFC_MASK << TRFC_OFFS);
+	/* printf("MC6_CH0_REFRESH_TIMING_REG addr 0x%x, data 0x%x\n", MC6_CH0_REFRESH_TIMING_REG,
+	       reg_read(MC6_CH0_REFRESH_TIMING_REG)); */
 
-	reg_bit_clrset(MC6_REG_SELF_REFRESH_TIMING_0,
-		       mc6_timing.t_xsdll << MC6_TXSRD_OFFS |
-		       mc6_timing.t_xs << MC6_TXSNR_OFFS,
-		       MC6_TXSRD_MASK << MC6_TXSRD_OFFS |
-		       MC6_TXSNR_MASK << MC6_TXSNR_OFFS);
-	/* printf("MC6_REG_SELF_REFRESH_TIMING_0 addr 0x%x, data 0x%x\n", MC6_REG_SELF_REFRESH_TIMING_0,
-	       reg_read(MC6_REG_SELF_REFRESH_TIMING_0)); */
+	reg_bit_clrset(MC6_CH0_SELFREFRESH_TIMING0_REG,
+		       mc6_timing.t_xsdll << TXSRD_OFFS |
+		       mc6_timing.t_xs << TXSNR_OFFS,
+		       TXSRD_MASK << TXSRD_OFFS |
+		       TXSNR_MASK << TXSNR_OFFS);
+	/* printf("MC6_CH0_SELFREFRESH_TIMING0_REG addr 0x%x, data 0x%x\n", MC6_CH0_SELFREFRESH_TIMING0_REG,
+	       reg_read(MC6_CH0_SELFREFRESH_TIMING0_REG)); */
 
-	reg_bit_clrset(MC6_REG_SELF_REFRESH_TIMING_1,
-		       mc6_timing.t_cksrx << MC6_TCKSRX_OFFS |
-		       mc6_timing.t_cksre << MC6_TCKSRE_OFFS,
-		       MC6_TCKSRX_MASK << MC6_TCKSRX_OFFS |
-		       MC6_TCKSRE_MASK << MC6_TCKSRE_OFFS);
-	/* printf("MC6_REG_SELF_REFRESH_TIMING_1 addr 0x%x, data 0x%x\n", MC6_REG_SELF_REFRESH_TIMING_1,
-	       reg_read(MC6_REG_SELF_REFRESH_TIMING_1)); */
+	reg_bit_clrset(MC6_CH0_SELFREFRESH_TIMING1_REG,
+		       mc6_timing.t_cksrx << TCKSRX_OFFS |
+		       mc6_timing.t_cksre << TCKSRE_OFFS,
+		       TCKSRX_MASK << TCKSRX_OFFS |
+		       TCKSRE_MASK << TCKSRE_OFFS);
+	/* printf("MC6_CH0_SELFREFRESH_TIMING1_REG addr 0x%x, data 0x%x\n", MC6_CH0_SELFREFRESH_TIMING1_REG,
+	       reg_read(MC6_CH0_SELFREFRESH_TIMING1_REG)); */
 
-	reg_bit_clrset(MC6_REG_POWER_DOWN_TIMING_0,
-		       TXARDS << MC6_TCKSRX_OFFS |
-		       mc6_timing.t_xp << MC6_TXP_OFFS |
-		       mc6_timing.t_ckesr << MC6_TCKESR_OFFS |
-		       mc6_timing.t_cpded << MC6_TCPDED_OFFS,
-		       MC6_TXARDS_MASK << MC6_TCKSRX_OFFS |
-		       MC6_TXP_MASK << MC6_TXP_OFFS |
-		       MC6_TCKESR_MASK << MC6_TCKESR_OFFS |
-		       MC6_TCPDED_MASK << MC6_TCPDED_OFFS);
-	/* printf("MC6_REG_POWER_DOWN_TIMING_0 addr 0x%x, data 0x%x\n", MC6_REG_POWER_DOWN_TIMING_0,
-	       reg_read(MC6_REG_POWER_DOWN_TIMING_0)); */
+	reg_bit_clrset(MC6_CH0_PWRDOWN_TIMING0_REG,
+		       TXARDS_VAL << TCKSRX_OFFS |
+		       mc6_timing.t_xp << TXP_OFFS |
+		       mc6_timing.t_ckesr << TCKESR_OFFS |
+		       mc6_timing.t_cpded << TCPDED_OFFS,
+		       TXARDS_MASK << TXARDS_OFFS |
+		       TXP_MASK << TXP_OFFS |
+		       TCKESR_MASK << TCKESR_OFFS |
+		       TCPDED_MASK << TCPDED_OFFS);
+	/* printf("MC6_CH0_PWRDOWN_TIMING0_REG addr 0x%x, data 0x%x\n", MC6_CH0_PWRDOWN_TIMING0_REG,
+	       reg_read(MC6_CH0_PWRDOWN_TIMING0_REG)); */
 
-	reg_bit_clrset(MC6_REG_POWER_DOWN_TIMING_1,
-		       mc6_timing.t_actpden << MC6_TPDEN_OFFS,
-		       MC6_TPDEN_MASK << MC6_TPDEN_OFFS);
-	/* printf("MC6_REG_POWER_DOWN_TIMING_1 addr 0x%x, data 0x%x\n", MC6_REG_POWER_DOWN_TIMING_1,
-	       reg_read(MC6_REG_POWER_DOWN_TIMING_1)); */
+	reg_bit_clrset(MC6_CH0_PWRDOWN_TIMING1_REG,
+		       mc6_timing.t_actpden << TPDEN_OFFS,
+		       TPDEN_MASK << TPDEN_OFFS);
+	/* printf("MC6_CH0_PWRDOWN_TIMING1_REG addr 0x%x, data 0x%x\n", MC6_CH0_PWRDOWN_TIMING1_REG,
+	       reg_read(MC6_CH0_PWRDOWN_TIMING1_REG)); */
 
-	reg_bit_clrset(MC6_REG_MRS_TIMING,
-		       mc6_timing.t_mrd << MC6_TMRD_OFFS |
-		       mc6_timing.t_mod << MC6_TMOD_OFFS,
-		       MC6_TMRD_MASK << MC6_TMRD_OFFS |
-		       MC6_TMOD_MASK << MC6_TMOD_OFFS);
-	/* printf("MC6_REG_MRS_TIMING addr 0x%x, data 0x%x\n", MC6_REG_MRS_TIMING,
-	       reg_read(MC6_REG_MRS_TIMING)); */
+	reg_bit_clrset(MC6_CH0_MRS_TIMING_REG,
+		       mc6_timing.t_mrd << TMRD_OFFS |
+		       mc6_timing.t_mod << TMOD_OFFS,
+		       TMRD_MASK << TMRD_OFFS |
+		       TMOD_MASK << TMOD_OFFS);
+	/* printf("MC6_CH0_MRS_TIMING_REG addr 0x%x, data 0x%x\n", MC6_CH0_MRS_TIMING_REG,
+	       reg_read(MC6_CH0_MRS_TIMING_REG)); */
 
-	reg_bit_clrset(MC6_REG_ACT_TIMING,
-		       mc6_timing.t_ras << MC6_TRAS_OFFS |
-		       mc6_timing.t_rcd << MC6_TRCD_OFFS |
-		       mc6_timing.t_rc << MC6_TRC_OFFS |
-		       mc6_timing.t_faw << MC6_TFAW_OFFS,
-		       MC6_TRAS_MASK << MC6_TRAS_OFFS |
-		       MC6_TRCD_MASK << MC6_TRCD_OFFS |
-		       MC6_TRC_MASK << MC6_TRC_OFFS |
-		       MC6_TFAW_MASK << MC6_TFAW_OFFS);
-	/* printf("MC6_REG_ACT_TIMING addr 0x%x, data 0x%x\n", MC6_REG_ACT_TIMING,
-	       reg_read(MC6_REG_ACT_TIMING)); */
+	reg_bit_clrset(MC6_CH0_ACT_TIMING_REG,
+		       mc6_timing.t_ras << TRAS_OFFS |
+		       mc6_timing.t_rcd << TRCD_OFFS |
+		       mc6_timing.t_rc << TRC_OFFS |
+		       mc6_timing.t_faw << TFAW_OFFS,
+		       TRAS_MASK << TRAS_OFFS |
+		       TRCD_MASK << TRCD_OFFS |
+		       TRC_MASK << TRC_OFFS |
+		       TFAW_MASK << TFAW_OFFS);
+	/* printf("MC6_CH0_ACT_TIMING_REG addr 0x%x, data 0x%x\n", MC6_CH0_ACT_TIMING_REG,
+	       reg_read(MC6_CH0_ACT_TIMING_REG)); */
 
-	reg_bit_clrset(MC6_REG_PRE_CHARGE_TIMING,
-		       mc6_timing.t_rp << MC6_TRP_OFFS |
-		       mc6_timing.t_rtp << MC6_TRTP_OFFS |
-		       mc6_timing.t_wr << MC6_TWR_OFFS |
-		       mc6_timing.t_rp << MC6_TRPA_OFFS,
-		       MC6_TRP_MASK << MC6_TRP_OFFS |
-		       MC6_TRTP_MASK << MC6_TRTP_OFFS |
-		       MC6_TWR_MASK << MC6_TWR_OFFS |
-		       MC6_TRPA_MASK << MC6_TRPA_OFFS);
-	/* printf("MC6_REG_PRE_CHARGE_TIMING addr 0x%x, data 0x%x\n", MC6_REG_PRE_CHARGE_TIMING,
-	       reg_read(MC6_REG_PRE_CHARGE_TIMING)); */
+	reg_bit_clrset(MC6_CH0_PRECHARGE_TIMING_REG,
+		       mc6_timing.t_rp << TRP_OFFS |
+		       mc6_timing.t_rtp << TRTP_OFFS |
+		       mc6_timing.t_wr << TWR_OFFS |
+		       mc6_timing.t_rp << TRPA_OFFS,
+		       TRP_MASK << TRP_OFFS |
+		       TRTP_MASK << TRTP_OFFS |
+		       TWR_MASK << TWR_OFFS |
+		       TRPA_MASK << TRPA_OFFS);
+	/* printf("MC6_CH0_PRECHARGE_TIMING_REG addr 0x%x, data 0x%x\n", MC6_CH0_PRECHARGE_TIMING_REG,
+	       reg_read(MC6_CH0_PRECHARGE_TIMING_REG)); */
 
-	reg_bit_clrset(MC6_REG_CAS_RAS_TIMING_0,
-		       mc6_timing.t_wtr << MC6_TWTR_S_OFFS |
-		       mc6_timing.t_wtr_l << MC6_TWTR_OFFS |
-		       mc6_timing.t_ccd << MC6_TCCD_S_OFFS |
-		       mc6_timing.t_ccd_l << MC6_TCCD_OFFS,
-		       MC6_TWTR_S_MASK << MC6_TWTR_S_OFFS |
-		       MC6_TWTR_MASK << MC6_TWTR_OFFS |
-		       MC6_TCCD_S_MASK << MC6_TCCD_S_OFFS |
-		       MC6_TCCD_MASK << MC6_TCCD_OFFS);
-	/* printf("MC6_REG_CAS_RAS_TIMING_0 addr 0x%x, data 0x%x\n", MC6_REG_CAS_RAS_TIMING_0,
-	       reg_read(MC6_REG_CAS_RAS_TIMING_0)); */
+	reg_bit_clrset(MC6_CH0_CAS_RAS_TIMING0_REG,
+		       mc6_timing.t_wtr << TWTR_S_OFFS |
+		       mc6_timing.t_wtr_l << TWTR_OFFS |
+		       mc6_timing.t_ccd << TCCD_S_OFFS |
+		       mc6_timing.t_ccd_l << TCCD_OFFS,
+		       TWTR_S_MASK << TWTR_S_OFFS |
+		       TWTR_MASK << TWTR_OFFS |
+		       TCCD_S_MASK << TCCD_S_OFFS |
+		       TCCD_MASK << TCCD_OFFS);
+	/* printf("MC6_CH0_CAS_RAS_TIMING0_REG addr 0x%x, data 0x%x\n", MC6_CH0_CAS_RAS_TIMING0_REG,
+	       reg_read(MC6_CH0_CAS_RAS_TIMING0_REG)); */
 
 	/* TODO: check why change default of 17:16 tDQS2DQ from '1' to '0' */
-	reg_bit_clrset(MC6_REG_CAS_RAS_TIMING_1,
-		       mc6_timing.t_rrd << MC6_TRRD_S_OFFS |
-		       mc6_timing.t_rrd_l << MC6_TRRD_OFFS |
-		       TDQS2DQ << MC6_TDQS2DQ_OFFS,
-		       MC6_TRRD_S_MASK << MC6_TRRD_S_OFFS |
-		       MC6_TRRD_MASK << MC6_TRRD_OFFS |
-		       MC6_TDQS2DQ_MASK << MC6_TDQS2DQ_OFFS);
-	/* printf("MC6_REG_CAS_RAS_TIMING_1 addr 0x%x, data 0x%x\n", MC6_REG_CAS_RAS_TIMING_1,
-	       reg_read(MC6_REG_CAS_RAS_TIMING_1)); */
+	reg_bit_clrset(MC6_CH0_CAS_RAS_TIMING1_REG,
+		       mc6_timing.t_rrd << TRRD_S_OFFS |
+		       mc6_timing.t_rrd_l << TRRD_OFFS |
+		       TDQS2DQ_VAL << TDQS2DQ_OFFS,
+		       TRRD_S_MASK << TRRD_S_OFFS |
+		       TRRD_MASK << TRRD_OFFS |
+		       TDQS2DQ_MASK << TDQS2DQ_OFFS);
+	/* printf("MC6_CH0_CAS_RAS_TIMING1_REG addr 0x%x, data 0x%x\n", MC6_CH0_CAS_RAS_TIMING1_REG,
+	       reg_read(MC6_CH0_CAS_RAS_TIMING1_REG)); */
 
-	reg_bit_clrset(MC6_REG_OFF_SPEC_TIMING_0,
-		       mc6_timing.t_ccd_ccs_ext_dly << MC6_TCCD_CCS_EXT_DLY_OFFS |
-		       mc6_timing.t_ccd_ccs_wr_ext_dly << MC6_TCCD_CCS_WR_EXT_DLY_OFFS |
-		       mc6_timing.t_rwd_ext_dly << MC6_TRWD_EXT_DLY_OFFS |
-		       mc6_timing.t_wl_early << MC6_TWL_EARLY_OFFS,
-		       MC6_TCCD_CCS_EXT_DLY_MASK << MC6_TCCD_CCS_EXT_DLY_OFFS |
-		       MC6_TCCD_CCS_WR_EXT_DLY_MASK << MC6_TCCD_CCS_WR_EXT_DLY_OFFS |
-		       MC6_TRWD_EXT_DLY_MASK << MC6_TRWD_EXT_DLY_OFFS |
-		       MC6_TWL_EARLY_MASK << MC6_TWL_EARLY_OFFS);
-	/* printf("MC6_REG_OFF_SPEC_TIMING_0 addr 0x%x, data 0x%x\n", MC6_REG_OFF_SPEC_TIMING_0,
-	       reg_read(MC6_REG_OFF_SPEC_TIMING_0)); */
+	reg_bit_clrset(MC6_CH0_OFF_SPEC_TIMING0_REG,
+		       mc6_timing.t_ccd_ccs_ext_dly << TCCD_CCS_EXT_DLY_OFFS |
+		       mc6_timing.t_ccd_ccs_wr_ext_dly << TCCD_CCS_WR_EXT_DLY_OFFS |
+		       mc6_timing.t_rwd_ext_dly << TRWD_EXT_DLY_OFFS |
+		       mc6_timing.t_wl_early << TWL_EARLY_OFFS,
+		       TCCD_CCS_EXT_DLY_MASK << TCCD_CCS_EXT_DLY_OFFS |
+		       TCCD_CCS_WR_EXT_DLY_MASK << TCCD_CCS_WR_EXT_DLY_OFFS |
+		       TRWD_EXT_DLY_MASK << TRWD_EXT_DLY_OFFS |
+		       TWL_EARLY_MASK << TWL_EARLY_OFFS);
+	/* printf("MC6_CH0_OFF_SPEC_TIMING0_REG addr 0x%x, data 0x%x\n", MC6_CH0_OFF_SPEC_TIMING0_REG,
+	       reg_read(MC6_CH0_OFF_SPEC_TIMING0_REG)); */
 
-	reg_bit_clrset(MC6_REG_OFF_SPEC_TIMING_1,
-		       mc6_timing.read_gap_extend << MC6_READ_GAP_EXTEND_OFFS |
-		       mc6_timing.t_ccd_ccs_ext_dly << MC6_TCCD_CCS_EXT_DLY_MIN_OFFS |
-		       mc6_timing.t_ccd_ccs_wr_ext_dly << MC6_TCCD_CCS_WR_EXT_DLY_MIN_OFFS,
-		       MC6_READ_GAP_EXTEND_MASK << MC6_READ_GAP_EXTEND_OFFS |
-		       MC6_TCCD_CCS_EXT_DLY_MIN_MASK << MC6_TCCD_CCS_EXT_DLY_MIN_OFFS |
-		       MC6_TCCD_CCS_WR_EXT_DLY_MIN_MASK << MC6_TCCD_CCS_WR_EXT_DLY_MIN_OFFS);
-	/* printf("MC6_REG_OFF_SPEC_TIMING_1 addr 0x%x, data 0x%x\n", MC6_REG_OFF_SPEC_TIMING_1,
-	       reg_read(MC6_REG_OFF_SPEC_TIMING_1)); */
+	reg_bit_clrset(MC6_CH0_OFF_SPEC_TIMING1_REG,
+		       mc6_timing.read_gap_extend << READ_GAP_EXTEND_OFFS |
+		       mc6_timing.t_ccd_ccs_ext_dly << TCCD_CCS_EXT_DLY_MIN_OFFS |
+		       mc6_timing.t_ccd_ccs_wr_ext_dly << TCCD_CCS_WR_EXT_DLY_MIN_OFFS,
+		       READ_GAP_EXTEND_MASK << READ_GAP_EXTEND_OFFS |
+		       TCCD_CCS_EXT_DLY_MIN_MASK << TCCD_CCS_EXT_DLY_MIN_OFFS |
+		       TCCD_CCS_WR_EXT_DLY_MIN_MASK << TCCD_CCS_WR_EXT_DLY_MIN_OFFS);
+	/* printf("MC6_CH0_OFF_SPEC_TIMING1_REG addr 0x%x, data 0x%x\n", MC6_CH0_OFF_SPEC_TIMING1_REG,
+	       reg_read(MC6_CH0_OFF_SPEC_TIMING1_REG)); */
 
 	/* TODO: check why change default of 3:0 tDQSCK from '3' to '0' */
-	reg_bit_clrset(MC6_REG_DRAM_READ_TIMING,
-		       TDQSCK << MC6_TDQSCK_OFFS,
-		       MC6_TDQSCK_MASK << MC6_TDQSCK_OFFS);
-	/* printf("MC6_REG_DRAM_READ_TIMING addr 0x%x, data 0x%x\n", MC6_REG_DRAM_READ_TIMING,
-	       reg_read(MC6_REG_DRAM_READ_TIMING)); */
+	reg_bit_clrset(MC6_CH0_DRAM_READ_TIMING_REG,
+		       TDQSCK_VAL << TDQSCK_OFFS,
+		       TDQSCK_MASK << TDQSCK_OFFS);
+	/* printf("MC6_CH0_DRAM_READ_TIMING_REG addr 0x%x, data 0x%x\n", MC6_CH0_DRAM_READ_TIMING_REG,
+	       reg_read(MC6_CH0_DRAM_READ_TIMING_REG)); */
 
-	reg_bit_clrset(MC6_REG_MPD_TIMING,
-		       mc6_timing.t_xmp << MC6_TXMP_OFFS |
-		       mc6_timing.t_mpx_s << MC6_TMPX_S_OFFS |
-		       mc6_timing.t_mpx_lh << MC6_TMPX_LH_OFFS,
-		       MC6_TXMP_MASK << MC6_TXMP_OFFS |
-		       MC6_TMPX_S_MASK << MC6_TMPX_S_OFFS |
-		       MC6_TMPX_LH_MASK << MC6_TMPX_LH_OFFS);
-	/* printf("MC6_REG_MPD_TIMING addr 0x%x, data 0x%x\n", MC6_REG_MPD_TIMING,
-	       reg_read(MC6_REG_MPD_TIMING)); */
+	reg_bit_clrset(MC6_CH0_DRAM_MPD_TIMING_REG,
+		       mc6_timing.t_xmp << TXMP_OFFS |
+		       mc6_timing.t_mpx_s << TMPX_S_OFFS |
+		       mc6_timing.t_mpx_lh << TMPX_LH_OFFS,
+		       TXMP_MASK << TXMP_OFFS |
+		       TMPX_S_MASK << TMPX_S_OFFS |
+		       TMPX_LH_MASK << TMPX_LH_OFFS);
+	/* printf("MC6_CH0_DRAM_MPD_TIMING_REG addr 0x%x, data 0x%x\n", MC6_CH0_DRAM_MPD_TIMING_REG,
+	       reg_read(MC6_CH0_DRAM_MPD_TIMING_REG)); */
 
-	reg_bit_clrset(MC6_REG_PDA_TIMING,
-		       mc6_timing.t_mrd_pda << MC6_TMRD_PDA_OFFS,
-		       MC6_TMRD_PDA_MASK << MC6_TMRD_PDA_OFFS);
-	/* printf("MC6_REG_PDA_TIMING addr 0x%x, data 0x%x\n", MC6_REG_PDA_TIMING,
-	       reg_read(MC6_REG_PDA_TIMING)); */
+	reg_bit_clrset(MC6_CH0_DRAM_PDA_TIMING_REG,
+		       mc6_timing.t_mrd_pda << TMRD_PDA_OFFS,
+		       TMRD_PDA_MASK << TMRD_PDA_OFFS);
+	/* printf("MC6_CH0_DRAM_PDA_TIMING_REG addr 0x%x, data 0x%x\n", MC6_CH0_DRAM_PDA_TIMING_REG,
+	       reg_read(MC6_CH0_DRAM_PDA_TIMING_REG)); */
 }
 
 void mv_ddr_mc6_and_dram_timing_set(void)
@@ -973,80 +973,80 @@ void mv_ddr_mc6_sizes_cfg(void)
 	for (cs_idx = 0; cs_idx < cs_num; cs_idx++) {
 		start_addr_bytes = area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * cs_idx;
 		start_addr_low = start_addr_bytes & MV_DDR_32_BITS_MASK;
-		start_addr_high = (start_addr_bytes >> START_ADDR_HIGH_TO_LOW_OFFS) & MV_DDR_32_BITS_MASK;
+		start_addr_high = (start_addr_bytes >> START_ADDR_HTOL_OFFS) & MV_DDR_32_BITS_MASK;
 
-		reg_bit_clrset(MC6_REG_MMAP_LOW_CH0(cs_idx),
-			       ACTIVATE_CS << MC6_CS_VALID_OFFS |
-			       NON_INTERLEAVE << MC6_INTERLEAVE_OFFS |
-			       mv_ddr_area_length_convert(are_length_mega_bytes) << MC6_AREA_LENGTH_OFFS |
+		reg_bit_clrset(MC6_CH0_MMAP_LOW_REG(cs_idx),
+			       CS_VALID_ENA << CS_VALID_OFFS |
+			       INTERLEAVE_DIS << INTERLEAVE_OFFS |
+			       mv_ddr_area_length_convert(are_length_mega_bytes) << AREA_LENGTH_OFFS |
 			       start_addr_low,
-			       MC6_CS_VALID_MASK << MC6_CS_VALID_OFFS |
-			       MC6_INTERLEAVE_MASK << MC6_INTERLEAVE_OFFS |
-			       MC6_AREA_LENGTH_MASK << MC6_AREA_LENGTH_OFFS |
-			       MC6_START_ADDRESS_L_MASK << MC6_START_ADDRESS_L_OFFS);
-		/* printf("MC6_REG_MMAP_LOW_CH0(cs_idx) addr 0x%x, data 0x%x\n", MC6_REG_MMAP_LOW_CH0(cs_idx),
-			  reg_read(MC6_REG_MMAP_LOW_CH0(cs_idx))); */
+			       CS_VALID_MASK << CS_VALID_OFFS |
+			       INTERLEAVE_MASK << INTERLEAVE_OFFS |
+			       AREA_LENGTH_MASK << AREA_LENGTH_OFFS |
+			       START_ADDRESS_L_MASK << START_ADDRESS_L_OFFS);
+		/* printf("MC6_CH0_MMAP_LOW_REG(cs_idx) addr 0x%x, data 0x%x\n", MC6_CH0_MMAP_LOW_REG(cs_idx),
+			  reg_read(MC6_CH0_MMAP_LOW_REG(cs_idx))); */
 
-		reg_bit_clrset(MC6_REG_MMAP_HIGH_CH0(cs_idx),
-			       start_addr_high << MC6_START_ADDRESS_H_OFFS,
-			       MC6_START_ADDRESS_H_MASK << MC6_START_ADDRESS_H_OFFS);
-		/* printf("MC6_REG_MMAP_HIGH_CH0(cs_idx) addr 0x%x, data 0x%x\n", MC6_REG_MMAP_HIGH_CH0(cs_idx),
-			  reg_read(MC6_REG_MMAP_HIGH_CH0(cs_idx))); */
+		reg_bit_clrset(MC6_CH0_MMAP_HIGH_REG(cs_idx),
+			       start_addr_high << START_ADDRESS_H_OFFS,
+			       START_ADDRESS_H_MASK << START_ADDRESS_H_OFFS);
+		/* printf("MC6_CH0_MMAP_HIGH_REG(cs_idx) addr 0x%x, data 0x%x\n", MC6_CH0_MMAP_HIGH_REG(cs_idx),
+			  reg_read(MC6_CH0_MMAP_HIGH_REG(cs_idx))); */
 
-		reg_bit_clrset(MC6_REG_MC_CONFIG(cs_idx),
+		reg_bit_clrset(MC6_CH0_MC_CFG_REG(cs_idx),
 			       mv_ddr_bank_addr_convert(addr_tbl.num_of_bank_addr_in_bank_group) <<
-			       MC6_BA_NUM_OFFS |
+			       BA_NUM_OFFS |
 			       mv_ddr_bank_groups_convert(addr_tbl.num_of_bank_groups) <<
-			       MC6_BG_NUM_OFFS |
+			       BG_NUM_OFFS |
 			       mv_ddr_column_num_convert(addr_tbl.column_addr) <<
-			       MC6_CA_NUM_OFFS |
+			       CA_NUM_OFFS |
 			       mv_ddr_row_num_convert(addr_tbl.row_addr) <<
-			       MC6_RA_NUM_OFFS |
+			       RA_NUM_OFFS |
 			       mv_ddr_stack_addr_num_convert(SINGLE_STACK) <<
-			       MC6_SA_NUM_OFFS |
+			       SA_NUM_OFFS |
 			       mv_ddr_device_type_convert(tm->interface_params[IF_ID_0].bus_width) <<
-			       MC6_DEVICE_TYPE_OFFS |
+			       DEVICE_TYPE_OFFS |
 			       mv_ddr_bank_map_convert(BANK_MAP_4KB) <<
-			       MC6_BANK_MAP_OFFS,
-			       MC6_BA_NUM_MASK << MC6_BA_NUM_OFFS |
-			       MC6_BG_NUM_MASK << MC6_BG_NUM_OFFS |
-			       MC6_CA_NUM_MASK << MC6_CA_NUM_OFFS |
-			       MC6_RA_NUM_MASK << MC6_RA_NUM_OFFS |
-			       MC6_SA_NUM_MASK << MC6_SA_NUM_OFFS |
-			       MC6_DEVICE_TYPE_MASK << MC6_DEVICE_TYPE_OFFS |
-			       MC6_BANK_MAP_MASK << MC6_BANK_MAP_OFFS);
+			       BANK_MAP_OFFS,
+			       BA_NUM_MASK << BA_NUM_OFFS |
+			       BG_NUM_MASK << BG_NUM_OFFS |
+			       CA_NUM_MASK << CA_NUM_OFFS |
+			       RA_NUM_MASK << RA_NUM_OFFS |
+			       SA_NUM_MASK << SA_NUM_OFFS |
+			       DEVICE_TYPE_MASK << DEVICE_TYPE_OFFS |
+			       BANK_MAP_MASK << BANK_MAP_OFFS);
 	}
 
 	/* configure here the channel 1 reg_map_low and reg_map_high to unused memory area due to mc6 bug */
 	for (cs_idx = 0, reserved_mem_idx = cs_num; cs_idx < cs_num; cs_idx++, reserved_mem_idx++) {
 		start_addr_bytes = area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * reserved_mem_idx;
 		start_addr_low = start_addr_bytes & MV_DDR_32_BITS_MASK;
-		start_addr_high = (start_addr_bytes >> START_ADDR_HIGH_TO_LOW_OFFS) & MV_DDR_32_BITS_MASK;
+		start_addr_high = (start_addr_bytes >> START_ADDR_HTOL_OFFS) & MV_DDR_32_BITS_MASK;
 
-		reg_bit_clrset(MC6_REG_MMAP_LOW_CH1(cs_idx),
-			       ACTIVATE_CS << MC6_CS_VALID_OFFS |
-			       NON_INTERLEAVE << MC6_INTERLEAVE_OFFS |
-			       mv_ddr_area_length_convert(are_length_mega_bytes) << MC6_AREA_LENGTH_OFFS |
+		reg_bit_clrset(MC6_CH1_MMAP_LOW_REG(cs_idx),
+			       CS_VALID_ENA << CS_VALID_OFFS |
+			       INTERLEAVE_DIS << INTERLEAVE_OFFS |
+			       mv_ddr_area_length_convert(are_length_mega_bytes) << AREA_LENGTH_OFFS |
 			       start_addr_low,
-			       MC6_CS_VALID_MASK << MC6_CS_VALID_OFFS |
-			       MC6_INTERLEAVE_MASK << MC6_INTERLEAVE_OFFS |
-			       MC6_AREA_LENGTH_MASK << MC6_AREA_LENGTH_OFFS |
-			       MC6_START_ADDRESS_L_MASK << MC6_START_ADDRESS_L_OFFS);
-		/* printf("MC6_REG_MMAP_LOW_CH1(cs_idx) addr 0x%x, data 0x%x\n", MC6_REG_MMAP_LOW_CH1(cs_idx),
-			  reg_read(MC6_REG_MMAP_LOW_CH1(cs_idx))); */
+			       CS_VALID_MASK << CS_VALID_OFFS |
+			       INTERLEAVE_MASK << INTERLEAVE_OFFS |
+			       AREA_LENGTH_MASK << AREA_LENGTH_OFFS |
+			       START_ADDRESS_L_MASK << START_ADDRESS_L_OFFS);
+		/* printf("MC6_CH1_MMAP_LOW_REG(cs_idx) addr 0x%x, data 0x%x\n", MC6_CH1_MMAP_LOW_REG(cs_idx),
+			  reg_read(MC6_CH1_MMAP_LOW_REG(cs_idx))); */
 
-		reg_bit_clrset(MC6_REG_MMAP_HIGH_CH1(cs_idx),
-			       start_addr_high << MC6_START_ADDRESS_H_OFFS,
-			       MC6_START_ADDRESS_H_MASK << MC6_START_ADDRESS_H_OFFS);
-		/* printf("MC6_REG_MMAP_HIGH_CH1(cs_idx) addr 0x%x, data 0x%x\n", MC6_REG_MMAP_HIGH_CH1(cs_idx),
-			  reg_read(MC6_REG_MMAP_HIGH_CH1(cs_idx))); */
+		reg_bit_clrset(MC6_CH1_MMAP_HIGH_REG(cs_idx),
+			       start_addr_high << START_ADDRESS_H_OFFS,
+			       START_ADDRESS_H_MASK << START_ADDRESS_H_OFFS);
+		/* printf("MC6_CH1_MMAP_HIGH_REG(cs_idx) addr 0x%x, data 0x%x\n", MC6_CH1_MMAP_HIGH_REG(cs_idx),
+			  reg_read(MC6_CH1_MMAP_HIGH_REG(cs_idx))); */
 	}
 }
 
 void  mv_ddr_mc6_ecc_enable(void)
 {
-	reg_bit_clrset(MC6_REG_RAS_CTRL,
-		       ECC_ENABLE << MC6_ECC_ENABLE_OFFS,
-		       MC6_ECC_ENABLE_MASK << MC6_ECC_ENABLE_OFFS);
+	reg_bit_clrset(MC6_RAS_CTRL_REG,
+		       ECC_EN_ENA << ECC_EN_OFFS,
+		       ECC_EN_MASK << ECC_EN_OFFS);
 }
 

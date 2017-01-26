@@ -106,18 +106,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 static u32 ui_xor_regs_ctrl_backup;
-static u32 ui_xor_regs_base_backup[MAX_CS + 1];
-static u32 ui_xor_regs_mask_backup[MAX_CS + 1];
+static u32 ui_xor_regs_base_backup[MAX_CS_NUM + 1];
+static u32 ui_xor_regs_mask_backup[MAX_CS_NUM + 1];
 
 void mv_sys_xor_init(u32 num_of_cs, u32 cs_ena, u32 cs_size, u32 base_delta)
 {
 	u32 reg, ui, base, cs_count, size_mask;
 
 	ui_xor_regs_ctrl_backup = reg_read(XOR_WINDOW_CTRL_REG(0, 0));
-	for (ui = 0; ui < MAX_CS + 1; ui++)
+	for (ui = 0; ui < MAX_CS_NUM + 1; ui++)
 		ui_xor_regs_base_backup[ui] =
 			reg_read(XOR_BASE_ADDR_REG(0, ui));
-	for (ui = 0; ui < MAX_CS + 1; ui++)
+	for (ui = 0; ui < MAX_CS_NUM + 1; ui++)
 		ui_xor_regs_mask_backup[ui] =
 			reg_read(XOR_SIZE_MASK_REG(0, ui));
 
@@ -185,10 +185,10 @@ void mv_sys_xor_finish(void)
 	u32 ui;
 
 	reg_write(XOR_WINDOW_CTRL_REG(0, 0), ui_xor_regs_ctrl_backup);
-	for (ui = 0; ui < MAX_CS + 1; ui++)
+	for (ui = 0; ui < MAX_CS_NUM + 1; ui++)
 		reg_write(XOR_BASE_ADDR_REG(0, ui),
 			  ui_xor_regs_base_backup[ui]);
-	for (ui = 0; ui < MAX_CS + 1; ui++)
+	for (ui = 0; ui < MAX_CS_NUM + 1; ui++)
 		reg_write(XOR_SIZE_MASK_REG(0, ui),
 			  ui_xor_regs_mask_backup[ui]);
 

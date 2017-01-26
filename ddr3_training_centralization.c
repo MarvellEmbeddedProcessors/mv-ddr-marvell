@@ -179,20 +179,20 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 		/* save current cs enable reg val */
 		CHECK_STATUS(ddr3_tip_if_read
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, cs_enable_reg_val, MASK_ALL_BITS));
+			      DUAL_DUNIT_CFG_REG, cs_enable_reg_val, MASK_ALL_BITS));
 		/* enable single cs */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, (1 << 3), (1 << 3)));
+			      DUAL_DUNIT_CFG_REG, (1 << 3), (1 << 3)));
 	}
 
 	if (mode == CENTRAL_TX) {
 		max_win_size = MAX_WINDOW_SIZE_TX;
-		reg_phy_off = WRITE_CENTRALIZATION_PHY_REG + (effective_cs * 4);
+		reg_phy_off = CTX_PHY_REG(effective_cs);
 		direction = OPER_WRITE;
 	} else {
 		max_win_size = MAX_WINDOW_SIZE_RX;
-		reg_phy_off = READ_CENTRALIZATION_PHY_REG + (effective_cs * 4);
+		reg_phy_off = CRX_PHY_REG(effective_cs);
 		direction = OPER_READ;
 	}
 
@@ -534,21 +534,21 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 				ddr3_tip_bus_read(dev_num, if_id,
 						  ACCESS_TYPE_UNICAST, bus_id,
 						  DDR_PHY_DATA,
-						  RESULT_DB_PHY_REG_ADDR +
+						  RESULT_PHY_REG +
 						  effective_cs, &reg);
 				reg = (reg & (~0x1f <<
 					      ((mode == CENTRAL_TX) ?
-					       (RESULT_DB_PHY_REG_TX_OFFSET) :
-					       (RESULT_DB_PHY_REG_RX_OFFSET))))
+					       (RESULT_PHY_TX_OFFS) :
+					       (RESULT_PHY_RX_OFFS))))
 					| pup_win_length <<
 					((mode == CENTRAL_TX) ?
-					 (RESULT_DB_PHY_REG_TX_OFFSET) :
-					 (RESULT_DB_PHY_REG_RX_OFFSET));
+					 (RESULT_PHY_TX_OFFS) :
+					 (RESULT_PHY_RX_OFFS));
 				CHECK_STATUS(ddr3_tip_bus_write
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id, ACCESS_TYPE_UNICAST,
 					      bus_id, DDR_PHY_DATA,
-					      RESULT_DB_PHY_REG_ADDR +
+					      RESULT_PHY_REG +
 					      effective_cs, reg));
 
 				/* offset per CS is calculated earlier */
@@ -576,7 +576,7 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 		/* restore cs enable value */
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST,
-					       if_id, CS_ENABLE_REG,
+					       if_id, DUAL_DUNIT_CFG_REG,
 					       cs_enable_reg_val[if_id],
 					       MASK_ALL_BITS));
 	}
@@ -614,12 +614,12 @@ int ddr3_tip_special_rx(u32 dev_num)
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		/* save current cs enable reg val */
 		CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST,
-					      if_id, CS_ENABLE_REG,
+					      if_id, DUAL_DUNIT_CFG_REG,
 					      cs_enable_reg_val,
 					      MASK_ALL_BITS));
 		/* enable single cs */
 		CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST,
-					       if_id, CS_ENABLE_REG,
+					       if_id, DUAL_DUNIT_CFG_REG,
 					       (1 << 3), (1 << 3)));
 	}
 
@@ -720,8 +720,7 @@ int ddr3_tip_special_rx(u32 dev_num)
 						     (dev_num, if_id,
 						      ACCESS_TYPE_UNICAST,
 						      pup_id, DDR_PHY_DATA,
-						      PBS_RX_PHY_REG + pad_num +
-						      effective_cs * 0x10,
+						      PBS_RX_PHY_REG(effective_cs, pad_num),
 						      &temp));
 					temp = (temp + 0xa > 31) ?
 						(31) : (temp + 0xa);
@@ -731,8 +730,7 @@ int ddr3_tip_special_rx(u32 dev_num)
 						      if_id,
 						      ACCESS_TYPE_UNICAST,
 						      pup_id, DDR_PHY_DATA,
-						      PBS_RX_PHY_REG + pad_num +
-						      effective_cs * 0x10,
+						      PBS_RX_PHY_REG(effective_cs, pad_num),
 						      temp));
 				}
 				DEBUG_CENTRALIZATION_ENGINE(
@@ -746,28 +744,28 @@ int ddr3_tip_special_rx(u32 dev_num)
 					     (dev_num, if_id,
 					      ACCESS_TYPE_UNICAST, pup_id,
 					      DDR_PHY_DATA,
-					      PBS_RX_PHY_REG + 4 +
-					      effective_cs * 0x10, &temp));
+					      PBS_RX_PHY_REG(effective_cs, 4),
+					      &temp));
 				temp += 0xa;
 				CHECK_STATUS(ddr3_tip_bus_write
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id, ACCESS_TYPE_UNICAST,
 					      pup_id, DDR_PHY_DATA,
-					      PBS_RX_PHY_REG + 4 +
-					      effective_cs * 0x10, temp));
+					      PBS_RX_PHY_REG(effective_cs, 4),
+					      temp));
 				CHECK_STATUS(ddr3_tip_bus_read
 					     (dev_num, if_id,
 					      ACCESS_TYPE_UNICAST, pup_id,
 					      DDR_PHY_DATA,
-					      PBS_RX_PHY_REG + 5 +
-					      effective_cs * 0x10, &temp));
+					      PBS_RX_PHY_REG(effective_cs, 5),
+					      &temp));
 				temp += 0xa;
 				CHECK_STATUS(ddr3_tip_bus_write
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id, ACCESS_TYPE_UNICAST,
 					      pup_id, DDR_PHY_DATA,
-					      PBS_RX_PHY_REG + 5 +
-					      effective_cs * 0x10, temp));
+					      PBS_RX_PHY_REG(effective_cs, 5),
+					      temp));
 				DEBUG_CENTRALIZATION_ENGINE(
 					DEBUG_LEVEL_INFO,
 					("Special: PBS:: I/F# %d , Bus# %d fix align to the right\n",

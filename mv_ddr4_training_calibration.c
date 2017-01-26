@@ -397,7 +397,7 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num)
 
 			status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ACCESS_TYPE_UNICAST,
 						    subphy_num, DDR_PHY_DATA,
-						    WRITE_CENTRALIZATION_PHY_REG + effective_cs * 4,
+						    CTX_PHY_REG(effective_cs),
 						    center_adll[if_id][subphy_num] % 64);
 			if (status != MV_OK)
 				return status;
@@ -452,13 +452,13 @@ static int mv_ddr4_centralization(u8 dev_num, u16 (*lambda)[MAX_BUS_NUM][BUS_WID
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		/* save current cs enable reg val */
-		status = ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, CS_ENABLE_REG,
+		status = ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, DUAL_DUNIT_CFG_REG,
 					  cs_ena_reg_val, MASK_ALL_BITS);
 		if (status != MV_OK)
 			return status;
 
 		/* enable single cs */
-		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, CS_ENABLE_REG,
+		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, DUAL_DUNIT_CFG_REG,
 					   (0x1 << 3), (0x1 << 3));
 		if (status != MV_OK)
 			return status;
@@ -751,7 +751,7 @@ static int mv_ddr4_centralization(u8 dev_num, u16 (*lambda)[MAX_BUS_NUM][BUS_WID
 	/* restore cs enable value*/
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, CS_ENABLE_REG,
+		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, DUAL_DUNIT_CFG_REG,
 					   cs_ena_reg_val[if_id], MASK_ALL_BITS);
 		if (status != MV_OK)
 			return status;
@@ -1122,7 +1122,7 @@ static int mv_ddr4_center_of_mass_calc(u8 dev_num, u8 if_id, u8 subphy_num, u8 m
 		polygon_area = -polygon_area;
 
 	status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ACCESS_TYPE_UNICAST, subphy_num,
-				    DDR_PHY_DATA, RESULT_DB_PHY_REG_ADDR + effective_cs + 4 * (1 - mode),
+				    DDR_PHY_DATA, RESULT_PHY_REG + effective_cs + 4 * (1 - mode),
 				    polygon_area);
 	if (status != MV_OK)
 		return status;
@@ -1229,22 +1229,22 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 	for (iface = 0; iface < MAX_INTERFACE_NUM; iface++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, iface);
 		if (mode == RX_DIR)
-			reg_addr = RD_DESKEW_BRDCAST_PHY_REG(effective_cs);
+			reg_addr = PBS_RX_BCAST_PHY_REG(effective_cs);
 		else
-			reg_addr = WR_DESKEW_BRDCAST_PHY_REG(effective_cs);
+			reg_addr = PBS_TX_BCAST_PHY_REG(effective_cs);
 		ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, iface, ACCESS_TYPE_MULTICAST,
 				   PARAM_NOT_CARE, DDR_PHY_DATA, reg_addr, 0);
 
 		if (mode == RX_DIR)
-			reg_addr = RD_DESKEW_PHY_REG(effective_cs, DQSP_PAD);
+			reg_addr = PBS_RX_PHY_REG(effective_cs, DQSP_PAD);
 		else
-			reg_addr = WR_DESKEW_PHY_REG(effective_cs, DQSP_PAD);
+			reg_addr = PBS_TX_PHY_REG(effective_cs, DQSP_PAD);
 		ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, iface, ACCESS_TYPE_MULTICAST,
 				   PARAM_NOT_CARE, DDR_PHY_DATA, reg_addr, 0);
 		if (mode == RX_DIR)
-			reg_addr = RD_DESKEW_PHY_REG(effective_cs, DQSN_PAD);
+			reg_addr = PBS_RX_PHY_REG(effective_cs, DQSN_PAD);
 		else
-			reg_addr = WR_DESKEW_PHY_REG(effective_cs, DQSN_PAD);
+			reg_addr = PBS_TX_PHY_REG(effective_cs, DQSN_PAD);
 		ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, iface, ACCESS_TYPE_MULTICAST,
 				   PARAM_NOT_CARE, DDR_PHY_DATA, reg_addr, 0);
 	}
@@ -1252,11 +1252,11 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 	for (iface = 0; iface < MAX_INTERFACE_NUM; iface++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, iface);
 		/* save current cs enable reg val */
-		ddr3_tip_if_read(dev, ACCESS_TYPE_UNICAST, iface, CS_ENABLE_REG,
+		ddr3_tip_if_read(dev, ACCESS_TYPE_UNICAST, iface, DUAL_DUNIT_CFG_REG,
 				 cs_ena_reg_val, MASK_ALL_BITS);
 
 		/* enable single cs */
-		ddr3_tip_if_write(dev, ACCESS_TYPE_UNICAST, iface, CS_ENABLE_REG,
+		ddr3_tip_if_write(dev, ACCESS_TYPE_UNICAST, iface, DUAL_DUNIT_CFG_REG,
 				  (SINGLE_CS_ENA << SINGLE_CS_PIN_OFFS),
 				  (SINGLE_CS_PIN_MASK << SINGLE_CS_PIN_OFFS));
 	}
@@ -1360,11 +1360,11 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 						/* check high limit */
 						if (dqs_shift[subphy] > MAX_PBS_NUM)
 							dqs_shift[subphy] = MAX_PBS_NUM;
-						reg_addr = WR_DESKEW_PHY_REG(effective_cs, DQSP_PAD);
+						reg_addr = PBS_TX_PHY_REG(effective_cs, DQSP_PAD);
 						ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, iface,
 								   ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
 								   reg_addr, dqs_shift[subphy]);
-						reg_addr = WR_DESKEW_PHY_REG(effective_cs, DQSN_PAD);
+						reg_addr = PBS_TX_PHY_REG(effective_cs, DQSN_PAD);
 						ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, iface,
 								   ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
 								   reg_addr, dqs_shift[subphy]);
@@ -1399,9 +1399,9 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 	for (iface = 0; iface < MAX_INTERFACE_NUM; iface++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, iface);
 		if (mode == RX_DIR)
-			reg_addr = RD_DESKEW_BRDCAST_PHY_REG(effective_cs);
+			reg_addr = PBS_RX_BCAST_PHY_REG(effective_cs);
 		else
-			reg_addr = WR_DESKEW_BRDCAST_PHY_REG(effective_cs);
+			reg_addr = PBS_TX_BCAST_PHY_REG(effective_cs);
 		ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, iface, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 				   DDR_PHY_DATA, reg_addr, new_pbs_per_byte[0]);
 	 }
@@ -1573,7 +1573,7 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 	/* restore cs enable value */
 	for (iface = 0; iface < MAX_INTERFACE_NUM; iface++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, iface);
-		ddr3_tip_if_write(dev, ACCESS_TYPE_UNICAST, iface, CS_ENABLE_REG,
+		ddr3_tip_if_write(dev, ACCESS_TYPE_UNICAST, iface, DUAL_DUNIT_CFG_REG,
 				  cs_ena_reg_val[iface], MASK_ALL_BITS);
 	}
 
@@ -1583,9 +1583,9 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 		for (subphy = 0; subphy < subphy_max; subphy++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy);
 			if (mode == RX_DIR)
-				reg_addr = RD_DESKEW_BRDCAST_PHY_REG(effective_cs);
+				reg_addr = PBS_RX_BCAST_PHY_REG(effective_cs);
 			else
-				reg_addr = WR_DESKEW_BRDCAST_PHY_REG(effective_cs);
+				reg_addr = PBS_TX_BCAST_PHY_REG(effective_cs);
 			ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, iface, ACCESS_TYPE_UNICAST,
 					   subphy, DDR_PHY_DATA, reg_addr, 0);
 		}
@@ -1606,17 +1606,17 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 				if (rx_vw_pos[iface][subphy] == ALIGN_LEFT) {
 					ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, 0,
 							   ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
-							   RD_DESKEW_BRDCAST_PHY_REG(effective_cs),
+							   PBS_RX_BCAST_PHY_REG(effective_cs),
 							   VW_DESKEW_BIAS);
 					DEBUG_CALIBRATION(DEBUG_LEVEL_INFO,
 							  ("%s: if %d, subphy %d aligned to left\n",
 							   __func__, iface, subphy));
 				} else if (rx_vw_pos[iface][subphy] == ALIGN_RIGHT) {
-					reg_addr = RD_DESKEW_PHY_REG(effective_cs, DQSP_PAD);
+					reg_addr = PBS_RX_PHY_REG(effective_cs, DQSP_PAD);
 					ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, 0,
 							   ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
 							   reg_addr, VW_DESKEW_BIAS);
-					reg_addr = RD_DESKEW_PHY_REG(effective_cs, DQSN_PAD);
+					reg_addr = PBS_RX_PHY_REG(effective_cs, DQSN_PAD);
 					ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, 0,
 							   ACCESS_TYPE_UNICAST, subphy, DDR_PHY_DATA,
 							   reg_addr, VW_DESKEW_BIAS);
@@ -1689,10 +1689,10 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 				DEBUG_TAP_TUNING_ENGINE(DEBUG_LEVEL_INFO,
 							("%s: tap tune failed; return to nominal wl\n",
 							__func__));
-				reg_addr = WR_DESKEW_PHY_REG(effective_cs, DQSP_PAD);
+				reg_addr = PBS_TX_PHY_REG(effective_cs, DQSP_PAD);
 				ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, iface, ACCESS_TYPE_UNICAST,
 						   subphy, DDR_PHY_DATA, reg_addr, 0);
-				reg_addr = WR_DESKEW_PHY_REG(effective_cs, DQSN_PAD);
+				reg_addr = PBS_TX_PHY_REG(effective_cs, DQSN_PAD);
 				ddr3_tip_bus_write(dev, ACCESS_TYPE_UNICAST, iface, ACCESS_TYPE_UNICAST,
 						   subphy, DDR_PHY_DATA, reg_addr, 0);
 			}
@@ -1796,19 +1796,19 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 		/* set new receiver dc training value in dram */
 		status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 					    ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
-					    CSN_IOB_VREF_REG(effective_cs), duty_cycle);
+					    VREF_BCAST_PHY_REG(effective_cs), duty_cycle);
 		if (status != MV_OK)
 			return status;
 
 		status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 					    ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
-					    CSN_IO_BASE_VREF_REG(effective_cs) + 4, duty_cycle);
+					    VREF_PHY_REG(effective_cs, DQSP_PAD), duty_cycle);
 		if (status != MV_OK)
 			return status;
 
 		status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 					    ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DDR_PHY_DATA,
-					    CSN_IO_BASE_VREF_REG(effective_cs) + 5, duty_cycle);
+					    VREF_PHY_REG(effective_cs, DQSN_PAD), duty_cycle);
 		if (status != MV_OK)
 			return status;
 
@@ -1903,21 +1903,21 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy_num);
 			status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 						    ACCESS_TYPE_UNICAST, subphy_num, DDR_PHY_DATA,
-						    CSN_IOB_VREF_REG(effective_cs),
+						    VREF_BCAST_PHY_REG(effective_cs),
 						    center_vref[if_id][subphy_num]);
 			if (status != MV_OK)
 				return status;
 
 			status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 						    ACCESS_TYPE_UNICAST, subphy_num, DDR_PHY_DATA,
-						    CSN_IO_BASE_VREF_REG(effective_cs) + 4,
+						    VREF_PHY_REG(effective_cs, DQSP_PAD),
 						    center_vref[if_id][subphy_num]);
 			if (status != MV_OK)
 				return status;
 
 			status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 						    ACCESS_TYPE_UNICAST, subphy_num, DDR_PHY_DATA,
-						    CSN_IO_BASE_VREF_REG(effective_cs) + 5,
+						    VREF_PHY_REG(effective_cs, DQSN_PAD),
 						    center_vref[if_id][subphy_num]);
 			if (status != MV_OK)
 				return status;
@@ -1977,7 +1977,7 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 
 			status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ACCESS_TYPE_UNICAST,
 						    subphy_num, DDR_PHY_DATA,
-						    READ_CENTRALIZATION_PHY_REG + effective_cs * 4,
+						    CRX_PHY_REG(effective_cs),
 						    center_adll[if_id][subphy_num]);
 			if (status != MV_OK)
 				return status;
@@ -2086,7 +2086,7 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 					}
 					status = ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 								    ACCESS_TYPE_UNICAST, subphy_num, DDR_PHY_DATA,
-								    READ_CENTRALIZATION_PHY_REG + effective_cs * 4,
+								    CRX_PHY_REG(effective_cs),
 								    ctr_x[cs_index]);
 					if (status != MV_OK)
 						return status;

@@ -594,20 +594,20 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 		/* All CSs to CS0     */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, access_type, interface_num,
-			      CS_ENABLE_REG, 1 << 3, 1 << 3));
+			      DUAL_DUNIT_CFG_REG, 1 << 3, 1 << 3));
 		/* All CSs to CS0     */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, access_type, interface_num,
-			      ODPG_DATA_CONTROL_REG,
+			      ODPG_DATA_CTRL_REG,
 			      (0x3 | (effective_cs << 26)), 0xc000003));
 	} else {
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, access_type, interface_num,
-			      CS_ENABLE_REG, 0, 1 << 3));
+			      DUAL_DUNIT_CFG_REG, 0, 1 << 3));
 		/*  CS select */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, access_type, interface_num,
-			      ODPG_DATA_CONTROL_REG, 0x3 | cs_num << 26,
+			      ODPG_DATA_CTRL_REG, 0x3 | cs_num << 26,
 			      0x3 | 3 << 26));
 	}
 
@@ -629,7 +629,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 	reg_data |= (direction == OPER_READ) ? 0x60 : 0xfa;
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, access_type, interface_num,
-		      ODPG_WRITE_READ_MODE_ENABLE_REG, reg_data,
+		      ODPG_WR_RD_MODE_ENA_REG, reg_data,
 		      MASK_ALL_BITS));
 	reg_data = (edge_comp == EDGE_PF || edge_comp == EDGE_FP) ? 0 : 1 << 6;
 	reg_data |= (edge_comp == EDGE_PF || edge_comp == EDGE_PFP) ?
@@ -652,13 +652,13 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, access_type, interface_num,
-		      ODPG_TRAINING_CONTROL_REG,
+		      GENERAL_TRAINING_OPCODE_REG,
 		      reg_data | (0x7 << 8) | (0x7 << 11),
 		      (0x3 | (0x3 << 2) | (0x3 << 6) | (1 << 5) | (0x7 << 8) |
 		       (0x7 << 11) | (0xf << 14) | (0x3 << 18) | (3 << 20))));
 	reg_data = (search_dir == HWS_LOW2HIGH) ? 0 : (1 << 8);
 	CHECK_STATUS(ddr3_tip_if_write
-		     (dev_num, access_type, interface_num, ODPG_OBJ1_OPCODE_REG,
+		     (dev_num, access_type, interface_num, OPCODE_REG0_REG(1),
 		      1 | reg_data | init_value << 9 | (1 << 25) | (1 << 26),
 		      0xff | (1 << 8) | (0xffff << 9) | (1 << 25) | (1 << 26)));
 
@@ -667,7 +667,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 	 * Max number of iterations
 	 */
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, interface_num,
-				       ODPG_OBJ1_ITER_CNT_REG, num_iter,
+				       OPCODE_REG1_REG(1), num_iter,
 				       0xffff));
 	if (control_element == HWS_CONTROL_ELEMENT_DQ_SKEW &&
 	    direction == OPER_READ) {
@@ -675,12 +675,10 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 		 * Write2_dunit(0x10c0, 0x5f , [7:0])
 		 * MC PBS Reg Address at DDR PHY
 		 */
-		reg_data = 0x5f +
-			effective_cs * CALIBRATED_OBJECTS_REG_ADDR_OFFSET;
+		reg_data = PBS_RX_BCAST_PHY_REG(effective_cs);
 	} else if (control_element == HWS_CONTROL_ELEMENT_DQ_SKEW &&
 		   direction == OPER_WRITE) {
-		reg_data = 0x1f +
-			effective_cs * CALIBRATED_OBJECTS_REG_ADDR_OFFSET;
+		reg_data = PBS_TX_BCAST_PHY_REG(effective_cs);
 	} else if (control_element == HWS_CONTROL_ELEMENT_ADLL &&
 		   direction == OPER_WRITE) {
 		/*
@@ -691,11 +689,11 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 		 * Write2_dunit(0x10c0, 0x1 , [7:0])
 		 * ADLL WR Reg Address at DDR PHY
 		 */
-		reg_data = 1 + effective_cs * CS_REGISTER_ADDR_OFFSET;
+		reg_data = CTX_PHY_REG(effective_cs);
 	} else if (control_element == HWS_CONTROL_ELEMENT_ADLL &&
 		   direction == OPER_READ) {
 		/* ADLL RD Reg Address at DDR PHY */
-		reg_data = 3 + effective_cs * CS_REGISTER_ADDR_OFFSET;
+		reg_data = CRX_PHY_REG(effective_cs);
 	} else if (control_element == HWS_CONTROL_ELEMENT_DQS_SKEW &&
 		   direction == OPER_WRITE) {
 		/* TBD not defined in 0.5.0 requirement  */
@@ -706,7 +704,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 
 	reg_data |= (0x6 << 28);
 	CHECK_STATUS(ddr3_tip_if_write
-		     (dev_num, access_type, interface_num, CALIB_OBJ_PRFA_REG,
+		     (dev_num, access_type, interface_num, CAL_PHY_REG(1),
 		      reg_data | (init_value << 8),
 		      0xff | (0xffff << 8) | (0xf << 24) | (u32) (0xf << 28)));
 
@@ -764,7 +762,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 
 	/* Start Training Trigger */
 	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3)
-		trigger_reg_addr = ODPG_TRAINING_TRIGGER_REG;
+		trigger_reg_addr = GLOB_CTRL_STATUS_REG;
 	else
 		trigger_reg_addr = ODPG_TRAINING_STATUS_REG;
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, interface_num,
@@ -808,7 +806,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 		/* Write ODPG done in Dunit */
 		CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_STATUS_DONE_REG, 0, 0x1));
+		      ODPG_DONE_STATUS_REG, 0, 0x1));
 	}
 
 	/* wait for all Dunit tests to finish (or timeout) */
@@ -849,7 +847,7 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_DATA_CONTROL_REG, 0, MASK_ALL_BITS));
+		      ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS));
 
 	return MV_OK;
 }
@@ -871,39 +869,39 @@ int ddr3_tip_load_pattern_to_odpg(u32 dev_num, enum hws_access_type access_type,
 		if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask)/* || tm->bus_act_mask == MV_DDR_32BIT_ECC_PUP8_BUS_MASK*/) {
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
-				      ODPG_PATTERN_DATA_LOW_REG,
+				      ODPG_DATA_WR_DATA_LOW_REG,
 				      pattern_table_get_word(dev_num, pattern,
 							     (u8) (pattern_length_cnt)),
 				      MASK_ALL_BITS));
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
-				      ODPG_PATTERN_DATA_HI_REG,
+				      ODPG_DATA_WR_DATA_HIGH_REG,
 				      pattern_table_get_word(dev_num, pattern,
 							     (u8) (pattern_length_cnt)),
 				      MASK_ALL_BITS));
 		} else {
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
-					      ODPG_PATTERN_DATA_LOW_REG,
+					      ODPG_DATA_WR_DATA_LOW_REG,
 				      pattern_table_get_word(dev_num, pattern,
 							     (u8) (pattern_length_cnt * 2)),
 				      MASK_ALL_BITS));
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, access_type, if_id,
-				      ODPG_PATTERN_DATA_HI_REG,
+				      ODPG_DATA_WR_DATA_HIGH_REG,
 				      pattern_table_get_word(dev_num, pattern,
 							     (u8) (pattern_length_cnt * 2 + 1)),
 				      MASK_ALL_BITS));
 		}
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, access_type, if_id,
-			      ODPG_PATTERN_ADDR_REG, pattern_length_cnt,
+			      ODPG_DATA_WR_ADDR_REG, pattern_length_cnt,
 			      MASK_ALL_BITS));
 	}
 
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, access_type, if_id,
-		      ODPG_PATTERN_ADDR_OFFSET_REG, load_addr, MASK_ALL_BITS));
+		      ODPG_DATA_BUFFER_OFFS_REG, load_addr, MASK_ALL_BITS));
 
 	return MV_OK;
 }
@@ -925,7 +923,7 @@ int ddr3_tip_configure_odpg(u32 dev_num, enum hws_access_type access_type,
 		      (rx_phases << 21) | (rd_mode << 25) | (cs_num << 26) |
 		      (addr_stress_jump << 29));
 	ret = ddr3_tip_if_write(dev_num, access_type, if_id,
-				ODPG_DATA_CONTROL_REG, data_value, 0xaffffffc);
+				ODPG_DATA_CTRL_REG, data_value, 0xaffffffc);
 	if (ret != MV_OK)
 		return ret;
 
@@ -1004,11 +1002,11 @@ int ddr3_tip_read_training_result(u32 dev_num, u32 if_id,
 	 * all pups
 	 */
 	CHECK_STATUS(ddr3_tip_if_write
-		     (dev_num, ACCESS_TYPE_UNICAST, if_id, CS_ENABLE_REG,
+		     (dev_num, ACCESS_TYPE_UNICAST, if_id, DUAL_DUNIT_CFG_REG,
 		      (cs_num_type == 0) ? 1 << 3 : 0, (1 << 3)));
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-		      ODPG_DATA_CONTROL_REG, (cs_num_type << 26), (3 << 26)));
+		      ODPG_DATA_CTRL_REG, (cs_num_type << 26), (3 << 26)));
 	DEBUG_TRAINING_IP_ENGINE(DEBUG_LEVEL_TRACE,
 				 ("Read_from_d_b %d cs_type %d oper %d result_type %d direction %d search %d pup_num %d if_id %d pup_access_type %d\n",
 				  is_read_from_db, cs_num_type, operation,
@@ -1148,7 +1146,7 @@ int ddr3_tip_load_all_pattern_to_mem(u32 dev_num)
 		/* enable single cs */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, (1 << 3), (1 << 3)));
+			      DUAL_DUNIT_CFG_REG, (1 << 3), (1 << 3)));
 	}
 
 	for (pattern = 0; pattern < PATTERN_LAST; pattern++)
@@ -1219,16 +1217,16 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 		(effective_cs << 26);
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_DATA_CONTROL_REG, reg_data, MASK_ALL_BITS));
+		      ODPG_DATA_CTRL_REG, reg_data, MASK_ALL_BITS));
 	/* ODPG Write enable from BIST */
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_DATA_CONTROL_REG, (0x1 | (effective_cs << 26)),
+		      ODPG_DATA_CTRL_REG, (0x1 | (effective_cs << 26)),
 		      0xc000003));
 	/* disable error injection */
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_WRITE_DATA_ERROR_REG, 0, 0x1));
+		      ODPG_DATA_WR_DATA_ERR_REG, 0, 0x1));
 	/* load pattern to ODPG */
 	ddr3_tip_load_pattern_to_odpg(dev_num, ACCESS_TYPE_MULTICAST,
 				      PARAM_NOT_CARE, pattern,
@@ -1240,7 +1238,7 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-				      SDRAM_ODT_CONTROL_HIGH_REG,
+				      SDRAM_ODT_CTRL_HIGH_REG,
 				      0x3, 0xf));
 		}
 
@@ -1251,7 +1249,7 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 	} else {
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      ODPG_DATA_CONTROL_REG, (u32)(0x1 << 31),
+			      ODPG_DATA_CTRL_REG, (u32)(0x1 << 31),
 			      (u32)(0x1 << 31)));
 	}
 	mdelay(1);
@@ -1264,18 +1262,18 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 	/* Disable ODPG and stop write to memory */
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_DATA_CONTROL_REG, (0x1 << 30), (u32) (0x3 << 30)));
+		      ODPG_DATA_CTRL_REG, (0x1 << 30), (u32) (0x3 << 30)));
 
 	/* return to default */
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_DATA_CONTROL_REG, 0, MASK_ALL_BITS));
+		      ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS));
 
 	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
 		/* Disable odt0 for CS0 training - need to adjust for multy CS */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      SDRAM_ODT_CONTROL_HIGH_REG, 0x0, 0xf));
+			      SDRAM_ODT_CTRL_HIGH_REG, 0x0, 0xf));
 	}
 	/* temporary added */
 	mdelay(1);
@@ -1804,27 +1802,21 @@ int ddr3_tip_load_phy_values(int b_load)
 					     (dev_num, if_id,
 					      ACCESS_TYPE_UNICAST, bus_cnt,
 					      DDR_PHY_DATA,
-					      WRITE_CENTRALIZATION_PHY_REG +
-					      (effective_cs *
-					       CS_REGISTER_ADDR_OFFSET),
+					      CTX_PHY_REG(effective_cs),
 					      &phy_reg_bk[if_id][bus_cnt]
 					      [0]));
 				CHECK_STATUS(ddr3_tip_bus_read
 					     (dev_num, if_id,
 					      ACCESS_TYPE_UNICAST, bus_cnt,
 					      DDR_PHY_DATA,
-					      RL_PHY_BASE +
-					      (effective_cs *
-					       CS_REGISTER_ADDR_OFFSET),
+					      RL_PHY_REG(effective_cs),
 					      &phy_reg_bk[if_id][bus_cnt]
 					      [1]));
 				CHECK_STATUS(ddr3_tip_bus_read
 					     (dev_num, if_id,
 					      ACCESS_TYPE_UNICAST, bus_cnt,
 					      DDR_PHY_DATA,
-					      READ_CENTRALIZATION_PHY_REG +
-					      (effective_cs *
-					       CS_REGISTER_ADDR_OFFSET),
+					      CRX_PHY_REG(effective_cs),
 					      &phy_reg_bk[if_id][bus_cnt]
 					      [2]));
 			} else {
@@ -1832,27 +1824,21 @@ int ddr3_tip_load_phy_values(int b_load)
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id, ACCESS_TYPE_UNICAST,
 					      bus_cnt, DDR_PHY_DATA,
-					      WRITE_CENTRALIZATION_PHY_REG +
-					      (effective_cs *
-					       CS_REGISTER_ADDR_OFFSET),
+					      CTX_PHY_REG(effective_cs),
 					      phy_reg_bk[if_id][bus_cnt]
 					      [0]));
 				CHECK_STATUS(ddr3_tip_bus_write
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id, ACCESS_TYPE_UNICAST,
 					      bus_cnt, DDR_PHY_DATA,
-					      RL_PHY_BASE +
-					      (effective_cs *
-					       CS_REGISTER_ADDR_OFFSET),
+					      RL_PHY_REG(effective_cs),
 					      phy_reg_bk[if_id][bus_cnt]
 					      [1]));
 				CHECK_STATUS(ddr3_tip_bus_write
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id, ACCESS_TYPE_UNICAST,
 					      bus_cnt, DDR_PHY_DATA,
-					      READ_CENTRALIZATION_PHY_REG +
-					      (effective_cs *
-					       CS_REGISTER_ADDR_OFFSET),
+					      CRX_PHY_REG(effective_cs),
 					      phy_reg_bk[if_id][bus_cnt]
 					      [2]));
 			}

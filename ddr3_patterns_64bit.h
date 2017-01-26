@@ -98,6 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __DDR3_PATTERNS_64_H
 #define __DDR3_PATTERNS_64_H
 
+#define FAB_OPT		21
 /*
  * Patterns Declerations
  */

@@ -282,7 +282,7 @@ static int mv_ddr4_mpr_read_mode_enable(u8 dev_num, u32 mpr_num, u32 page_num,
 	}
 
 	/* disable refresh - TODO: check why it is the must */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CONTROL_REG,
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CTRL_REG,
 				   0x1 << 21, 0x1 << 21);
 	if (status != MV_OK)
 		return status;
@@ -296,12 +296,12 @@ static int mv_ddr4_mpr_read_mode_enable(u8 dev_num, u32 mpr_num, u32 page_num,
 		return status;
 
 	/* op cmd: cs0, cs1 are on, cs2, cs3 are off */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, SDRAM_OPERATION_REG,
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, SDRAM_OP_REG,
 				   (0x9 | (0xc << 8)) , (0x1f | (0xf << 8)));
 	if (status != MV_OK)
 		return status;
 
-	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0, 0x1f, SDRAM_OPERATION_REG,
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0, 0x1f, SDRAM_OP_REG,
 				MAX_POLLING_ITERATIONS) != MV_OK) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_mpr_read_mode_enable: DDR3 poll failed(MPR3)\n"));
 	}
@@ -325,18 +325,18 @@ static int mv_ddr4_mpr_mode_disable(u8 dev_num)
 		return status;
 
 	/* op cmd: cs0, cs1 are on, cs2, cs3 are off */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, SDRAM_OPERATION_REG,
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, SDRAM_OP_REG,
 				   (0x9 | (0xc << 8)) , (0x1f | (0xf << 8)));
 	if (status != MV_OK)
 		return status;
 
-	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0, 0x1f, SDRAM_OPERATION_REG,
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0, 0x1f, SDRAM_OP_REG,
 				MAX_POLLING_ITERATIONS) != MV_OK) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_mpr_mode_disable: DDR3 poll failed(MPR3)\n"));
 	}
 
 	/* enable refresh; see TODO in mv_ddr4_mpr_read_mode_enable() */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CONTROL_REG,
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CTRL_REG,
 				   0x0 << 21, 0x1 << 21);
 	if (status != MV_OK)
 		return status;
@@ -430,7 +430,7 @@ static int mv_ddr4_mpr_write_mode_enable(u8 dev_num, u32 mpr_location, u32 page_
 	u32 if_id = 0, val = 0, mask;
 
 	/* disable refresh - TODO: check why it is the must */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CONTROL_REG,
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CTRL_REG,
 				   0x1 << 21, 0x1 << 21);
 	if (status != MV_OK)
 		return status;
@@ -449,12 +449,12 @@ static int mv_ddr4_mpr_write_mode_enable(u8 dev_num, u32 mpr_location, u32 page_
 		return status;
 
 	/* op cmd: cs0, cs1 are on, cs2, cs3 are off */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, SDRAM_OPERATION_REG,
+	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, SDRAM_OP_REG,
 				   (0x13 | 0xc << 8) , (0x1f | (0xf << 8)));
 	if (status != MV_OK)
 		return status;
 
-	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,  0, 0x1f, SDRAM_OPERATION_REG,
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,  0, 0x1f, SDRAM_OP_REG,
 				MAX_POLLING_ITERATIONS) != MV_OK) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_mpr_write_mode_enable: DDR3 poll failed(MPR3)\n"));
 	}
@@ -548,7 +548,7 @@ int mv_ddr4_vref_training_mode_ctrl(u8 dev_num, u8 if_id, enum hws_access_type a
 	 */
 
 	if (enable == 1) { /* disable refresh */
-		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_CTRL_CONTROL_REG,
+		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_CTRL_CTRL_REG,
 					   0x1 << 21, 0x1 << 21);
 		if (status != MV_OK)
 			return status;
@@ -569,17 +569,17 @@ int mv_ddr4_vref_training_mode_ctrl(u8 dev_num, u8 if_id, enum hws_access_type a
 	/* write DDR4 MR6 command */
 	val |= 0x12;
 	mask = (0xf << 8) | 0x1f;
-	status = ddr3_tip_if_write(dev_num, access_type, if_id, SDRAM_OPERATION_REG, val, mask);
+	status = ddr3_tip_if_write(dev_num, access_type, if_id, SDRAM_OP_REG, val, mask);
 	if (status != MV_OK)
 		return status;
 
-	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,  0, 0x1f, SDRAM_OPERATION_REG,
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,  0, 0x1f, SDRAM_OP_REG,
 				MAX_POLLING_ITERATIONS) != MV_OK) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_vref_training_mode_ctrl: Polling command failed\n"));
 	}
 
 	if (enable == 0) { /* enable refresh */
-		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_CTRL_CONTROL_REG,
+		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_CTRL_CTRL_REG,
 					   0x0 << 21, 0x1 << 21);
 		if (status != MV_OK)
 			return status;
@@ -673,11 +673,11 @@ int mv_ddr4_vref_set(u8 dev_num, u8 if_id, enum hws_access_type access_type,
 	/* write DDR4 MR6 command */
 	val |= 0x12;
 	mask = (0xf << 8) | 0x1f;
-	status = ddr3_tip_if_write(dev_num, access_type, if_id, SDRAM_OPERATION_REG, val, mask);
+	status = ddr3_tip_if_write(dev_num, access_type, if_id, SDRAM_OP_REG, val, mask);
 	if (status != MV_OK)
 		return status;
 
-	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,  0, 0x1F, SDRAM_OPERATION_REG,
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,  0, 0x1F, SDRAM_OP_REG,
 				MAX_POLLING_ITERATIONS) != MV_OK) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_vref_set: Polling command failed\n"));
 	}
@@ -701,7 +701,7 @@ int mv_ddr4_pda_pattern_odpg_load(u32 dev_num, enum hws_access_type access_type,
 	 */
 	val = (cs_num << 26) | (0x1 << 25) | (0x3 << 11) | (0x3 << 5) | 0x1;
 	mask = (0x3 << 26) | (0x1 << 25) | (0x3f << 11) | (0x3f << 5) | 0x1;
-	status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_DATA_CONTROL_REG, val, mask);
+	status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_DATA_CTRL_REG, val, mask);
 	if (status != MV_OK)
 		return status;
 
@@ -718,23 +718,23 @@ int mv_ddr4_pda_pattern_odpg_load(u32 dev_num, enum hws_access_type access_type,
 	}
 
 	for (pattern_len_count = 0; pattern_len_count < 4 ; pattern_len_count++) {
-		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_PATTERN_DATA_LOW_REG,
+		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_DATA_WR_DATA_LOW_REG,
 					   data_low[pattern_len_count], MASK_ALL_BITS);
 		if (status != MV_OK)
 			return status;
 
-		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_PATTERN_DATA_HI_REG,
+		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_DATA_WR_DATA_HIGH_REG,
 					   data_high[pattern_len_count], MASK_ALL_BITS);
 		if (status != MV_OK)
 			return status;
 
-		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_PATTERN_ADDR_REG,
+		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_DATA_WR_ADDR_REG,
 					   pattern_len_count, MASK_ALL_BITS);
 		if (status != MV_OK)
 			return status;
 	}
 
-	status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_PATTERN_ADDR_OFFSET_REG,
+	status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_DATA_BUFFER_OFFS_REG,
 				   0x0, MASK_ALL_BITS);
 	if (status != MV_OK)
 		return status;
@@ -756,7 +756,7 @@ int mv_ddr4_pda_ctrl(u8 dev_num, u8 if_id, u8 cs_num, int enable)
 	u32 val, mask;
 
 	if (enable == 1) { /* disable refresh */
-		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CONTROL_REG,
+		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CTRL_REG,
 					   0x1 << 21, 0x1 << 21);
 		if (status != MV_OK)
 			return status;
@@ -779,7 +779,7 @@ int mv_ddr4_pda_ctrl(u8 dev_num, u8 if_id, u8 cs_num, int enable)
 	/* write DDR4 MR3 command */
 	val |= 0x9;
 	mask = (0xf << 8) | 0x1f;
-	status = ddr3_tip_if_write(dev_num, access_type, if_id, SDRAM_OPERATION_REG, val, mask);
+	status = ddr3_tip_if_write(dev_num, access_type, if_id, SDRAM_OP_REG, val, mask);
 	if (status != MV_OK)
 		return status;
 
@@ -790,12 +790,12 @@ int mv_ddr4_pda_ctrl(u8 dev_num, u8 if_id, u8 cs_num, int enable)
 			return status;
 	}
 
-	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0, 0x1f, SDRAM_OPERATION_REG,
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0, 0x1f, SDRAM_OP_REG,
 				MAX_POLLING_ITERATIONS) != MV_OK)
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_pda_ctrl: Polling command failed\n"));
 
 	if (enable == 0) {/* enable refresh */
-		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CONTROL_REG,
+		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CTRL_REG,
 					   0x0 << 21, 0x1 << 21);
 		if (status != MV_OK)
 			return status;

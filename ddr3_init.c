@@ -96,6 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ddr3_init.h"
+#include "mv_ddr_common.h"
 
 /*
  * Translates topology map definitions to real memory size in bits
@@ -236,7 +237,7 @@ uint64_t mv_ddr_get_memory_size_per_cs_in_bits(void)
 
 	/* calculate dram size per cs */
 	memory_size_per_cs = (uint64_t)mem_size[tm->interface_params[0].memory_size] * (uint64_t)num_of_active_bus
-		/ (uint64_t)num_of_sub_phys_per_ddr_unit * (uint64_t)BITS_IN_BYTE;
+		/ (uint64_t)num_of_sub_phys_per_ddr_unit * (uint64_t)MV_DDR_NUM_BITS_IN_BYTE;
 
 	return memory_size_per_cs;
 }

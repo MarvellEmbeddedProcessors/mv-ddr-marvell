@@ -98,8 +98,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_A38X_H
 #define _MV_DDR_A38X_H
 
-#include "ddr3_hws_hw_training_def.h"
-
 #define MAX_INTERFACE_NUM		1
 #define MAX_BUS_NUM			5
 #define DDR_IF_CTRL_SUBPHYS_NUM		3
@@ -107,6 +105,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DFS_LOW_FREQ_VALUE		120
 #define SDRAM_CS_SIZE			0xfffffff	/* FIXME: implement a function for cs size for each platform */
 
+#define INTER_REGS_BASE			0xd0000000
 #define AP_INT_REG_START_ADDR		0xd0000000
 #define AP_INT_REG_END_ADDR		0xd0100000
 
@@ -174,6 +173,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define REG_FASTPATH_WIN_BASE_ADDR(win)         (0x20180 + (0x8 * win))
 #define REG_FASTPATH_WIN_CTRL_ADDR(win)         (0x20184 + (0x8 * win))
 
+#define CPU_CONFIGURATION_REG(id)	(0x21800 + (id * 0x100))
+#define CPU_MRVL_ID_OFFSET		0x10
+#define SAR1_CPU_CORE_MASK		0x00000018
+#define SAR1_CPU_CORE_OFFSET		3
+
 /* SatR defined too change topology busWidth and ECC configuration */
 #define DDR_SATR_CONFIG_MASK_WIDTH		0x8
 #define DDR_SATR_CONFIG_MASK_ECC		0x10
@@ -181,9 +185,46 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define	REG_SAMPLE_RESET_HIGH_ADDR		0x18600
 
+#define MV_BOARD_REFCLK_25MHZ			25000000
 #define MV_BOARD_REFCLK				MV_BOARD_REFCLK_25MHZ
 
 #define MAX_DQ_NUM				40
+
+/* dram line buffer registers */
+#define DLB_CTRL_REG			0x1700
+#define DLB_EN_OFFS			0
+#define DLB_EN_MASK			0x1
+#define DLB_EN_ENA			1
+#define DLB_EN_DIS			0
+#define WR_COALESCE_EN_OFFS		2
+#define WR_COALESCE_EN_MASK		0x1
+#define WR_COALESCE_EN_ENA		1
+#define WR_COALESCE_EN_DIS		0
+#define AXI_PREFETCH_EN_OFFS		3
+#define AXI_PREFETCH_EN_MASK		0x1
+#define AXI_PREFETCH_EN_ENA		1
+#define AXI_PREFETCH_EN_DIS		0
+#define MBUS_PREFETCH_EN_OFFS		4
+#define MBUS_PREFETCH_EN_MASK		0x1
+#define MBUS_PREFETCH_EN_ENA		1
+#define MBUS_PREFETCH_EN_DIS		0
+#define PREFETCH_NXT_LN_SZ_TRIG_OFFS	6
+#define PREFETCH_NXT_LN_SZ_TRIG_MASK	0x1
+#define PREFETCH_NXT_LN_SZ_TRIG_ENA	1
+#define PREFETCH_NXT_LN_SZ_TRIG_DIS	0
+
+#define DLB_BUS_OPT_WT_REG		0x1704
+#define DLB_AGING_REG			0x1708
+#define DLB_EVICTION_CTRL_REG		0x170c
+#define DLB_EVICTION_TIMERS_REG		0x1710
+#define DLB_USER_CMD_REG		0x1714
+#define DLB_WTS_DIFF_CS_REG		0x1770
+#define DLB_WTS_DIFF_BG_REG		0x1774
+#define DLB_WTS_SAME_BG_REG		0x1778
+#define DLB_WTS_CMDS_REG		0x177c
+#define DLB_WTS_ATTR_PRIO_REG		0x1780
+#define DLB_QUEUE_MAP_REG		0x1784
+#define DLB_SPLIT_REG			0x1788
 
 /* Subphy result control per byte registers */
 #define RESULT_CONTROL_BYTE_PUP_0_REG		0x1830
@@ -242,6 +283,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ODPG_ENABLE_REG				0x186d4
 #define ODPG_ENABLE_OFFS			0
 #define ODPG_DISABLE_OFFS			8
+
+/* CPU */
+#define REG_BOOTROM_ROUTINE_ADDR		0x182d0
+#define REG_BOOTROM_ROUTINE_DRAM_INIT_OFFS	12
 
 /* Matrix enables DRAM modes (bus width/ECC) per boardId */
 #define TOPOLOGY_UPDATE_32BIT			0

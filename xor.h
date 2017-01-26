@@ -100,8 +100,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define SRAM_BASE		0x40000000
 
-#include "ddr3_hws_hw_training_def.h"
-
 #define MV_XOR_MAX_UNIT		2	/* XOR unit == XOR engine */
 #define MV_XOR_MAX_CHAN		4	/* total channels for all units */
 #define MV_XOR_MAX_CHAN_PER_UNIT 2	/* channels for units */

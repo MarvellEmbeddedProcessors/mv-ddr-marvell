@@ -143,10 +143,10 @@ int ddr3_tip_write_additional_odt_setting(u32 dev_num, u32 if_id)
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       DUNIT_ODT_CONTROL_REG,
+				       DUNIT_ODT_CTRL_REG,
 				       0 << 8, 0x3 << 8));
 	CHECK_STATUS(ddr3_tip_if_read(dev_num, access_type, if_id,
-				      READ_DATA_SAMPLE_DELAY,
+				      RD_DATA_SMPL_DLYS_REG,
 				      data_read, MASK_ALL_BITS));
 	val = data_read[if_id];
 
@@ -167,7 +167,7 @@ int ddr3_tip_write_additional_odt_setting(u32 dev_num, u32 if_id)
 					     (dev_num, if_id,
 					      ACCESS_TYPE_UNICAST, pup_index,
 					      DDR_PHY_DATA,
-					      RL_PHY_BASE + CS_BYTE_GAP(cs_num),
+					      RL_PHY_REG(cs_num),
 					      &val));
 
 				current_phase = ((int)val & 0xe0) >> 6;
@@ -189,11 +189,11 @@ int ddr3_tip_write_additional_odt_setting(u32 dev_num, u32 if_id)
 		max_read_sample = 0x1f;
 
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       ODT_TIMING_LOW,
+				       DDR_ODT_TIMING_LOW_REG,
 				       ((min_read_sample - 1) << 12),
 				       0xf << 12));
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-				       ODT_TIMING_LOW,
+				       DDR_ODT_TIMING_LOW_REG,
 				       (max_read_sample << 16),
 				       0x1f << 16));
 
@@ -202,7 +202,7 @@ int ddr3_tip_write_additional_odt_setting(u32 dev_num, u32 if_id)
 
 int get_valid_win_rx(u32 dev_num, u32 if_id, u8 res[4])
 {
-	u32 reg_pup = RESULT_DB_PHY_REG_ADDR;
+	u32 reg_pup = RESULT_PHY_REG;
 	u32 reg_data;
 	u32 cs_num;
 	int i;
@@ -217,7 +217,7 @@ int get_valid_win_rx(u32 dev_num, u32 if_id, u8 res[4])
 					       ACCESS_TYPE_UNICAST, i,
 					       DDR_PHY_DATA, reg_pup,
 					       &reg_data));
-		res[i] = (reg_data >> RESULT_DB_PHY_REG_RX_OFFSET) & 0x1f;
+		res[i] = (reg_data >> RESULT_PHY_RX_OFFS) & 0x1f;
 	}
 
 	return 0;

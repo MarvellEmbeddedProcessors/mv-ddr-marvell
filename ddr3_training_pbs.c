@@ -150,19 +150,17 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 		/* save current cs enable reg val */
 		CHECK_STATUS(ddr3_tip_if_read
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, cs_enable_reg_val, MASK_ALL_BITS));
+			      DUAL_DUNIT_CFG_REG, cs_enable_reg_val, MASK_ALL_BITS));
 
 		/* enable single cs */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, (1 << 3), (1 << 3)));
+			      DUAL_DUNIT_CFG_REG, (1 << 3), (1 << 3)));
 	}
 
 	reg_addr = (pbs_mode == PBS_RX_MODE) ?
-		(READ_CENTRALIZATION_PHY_REG +
-		 (effective_cs * CS_REGISTER_ADDR_OFFSET)) :
-		(WRITE_CENTRALIZATION_PHY_REG +
-		 (effective_cs * CS_REGISTER_ADDR_OFFSET));
+		CRX_PHY_REG(effective_cs) :
+		CTX_PHY_REG(effective_cs);
 	ddr3_tip_read_adll_value(dev_num, nominal_adll, reg_addr, MASK_ALL_BITS);
 
 	/* stage 1 shift ADLL */
@@ -864,8 +862,8 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 						  result_mat[if_id][pup]
 						  [bit]));
 				reg_addr = (pbs_mode == PBS_RX_MODE) ?
-					(PBS_RX_PHY_REG + effective_cs * 0x10) :
-					(PBS_TX_PHY_REG + effective_cs * 0x10);
+					PBS_RX_PHY_REG(effective_cs, 0) :
+					PBS_TX_PHY_REG(effective_cs, 0);
 				CHECK_STATUS(ddr3_tip_bus_write
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id, ACCESS_TYPE_UNICAST, pup,
@@ -942,8 +940,8 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 
 	/* Write back to the phy the default values */
 	reg_addr = (pbs_mode == PBS_RX_MODE) ?
-		(READ_CENTRALIZATION_PHY_REG + effective_cs * 4) :
-		(WRITE_CENTRALIZATION_PHY_REG + effective_cs * 4);
+		CRX_PHY_REG(effective_cs) :
+		CTX_PHY_REG(effective_cs);
 	ddr3_tip_write_adll_value(dev_num, nominal_adll, reg_addr);
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
@@ -959,14 +957,14 @@ int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, cs_enable_reg_val[if_id],
+			      DUAL_DUNIT_CFG_REG, cs_enable_reg_val[if_id],
 			      MASK_ALL_BITS));
 	}
 
 	/* exit test mode */
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_WRITE_READ_MODE_ENABLE_REG, 0xffff, MASK_ALL_BITS));
+		      ODPG_WR_RD_MODE_ENA_REG, 0xffff, MASK_ALL_BITS));
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
@@ -1032,8 +1030,8 @@ int ddr3_tip_print_pbs_result(u32 dev_num, u32 cs_num, enum pbs_dir pbs_mode)
 {
 	u32 data_value = 0, bit = 0, if_id = 0, pup = 0;
 	u32 reg_addr = (pbs_mode == PBS_RX_MODE) ?
-		(PBS_RX_PHY_REG + cs_num * 0x10) :
-		(PBS_TX_PHY_REG + cs_num * 0x10);
+		PBS_RX_PHY_REG(cs_num, 0) :
+		PBS_TX_PHY_REG(cs_num , 0);
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
@@ -1082,8 +1080,8 @@ int ddr3_tip_clean_pbs_result(u32 dev_num, enum pbs_dir pbs_mode)
 {
 	u32 if_id, pup, bit;
 	u32 reg_addr = (pbs_mode == PBS_RX_MODE) ?
-		(PBS_RX_PHY_REG + effective_cs * 0x10) :
-		(PBS_TX_PHY_REG + effective_cs * 0x10);
+		PBS_RX_PHY_REG(effective_cs, 0) :
+		PBS_TX_PHY_REG(effective_cs, 0);
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 

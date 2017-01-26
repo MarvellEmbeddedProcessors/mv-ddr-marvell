@@ -105,8 +105,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <asm/arch/cpu.h>
 #include <asm/arch/soc.h>
 
-#include "ddr3_hws_hw_training_def.h"
-
 /*
  * MV_DEBUG_INIT need to be defines, otherwise the output of the
  * DDR2 training code is not complete and misleading

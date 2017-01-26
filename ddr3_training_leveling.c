@@ -175,12 +175,12 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 			/* save current cs enable reg val */
 			CHECK_STATUS(ddr3_tip_if_read
 				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-				      CS_ENABLE_REG, cs_enable_reg_val,
+				      DUAL_DUNIT_CFG_REG, cs_enable_reg_val,
 				      MASK_ALL_BITS));
 			/* enable single cs */
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-				      CS_ENABLE_REG, (1 << 3), (1 << 3)));
+				      DUAL_DUNIT_CFG_REG, (1 << 3), (1 << 3)));
 		}
 
 		ddr3_tip_reset_fifo_ptr(dev_num);
@@ -198,7 +198,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 		/* BUS count is 0 shifted 26 */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      ODPG_DATA_CONTROL_REG, 0x3, 0x3));
+			      ODPG_DATA_CTRL_REG, 0x3, 0x3));
 		CHECK_STATUS(ddr3_tip_configure_odpg
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, 0,
 			      pattern_table[PATTERN_RL].num_of_phases_tx, 0,
@@ -218,12 +218,12 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 		/* General Training Opcode register */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      ODPG_WRITE_READ_MODE_ENABLE_REG, 0,
+			      ODPG_WR_RD_MODE_ENA_REG, 0,
 			      MASK_ALL_BITS));
 
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      ODPG_TRAINING_CONTROL_REG,
+			      GENERAL_TRAINING_OPCODE_REG,
 			      (0x301b01 | effective_cs << 2), 0x3c3fef));
 
 		/* Object1 opcode register 0 & 1 */
@@ -237,13 +237,13 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 			mask = (0xff << 9) | (0x1f << 17) | (0x3 << 25);
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-				      ODPG_OBJ1_OPCODE_REG, data, mask));
+				      OPCODE_REG0_REG(1), data, mask));
 		}
 
 		/* Set iteration count to max value */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      TRAINING_OPCODE_1_REG, 0xd00, 0xd00));
+			      OPCODE_REG1_REG(1), 0xd00, 0xd00));
 
 		/*
 		 *     Phase 2: Mask config
@@ -267,11 +267,11 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 		/* data pup rd reset enable  */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      SDRAM_CONFIGURATION_REG, 0, (1 << 30)));
+			      SDRAM_CFG_REG, 0, (1 << 30)));
 		/* data pup rd reset disable */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      SDRAM_CONFIGURATION_REG, (1 << 30), (1 << 30)));
+			      SDRAM_CFG_REG, (1 << 30), (1 << 30)));
 		/* training SW override & training RL mode */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
@@ -289,7 +289,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      ODPG_TRAINING_TRIGGER_REG, 0x1, 0x1));
+				      GLOB_CTRL_STATUS_REG, 0x1, 0x1));
 
 			/* check for training done + results pass */
 			if (ddr3_tip_if_polling
@@ -306,7 +306,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 				CHECK_STATUS(ddr3_tip_if_read
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id,
-					      ODPG_TRAINING_TRIGGER_REG, data_read,
+					      GLOB_CTRL_STATUS_REG, data_read,
 					      0x4));
 				data = data_read[if_id];
 				if (data != 0x0) {
@@ -332,7 +332,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      ODPG_DATA_CONTROL_REG, 0, MASK_ALL_BITS));
+				      ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS));
 		} else {
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
@@ -394,16 +394,16 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 		/* set ODPG to functional */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      ODPG_DATA_CONTROL_REG, 0x0, MASK_ALL_BITS));
+			      ODPG_DATA_CTRL_REG, 0x0, MASK_ALL_BITS));
 
 		/*
 		 * Copy the result from the effective CS search to the
 		 * real Functional CS
 		 */
-		/*ddr3_tip_write_cs_result(dev_num, RL_PHY_BASE); */
+		/*ddr3_tip_write_cs_result(dev_num, RL_PHY_REG(0); */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      ODPG_DATA_CONTROL_REG, 0x0, MASK_ALL_BITS));
+			      ODPG_DATA_CTRL_REG, 0x0, MASK_ALL_BITS));
 	}
 
 	for (effective_cs = 0; effective_cs < max_cs; effective_cs++) {
@@ -423,9 +423,8 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 						   if_id,
 						   ACCESS_TYPE_UNICAST,
 						   bus_num, DDR_PHY_DATA,
-						   RL_PHY_BASE +
-						   ((effective_cs ==
-						     0) ? 0x0 : 0x4), data);
+						   RL_PHY_REG(effective_cs),
+						   data);
 			}
 		}
 	}
@@ -437,7 +436,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 		/* restore cs enable value */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, cs_enable_reg_val[if_id],
+			      DUAL_DUNIT_CFG_REG, cs_enable_reg_val[if_id],
 			      MASK_ALL_BITS));
 		if (odt_config != 0) {
 			CHECK_STATUS(ddr3_tip_write_additional_odt_setting
@@ -569,7 +568,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 			CHECK_STATUS(ddr3_tip_bus_read
 				     (dev_num, if_id, ACCESS_TYPE_UNICAST,
 				      bus_num, DDR_PHY_DATA,
-				      READ_CENTRALIZATION_PHY_REG,
+				      CRX_PHY_REG(0),
 				      &phyreg3_arr[if_id][bus_num]));
 		}
 	}
@@ -582,12 +581,12 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 		/* save current cs enable reg val */
 		CHECK_STATUS(ddr3_tip_if_read
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, &cs_enable_reg_val[if_id],
+			      DUAL_DUNIT_CFG_REG, &cs_enable_reg_val[if_id],
 			      MASK_ALL_BITS));
 		/* enable single cs */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, (1 << 3), (1 << 3)));
+			      DUAL_DUNIT_CFG_REG, (1 << 3), (1 << 3)));
 	}
 
 	ddr3_tip_reset_fifo_ptr(dev_num);
@@ -605,7 +604,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 		/* BUS count is 0 shifted 26 */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      ODPG_DATA_CONTROL_REG, 0x3, 0x3));
+			      ODPG_DATA_CTRL_REG, 0x3, 0x3));
 		CHECK_STATUS(ddr3_tip_configure_odpg
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, 0,
 			      pattern_table[PATTERN_TEST].num_of_phases_tx, 0,
@@ -625,11 +624,11 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 		/* General Training Opcode register */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      ODPG_WRITE_READ_MODE_ENABLE_REG, 0,
+			      ODPG_WR_RD_MODE_ENA_REG, 0,
 			      MASK_ALL_BITS));
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      ODPG_TRAINING_CONTROL_REG, 0x301b01, 0x3c3fef));
+			      GENERAL_TRAINING_OPCODE_REG, 0x301b01, 0x3c3fef));
 
 		/* Object1 opcode register 0 & 1 */
 		for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
@@ -642,13 +641,13 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 			mask = (0xff << 9) | (0x1f << 17) | (0x3 << 25);
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-				      ODPG_OBJ1_OPCODE_REG, data, mask));
+				      OPCODE_REG0_REG(1), data, mask));
 		}
 
 		/* Set iteration count to max value */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      TRAINING_OPCODE_1_REG, 0xd00, 0xd00));
+			      OPCODE_REG1_REG(1), 0xd00, 0xd00));
 
 		/*
 		 *     Phase 2: Mask config
@@ -672,11 +671,11 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 		/* data pup rd reset enable  */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      SDRAM_CONFIGURATION_REG, 0, (1 << 30)));
+			      SDRAM_CFG_REG, 0, (1 << 30)));
 		/* data pup rd reset disable */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      SDRAM_CONFIGURATION_REG, (1 << 30), (1 << 30)));
+			      SDRAM_CFG_REG, (1 << 30), (1 << 30)));
 		/* training SW override & training RL mode */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
@@ -694,7 +693,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      ODPG_TRAINING_TRIGGER_REG, 0x1, 0x1));
+				      GLOB_CTRL_STATUS_REG, 0x1, 0x1));
 
 			/* check for training done + results pass */
 			if (ddr3_tip_if_polling
@@ -711,7 +710,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 				CHECK_STATUS(ddr3_tip_if_read
 					     (dev_num, ACCESS_TYPE_UNICAST,
 					      if_id,
-					      ODPG_TRAINING_TRIGGER_REG, data_read,
+					      GLOB_CTRL_STATUS_REG, data_read,
 					      0x4));
 				data = data_read[if_id];
 				if (data != 0x0) {
@@ -734,7 +733,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 			}
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      ODPG_DATA_CONTROL_REG, 0, MASK_ALL_BITS));
+				      ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS));
 		} else {
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
@@ -834,7 +833,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 							  if_id,
 							  ACCESS_TYPE_UNICAST,
 							  bus_num, DDR_PHY_DATA,
-							  READ_CENTRALIZATION_PHY_REG,
+							  CRX_PHY_REG(0),
 							  (phyreg3_arr[if_id]
 							   [bus_num] +
 							   adll_array[curr_numb])));
@@ -861,8 +860,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 						   if_id,
 						   ACCESS_TYPE_UNICAST,
 						   bus_num, DDR_PHY_DATA,
-						   RL_PHY_BASE +
-						   CS_BYTE_GAP(effective_cs),
+						   RL_PHY_REG(effective_cs),
 						   data2_write[if_id]
 						   [bus_num]);
 			else
@@ -904,22 +902,22 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 	/* set ODPG to functional */
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_DATA_CONTROL_REG, 0x0, MASK_ALL_BITS));
+		      ODPG_DATA_CTRL_REG, 0x0, MASK_ALL_BITS));
 	/*
 	 * Copy the result from the effective CS search to the real
 	 * Functional CS
 	 */
-	ddr3_tip_write_cs_result(dev_num, RL_PHY_BASE);
+	ddr3_tip_write_cs_result(dev_num, RL_PHY_REG(0));
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_DATA_CONTROL_REG, 0x0, MASK_ALL_BITS));
+		      ODPG_DATA_CTRL_REG, 0x0, MASK_ALL_BITS));
 
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		/* restore cs enable value */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, cs_enable_reg_val[if_id],
+			      DUAL_DUNIT_CFG_REG, cs_enable_reg_val[if_id],
 			      MASK_ALL_BITS));
 		if (odt_config != 0) {
 			CHECK_STATUS(ddr3_tip_write_additional_odt_setting
@@ -1003,24 +1001,24 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 		/* save Read Data Sample Delay */
 		CHECK_STATUS(ddr3_tip_if_read
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      READ_DATA_SAMPLE_DELAY,
+			      RD_DATA_SMPL_DLYS_REG,
 			      read_data_sample_delay_vals, MASK_ALL_BITS));
 		/* save Read Data Ready Delay */
 		CHECK_STATUS(ddr3_tip_if_read
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      READ_DATA_READY_DELAY, read_data_ready_delay_vals,
+			      RD_DATA_RDY_DLYS_REG, read_data_ready_delay_vals,
 			      MASK_ALL_BITS));
 		/* save current cs reg val */
 		CHECK_STATUS(ddr3_tip_if_read
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, cs_enable_reg_val, MASK_ALL_BITS));
+			      DUAL_DUNIT_CFG_REG, cs_enable_reg_val, MASK_ALL_BITS));
 	}
 
 	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) < MV_TIP_REV_3) {
 		/* Enable multi-CS */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			     CS_ENABLE_REG, 0, (1 << 3)));
+			     DUAL_DUNIT_CFG_REG, 0, (1 << 3)));
 	}
 
 	/*
@@ -1033,7 +1031,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_UNICAST,
-				      if_id, SDRAM_OPERATION_REG,
+				      if_id, SDRAM_OP_REG,
 				      (u32)((~(0xf) << 8) | 0x2), 0xf1f));
 		}
 	}
@@ -1042,7 +1040,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		if (ddr3_tip_if_polling
 		    (dev_num, ACCESS_TYPE_UNICAST, if_id, 0, 0x1f,
-		     SDRAM_OPERATION_REG, MAX_POLLING_ITERATIONS) != MV_OK) {
+		     SDRAM_OP_REG, MAX_POLLING_ITERATIONS) != MV_OK) {
 			DEBUG_LEVELING(DEBUG_LEVEL_ERROR,
 				       ("WL: DDR3 poll failed(3)"));
 		}
@@ -1088,7 +1086,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) < MV_TIP_REV_3)
 			trigger_reg_addr = ODPG_TRAINING_STATUS_REG;
 		else
-			trigger_reg_addr = ODPG_TRAINING_TRIGGER_REG;
+			trigger_reg_addr = GLOB_CTRL_STATUS_REG;
 
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
@@ -1115,7 +1113,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 					CHECK_STATUS(ddr3_tip_if_read
 						     (dev_num, ACCESS_TYPE_UNICAST,
 						      if_id,
-						      ODPG_TRAINING_TRIGGER_REG,
+						      GLOB_CTRL_STATUS_REG,
 						      data_read, (1 << 2)));
 					if (data_read[if_id] != 0) {
 						DEBUG_LEVELING(
@@ -1223,7 +1221,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 				/* Search with WL CS0 subphy reg */
 				ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 						   ACCESS_TYPE_UNICAST, bus_cnt,
-						   DDR_PHY_DATA, WL_PHY_BASE, reg_data);
+						   DDR_PHY_DATA, WL_PHY_REG(0), reg_data);
 				/*
 				 * Check for change in data read from DRAM.
 				 * If changed, fix the result
@@ -1232,7 +1230,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 					     (dev_num,
 					      ACCESS_TYPE_UNICAST,
 					      if_id,
-					      TRAINING_WRITE_LEVELING_REG,
+					      TRAINING_WL_REG,
 					      data_read, MASK_ALL_BITS));
 				if (((data_read[if_id] & (1 << (bus_cnt + 20))) >>
 				     (bus_cnt + 20)) == 0) {
@@ -1259,7 +1257,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 		/* disable DQs toggling */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      WR_LEVELING_DQS_PATTERN_REG, 0x0, 0x1));
+			      WL_DQS_PATTERN_REG, 0x0, 0x1));
 
 		/* Update MRS 1 (WL off) */
 		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
@@ -1329,7 +1327,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 					if (phase_remove == 1)
 						reg_data |= ((reg_data >> WR_LVL_PH_SEL_OFFS &
 							     WR_LVL_PH_SEL_MASK) &
-							     FIRST_PHASE) << WR_LVL_PH_SEL_OFFS;
+							     WR_LVL_PH_SEL_PHASE1) << WR_LVL_PH_SEL_OFFS;
 
 					ddr3_tip_bus_write(
 						dev_num,
@@ -1338,9 +1336,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 						ACCESS_TYPE_UNICAST,
 						bus_cnt,
 						DDR_PHY_DATA,
-						WL_PHY_BASE +
-						effective_cs *
-						CS_REGISTER_ADDR_OFFSET,
+						WL_PHY_REG(effective_cs),
 						reg_data);
 				} else {
 					test_res = 1;
@@ -1376,28 +1372,28 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 	 * Copy the result from the effective CS search to the real
 	 * Functional CS
 	 */
-	/* ddr3_tip_write_cs_result(dev_num, WL_PHY_BASE); */
+	/* ddr3_tip_write_cs_result(dev_num, WL_PHY_REG(0); */
 	/* restore saved values */
 	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		/* restore Read Data Sample Delay */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      READ_DATA_SAMPLE_DELAY,
+			      RD_DATA_SMPL_DLYS_REG,
 			      read_data_sample_delay_vals[if_id],
 			      MASK_ALL_BITS));
 
 		/* restore Read Data Ready Delay */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      READ_DATA_READY_DELAY,
+			      RD_DATA_RDY_DLYS_REG,
 			      read_data_ready_delay_vals[if_id],
 			      MASK_ALL_BITS));
 
 		/* enable multi cs */
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      CS_ENABLE_REG, cs_enable_reg_val[if_id],
+			      DUAL_DUNIT_CFG_REG, cs_enable_reg_val[if_id],
 			      MASK_ALL_BITS));
 	}
 
@@ -1407,11 +1403,11 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 		 */
 		if (odt_config != 0) {
 			CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-						       SDRAM_ODT_CONTROL_HIGH_REG, 0x0, 0xf));
+						       SDRAM_ODT_CTRL_HIGH_REG, 0x0, 0xf));
 		}
 		else {
 			CHECK_STATUS(ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-						       SDRAM_ODT_CONTROL_HIGH_REG, 0xf, 0xf));
+						       SDRAM_ODT_CTRL_HIGH_REG, 0xf, 0xf));
 		}
 
 	}
@@ -1446,8 +1442,7 @@ int ddr3_tip_dynamic_write_leveling_supp(u32 dev_num)
 			CHECK_STATUS(ddr3_tip_bus_read
 				     (dev_num, if_id, ACCESS_TYPE_UNICAST,
 				      bus_id, DDR_PHY_DATA,
-				      WRITE_CENTRALIZATION_PHY_REG +
-				      effective_cs * CS_REGISTER_ADDR_OFFSET,
+				      CTX_PHY_REG(effective_cs),
 				      &data));
 			DEBUG_LEVELING(
 				DEBUG_LEVEL_TRACE,
@@ -1467,14 +1462,12 @@ int ddr3_tip_dynamic_write_leveling_supp(u32 dev_num)
 			CHECK_STATUS(ddr3_tip_bus_write
 				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
 				      ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
-				      WRITE_CENTRALIZATION_PHY_REG +
-				      effective_cs * CS_REGISTER_ADDR_OFFSET,
+				      CTX_PHY_REG(effective_cs),
 				      data + adll_offset));
 			CHECK_STATUS(ddr3_tip_bus_read
 				     (dev_num, if_id, ACCESS_TYPE_UNICAST,
 				      bus_id, DDR_PHY_DATA,
-				      WRITE_CENTRALIZATION_PHY_REG +
-				      effective_cs * CS_REGISTER_ADDR_OFFSET,
+				      CTX_PHY_REG(effective_cs),
 				      &data_tmp));
 			DEBUG_LEVELING(
 				DEBUG_LEVEL_TRACE,
@@ -1495,14 +1488,12 @@ int ddr3_tip_dynamic_write_leveling_supp(u32 dev_num)
 			CHECK_STATUS(ddr3_tip_bus_write
 				     (dev_num, ACCESS_TYPE_UNICAST, if_id,
 				      ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
-				      WRITE_CENTRALIZATION_PHY_REG +
-				      effective_cs * CS_REGISTER_ADDR_OFFSET,
+				      CTX_PHY_REG(effective_cs),
 				      data + adll_offset));
 			CHECK_STATUS(ddr3_tip_bus_read
 				     (dev_num, if_id, ACCESS_TYPE_UNICAST,
 				      bus_id, DDR_PHY_DATA,
-				      WRITE_CENTRALIZATION_PHY_REG +
-				      effective_cs * CS_REGISTER_ADDR_OFFSET,
+				      CTX_PHY_REG(effective_cs),
 				      &data_tmp));
 			DEBUG_LEVELING(
 				DEBUG_LEVEL_TRACE,
@@ -1560,8 +1551,7 @@ static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
 	/* Read current phase */
 	CHECK_STATUS(ddr3_tip_bus_read
 		     (dev_num, if_id, ACCESS_TYPE_UNICAST, bus_id,
-		      DDR_PHY_DATA, WL_PHY_BASE + effective_cs *
-		      CS_REGISTER_ADDR_OFFSET, &data));
+		      DDR_PHY_DATA, WL_PHY_REG(effective_cs), &data));
 	original_phase = (data >> 6) & 0x7;
 
 	/* Set phase (0x0[6-8]) -2 */
@@ -1573,8 +1563,7 @@ static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
 				     ((original_phase - 2) << 6);
 		ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
-				   WL_PHY_BASE + effective_cs *
-				   CS_REGISTER_ADDR_OFFSET, write_data);
+				   WL_PHY_REG(effective_cs), write_data);
 		if (ddr3_tip_xsb_compare_test
 		    (dev_num, if_id, bus_id, -2) == MV_OK)
 			return MV_OK;
@@ -1586,8 +1575,7 @@ static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
 			     ((original_phase + 2) << 6);
 		ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
-				   WL_PHY_BASE + effective_cs *
-				   CS_REGISTER_ADDR_OFFSET, write_data);
+				   WL_PHY_REG(effective_cs), write_data);
 		if (ddr3_tip_xsb_compare_test
 		    (dev_num, if_id, bus_id, 2) == MV_OK)
 			return MV_OK;
@@ -1599,8 +1587,7 @@ static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
 			     ((original_phase + 4) << 6);
 		ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
-				   WL_PHY_BASE + effective_cs *
-				   CS_REGISTER_ADDR_OFFSET, write_data);
+				   WL_PHY_REG(effective_cs), write_data);
 		if (ddr3_tip_xsb_compare_test
 		    (dev_num, if_id, bus_id, 4) == MV_OK)
 			return MV_OK;
@@ -1612,8 +1599,7 @@ static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
 			     ((original_phase + 6) << 6);
 		ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 				   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
-				   WL_PHY_BASE + effective_cs *
-				   CS_REGISTER_ADDR_OFFSET, write_data);
+				   WL_PHY_REG(effective_cs), write_data);
 		if (ddr3_tip_xsb_compare_test
 		    (dev_num, if_id, bus_id, 6) == MV_OK)
 			return MV_OK;
@@ -1622,8 +1608,7 @@ static int ddr3_tip_wl_supp_align_phase_shift(u32 dev_num, u32 if_id,
 	/* Write original WL result back */
 	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 			   ACCESS_TYPE_UNICAST, bus_id, DDR_PHY_DATA,
-			   WL_PHY_BASE + effective_cs *
-			   CS_REGISTER_ADDR_OFFSET, data);
+			   WL_PHY_REG(effective_cs), data);
 	wr_supp_res[if_id][bus_id].is_pup_fail = 1;
 
 	return MV_FAIL;
@@ -1738,25 +1723,25 @@ static int ddr3_tip_dynamic_write_leveling_seq(u32 dev_num)
 		      TRAINING_SW_2_REG, 0x1, 0x5));
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      TRAINING_WRITE_LEVELING_REG, 0x50, 0xff));
+		      TRAINING_WL_REG, 0x50, 0xff));
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      TRAINING_WRITE_LEVELING_REG, 0x5c, 0xff));
+		      TRAINING_WL_REG, 0x5c, 0xff));
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_TRAINING_CONTROL_REG, 0x381b82, 0x3c3faf));
+		      GENERAL_TRAINING_OPCODE_REG, 0x381b82, 0x3c3faf));
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_OBJ1_OPCODE_REG, (0x3 << 25), (0x3ffff << 9)));
+		      OPCODE_REG0_REG(1), (0x3 << 25), (0x3ffff << 9)));
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_OBJ1_ITER_CNT_REG, 0x80, 0xffff));
+		      OPCODE_REG1_REG(1), 0x80, 0xffff));
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_WRITE_LEVELING_DONE_CNTR_REG, 0x14, 0xff));
+		      WL_DONE_CNTR_REF_REG, 0x14, 0xff));
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      TRAINING_WRITE_LEVELING_REG, 0xff5c, 0xffff));
+		      TRAINING_WL_REG, 0xff5c, 0xffff));
 
 	/* mask PBS */
 	for (dq_id = 0; dq_id < MAX_DQ_NUM; dq_id++) {
@@ -1784,7 +1769,7 @@ static int ddr3_tip_dynamic_write_leveling_seq(u32 dev_num)
 
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      WR_LEVELING_DQS_PATTERN_REG, 0x1, 0x1));
+		      WL_DQS_PATTERN_REG, 0x1, 0x1));
 
 	return MV_OK;
 }
@@ -1958,18 +1943,18 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 	if (ddr3_if_ecc_enabled()) {
 		ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, TRAINING_SW_2_REG,
 				 &reg_val, MASK_ALL_BITS);
-		reg_mask = (TRAINING_SW_2_TRN_ECC_MUX_MASK << TRAINING_SW_2_TRN_ECC_MUX_OFFS) |
-			   (TRAINING_SW_2_TRN_SW_OVRD_MASK << TRAINING_SW_2_TRN_SW_OVRD_OFFS);
+		reg_mask = (TRAINING_ECC_MUX_MASK << TRAINING_ECC_MUX_OFFS) |
+			   (TRAINING_SW_OVRD_MASK << TRAINING_SW_OVRD_OFFS);
 		reg_val &= ~reg_mask;
-		reg_val |= (TRAINING_SW_2_TRN_ECC_MUX_DIS << TRAINING_SW_2_TRN_ECC_MUX_OFFS) |
-			   (TRAINING_SW_2_TRN_SW_OVRD_ENA << TRAINING_SW_2_TRN_SW_OVRD_OFFS);
+		reg_val |= (TRAINING_ECC_MUX_DIS << TRAINING_ECC_MUX_OFFS) |
+			   (TRAINING_SW_OVRD_ENA << TRAINING_SW_OVRD_OFFS);
 		ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, TRAINING_SW_2_REG,
 				  reg_val, MASK_ALL_BITS);
 		ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, TRAINING_REG,
 				 &reg_val, MASK_ALL_BITS);
-		reg_mask = (TRAINING_TRN_START_MASK << TRAINING_TRN_START_OFFS);
+		reg_mask = (TRN_START_MASK << TRN_START_OFFS);
 		reg_val &= ~reg_mask;
-		reg_val |= TRAINING_TRN_START_ENA << TRAINING_TRN_START_OFFS;
+		reg_val |= TRN_START_ENA << TRN_START_OFFS;
 		ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, TRAINING_REG,
 				  reg_val, MASK_ALL_BITS);
 	}
@@ -1992,7 +1977,7 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 	if_id = 0;
 	for (effective_cs = 0; effective_cs < max_cs; effective_cs++) {
 		pass_lock_num = init_pass_lock_num;
-		ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CONTROL_REG,
+		ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CTRL_REG,
 				  effective_cs << ODPG_DATA_CS_OFFS,
 				  ODPG_DATA_CS_MASK << ODPG_DATA_CS_OFFS);
 		rl_min_val[effective_cs] = MAX_RL_VALUE;
@@ -2005,14 +1990,12 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 			/* fifo out to in delay in search is constant */
 			rd_ready = rd_sample + RD_FIFO_DLY;
 
-			ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, REG_READ_DATA_SAMPLE_DELAYS_ADDR,
-					  rd_sample << (REG_READ_DATA_SAMPLE_DELAYS_OFFS * effective_cs),
-					  REG_READ_DATA_SAMPLE_DELAYS_MASK <<
-					  (REG_READ_DATA_SAMPLE_DELAYS_OFFS * effective_cs));
-			ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, REG_READ_DATA_READY_DELAYS_ADDR,
-					  rd_ready << (REG_READ_DATA_READY_DELAYS_OFFS * effective_cs),
-					  REG_READ_DATA_READY_DELAYS_MASK <<
-					  (REG_READ_DATA_READY_DELAYS_OFFS * effective_cs));
+			ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, RD_DATA_SMPL_DLYS_REG,
+					  rd_sample << RD_SMPL_DLY_CS_OFFS(effective_cs),
+					  RD_SMPL_DLY_CS_MASK << RD_SMPL_DLY_CS_OFFS(effective_cs));
+			ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, RD_DATA_RDY_DLYS_REG,
+					  rd_ready << RD_RDY_DLY_CS_OFFS(effective_cs),
+					  RD_RDY_DLY_CS_MASK << RD_RDY_DLY_CS_OFFS(effective_cs));
 
 			/* one sdr (single data rate) cycle incremented on every four phases of ddr clock */
 			sdr_cycle_incr = i % TAPS_PER_RD_SAMPLE;
@@ -2026,14 +2009,14 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 					   0, DDR_PHY_DATA, RL_PHY_REG(effective_cs), rl_val);
 
 			/* reset read fifo assertion */
-			ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, if_id, SDRAM_CONFIGURATION_REG,
-					  MV_DDR_DATA_PUP_RD_RESET_ENA << MV_DDR_DATA_PUP_RD_RESET_OFFS,
-					  MV_DDR_DATA_PUP_RD_RESET_MASK << MV_DDR_DATA_PUP_RD_RESET_OFFS);
+			ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, if_id, SDRAM_CFG_REG,
+					  DATA_PUP_RD_RESET_ENA << DATA_PUP_RD_RESET_OFFS,
+					  DATA_PUP_RD_RESET_MASK << DATA_PUP_RD_RESET_OFFS);
 
 			/* reset read fifo deassertion */
-			ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, if_id, SDRAM_CONFIGURATION_REG,
-					  MV_DDR_DATA_PUP_RD_RESET_DIS << MV_DDR_DATA_PUP_RD_RESET_OFFS,
-					  MV_DDR_DATA_PUP_RD_RESET_MASK << MV_DDR_DATA_PUP_RD_RESET_OFFS);
+			ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, if_id, SDRAM_CFG_REG,
+					  DATA_PUP_RD_RESET_DIS << DATA_PUP_RD_RESET_OFFS,
+					  DATA_PUP_RD_RESET_MASK << DATA_PUP_RD_RESET_OFFS);
 
 			/* perform one read burst */
 			if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask))
@@ -2154,14 +2137,12 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 		final_rd_sample = rd_sample;
 		final_rd_ready = rd_ready;
 
-		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, REG_READ_DATA_SAMPLE_DELAYS_ADDR,
-				  rd_sample << (REG_READ_DATA_SAMPLE_DELAYS_OFFS * effective_cs),
-				  REG_READ_DATA_SAMPLE_DELAYS_MASK <<
-				  (REG_READ_DATA_SAMPLE_DELAYS_OFFS * effective_cs));
-		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, REG_READ_DATA_READY_DELAYS_ADDR,
-				  rd_ready << (REG_READ_DATA_READY_DELAYS_OFFS * effective_cs),
-				  REG_READ_DATA_READY_DELAYS_MASK <<
-				  (REG_READ_DATA_READY_DELAYS_OFFS * effective_cs));
+		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, RD_DATA_SMPL_DLYS_REG,
+				  rd_sample << RD_SMPL_DLY_CS_OFFS(effective_cs),
+				  RD_SMPL_DLY_CS_MASK << RD_SMPL_DLY_CS_OFFS(effective_cs));
+		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, RD_DATA_RDY_DLYS_REG,
+				  rd_ready << RD_RDY_DLY_CS_OFFS(effective_cs),
+				  RD_RDY_DLY_CS_MASK << RD_RDY_DLY_CS_OFFS(effective_cs));
 		DEBUG_LEVELING(DEBUG_LEVEL_INFO,
 			       ("%s: cs %d, min phase %d, max phase %d, read sample %d\n",
 				__func__, effective_cs, min_phase, max_phase, rd_sample));
@@ -2192,14 +2173,14 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 	}
 
 	/* reset read fifo assertion */
-	ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, if_id, SDRAM_CONFIGURATION_REG,
-			  MV_DDR_DATA_PUP_RD_RESET_ENA << MV_DDR_DATA_PUP_RD_RESET_OFFS,
-			  MV_DDR_DATA_PUP_RD_RESET_MASK << MV_DDR_DATA_PUP_RD_RESET_OFFS);
+	ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, if_id, SDRAM_CFG_REG,
+			  DATA_PUP_RD_RESET_ENA << DATA_PUP_RD_RESET_OFFS,
+			  DATA_PUP_RD_RESET_MASK << DATA_PUP_RD_RESET_OFFS);
 
 	/* reset read fifo deassertion */
-	ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, if_id, SDRAM_CONFIGURATION_REG,
-			  MV_DDR_DATA_PUP_RD_RESET_DIS << MV_DDR_DATA_PUP_RD_RESET_OFFS,
-			  MV_DDR_DATA_PUP_RD_RESET_MASK << MV_DDR_DATA_PUP_RD_RESET_OFFS);
+	ddr3_tip_if_write(dev_num, ACCESS_TYPE_MULTICAST, if_id, SDRAM_CFG_REG,
+			  DATA_PUP_RD_RESET_DIS << DATA_PUP_RD_RESET_OFFS,
+			  DATA_PUP_RD_RESET_MASK << DATA_PUP_RD_RESET_OFFS);
 
 	return MV_OK;
 }

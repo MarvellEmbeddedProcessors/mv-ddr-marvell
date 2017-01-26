@@ -374,6 +374,9 @@ struct dlb_config *sys_env_dlb_config_ptr_get(void)
  */
 u32 sys_env_get_cs_ena_from_reg(void)
 {
-	return reg_read(REG_DDR3_RANK_CTRL_ADDR) &
-		REG_DDR3_RANK_CTRL_CS_ENA_MASK;
+	return reg_read(DDR3_RANK_CTRL_REG) &
+		((CS_EXIST_MASK << CS_EXIST_OFFS(0)) |
+		 (CS_EXIST_MASK << CS_EXIST_OFFS(1)) |
+		 (CS_EXIST_MASK << CS_EXIST_OFFS(2)) |
+		 (CS_EXIST_MASK << CS_EXIST_OFFS(3)));
 }

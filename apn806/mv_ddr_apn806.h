@@ -98,7 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_AP806_H
 #define _MV_DDR_AP806_H
 
-#include "mv_ddr_mc6_drv.h"
+#include "mv_ddr_mc6.h"
 
 #define INTER_REGS_BASE	0xf0000000
 /* revision id register address */
@@ -176,23 +176,6 @@ enum{
 #define RING_CLK_VAL				0
 
 /* FIXME: locate the definition in mc6 driver file when generated */
-#define REG_CH0_PHY_RL_CTRL_OFFS	0x1180
-#define REG_CH0_PHY_RL_CTRL_ADDR(cs)	(MC6_BASE_ADDR + REG_CH0_PHY_RL_CTRL_OFFS + (cs * 36))
-#define PHY_RL_CYCLE_DLY_MC6_OFFS	8
-#define PHY_RL_CYCLE_DLY_MC6_MASK	0xf
-
-#define REG_PHY_CONTROL_1_ADDR		(MC6_BASE_ADDR + 0x1000)
-#define PHY_RFIFO_RPTR_DLY_VAL_OFFS	4
-#define PHY_RFIFO_RPTR_DLY_VAL_MASK	0xf
-
-#define REG_RDP_CONTROL_ADDR		(MC6_BASE_ADDR + 0x64)
-#define MB_READ_DATA_LATENCY_CH0_OFFS	0
-#define MB_READ_DATA_LATENCY_CH0_MASK	0x3f
-
-#define MC6_REG_USER_CMD0		(MC6_BASE_ADDR + 0x20)
-#define MC6_USER_CS_OFFS		24
-#define MC6_USER_CS_MASK		0xf
-
 #define CPU_2000_DDR_1200_RCLK_1200	0x0
 #define CPU_2000_DDR_1050_RCLK_1050	0x1
 #define CPU_1600_DDR_800_RCLK_800	0x4

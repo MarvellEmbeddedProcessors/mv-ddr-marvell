@@ -126,17 +126,17 @@ int ddr3_tip_bist_activate(u32 dev_num, enum hws_pattern pattern,
 
 	/* ODPG Write enable from BIST */
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_num,
-				       ODPG_DATA_CONTROL_REG, 0x1, 0x1));
+				       ODPG_DATA_CTRL_REG, 0x1, 0x1));
 	/* ODPG Read enable/disable from BIST */
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_num,
-				       ODPG_DATA_CONTROL_REG,
+				       ODPG_DATA_CTRL_REG,
 				       (direction == OPER_READ) ?
 				       0x2 : 0, 0x2));
 	CHECK_STATUS(ddr3_tip_load_pattern_to_odpg(dev_num, access_type, if_num,
 						   pattern, offset));
 
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_num,
-				       ODPG_DATA_BUF_SIZE_REG,
+				       ODPG_DATA_BUFFER_SIZE_REG,
 				       pattern_addr_length, MASK_ALL_BITS));
 	tx_burst_size = (direction == OPER_WRITE) ?
 		pattern_table[pattern].tx_burst_size : 0;
@@ -149,7 +149,7 @@ int ddr3_tip_bist_activate(u32 dev_num, enum hws_pattern pattern,
 		      delay_between_burst,
 		      rd_mode, cs_num, addr_stress_jump, duration));
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_num,
-				       ODPG_PATTERN_ADDR_OFFSET_REG,
+				       ODPG_DATA_BUFFER_OFFS_REG,
 				       offset, MASK_ALL_BITS));
 	if (oper_type == BIST_STOP) {
 		CHECK_STATUS(ddr3_tip_bist_operation(dev_num, access_type,
@@ -215,7 +215,7 @@ int ddr3_tip_bist_activate(u32 dev_num, enum hws_pattern pattern,
 						     (dev_num,
 						      ACCESS_TYPE_UNICAST,
 						      if_num,
-						      ODPG_DATA_CONTROL_REG, 0,
+						      ODPG_DATA_CTRL_REG, 0,
 						      MASK_ALL_BITS));
 					return MV_FAIL;
 				}
@@ -227,7 +227,7 @@ int ddr3_tip_bist_activate(u32 dev_num, enum hws_pattern pattern,
 	}
 
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_num,
-				       ODPG_DATA_CONTROL_REG, 0,
+				       ODPG_DATA_CTRL_REG, 0,
 				       MASK_ALL_BITS));
 
 	return MV_OK;
@@ -249,26 +249,26 @@ int ddr3_tip_bist_read_result(u32 dev_num, u32 if_id,
 				   ("ddr3_tip_bist_read_result if_id %d\n",
 				    if_id));
 	ret = ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id,
-			       ODPG_BIST_FAILED_DATA_HI_REG, read_data,
+			       ODPG_DATA_RX_WORD_ERR_DATA_HIGH_REG, read_data,
 			       MASK_ALL_BITS);
 	if (ret != MV_OK)
 		return ret;
 	pst_bist_result->bist_fail_high = read_data[if_id];
 	ret = ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id,
-			       ODPG_BIST_FAILED_DATA_LOW_REG, read_data,
+			       ODPG_DATA_RX_WORD_ERR_DATA_LOW_REG, read_data,
 			       MASK_ALL_BITS);
 	if (ret != MV_OK)
 		return ret;
 	pst_bist_result->bist_fail_low = read_data[if_id];
 
 	ret = ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id,
-			       ODPG_BIST_LAST_FAIL_ADDR_REG, read_data,
+			       ODPG_DATA_RX_WORD_ERR_ADDR_REG, read_data,
 			       MASK_ALL_BITS);
 	if (ret != MV_OK)
 		return ret;
 	pst_bist_result->bist_last_fail_addr = read_data[if_id];
 	ret = ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id,
-			       ODPG_BIST_DATA_ERROR_COUNTER_REG, read_data,
+			       ODPG_DATA_RX_WORD_ERR_CNTR_REG, read_data,
 			       MASK_ALL_BITS);
 	if (ret != MV_OK)
 		return ret;
@@ -339,7 +339,7 @@ static int ddr3_tip_bist_operation(u32 dev_num,
 						       ODPG_BIST_DONE, 1 << 8, 1 << 8));
 		} else {
 			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-						       ODPG_DATA_CONTROL_REG,
+						       ODPG_DATA_CTRL_REG,
 						       (u32)(1 << 30), (u32)(0x3 << 30)));
 		}
 	} else {
@@ -348,7 +348,7 @@ static int ddr3_tip_bist_operation(u32 dev_num,
 						       ODPG_BIST_DONE, 1, 1));
 		} else {
 			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-						       ODPG_DATA_CONTROL_REG,
+						       ODPG_DATA_CTRL_REG,
 						       (u32)(1 << 31), (u32)(0x1 << 31)));
 		}
 	}
