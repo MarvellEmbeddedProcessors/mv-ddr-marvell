@@ -98,10 +98,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_init.h"
 #include "mv_ddr_xor_v2.h"
 
-#if defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC)
-#include "mv_ddr_apn806_static.h"
-#endif
-
 #define DDR_INTERFACES_NUM		1
 #define DDR_INTERFACE_OCTETS_NUM	9
 
@@ -1086,10 +1082,6 @@ void mv_ddr_mc_config(void)
 	status = mv_ddr_mc6_init_controller();
 	if (MV_OK != status)
 		printf("mv_ddr %s: failed: err code 0x%x\n", __FUNCTION__, status);
-
-	status = mv_ddr_mc_init();
-	if (MV_OK != status)
-		printf("mv_ddr %s: failed: err code 0x%x\n", __FUNCTION__, status);
 }
 
 /* FIXME: this is a place holder for the mc6 generic init currently hard coded */
@@ -1360,73 +1352,6 @@ int ddr3_tip_configure_phy(u32 dev_num)
 
 	return MV_OK;
 }
-
-#ifdef CONFIG_MC_STATIC
-static void ddr_static_config(void)
-{
-	struct mk6_reg_data *reg_data = ddr_static_setup;
-
-	for (; reg_data->offset != -1; reg_data++)
-		mmio_write_32(reg_data->offset, reg_data->value);
-}
-
-int mv_ddr_mc_static_config(void)
-{
-	ddr_static_config();
-/* FIXME: remove this configuration which is needed because
- * running over the static parameters when calling the timing function
- * during the DFS algorithm
- * add the two registers to the static configuration
- * these registers initialize the dunit and the mc6
- */
-	reg_write(0x11480, 0x1);
-	reg_write(0x20020, 0x13000001);
-
-	mdelay(10);
-
-	return MV_OK;
-}
-#endif /* CONFIG_MC_STATIC */
-
-#ifdef CONFIG_PHY_STATIC
-static int mv_ddr_apn806_phy_static_config(u32 if_id, u32 subphys_num, enum hws_ddr_phy subphy_type)
-{
-#if 0
-	u32 i, mode, subphy_id, dev_num = 0;
-
-	mode = ddr3_get_static_ddr_mode();
-	if (subphy_type == DDR_PHY_DATA) {
-		for (subphy_id = 0; subphy_id < subphys_num; subphy_id++) {
-			i = 0;
-			while (ddr_modes[mode].data_phy_regs[i].reg_addr != 0xffffffff) {
-				ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ACCESS_TYPE_UNICAST,
-							subphy_id, subphy_type, ddr_modes[mode].data_phy_regs[i].reg_addr,
-							ddr_modes[mode].data_phy_regs[i].reg_data[subphy_id]);
-				i++;
-			}
-		}
-	} else {
-		for (subphy_id = 0; subphy_id < subphys_num; subphy_id++) {
-			i = 0;
-			while (ddr_modes[mode].ctrl_phy_regs[i].reg_addr != 0xffffffff) {
-				ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ACCESS_TYPE_UNICAST,
-							subphy_id, subphy_type, ddr_modes[mode].ctrl_phy_regs[i].reg_addr,
-							ddr_modes[mode].ctrl_phy_regs[i].reg_data[subphy_id]);
-				i++;
-			}
-		}
-	}
-#endif
-	return MV_OK;
-}
-
-void mv_ddr_phy_static_config(void)
-{
-	/* TODO: Need to use variable for subphys number */
-	mv_ddr_apn806_phy_static_config(0, 4, DDR_PHY_DATA);
-	mv_ddr_apn806_phy_static_config(0, 3, DDR_PHY_CONTROL);
-}
-#endif /* CONFIG_PHY_STATIC */
 
 /*
  * TODO: dq to pad mapping detection code to be relocated

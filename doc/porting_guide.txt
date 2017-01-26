@@ -216,3 +216,39 @@ Porting procedure
 	in order to apply one of the options change to the wanted option and compile
 
 6. Compiler options
+
+7. Static configuration options
+	The current static PHY and MC configuration options are available
+	for APN806, A80x0 project with single chip select.
+
+	This functionality is controlled statically through mv_ddr Makefile:
+	- "CFLAGS += -DCONFIG_MC_STATIC" line enables MC static configuration,
+	- "CFLAGS += -DCONFIG_MC_STATIC_PRINT" line prints out MC configuration,
+	- "CFLAGS += -DCONFIG_PHY_STATIC" line enables PHY static configuration,
+	- "CFLAGS += -DCONFIG_PHY_STATIC_PRINT" line prints PHY configuration.
+	All these options may be enabled either separately or together.
+
+	The CONFIG_*_STATIC_PRINT option(s) prints out appropriate C-code of MC and/or PHY
+	static configuration to be inserted "as is" into corresponding mv_ddr_static.c
+	file to enable further functionality of CONFIG_*_STATIC option(s).
+
+	Customization of these static configurations is as follows:
+	- Update the following arrays of the lists of registers:
+		- MC:
+			dunit_regs_list,
+			mc6_regs_list.
+		- PHY:
+			data_phy_regs_list,
+			ctrl_phy_regs_list,
+			dunit_4phy_regs_list,
+			mc6_4phy_regs_list.
+	- Update the size of the mentioned arrays using their corresponding defines:
+		-MC:
+			DUNIT_REGS_NUM,
+			MC6_REGS_NUM.
+		-PHY:
+			DATA_PHY_REGS_NUM,
+			CTRL_PHY_REGS_NUM,
+			DUNIT_4PHY_REGS_NUM,
+			MC6_4PHY_REGS_NUM.
+	- Use the "print" option(s) to generate an appropriate static configuration.

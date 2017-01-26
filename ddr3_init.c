@@ -163,14 +163,19 @@ int ddr3_init(void)
 	if (MV_OK != status)
 		return status;
 
-#ifdef MV_DDR_ATF
+#if defined(MV_DDR_ATF)
 	mv_ddr_dram_config_update();
 #endif /* MV_DDR_ATF */
 
-#ifdef CONFIG_MC_STATIC
+#if defined(CONFIG_MC_STATIC)
 	mv_ddr_mc_static_config();
 #else
 	mv_ddr_mc_config();
+#endif
+
+	mv_ddr_mc_init();
+
+#if !defined(CONFIG_MC_STATIC)
 #if defined(CONFIG_DDR4)
 	status = mv_ddr4_calibration_adjust(0, 1, 0);
 	if (MV_OK != status) {
@@ -180,13 +185,17 @@ int ddr3_init(void)
 #endif
 #endif
 
+#if defined(CONFIG_MC_STATIC_PRINT)
+	mv_ddr_mc_static_print();
+#endif
+
 	status = ddr3_silicon_post_init();
 	if (MV_OK != status) {
 		printf("DDR3 Post Init - FAILED 0x%x\n", status);
 		return status;
 	}
 
-#ifdef CONFIG_PHY_STATIC
+#if defined(CONFIG_PHY_STATIC)
 	mv_ddr_phy_static_config();
 #else
 	/* PHY initialization (Training) */
@@ -196,6 +205,11 @@ int ddr3_init(void)
 		return status;
 	}
 #endif
+
+#if defined(CONFIG_PHY_STATIC_PRINT)
+	mv_ddr_phy_static_print();
+#endif
+
 	/* Post MC/PHY initializations */
 	mv_ddr_post_training_soc_config(ddr_type);
 

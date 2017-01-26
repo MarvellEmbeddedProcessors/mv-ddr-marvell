@@ -1,5 +1,5 @@
 /*******************************************************************************
-Copyright (C) 2016 Marvell International Ltd.
+Copyright (C) 2017 Marvell International Ltd.
 
 This software file (the "File") is owned and distributed by Marvell
 International Ltd. and/or its affiliates ("Marvell") under the following
@@ -95,23 +95,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#ifndef _MV_DDR_AP806_INIT_H
-#define _MV_DDR_AP806_INIT_H
+#ifndef _MV_DDR_STATIC_H
+#define _MV_DDR_STATIC_H
 
-#include "ddr3_topology_def.h"
-#include "ddr3_training_ip.h"
-#include "ddr3_training_ip_prv_if.h"
-
-/* MARVELL U-BOOT 20013.01 & ATF SUPPORT */
-#if defined(MV_DDR) || defined(MV_DDR_ATF)
-#include "sys_env_lib.h"
-/* U-BOOT SPL SUPPORT */
-#else
-/* TODO: no support in SPL */
+#ifdef CONFIG_MC_STATIC
+int mv_ddr_mc_static_config(void);
 #endif
 
-#include "mv_ddr_apn806.h"
-#include "mv_ddr_apn806_topology.h"
-#include "mv_ddr_static.h"
+#ifdef CONFIG_MC_STATIC_PRINT
+int mv_ddr_mc_static_print(void);
+#endif
 
-#endif /* _MV_DDR_AP806_INIT_H */
+#ifdef CONFIG_PHY_STATIC
+int mv_ddr_phy_static_config(void);
+#endif
+
+#ifdef CONFIG_PHY_STATIC_PRINT
+int mv_ddr_phy_static_print(void);
+#endif
+
+#endif /* _MV_DDR_STATIC_H */

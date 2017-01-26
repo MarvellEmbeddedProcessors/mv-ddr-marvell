@@ -2682,13 +2682,6 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 		reg_write(0x6f812c, extension_avs);
 		reg_write(0x6f8130, nominal_avs);
 	}
-#if defined(CONFIG_MC_STATIC)
-		/* FIXME: remove this configuration
-		 * this is a patch due to the DFS algorithm
-		 * which override the static parameters
-		 */
-		mv_ddr_mc_static_config();
-#endif	/* CONFIG_MC_STATIC */
 #endif /* #if defined(a70x0) || defined(a70x0_cust) || defined(a7040_pcac) || defined(a80x0) || defined(a80x0_cust) */
 		if (is_reg_dump != 0)
 			ddr3_tip_reg_dump(dev_num);

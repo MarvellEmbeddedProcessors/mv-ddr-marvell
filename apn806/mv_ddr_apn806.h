@@ -388,13 +388,6 @@ int mv_ddr_pre_training_soc_config(const char *ddr_type);
 int mv_ddr_post_training_soc_config(const char *ddr_type);
 int mv_ddr_mc6_init_controller(void);	/* FIXME: remove to mc6 driver when implemented */
 
-#ifdef CONFIG_MC_STATIC
-int mv_ddr_mc_static_config(void);
-#endif /* CONFIG_MC_STATIC */
-
-#ifdef CONFIG_PHY_STATIC
-void mv_ddr_phy_static_config(void);
-#endif /* CONFIG_PHY_STATIC */
 /*
  * TODO: dq to pad mapping detection code to be relocated
  * to the generic part of mv_ddr code.
