@@ -677,7 +677,7 @@ static int prda_write(enum hws_access_type phy_access, u32 phy,
 			reg_addr |= (PRDA_PUP_CTRL_BCAST << PRDA_PUP_NUM_OFFS);
 	} else { /* unicast access type */
 		reg_addr |= ((phy & PRDA_PUP_NUM_MASK) << PRDA_PUP_NUM_OFFS);
-		reg_addr |= ((phy_access & PRDA_PUP_CTRL_DATA_MASK) <<
+		reg_addr |= ((phy_type & PRDA_PUP_CTRL_DATA_MASK) <<
 			     PRDA_PUP_CTRL_DATA_OFFS);
 	}
 
@@ -700,7 +700,7 @@ static int prda_read(enum hws_access_type phy_access, u32 phy,
 		for (i = 0; i < max_phy; i++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, i);
 			reg_addr |= ((i & PRDA_PUP_NUM_MASK) << PRDA_PUP_NUM_OFFS);
-			reg_addr |= ((phy_access & PRDA_PUP_CTRL_DATA_MASK) <<
+			reg_addr |= ((phy_type & PRDA_PUP_CTRL_DATA_MASK) <<
 				     PRDA_PUP_CTRL_DATA_OFFS);
 			dunit_read(reg_addr, MASK_ALL_BITS, &reg_val);
 			data[i] = (reg_val >> PRDA_DATA_OFFS) & PRDA_DATA_MASK;
@@ -709,7 +709,7 @@ static int prda_read(enum hws_access_type phy_access, u32 phy,
 		}
 	} else { /* unicast type access */
 		reg_addr |= ((phy & PRDA_PUP_NUM_MASK) << PRDA_PUP_NUM_OFFS);
-		reg_addr |= ((phy_access & PRDA_PUP_CTRL_DATA_MASK) <<
+		reg_addr |= ((phy_type & PRDA_PUP_CTRL_DATA_MASK) <<
 			     PRDA_PUP_CTRL_DATA_OFFS);
 		dunit_read(reg_addr, MASK_ALL_BITS, &reg_val);
 		*data = (reg_val >> PRDA_DATA_OFFS) & PRDA_DATA_MASK;
