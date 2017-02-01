@@ -1140,7 +1140,7 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 			  ("ddr4TipCalibrationValidate::DDR4 SSTL calib val - Pcal = 0x%x , Ncal = 0x%x\n",
 			   cal_p, cal_n));
-	if ((cal_n >= 16) || (cal_n <= 3) || (cal_p >= 17) || (cal_p <= 4)) {
+	if ((cal_n >= 19) || (cal_n <= 2) || (cal_p >= 25) || (cal_p <= 4)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr: manual calibration\n"));
 				/* ("ddr4TipCalibrationValidate: DDR4 SSTL calib val - Pcal = 0x%x , Ncal = 0x%x \
 				   are out of range\n", cal_p, cal_n)); */
@@ -1153,7 +1153,7 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO, ("ddr4TipCalibrationValidate::DDR4 SSTL-H calib val - Pcal = 0x%x, \
 					     Ncal = 0x%x \n", cal_p, cal_n));
-	if ((cal_n >= 16) || (cal_n <= 3) || (cal_p >= 17) || (cal_p <= 4)) {
+	if ((cal_n >= 19) || (cal_n <= 2) || (cal_p >= 25) || (cal_p <= 4)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr: manual calibration\n"));
 				/* ("ddr4TipCalibrationValidate: DDR4 SSTL-H calib val - Pcal = 0x%x, \
 				   Ncal = 0x%x are out of range\n", cal_p, cal_n)); */
@@ -1167,7 +1167,7 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 			  ("ddr4TipCalibrationValidate::DDR4 POD-H calib val - Pcal = 0x%x , Ncal = 0x%x\n",
 			   cal_p, cal_n));
-	if ((cal_n >= 28) || (cal_n <= 4) || (cal_p >= 13) || (cal_p <= 3)) {
+	if ((cal_n >= 32) || (cal_n <= 4) || (cal_p >= 17) || (cal_p <= 3)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr: manual calibration\n"));
 				/* ("ddr4TipCalibrationValidate: DDR4 POD-H calib val - Pcal = 0x%x , \
 				   Ncal = 0x%x are out of range\n", cal_p, cal_n)); */
@@ -1181,7 +1181,7 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 			  ("ddr4TipCalibrationValidate::DDR4 POD-V calib val - Pcal = 0x%x , Ncal = 0x%x\n",
 			   cal_p, cal_n));
-	if ((cal_n >= 28) || (cal_n <= 4) || (cal_p >= 13) || (cal_p <= 3)) {
+	if ((cal_n >= 32) || (cal_n <= 4) || (cal_p >= 17) || (cal_p <= 3)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr: manual calibration\n"));
 				/* ("ddr4TipCalibrationValidate: DDR4 POD-V calib val - Pcal = 0x%x , \
 				   Ncal = 0x%x are out of range\n", cal_p, cal_n)); */
@@ -1190,21 +1190,24 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 
 	/* FIXME: in case calibration failure set static calibration values, remove this in next release (A0 only) */
 	if (status == MV_FAIL) {
-		status = MV_OK;
+		int rev_id = apn806_rev_id_get();
+		if (rev_id == APN806_REV_ID_A0) {
+			status = MV_OK;
 #if defined(a70x0) || defined(a70x0_cust) || defined(a7040_pcac)
-		reg_write(0x114CC, 0x1200D);
-		reg_write(0x114C8, 0x1840008);
-		reg_write(0x117C8, 0x28A0008);
-		reg_write(0x11DC8, 0x1840008);
-		reg_write(0x11EC8, 0x28A0008);
+			reg_write(0x114CC, 0x1200D);
+			reg_write(0x114C8, 0x1840008);
+			reg_write(0x117C8, 0x28A0008);
+			reg_write(0x11DC8, 0x1840008);
+			reg_write(0x11EC8, 0x28A0008);
 #endif
 #if defined(a80x0) || defined(a80x0_cust)
-		reg_write(0x114CC, 0x1200D);
-		reg_write(0x114C8, 0x1840008);
-		reg_write(0x117C8, 0x28A0008);
-		reg_write(0x11DC8, 0x1840008);
-		reg_write(0x11EC8, 0x28A0008);
+			reg_write(0x114CC, 0x1200D);
+			reg_write(0x114C8, 0x1840008);
+			reg_write(0x117C8, 0x28A0008);
+			reg_write(0x11DC8, 0x1840008);
+			reg_write(0x11EC8, 0x28A0008);
 #endif
+		}
 	}
 
 	return status;
