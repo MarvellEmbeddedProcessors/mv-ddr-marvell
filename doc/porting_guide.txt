@@ -1,10 +1,23 @@
-DDR Code Porting Guide
-======================
+DDR Porting Guide
+=================
+
+This document provides instructions for porting Marvell mv_ddr package to a customer's board.
+
+Relevant Devices
+----------------
+	- Armada-80x0
+	- Armada-70x0
+	- Armada-38x
+
+Introduction
+------------
 This section describes a set of input parameters (a porting layer) for the DDR code.
 These input parameters include a DDR system topology, electrical, and timing parameters.
 The DDR code is responsible for taking these inputs, tuning timing and electrical parameters,
 and configuring the DDR memory controller and the PHY for reliable operation of the DDR system.
 
+Porting procedure
+-----------------
 1. Files location:
 	- Please refer to atf/docs/marvell/porting.txt for detailed description for ATF files location.
 
