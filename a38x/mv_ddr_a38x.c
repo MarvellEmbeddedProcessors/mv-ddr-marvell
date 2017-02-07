@@ -1223,7 +1223,7 @@ static float ddr3_get_device_size(u32 cs)
 	}
 }
 
-static int ddr3_calc_mem_cs_size(u32 cs, u32 *cs_size)
+static int ddr3_calc_mem_cs_size(u32 cs, long long *cs_size)
 {
 	float cs_mem_size;
 
@@ -1249,6 +1249,8 @@ static int ddr3_calc_mem_cs_size(u32 cs, u32 *cs_size)
 		*cs_size = 1 << 30;
 	} else if (cs_mem_size == 2) {
 		*cs_size = 2 << 30;
+	} else if (cs_mem_size == 4) {
+		*cs_size = 4 << 30;
 	} else {
 		DEBUG_INIT_C("Error: Wrong Memory size of Cs: ", cs, 1);
 		return MV_BAD_VALUE;
@@ -1261,8 +1263,8 @@ static int ddr3_fast_path_dynamic_cs_size_config(u32 cs_ena)
 {
 	u32 reg, cs;
 	u32 mem_total_size = 0;
-	u32 cs_mem_size = 0;
-	u32 mem_total_size_c, cs_mem_size_c;
+	long long cs_mem_size = 0;
+	long long mem_total_size_c, cs_mem_size_c;
 
 #ifdef DEVICE_MAX_DRAM_ADDRESS_SIZE
 	u32 physical_mem_size;
