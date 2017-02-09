@@ -185,6 +185,7 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num)
 	static u8 vref_byte_status[MAX_INTERFACE_NUM][MAX_BUS_NUM][MV_DDR4_VREF_MAX_RANGE];
 
 	DEBUG_CALIBRATION(DEBUG_LEVEL_INFO, ("Starting ddr4 dq vref calibration training stage\n"));
+
 	vdq_tv = 0;
 	duty_cycle = 0;
 
@@ -295,16 +296,20 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num)
 	/* close vref range */
 	mv_ddr4_vref_tap_set(dev_num, 0, ACCESS_TYPE_MULTICAST, vref_tap_idx, MV_DDR4_VREF_TAP_END);
 
-	/* find out the results with the mixed and low states and move the low state 64 adlls */
+	/*
+	 * find out the results with the mixed and low states and move the low state 64 adlls in case
+	 * the center of the ui is smaller than 31
+	 */
 	for (vref_idx = 0; vref_idx < MV_DDR4_VREF_MAX_RANGE; vref_idx++) {
 		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			for (subphy_num = 0; subphy_num < subphy_max; subphy_num++) {
 				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy_num);
-				if ((vref_byte_status[if_id][subphy_num][vref_idx]) &
+				if (((vref_byte_status[if_id][subphy_num][vref_idx]) &
+				    (BYTE_HOMOGENEOUS_LOW | BYTE_SPLIT_OUT_MIX)) ==
 				    (BYTE_HOMOGENEOUS_LOW | BYTE_SPLIT_OUT_MIX)) {
-					if (dq_vref_start_win[if_id][subphy_num][vref_idx] <= 31 &&
-					    dq_vref_end_win[if_id][subphy_num][vref_idx] <= 31) {
+					if ((dq_vref_start_win[if_id][subphy_num][vref_idx] +
+					    dq_vref_end_win[if_id][subphy_num][vref_idx]) / 2 <= 31) {
 						dq_vref_start_win[if_id][subphy_num][vref_idx] += 64;
 						dq_vref_end_win[if_id][subphy_num][vref_idx] += 64;
 						DEBUG_CALIBRATION
@@ -592,7 +597,7 @@ static int mv_ddr4_centralization(u8 dev_num, u16 (*lambda)[MAX_BUS_NUM][BUS_WID
 								64;
 							end_win_db[pattern_loop_idx][if_id][subphy_num][bit_num] += 64;
 							DEBUG_DDR4_CENTRALIZATION
-								(DEBUG_LEVEL_TRACE,
+								(DEBUG_LEVEL_INFO,
 								 ("%s %s pattern %d if %d subphy %d bit %d added 64 "
 								 "adll\n",
 								 __func__, str_dir[mode], pattern_id, if_id,
@@ -632,16 +637,16 @@ static int mv_ddr4_centralization(u8 dev_num, u16 (*lambda)[MAX_BUS_NUM][BUS_WID
 				subphy_start_win[mode][if_id][subphy_num] =
 					GET_MAX(subphy_start_win[mode][if_id][subphy_num], curr_start_win_max);
 				DEBUG_DDR4_CENTRALIZATION
-					(DEBUG_LEVEL_INFO,
+					(DEBUG_LEVEL_TRACE,
 					 ("%s, %s pat %d if %d subphy %d opt_win %d ",
 					 __func__, str_dir[mode], pattern_id, if_id, subphy_num, opt_win));
 				DEBUG_DDR4_CENTRALIZATION
-					(DEBUG_LEVEL_INFO,
+					(DEBUG_LEVEL_TRACE,
 					 ("final_subphy_win %d waste_win %d "
 					 "start_win_skew %d end_win_skew %d ",
 					 final_subphy_win[if_id][subphy_num],
 					 waste_win, start_win_skew, end_win_skew));
-				DEBUG_DDR4_CENTRALIZATION(DEBUG_LEVEL_INFO,
+				DEBUG_DDR4_CENTRALIZATION(DEBUG_LEVEL_TRACE,
 					("curr_start_win_max %d curr_end_win_min %d "
 					"subphy_start_win %d subphy_end_win %d\n",
 					curr_start_win_max, curr_end_win_min,
@@ -649,7 +654,7 @@ static int mv_ddr4_centralization(u8 dev_num, u16 (*lambda)[MAX_BUS_NUM][BUS_WID
 					subphy_end_win[mode][if_id][subphy_num]));
 
 				/* valid window */
-				DEBUG_DDR4_CENTRALIZATION(DEBUG_LEVEL_INFO,
+				DEBUG_DDR4_CENTRALIZATION(DEBUG_LEVEL_TRACE,
 					("valid window, pat %d if %d subphy %d\n",
 					pattern_id, if_id, subphy_num));
 				for (bit_num = 0; bit_num < BUS_WIDTH_IN_BITS; bit_num++) {
@@ -691,6 +696,16 @@ static int mv_ddr4_centralization(u8 dev_num, u16 (*lambda)[MAX_BUS_NUM][BUS_WID
 							  final_end_win[if_id][subphy_num],
 							  pbs_result[if_id][subphy_num],
 							  &copt[if_id][subphy_num]);
+
+				/*
+				 * after copt the adll is moved to smaller value due to pbs compensation
+				 * so the byte status might change, here we change the byte status to be
+				 * homogeneous low in case the center of the ui after copt is moved below
+				 * 31 adlls
+				 */
+				if(copt[if_id][subphy_num] <= 31)
+					patterns_byte_status[if_id][subphy_num] = BYTE_HOMOGENEOUS_LOW;
+
 				DEBUG_DDR4_CENTRALIZATION
 					(DEBUG_LEVEL_INFO,
 					 ("%s %s if %d subphy %d copt %d\n",
@@ -830,9 +845,12 @@ static int mv_ddr4_copt_get(u8 dir, u16 *lambda, u8 *vw_l, u8 *vw_h, u8 *pbs_res
 						      (0.5 * vw_per_dq[dq_idx] + vw_per_dq[dq_idx] % 2);
 			} else {
 				vw_zone_low[dq_idx] = 0;
-				DEBUG_CALIBRATION(DEBUG_LEVEL_TRACE,
+				DEBUG_CALIBRATION(DEBUG_LEVEL_INFO,
 						  ("dq_idx %d, center zone low %d, vw_l %d, vw_l %d\n",
 						   dq_idx, center_zone_low[dq_idx], vw_l[dq_idx], vw_h[dq_idx]));
+				DEBUG_CALIBRATION(DEBUG_LEVEL_INFO,
+						  ("vw_l[%d], vw_lh[%d], lambda[%d]\n",
+						   vw_l[dq_idx], vw_h[dq_idx], lambda[dq_idx]));
 			}
 
 			vw_zone_high[dq_idx] = center_zone_high[dq_idx] + 0.5 * vw_per_dq[dq_idx];
@@ -1042,7 +1060,7 @@ static int mv_ddr4_center_of_mass_calc(u8 dev_num, u8 if_id, u8 subphy_num, u8 m
 		edge_v[vw_num * 2 - 1 - idx] = vw_v[idx];
 		vw_avg += vw_h[idx] - vw_l[idx];
 		v_avg += vw_v[idx];
-		DEBUG_CALIBRATION(DEBUG_LEVEL_TRACE,
+		DEBUG_CALIBRATION(DEBUG_LEVEL_INFO,
 				  ("%s: if %d, byte %d, direction %d, vw_v %d, vw_l %d, vw_h %d\n",
 				   __func__, if_id, subphy_num, mode, vw_v[idx], vw_l[idx], vw_h[idx]));
 	}
@@ -1194,6 +1212,7 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 	int wl_tap, new_wl_tap;
 	int pbs_tap_factor_avg;
 	int dqs_shift[MAX_BUS_NUM]; /* dqs' pbs delay */
+	DEBUG_TAP_TUNING_ENGINE(DEBUG_LEVEL_INFO, ("Starting ddr4 tap tuning training stage\n"));
 
 	for (i = 0; i < MAX_BUS_NUM; i++)
 		dqs_shift[i] = DQS_SHIFT_INIT_VAL;
