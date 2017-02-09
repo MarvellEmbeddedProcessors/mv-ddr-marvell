@@ -19,7 +19,8 @@ and configuring the DDR memory controller and the PHY for reliable operation of 
 Porting procedure
 -----------------
 1. Files location:
-	- Please refer to atf/docs/marvell/porting.txt for detailed description for ATF files location.
+	- for A7/8K, please refer to atf/docs/marvell/porting.txt for detailed description for ATF files location.
+	- for A38x, please update a38x/mv_ddr_a38x_brd.c
 
 2. DDR topology map description:
 	- The definition of DDR topology structure is given at "<mv_ddr>/ddr_topology_def.h" file:
