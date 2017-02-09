@@ -130,7 +130,7 @@ static u8 mv_ddr4_xsb_comp_test(u32 dev_num, u32 subphy_num, u32 if_id,
 	 *	0xffffffffffffffff};
 	 */
 	u32 read_pattern[MV_DDR4_XSB_COMP_PATTERNS_NUM];
-	u32 pattern_test_table[MV_DDR4_XSB_COMP_PATTERNS_NUM] = {
+	/*u32 pattern_test_table[MV_DDR4_XSB_COMP_PATTERNS_NUM] = {
 		0xffffffff,
 		0xffffffff,
 		0x00000000,
@@ -138,7 +138,7 @@ static u8 mv_ddr4_xsb_comp_test(u32 dev_num, u32 subphy_num, u32 if_id,
 		0x00000000,
 		0x00000000,
 		0xffffffff,
-		0xffffffff}; /* TODO: use pattern_table_get_word */
+		0xffffffff};	TODO: use pattern_table_get_word */
 	int i, status;
 	uint64_t data64;
 	uintptr_t addr64;
@@ -181,18 +181,27 @@ static u8 mv_ddr4_xsb_comp_test(u32 dev_num, u32 subphy_num, u32 if_id,
 		if (status != MV_OK)
 			return status;
 
-		status = ddr3_tip_ext_write(dev_num, if_id,
-					    pattern_table[PATTERN_TEST].start_addr,
-					    1, pattern_test_table);
-		if (status != MV_OK)
-			return status;
+		/*
+		 * FIXME: changed the load pattern to memory through the odpg
+		 * this change is needed to be validate
+		 * this change is done due to un calibrated dm at this stage
+		 * the below code is the code for loading the pattern directly
+		 * to the memory
+		 */
+		int j;
+		for (j = 0; j < 2; j++)
+			ddr3_tip_load_pattern_to_mem(dev_num, PATTERN_TEST);
 	} else {
-		status = ddr3_tip_ext_write(dev_num, if_id,
-					    (pattern_table[PATTERN_TEST].start_addr +
-					    ((SDRAM_CS_SIZE + 1)  * effective_cs)),
-					    1, pattern_test_table);
-		if (status != MV_OK)
-			return status;
+		/*
+		 * FIXME: changed the load pattern to memory through the odpg
+		 * this change is needed to be validate
+		 * this change is done due to un calibrated dm at this stage
+		 * the below code is the code for loading the pattern directly
+		 * to the memory
+		 */
+		int j;
+		for (j = 0; j < 2; j++)
+			ddr3_tip_load_pattern_to_mem(dev_num, PATTERN_TEST);
 	}
 
 	if ((ecc_mode == WRITE_LEVELING_SUPP_ECC_MODE_ECC_PUP4) ||
@@ -248,7 +257,8 @@ static u8 mv_ddr4_xsb_comp_test(u32 dev_num, u32 subphy_num, u32 if_id,
 		if (status != MV_OK)
 			return status;
 
-		status = ddr3_tip_ext_read(dev_num, if_id, pattern_table[PATTERN_TEST].start_addr, 1, read_pattern);
+		status = ddr3_tip_ext_read(dev_num, if_id, pattern_table[PATTERN_TEST].start_addr << 3,
+					   1, read_pattern);
 		if (status != MV_OK)
 			return status;
 
@@ -257,7 +267,7 @@ static u8 mv_ddr4_xsb_comp_test(u32 dev_num, u32 subphy_num, u32 if_id,
 			DEBUG_LEVELING(DEBUG_LEVEL_INFO, ("0x%16x\n", read_pattern[edge]));
 		DEBUG_LEVELING(DEBUG_LEVEL_INFO, ("\n"));
 	} else {
-		status = ddr3_tip_ext_read(dev_num, if_id, (pattern_table[PATTERN_TEST].start_addr +
+		status = ddr3_tip_ext_read(dev_num, if_id, ((pattern_table[PATTERN_TEST].start_addr << 3) +
 					    ((SDRAM_CS_SIZE + 1) * effective_cs)), 1, read_pattern);
 		if (status != MV_OK)
 			return status;
