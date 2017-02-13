@@ -157,7 +157,7 @@ static int mv_ddr4_center_of_mass_calc(u8 dev_num, u8 if_id, u8 subphy_num, u8 m
 static int mv_ddr4_tap_tuning(u8 dev_num, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WIDTH_IN_BITS], u8 mode);
 
 /* dq vref calibration flow */
-int mv_ddr4_dq_vref_calibration(u8 dev_num)
+int mv_ddr4_dq_vref_calibration(u8 dev_num, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WIDTH_IN_BITS])
 {
 	u32 if_id, subphy_num;
 	u32 vref_idx, dq_idx, pad_num = 0;
@@ -170,7 +170,6 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num)
 	u8 center_adll[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 	u8 center_vref[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 	u8 pbs_res_per_bus[MAX_INTERFACE_NUM][MAX_BUS_NUM][BUS_WIDTH_IN_BITS];
-	u16 lambda_per_dq[MAX_INTERFACE_NUM][MAX_BUS_NUM][BUS_WIDTH_IN_BITS];
 	u16 vref_avg, vref_subphy_num;
 	int vref_tap_idx;
 	int vref_range_min;
@@ -197,7 +196,7 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num)
 		}
 	}
 
-	if (mv_ddr4_tap_tuning(dev_num, lambda_per_dq, TX_DIR) == MV_OK)
+	if (mv_ddr4_tap_tuning(dev_num, pbs_tap_factor, TX_DIR) == MV_OK)
 		tap_tune_passed = MV_TRUE;
 
 	/* place dram to vref training mode */
@@ -220,13 +219,13 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num)
 		mv_ddr4_vref_tap_set(dev_num, 0, ACCESS_TYPE_MULTICAST, vref_tap_idx, vref_tap_set_state);
 
 		if (tap_tune_passed == MV_FALSE) {
-			if (mv_ddr4_tap_tuning(dev_num, lambda_per_dq, TX_DIR) == MV_OK)
+			if (mv_ddr4_tap_tuning(dev_num, pbs_tap_factor, TX_DIR) == MV_OK)
 				tap_tune_passed = MV_TRUE;
 			else
 				continue;
 		}
 
-		if (mv_ddr4_centralization(dev_num, lambda_per_dq, c_opt_per_bus, pbs_res_per_bus,
+		if (mv_ddr4_centralization(dev_num, pbs_tap_factor, c_opt_per_bus, pbs_res_per_bus,
 					   valid_win_size, TX_DIR, vref_tap_idx, 0) != MV_OK) {
 			DEBUG_CALIBRATION(DEBUG_LEVEL_ERROR,
 					  ("error: %s: ddr4 centralization failed (dq vref tap index %d)!!!\n",
@@ -371,7 +370,7 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num)
 				     vref_avg / vref_subphy_num, MV_DDR4_VREF_TAP_END);
 		DEBUG_CALIBRATION(DEBUG_LEVEL_INFO, ("final vref average %d\n", vref_avg / vref_subphy_num));
 		/* run centralization again with optimal vref to update global structures */
-		mv_ddr4_centralization(dev_num, lambda_per_dq, c_opt_per_bus, pbs_res_per_bus, valid_win_size,
+		mv_ddr4_centralization(dev_num, pbs_tap_factor, c_opt_per_bus, pbs_res_per_bus, valid_win_size,
 				       TX_DIR, vref_avg / vref_subphy_num, duty_cycle);
 	}
 

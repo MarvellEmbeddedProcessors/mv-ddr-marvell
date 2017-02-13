@@ -590,6 +590,7 @@ static int a39x_z1_config(u32 dev_num)
 int mv_ddr4_training_main_flow(u32 dev_num)
 {
 	int status = MV_OK;
+	u16 pbs_tap_factor[MAX_INTERFACE_NUM][MAX_BUS_NUM][BUS_WIDTH_IN_BITS] = {0};
 
 	if (mask_tune_func & RECEIVER_CALIBRATION_MASK_BIT) {
 		training_stage = RECEIVER_CALIBRATION;
@@ -620,11 +621,24 @@ int mv_ddr4_training_main_flow(u32 dev_num)
 	if (mask_tune_func & DQ_VREF_CALIBRATION_MASK_BIT) {
 		training_stage = DQ_VREF_CALIBRATION;
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO, ("DQ_VREF_CALIBRATION_MASK_BIT #%d\n", effective_cs));
-		status = mv_ddr4_dq_vref_calibration(dev_num);
+		status = mv_ddr4_dq_vref_calibration(dev_num, pbs_tap_factor);
 		if (is_reg_dump != 0)
 			ddr3_tip_reg_dump(dev_num);
 		if (status != MV_OK) {
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_dq_vref_calibrate failure\n"));
+			if (debug_mode == MV_FALSE)
+				return status;
+		}
+	}
+
+	if (mask_tune_func & DM_TUNING_MASK_BIT) {
+		training_stage = DM_TUNING;
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO, ("DM_TUNING_MASK_BIT #%d\n", effective_cs));
+		status = mv_ddr4_dm_tuning(effective_cs, pbs_tap_factor);
+		if (is_reg_dump != 0)
+			ddr3_tip_reg_dump(dev_num);
+		if (status != MV_OK) {
+			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_dm_tuning failure\n"));
 			if (debug_mode == MV_FALSE)
 				return status;
 		}

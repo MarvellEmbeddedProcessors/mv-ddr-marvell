@@ -107,7 +107,7 @@ enum mv_ddr4_vref_subphy_cal_state {
 };
 
 /* calibrate DDR4 dq vref (tx) */
-int mv_ddr4_dq_vref_calibration(u8 dev_num);
+int mv_ddr4_dq_vref_calibration(u8 dev_num, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WIDTH_IN_BITS]);
 
 /* calibrate receiver (receiver duty cycle) */
 int mv_ddr4_receiver_calibration(u8 dev_num);
