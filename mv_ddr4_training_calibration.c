@@ -1492,8 +1492,10 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 					 * don't care about start in tx mode
 					 * TODO: temporary solution for instability in the start adll search
 					 */
-					if (mode == TX_DIR)
+					if (mode == TX_DIR) {
 						start_win_diff = end_win_diff;
+						limit_div = 2;
+					}
 
 					if (limit_div != 0) {
 						pbs_tap_factor[iface][subphy][bit] =
