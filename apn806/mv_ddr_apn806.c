@@ -260,6 +260,68 @@ void mmio_write2_32(u32 val, u32 addr)
 	mmio_write_32(addr, val);
 }
 
+/* remap overlapping dram region to the top */
+#define ALIAS_BANKED_UID(n)	(0x800 + 0x400 * (n))
+#define DRAM_UID		3
+#define CCU_MC_RCR_BASE		0x300
+#define CCU_MC_RCR_REG		(ALIAS_BANKED_UID(DRAM_UID) + CCU_MC_RCR_BASE)
+#define REMAP_EN_ENA		1
+#define REMAP_EN_OFFS		0
+#define REMAP_EN_MASK		0x1
+#define REMAP_SIZE_OFFS		20
+#define REMAP_SIZE_MASK		0xfff
+#define CCU_MC_RSBR_BASE	0x304
+#define CCU_MC_RSBR_REG		(ALIAS_BANKED_UID(DRAM_UID) + CCU_MC_RSBR_BASE)
+#define SOURCE_BASE_OFFS	10
+#define SOURCE_BASE_MASK	0xfffff
+#define CCU_MC_RTBR_BASE	0x308
+#define CCU_MC_RTBR_REG		(ALIAS_BANKED_UID(DRAM_UID) + CCU_MC_RTBR_BASE)
+#define TARGET_BASE_OFFS	10
+#define TARGET_BASE_MASK	0xfffff
+int mv_ddr_mc_remap(void)
+{
+	uintptr_t remap_target = NON_DRAM_MEM_RGN_START_ADDR;
+	uintptr_t remap_source = mv_ddr_get_total_memory_size_in_bits() / MV_DDR_NUM_BITS_IN_BYTE;
+	uint64_t remap_size = NON_DRAM_MEM_RGN_END_ADDR - NON_DRAM_MEM_RGN_START_ADDR;
+	u32 val;
+
+	if ((remap_size == 0) ||		/* can't be zero */
+	    (remap_size >> 32) ||		/* can't be more than 4GB */
+	    (remap_size % (1 << 20))) {		/* must be multiple of 1MB */
+		printf("%s: incorrect mc remap size found\n", __func__);
+		return MV_FAIL;
+	}
+
+	if (remap_target % remap_size) {	/* must be multiple of remap size */
+		printf("%s: incorrect mc remap target base addr found\n", __func__);
+		return MV_FAIL;
+	}
+
+	if (remap_source % remap_size) {	/* must be multiple of remap size */
+		printf("%s: incorrect mc remap source base addr found\n", __func__);
+		return MV_FAIL;
+	}
+
+	/* set mc remap source base to the top of dram */
+	remap_source >>= 20;	/* in MB */
+	val = (remap_source & SOURCE_BASE_MASK) << SOURCE_BASE_OFFS;
+	reg_write(CCU_MC_RSBR_REG, val);
+
+	/* set mc remap target base to the overlapping dram region */
+	remap_target >>= 20;	/* in MB */
+	val = (remap_target & TARGET_BASE_MASK) << TARGET_BASE_OFFS;
+	reg_write(CCU_MC_RTBR_REG, val);
+
+	/* set mc remap size to the size of the overlapping dram region */
+	remap_size >>= 20;	/* in MB */
+	val = ((remap_size - 1) & REMAP_SIZE_MASK) << REMAP_SIZE_OFFS;
+	/* enable remapping */
+	val |= (REMAP_EN_ENA << REMAP_EN_OFFS);
+	reg_write(CCU_MC_RCR_REG, val);
+
+	return MV_OK;
+}
+
 void mv_ddr_mem_scrubbing(void)
 {
 	uint64_t val = 0;
@@ -277,7 +339,8 @@ void mv_ddr_mem_scrubbing(void)
 
 	/* scrub memory up to the end */
 	if (tot_mem_sz > NON_DRAM_MEM_RGN_END_ADDR)
-		mv_ddr_xor_mem_scrubbing(NON_DRAM_MEM_RGN_END_ADDR, tot_mem_sz - NON_DRAM_MEM_RGN_END_ADDR, val);
+		mv_ddr_xor_mem_scrubbing(NON_DRAM_MEM_RGN_END_ADDR,
+					 tot_mem_sz - NON_DRAM_MEM_RGN_START_ADDR, val);
 }
 
 static u8 mv_ddr_tip_clk_ratio_get(u32 freq)
@@ -854,6 +917,10 @@ int mv_ddr_early_init(void)
 int mv_ddr_early_init2(void)
 {
 	mv_ddr_training_mask_set();
+
+	/* remap overlapping dram region to the top */
+	if (mv_ddr_mc_remap() != MV_OK)
+		return MV_FAIL;
 
 	return MV_OK;
 }

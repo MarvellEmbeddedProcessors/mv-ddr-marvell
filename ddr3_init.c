@@ -155,7 +155,8 @@ int ddr3_init(void)
 		return MV_FAIL;
 	}
 
-	mv_ddr_early_init2();
+	if (mv_ddr_early_init2() != MV_OK)
+		return MV_FAIL;
 
 	/* Set training algorithm's parameters */
 	status = mv_ddr_training_params_set(0);
