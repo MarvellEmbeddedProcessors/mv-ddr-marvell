@@ -430,9 +430,10 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 							  [if_id][bus_id]));
 						centralization_state[if_id]
 							[bus_id] = 1;
-						if (debug_mode == 0)
+						if (debug_mode == 0) {
 							flow_result[if_id] = TEST_FAILED;
 							return MV_FAIL;
+						}
 					}
 				}	/* ddr3_tip_centr_skip_min_win_check */
 			}	/* pup */
