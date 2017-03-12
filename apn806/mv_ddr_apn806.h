@@ -329,9 +329,6 @@ enum{
 #define RESULT_CONTROL_PUP_8_BIT_7_REG	0x1D30
 
 #define ODPG_TRAINING_STATUS_REG	0x1030
-#define ODPG_ENABLE_REG			0x1630
-#define ODPG_ENABLE_OFFS		31
-#define ODPG_DISABLE_OFFS		30
 
 /* Matrix enables DRAM modes (bus width/ECC) per boardId */
 #define TOPOLOGY_UPDATE_32BIT			0
@@ -401,4 +398,7 @@ int mv_ddr_dq_mapping_detect(u32 dev_num);
 #endif
 void mv_ddr_mem_scrubbing(void);
 int apn806_rev_id_get(void);
+void mv_ddr_odpg_enable(void);
+void mv_ddr_odpg_disable(void);
+int mv_ddr_is_odpg_done(u32 count);
 #endif /* _MV_DDR_AP806_H */

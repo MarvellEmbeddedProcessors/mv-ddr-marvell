@@ -281,9 +281,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RESULT_CONTROL_PUP_4_BIT_7_REG		0x1af0
 
 #define ODPG_TRAINING_STATUS_REG		0x18488
-#define ODPG_ENABLE_REG				0x186d4
-#define ODPG_ENABLE_OFFS			0
-#define ODPG_DISABLE_OFFS			8
 
 /* CPU */
 #define REG_BOOTROM_ROUTINE_ADDR		0x182d0
@@ -352,5 +349,8 @@ struct mv_ddr_subphys_reg_config {
 void mv_ddr_phy_static_config(void);
 #endif /* CONFIG_PHY_STATIC */
 
+void mv_ddr_odpg_enable(void);
+void mv_ddr_odpg_disable(void);
+int mv_ddr_is_odpg_done(u32 count);
 
 #endif /* _MV_DDR_A38X_H */

@@ -316,15 +316,9 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 			}
 
 			/* disable ODPG - Back to functional mode */
-			CHECK_STATUS(ddr3_tip_if_write
-				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      ODPG_ENABLE_REG, 0x1 << ODPG_DISABLE_OFFS,
-				      (0x1 << ODPG_DISABLE_OFFS)));
+			mv_ddr_odpg_disable();
 
-			if (ddr3_tip_if_polling
-			    (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, 0x0,
-			     0x1 << ODPG_ENABLE_OFFS, ODPG_ENABLE_REG,
-			     MAX_POLLING_ITERATIONS) != MV_OK) {
+			if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK) {
 				DEBUG_LEVELING(DEBUG_LEVEL_ERROR,
 					       ("ODPG disable failed "));
 				return MV_FAIL;
@@ -720,17 +714,14 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 			}
 
 			/*disable ODPG - Back to functional mode */
-			CHECK_STATUS(ddr3_tip_if_write
-				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      ODPG_ENABLE_REG, 0x1 << ODPG_DISABLE_OFFS,
-				      (0x1 << ODPG_DISABLE_OFFS)));
-			if (ddr3_tip_if_polling
-			    (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, 0x0, 0x1,
-			     ODPG_ENABLE_REG, MAX_POLLING_ITERATIONS) != MV_OK) {
+			mv_ddr_odpg_disable();
+
+			if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK) {
 				DEBUG_LEVELING(DEBUG_LEVEL_ERROR,
 					       ("ODPG disable failed "));
 				return MV_FAIL;
 			}
+
 			CHECK_STATUS(ddr3_tip_if_write
 				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 				      ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS));

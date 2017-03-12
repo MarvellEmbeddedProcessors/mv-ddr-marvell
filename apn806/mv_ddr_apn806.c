@@ -387,6 +387,43 @@ static void dunit_write(u32 addr, u32 mask, u32 data)
 	reg_write(addr + DUNIT_BASE_ADDR, reg_val);
 }
 
+void mv_ddr_odpg_enable(void)
+{
+	dunit_write(ODPG_DATA_CTRL_REG,
+		    ODPG_ENABLE_MASK << ODPG_ENABLE_OFFS,
+		    ODPG_ENABLE_ENA << ODPG_ENABLE_OFFS);
+}
+
+void mv_ddr_odpg_disable(void)
+{
+	dunit_write(ODPG_DATA_CTRL_REG,
+		    ODPG_DISABLE_MASK << ODPG_DISABLE_OFFS,
+		    ODPG_DISABLE_DIS << ODPG_DISABLE_OFFS);
+}
+
+int mv_ddr_is_odpg_done(u32 count)
+{
+	u32 i, data;
+
+	for (i = 0; i < count; i++) {
+		dunit_read(ODPG_DONE_STATUS_REG, MASK_ALL_BITS, &data);
+		if (((data >> ODPG_DONE_STATUS_BIT_OFFS) & ODPG_DONE_STATUS_BIT_MASK) ==
+		     ODPG_DONE_STATUS_BIT_SET)
+			break;
+	}
+
+	if (i >= count) {
+		printf("%s: timeout\n", __func__);
+		return MV_FAIL;
+	}
+
+	dunit_write(ODPG_DONE_STATUS_REG,
+		    ODPG_DONE_STATUS_BIT_MASK << ODPG_DONE_STATUS_BIT_OFFS,
+		    ODPG_DONE_STATUS_BIT_CLR << ODPG_DONE_STATUS_BIT_OFFS);
+
+	return MV_OK;
+}
+
 /* return ddr frequency from sar */
 static int mv_ddr_sar_freq_get(int dev_num, enum hws_ddr_freq *freq)
 {

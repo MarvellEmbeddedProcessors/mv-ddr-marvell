@@ -110,7 +110,7 @@ static int ddr3_tip_bist_operation(u32 dev_num,
  */
 int ddr3_tip_bist_activate(u32 dev_num, enum hws_pattern pattern,
 			   enum hws_access_type access_type, u32 if_num,
-			   enum hws_dir direction,
+			   enum hws_dir dir,
 			   enum hws_stress_jump addr_stress_jump,
 			   enum hws_pattern_duration duration,
 			   enum hws_bist_operation oper_type,
@@ -118,117 +118,43 @@ int ddr3_tip_bist_activate(u32 dev_num, enum hws_pattern pattern,
 {
 	u32 tx_burst_size;
 	u32 delay_between_burst;
-	u32 rd_mode, val;
-	u32 poll_cnt = 0, max_poll = 1000, i, start_if, end_if;
+	u32 rd_mode;
 	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
-	u32 read_data[MAX_INTERFACE_NUM];
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
-	/* ODPG Write enable from BIST */
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_num,
-				       ODPG_DATA_CTRL_REG, 0x1, 0x1));
-	/* ODPG Read enable/disable from BIST */
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_num,
-				       ODPG_DATA_CTRL_REG,
-				       (direction == OPER_READ) ?
-				       0x2 : 0, 0x2));
-	CHECK_STATUS(ddr3_tip_load_pattern_to_odpg(dev_num, access_type, if_num,
-						   pattern, offset));
+	/* odpg bist write enable */
+	ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_CTRL_REG,
+			  (ODPG_WRBUF_WR_CTRL_ENA << ODPG_WRBUF_WR_CTRL_OFFS),
+			  (ODPG_WRBUF_WR_CTRL_MASK << ODPG_WRBUF_WR_CTRL_OFFS));
 
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_num,
-				       ODPG_DATA_BUFFER_SIZE_REG,
-				       pattern_addr_length, MASK_ALL_BITS));
-	tx_burst_size = (direction == OPER_WRITE) ?
+	/* odpg bist read enable/disable */
+	ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_CTRL_REG,
+			  (dir == OPER_READ) ? (ODPG_WRBUF_RD_CTRL_ENA << ODPG_WRBUF_RD_CTRL_OFFS) :
+					       (ODPG_WRBUF_RD_CTRL_DIS << ODPG_WRBUF_RD_CTRL_OFFS),
+			  (ODPG_WRBUF_RD_CTRL_MASK << ODPG_WRBUF_RD_CTRL_OFFS));
+
+	ddr3_tip_load_pattern_to_odpg(0, access_type, 0, pattern, offset);
+
+	ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_BUFFER_SIZE_REG, pattern_addr_length, MASK_ALL_BITS);
+	tx_burst_size = (dir == OPER_WRITE) ?
 		pattern_table[pattern].tx_burst_size : 0;
-	delay_between_burst = (direction == OPER_WRITE) ? 2 : 0;
-	rd_mode = (direction == OPER_WRITE) ? 1 : 0;
-	CHECK_STATUS(ddr3_tip_configure_odpg
-		     (dev_num, access_type, if_num, direction,
+	delay_between_burst = (dir == OPER_WRITE) ? 2 : 0;
+	rd_mode = (dir == OPER_WRITE) ? 1 : 0;
+	ddr3_tip_configure_odpg(0, access_type, 0, dir,
 		      pattern_table[pattern].num_of_phases_tx, tx_burst_size,
 		      pattern_table[pattern].num_of_phases_rx,
 		      delay_between_burst,
-		      rd_mode, cs_num, addr_stress_jump, duration));
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_num,
-				       ODPG_DATA_BUFFER_OFFS_REG,
-				       offset, MASK_ALL_BITS));
+		      rd_mode, cs_num, addr_stress_jump, duration);
+	ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_BUFFER_OFFS_REG, offset, MASK_ALL_BITS);
+
 	if (oper_type == BIST_STOP) {
-		CHECK_STATUS(ddr3_tip_bist_operation(dev_num, access_type,
-						     if_num, BIST_STOP));
+		ddr3_tip_bist_operation(0, access_type, 0, BIST_STOP);
 	} else {
-		CHECK_STATUS(ddr3_tip_bist_operation(dev_num, access_type,
-						     if_num, BIST_START));
-		if (duration != DURATION_CONT) {
-			/*
-			 * This pdelay is a WA, becuase polling fives "done"
-			 * also the odpg did nmot finish its task
-			 */
-			if (access_type == ACCESS_TYPE_MULTICAST) {
-				start_if = 0;
-				end_if = MAX_INTERFACE_NUM - 1;
-			} else {
-				start_if = if_num;
-				end_if = if_num;
-			}
-
-			for (i = start_if; i <= end_if; i++) {
-				VALIDATE_IF_ACTIVE(tm->
-						   if_act_mask, i);
-
-				for (poll_cnt = 0; poll_cnt < max_poll;
-				     poll_cnt++) {
-					CHECK_STATUS(ddr3_tip_if_read
-						     (dev_num,
-						      ACCESS_TYPE_UNICAST,
-						      if_num, ODPG_BIST_DONE,
-						      read_data,
-						      MASK_ALL_BITS));
-					val = read_data[i];
-					if (ddr3_tip_dev_attr_get
-					    (dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
-						/*
-						 * The bit is self-cleared in SoC devices.
-						 * So, if it is cleared, all is good.
-						 */
-						if ((val & 0x1) == 0x0)
-							break;
-					} else {
-						if ((val & 0x1) == 0x1) {
-							if (is_bist_reset_bit != 0) {
-								CHECK_STATUS(ddr3_tip_if_write
-									     (dev_num,
-									      ACCESS_TYPE_UNICAST,
-									      if_num,
-									      ODPG_BIST_DONE,
-									      val & 0xFFFFFFFE,
-									      MASK_ALL_BITS));
-							}
-							break;
-						}
-					}
-				}
-
-				if (poll_cnt >= max_poll) {
-					DEBUG_TRAINING_BIST_ENGINE
-						(DEBUG_LEVEL_ERROR,
-						 ("Bist poll failure 2\n"));
-					CHECK_STATUS(ddr3_tip_if_write
-						     (dev_num,
-						      ACCESS_TYPE_UNICAST,
-						      if_num,
-						      ODPG_DATA_CTRL_REG, 0,
-						      MASK_ALL_BITS));
-					return MV_FAIL;
-				}
-			}
-
-			CHECK_STATUS(ddr3_tip_bist_operation
-				     (dev_num, access_type, if_num, BIST_STOP));
-		}
+		ddr3_tip_bist_operation(0, access_type, 0, BIST_START);
+		if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK)
+			return MV_FAIL;
+		ddr3_tip_bist_operation(0, access_type, 0, BIST_STOP);
 	}
-
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_num,
-				       ODPG_DATA_CTRL_REG, 0,
-				       MASK_ALL_BITS));
+	ddr3_tip_if_write(0, access_type, 0, ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS);
 
 	return MV_OK;
 }
@@ -333,25 +259,10 @@ static int ddr3_tip_bist_operation(u32 dev_num,
 				   enum hws_access_type access_type,
 				   u32 if_id, enum hws_bist_operation oper_type)
 {
-	if (oper_type == BIST_STOP) {
-		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
-			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-						       ODPG_BIST_DONE, 1 << 8, 1 << 8));
-		} else {
-			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-						       ODPG_DATA_CTRL_REG,
-						       (u32)(1 << 30), (u32)(0x3 << 30)));
-		}
-	} else {
-		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
-			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-						       ODPG_BIST_DONE, 1, 1));
-		} else {
-			CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
-						       ODPG_DATA_CTRL_REG,
-						       (u32)(1 << 31), (u32)(0x1 << 31)));
-		}
-	}
+	if (oper_type == BIST_STOP)
+		mv_ddr_odpg_disable();
+	else
+		mv_ddr_odpg_enable();
 
 	return MV_OK;
 }

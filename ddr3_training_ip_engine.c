@@ -800,7 +800,8 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 				}
 			}
 			/* Be sure that ODPG done */
-			CHECK_STATUS(is_odpg_access_done(dev_num, index_cnt));
+			if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK)
+				return MV_FAIL;
 		}
 
 		/* Write ODPG done in Dunit */
@@ -1156,46 +1157,6 @@ int ddr3_tip_load_all_pattern_to_mem(u32 dev_num)
 }
 
 /*
- * Wait till ODPG access is ready
- */
-int is_odpg_access_done(u32 dev_num, u32 if_id)
-{
-	u32 poll_cnt = 0, data_value, expected_val;
-	u32 read_data[MAX_INTERFACE_NUM];
-
-	for (poll_cnt = 0; poll_cnt < MAX_POLLING_ITERATIONS; poll_cnt++) {
-		CHECK_STATUS(ddr3_tip_if_read
-			     (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			      ODPG_BIST_DONE, read_data, MASK_ALL_BITS));
-		data_value = read_data[if_id];
-
-		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) < MV_TIP_REV_3)
-			expected_val = ODPG_BIST_DONE_BIT_VALUE_REV2;
-		else
-			expected_val = ODPG_BIST_DONE_BIT_VALUE_REV3;
-
-		if (((data_value >> ODPG_BIST_DONE_BIT_OFFS) & 0x1) == expected_val) {
-			data_value = data_value & 0xfffffffe;
-			CHECK_STATUS(ddr3_tip_if_write(dev_num,
-						       ACCESS_TYPE_UNICAST,
-						       if_id,
-						       ODPG_BIST_DONE,
-						       data_value,
-						       MASK_ALL_BITS));
-			break;
-		}
-	}
-
-	if (poll_cnt >= MAX_POLLING_ITERATIONS) {
-		DEBUG_TRAINING_IP_ENGINE(DEBUG_LEVEL_ERROR,
-					 ("Bist Activate: poll failure 2\n"));
-		return MV_FAIL;
-	}
-
-	return MV_OK;
-}
-
-/*
  * Load specific pattern to memory using ODPG
  */
 int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
@@ -1242,10 +1203,7 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 				      0x3, 0xf));
 		}
 
-		CHECK_STATUS(ddr3_tip_if_write
-			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      ODPG_ENABLE_REG, 0x1 << ODPG_ENABLE_OFFS,
-			      (0x1 << ODPG_ENABLE_OFFS)));
+		mv_ddr_odpg_enable();
 	} else {
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
@@ -1254,10 +1212,8 @@ int ddr3_tip_load_pattern_to_mem(u32 dev_num, enum hws_pattern pattern)
 	}
 	mdelay(1);
 
-	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		CHECK_STATUS(is_odpg_access_done(dev_num, if_id));
-	}
+	if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK)
+		return MV_FAIL;
 
 	/* Disable ODPG and stop write to memory */
 	CHECK_STATUS(ddr3_tip_if_write

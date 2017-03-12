@@ -504,6 +504,47 @@ static void dunit_write(u32 addr, u32 mask, u32 data)
 	reg_write(addr, reg_val);
 }
 
+#define ODPG_ENABLE_REG				0x186d4
+#define ODPG_EN_OFFS				0
+#define ODPG_EN_MASK				0x1
+#define ODPG_EN_ENA				1
+#define ODPG_EN_DONE				0
+#define ODPG_DIS_OFFS				8
+#define ODPG_DIS_MASK				0x1
+#define ODPG_DIS_DIS				1
+void mv_ddr_odpg_enable(void)
+{
+	dunit_write(ODPG_ENABLE_REG,
+		    ODPG_EN_MASK << ODPG_EN_OFFS,
+		    ODPG_EN_ENA << ODPG_EN_OFFS);
+}
+
+void mv_ddr_odpg_disable(void)
+{
+	dunit_write(ODPG_ENABLE_REG,
+		    ODPG_DIS_MASK << ODPG_DIS_OFFS,
+		    ODPG_DIS_DIS << ODPG_DIS_OFFS);
+}
+
+int mv_ddr_is_odpg_done(u32 count)
+{
+	u32 i, data;
+
+	for (i = 0; i < count; i++) {
+		dunit_read(ODPG_ENABLE_REG, MASK_ALL_BITS, &data);
+		if (((data >> ODPG_EN_OFFS) & ODPG_EN_MASK) ==
+		     ODPG_EN_DONE)
+			break;
+	}
+
+	if (i >= count) {
+		printf("%s: timeout\n", __func__);
+		return MV_FAIL;
+	}
+
+	return MV_OK;
+}
+
 /*
  * Name:     ddr3_tip_a38x_select_ddr_controller.
  * Desc:     Enable/Disable access to Marvell's server.

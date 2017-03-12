@@ -785,9 +785,8 @@ int mv_ddr4_pda_ctrl(u8 dev_num, u8 if_id, u8 cs_num, int enable)
 
 	if (enable == 0) {
 		/* check odpg access is done */
-		status = is_odpg_access_done(dev_num, if_id);
-		if (status != MV_OK)
-			return status;
+		if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK)
+			return MV_FAIL;
 	}
 
 	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0, 0x1f, SDRAM_OP_REG,
