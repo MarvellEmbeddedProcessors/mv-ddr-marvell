@@ -236,6 +236,9 @@ endif
 ifeq ($(PLATFORM),$(filter $(PLATFORM),a80x0 a80x0_cust))
 CFLAGS += -DCONFIG_64BIT
 endif
+ifneq ($(ARCH),)
+CFLAGS += -D$(ARCH)
+endif
 
 LDFLAGS = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
