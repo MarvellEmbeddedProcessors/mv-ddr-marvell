@@ -1333,7 +1333,7 @@ int ddr3_tip_configure_phy(u32 dev_num)
 					PARAM_NOT_CARE, DDR_PHY_DATA, VREF_BCAST_PHY_REG(0), 0x20));
 	/* vref configuration */
 	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					PARAM_NOT_CARE, DDR_PHY_DATA, PAD_CFG_PHY_REG, 0x42a));
+					PARAM_NOT_CARE, DDR_PHY_DATA, PAD_CFG_PHY_REG, 0x427));
 	/* data drive strength */
 	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 					PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ZRI_CAL_PHY_REG, 0x70E));
@@ -1342,7 +1342,7 @@ int ddr3_tip_configure_phy(u32 dev_num)
 					PARAM_NOT_CARE, DDR_PHY_CONTROL, PAD_ZRI_CAL_PHY_REG, 0x70C));
 	/*data ODT*/
 	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ODT_CAL_PHY_REG, 0x200));
+					PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ODT_CAL_PHY_REG, 0x8<<6));
 	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 					PARAM_NOT_CARE, DDR_PHY_DATA, TEST_ADLL_PHY_REG, 0x1));
 	/* set the phy register core_tx_data_samp_edge to posadge */
