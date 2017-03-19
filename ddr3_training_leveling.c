@@ -143,6 +143,10 @@ u32 ddr3_tip_max_cs_get(u32 dev_num)
 	return max_cs;
 }
 
+enum {
+	PASS,
+	FAIL
+};
 /*****************************************************************************
 Dynamic read leveling
 ******************************************************************************/
@@ -285,53 +289,28 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 			      TRAINING_REG, (u32)(1 << 31), (u32)(1 << 31)));
 
-		/********* trigger training *******************/
-		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
-			CHECK_STATUS(ddr3_tip_if_write
-				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      GLOB_CTRL_STATUS_REG, 0x1, 0x1));
+		/* trigger training */
+		mv_ddr_training_enable();
 
-			/* check for training done + results pass */
-			if (ddr3_tip_if_polling
-			    (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, 0x2, 0x2,
-			     ODPG_TRAINING_STATUS_REG,
-			     MAX_POLLING_ITERATIONS) != MV_OK) {
-				DEBUG_LEVELING(DEBUG_LEVEL_ERROR,
-					       ("Training Done Failed\n"));
-				return MV_FAIL;
-			}
-
-			for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-				VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-				CHECK_STATUS(ddr3_tip_if_read
-					     (dev_num, ACCESS_TYPE_UNICAST,
-					      if_id,
-					      GLOB_CTRL_STATUS_REG, data_read,
-					      0x4));
-				data = data_read[if_id];
-				if (data != 0x0) {
-					DEBUG_LEVELING(DEBUG_LEVEL_ERROR,
-						       ("Training Result Failed\n"));
-				}
-			}
-
-			/* disable ODPG - Back to functional mode */
-			mv_ddr_odpg_disable();
-
-			if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK) {
-				DEBUG_LEVELING(DEBUG_LEVEL_ERROR,
-					       ("ODPG disable failed "));
-				return MV_FAIL;
-			}
-
-			CHECK_STATUS(ddr3_tip_if_write
-				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS));
-		} else {
-			CHECK_STATUS(ddr3_tip_if_write
-				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      ODPG_TRAINING_STATUS_REG, 0x1, 0x1));
+		/* check for training done */
+		if (mv_ddr_is_training_done(MAX_POLLING_ITERATIONS, &data) != MV_OK) {
+			DEBUG_LEVELING(DEBUG_LEVEL_ERROR, ("training done failed\n"));
+			return MV_FAIL;
 		}
+		/* check for training pass */
+		if (data != PASS)
+			DEBUG_LEVELING(DEBUG_LEVEL_INFO, ("training result failed\n"));
+
+		/* disable odpg; switch back to functional mode */
+		mv_ddr_odpg_disable();
+
+		if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK) {
+			DEBUG_LEVELING(DEBUG_LEVEL_ERROR, ("odpg disable failed\n"));
+			return MV_FAIL;
+		}
+
+		ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+				  ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS);
 
 		/* double loop on bus, pup */
 		for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
@@ -683,53 +662,28 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 			      TRAINING_REG, (u32)(1 << 31), (u32)(1 << 31)));
 
-		/********* trigger training *******************/
-		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
-			CHECK_STATUS(ddr3_tip_if_write
-				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      GLOB_CTRL_STATUS_REG, 0x1, 0x1));
+		/* trigger training */
+		mv_ddr_training_enable();
 
-			/* check for training done + results pass */
-			if (ddr3_tip_if_polling
-			    (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, 0x2, 0x2,
-			     ODPG_TRAINING_STATUS_REG,
-			     MAX_POLLING_ITERATIONS) != MV_OK) {
-				DEBUG_LEVELING(DEBUG_LEVEL_ERROR,
-					       ("Training Done Failed\n"));
-				return MV_FAIL;
-			}
-
-			for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-				VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-				CHECK_STATUS(ddr3_tip_if_read
-					     (dev_num, ACCESS_TYPE_UNICAST,
-					      if_id,
-					      GLOB_CTRL_STATUS_REG, data_read,
-					      0x4));
-				data = data_read[if_id];
-				if (data != 0x0) {
-					DEBUG_LEVELING(DEBUG_LEVEL_ERROR,
-						       ("Training Result Failed\n"));
-				}
-			}
-
-			/*disable ODPG - Back to functional mode */
-			mv_ddr_odpg_disable();
-
-			if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK) {
-				DEBUG_LEVELING(DEBUG_LEVEL_ERROR,
-					       ("ODPG disable failed "));
-				return MV_FAIL;
-			}
-
-			CHECK_STATUS(ddr3_tip_if_write
-				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS));
-		} else {
-			CHECK_STATUS(ddr3_tip_if_write
-				     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				      ODPG_TRAINING_STATUS_REG, 0x1, 0x1));
+		/* check for training done */
+		if (mv_ddr_is_training_done(MAX_POLLING_ITERATIONS, &data) != MV_OK) {
+			DEBUG_LEVELING(DEBUG_LEVEL_ERROR, ("training done failed\n"));
+			return MV_FAIL;
 		}
+		/* check for training pass */
+		if (data != PASS)
+			DEBUG_LEVELING(DEBUG_LEVEL_INFO, ("training result failed\n"));
+
+		/* disable odpg; switch back to functional mode */
+		mv_ddr_odpg_disable();
+
+		if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK) {
+			DEBUG_LEVELING(DEBUG_LEVEL_ERROR, ("odpg disable failed\n"));
+			return MV_FAIL;
+		}
+
+		ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+				  ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS);
 
 		/* double loop on bus, pup */
 		for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
@@ -968,7 +922,7 @@ int ddr3_tip_calc_cs_mask(u32 dev_num, u32 if_id, u32 effective_cs,
  */
 int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 {
-	u32 reg_data = 0, iter, if_id, bus_cnt, trigger_reg_addr;
+	u32 reg_data = 0, iter, if_id, bus_cnt;
 	u32 cs_enable_reg_val[MAX_INTERFACE_NUM] = { 0 };
 	u32 cs_mask[MAX_INTERFACE_NUM];
 	u32 read_data_sample_delay_vals[MAX_INTERFACE_NUM] = { 0 };
@@ -1071,122 +1025,41 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 
 		CHECK_STATUS(ddr3_tip_dynamic_write_leveling_seq(dev_num));
 
-		/*
-		 *     Phase 3: Trigger training
-		 */
-		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) < MV_TIP_REV_3)
-			trigger_reg_addr = ODPG_TRAINING_STATUS_REG;
-		else
-			trigger_reg_addr = GLOB_CTRL_STATUS_REG;
+		/* phase 3: trigger training */
+		mv_ddr_training_enable();
 
-		CHECK_STATUS(ddr3_tip_if_write
-			     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			      trigger_reg_addr, 0x1, 0x1));
-
-		if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
-			for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
-				VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-
-				/* training done */
-				if (ddr3_tip_if_polling
-				    (dev_num, ACCESS_TYPE_UNICAST, if_id,
-				     (1 << 1), (1 << 1), ODPG_TRAINING_STATUS_REG,
-				     MAX_POLLING_ITERATIONS) != MV_OK) {
-					DEBUG_LEVELING(
-						DEBUG_LEVEL_ERROR,
-						("WL: DDR3 poll (4) failed (Data: 0x%x)\n",
-						 reg_data));
-				} else {
+		/* check for training done */
+		if (mv_ddr_is_training_done(MAX_POLLING_ITERATIONS, data_read) != MV_OK) {
+			DEBUG_LEVELING(DEBUG_LEVEL_ERROR, ("training done failed\n"));
+		} else { /* check for training pass */
+			reg_data = data_read[0];
 #if defined(CONFIG_ARMADA_38X) /* JIRA #1498 for 16 bit with ECC */
-					if (tm->bus_act_mask == 0xb)
-						break;
+			if (tm->bus_act_mask == 0xb) /* set to data to 0 to skip the check */
+				reg_data = 0;
 #endif
-					CHECK_STATUS(ddr3_tip_if_read
-						     (dev_num, ACCESS_TYPE_UNICAST,
-						      if_id,
-						      GLOB_CTRL_STATUS_REG,
-						      data_read, (1 << 2)));
-					if (data_read[if_id] != 0) {
-						DEBUG_LEVELING(
-							DEBUG_LEVEL_ERROR,
-							("WL 1: WL failed IF %d reg_data=0x%x\n",
-							 if_id, data_read[if_id]));
-					}
-				}
-			}
-		}
+			if (reg_data != PASS)
+				DEBUG_LEVELING(DEBUG_LEVEL_INFO, ("training result failed\n"));
 
-		for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-			/* training done */
-			if (ddr3_tip_if_polling
-			    (dev_num, ACCESS_TYPE_UNICAST, if_id,
-			     (1 << 1), (1 << 1), ODPG_TRAINING_STATUS_REG,
-			     MAX_POLLING_ITERATIONS) != MV_OK) {
-				DEBUG_LEVELING(
-					DEBUG_LEVEL_ERROR,
-					("WL: DDR3 poll (4) failed (Data: 0x%x)\n",
-					 reg_data));
-			} else {
-				CHECK_STATUS(ddr3_tip_if_read
-					     (dev_num, ACCESS_TYPE_UNICAST,
-					      if_id,
-					      ODPG_TRAINING_STATUS_REG,
-					      data_read, (1 << 2)));
-				reg_data = data_read[if_id];
-#if defined(CONFIG_ARMADA_38X) /* JIRA #1498 for 16 bit with ECC */
-				if (tm->bus_act_mask == 0xb) {
-					/* set to data to 0 to skip the check */
-					reg_data = 0;
-				}
-#endif
-				if (reg_data != 0) {
-					DEBUG_LEVELING(
-						DEBUG_LEVEL_ERROR,
-						("WL 2: WL failed IF %d reg_data=0x%x\n",
-						 if_id, reg_data));
-				}
-
-				/* check for training completion per bus */
-				for (bus_cnt = 0;
-				     bus_cnt < octets_per_if_num;
-				     bus_cnt++) {
-					VALIDATE_BUS_ACTIVE(tm->bus_act_mask,
-							bus_cnt);
-					/* training status */
-					CHECK_STATUS(ddr3_tip_if_read
-						     (dev_num,
-						      ACCESS_TYPE_UNICAST,
-						      if_id,
-						      mask_results_pup_reg_map
-						      [bus_cnt], data_read,
-						      MASK_ALL_BITS));
-					reg_data = data_read[if_id];
-					DEBUG_LEVELING(
-						DEBUG_LEVEL_TRACE,
-						("WL: IF %d BUS %d reg 0x%x\n",
-						 if_id, bus_cnt, reg_data));
-					if ((reg_data & (1 << 25)) == 0) {
-						res_values[
-							(if_id *
-							 octets_per_if_num)
-							+ bus_cnt] = 1;
-					}
-					CHECK_STATUS(ddr3_tip_if_read
-						     (dev_num,
-						      ACCESS_TYPE_UNICAST,
-						      if_id,
-						      mask_results_pup_reg_map
-						      [bus_cnt], data_read,
-						      0xff));
-					/*
-					 * Save the read value that should be
-					 * write to PHY register
-					 */
-					wl_values[effective_cs]
-						[bus_cnt][if_id] =
-						(u8)data_read[if_id];
-				}
+			/* check for training completion per bus */
+			for (bus_cnt = 0; bus_cnt < octets_per_if_num; bus_cnt++) {
+				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
+				/* training status */
+				ddr3_tip_if_read(0, ACCESS_TYPE_UNICAST, 0,
+					      mask_results_pup_reg_map[bus_cnt],
+					      data_read, MASK_ALL_BITS);
+				reg_data = data_read[0];
+				DEBUG_LEVELING(DEBUG_LEVEL_TRACE, ("WL: IF %d BUS %d reg 0x%x\n",
+								   0, bus_cnt, reg_data));
+				if ((reg_data & (1 << 25)) == 0)
+					res_values[bus_cnt] = 1;
+				ddr3_tip_if_read(0, ACCESS_TYPE_UNICAST, 0,
+					      mask_results_pup_reg_map[bus_cnt],
+					      data_read, 0xff);
+				/*
+				 * Save the read value that should be
+				 * write to PHY register
+				 */
+				wl_values[effective_cs][bus_cnt][0] = (u8)data_read[0];
 			}
 		}
 

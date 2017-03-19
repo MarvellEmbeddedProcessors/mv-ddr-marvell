@@ -280,8 +280,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RESULT_CONTROL_PUP_4_BIT_6_REG		0x1acc
 #define RESULT_CONTROL_PUP_4_BIT_7_REG		0x1af0
 
-#define ODPG_TRAINING_STATUS_REG		0x18488
-
 /* CPU */
 #define REG_BOOTROM_ROUTINE_ADDR		0x182d0
 #define REG_BOOTROM_ROUTINE_DRAM_INIT_OFFS	12
@@ -352,5 +350,6 @@ void mv_ddr_phy_static_config(void);
 void mv_ddr_odpg_enable(void);
 void mv_ddr_odpg_disable(void);
 int mv_ddr_is_odpg_done(u32 count);
-
+void mv_ddr_training_enable(void);
+int mv_ddr_is_training_done(u32 count, u32 *result);
 #endif /* _MV_DDR_A38X_H */

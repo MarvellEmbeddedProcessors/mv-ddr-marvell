@@ -545,6 +545,51 @@ int mv_ddr_is_odpg_done(u32 count)
 	return MV_OK;
 }
 
+void mv_ddr_training_enable(void)
+{
+	dunit_write(GLOB_CTRL_STATUS_REG,
+		    TRAINING_TRIGGER_MASK << TRAINING_TRIGGER_OFFS,
+		    TRAINING_TRIGGER_ENA << TRAINING_TRIGGER_OFFS);
+}
+
+#define DRAM_INIT_CTRL_STATUS_REG	0x18488
+#define TRAINING_TRIGGER_OFFS		0
+#define TRAINING_TRIGGER_MASK		0x1
+#define TRAINING_TRIGGER_ENA		1
+#define TRAINING_DONE_OFFS		1
+#define TRAINING_DONE_MASK		0x1
+#define TRAINING_DONE_DONE		1
+#define TRAINING_DONE_NOT_DONE		0
+#define TRAINING_RESULT_OFFS		2
+#define TRAINING_RESULT_MASK		0x1
+#define TRAINING_RESULT_PASS		0
+#define TRAINING_RESULT_FAIL		1
+int mv_ddr_is_training_done(u32 count, u32 *result)
+{
+	u32 i, data;
+
+	if (result == NULL) {
+		printf("%s: NULL result pointer found\n", __func__);
+		return MV_FAIL;
+	}
+
+	for (i = 0; i < count; i++) {
+		dunit_read(DRAM_INIT_CTRL_STATUS_REG, MASK_ALL_BITS, &data);
+		if (((data >> TRAINING_DONE_OFFS) & TRAINING_DONE_MASK) ==
+		     TRAINING_DONE_DONE)
+			break;
+	}
+
+	if (i >= count) {
+		printf("%s: timeout\n", __func__);
+		return MV_FAIL;
+	}
+
+	*result = (data >> TRAINING_RESULT_OFFS) & TRAINING_RESULT_MASK;
+
+	return MV_OK;
+}
+
 /*
  * Name:     ddr3_tip_a38x_select_ddr_controller.
  * Desc:     Enable/Disable access to Marvell's server.

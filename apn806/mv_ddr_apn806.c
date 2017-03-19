@@ -424,6 +424,39 @@ int mv_ddr_is_odpg_done(u32 count)
 	return MV_OK;
 }
 
+void mv_ddr_training_enable(void)
+{
+	dunit_write(GLOB_CTRL_STATUS_REG,
+		    TRAINING_TRIGGER_MASK << TRAINING_TRIGGER_OFFS,
+		    TRAINING_TRIGGER_ENA << TRAINING_TRIGGER_OFFS);
+}
+
+int mv_ddr_is_training_done(u32 count, u32 *result)
+{
+	u32 i, data;
+
+	if (result == NULL) {
+		printf("%s: NULL result pointer found\n", __func__);
+		return MV_FAIL;
+	}
+
+	for (i = 0; i < count; i++) {
+		dunit_read(GLOB_CTRL_STATUS_REG, MASK_ALL_BITS, &data);
+		if (((data >> TRAINING_DONE_OFFS) & TRAINING_DONE_MASK) ==
+		     TRAINING_DONE_DONE)
+			break;
+	}
+
+	if (i >= count) {
+		printf("%s: timeout\n", __func__);
+		return MV_FAIL;
+	}
+
+	*result = (data >> TRAINING_RESULT_OFFS) & TRAINING_RESULT_MASK;
+
+	return MV_OK;
+}
+
 /* return ddr frequency from sar */
 static int mv_ddr_sar_freq_get(int dev_num, enum hws_ddr_freq *freq)
 {

@@ -545,6 +545,10 @@ u32 *ddr3_tip_get_buf_ptr(u32 dev_num, enum hws_search_dir search,
 	return buf_ptr;
 }
 
+enum {
+	PASS,
+	FAIL
+};
 /*
  * IP Training search
  * Note: for one edge search only from fail to pass, else jitter can
@@ -562,12 +566,12 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 			 enum hws_ddr_cs cs_type, u32 cs_num,
 			 enum hws_training_ip_stat *train_status)
 {
-	u32 mask_dq_num_of_regs, mask_pup_num_of_regs, index_cnt, poll_cnt,
-		reg_data, pup_id, trigger_reg_addr;
+	u32 mask_dq_num_of_regs, mask_pup_num_of_regs, index_cnt,
+		reg_data, pup_id;
 	u32 tx_burst_size;
 	u32 delay_between_burst;
 	u32 rd_mode;
-	u32 read_data[MAX_INTERFACE_NUM];
+	u32 data;
 	struct pattern_info *pattern_table = ddr3_tip_get_pattern_table();
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
@@ -760,95 +764,24 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 		}
 	}
 
-	/* Start Training Trigger */
-	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3)
-		trigger_reg_addr = GLOB_CTRL_STATUS_REG;
-	else
-		trigger_reg_addr = ODPG_TRAINING_STATUS_REG;
-	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, interface_num,
-				       trigger_reg_addr, 1, 1));
+	/* trigger training */
+	mv_ddr_training_enable();
 
-	/* wait for all RFU tests to finish (or timeout) */
-	/* WA for 16 bit mode, more investigation needed */
+	/* wa for 16-bit mode: wait for all rfu tests to finish or timeout */
 	mdelay(1);
 
-	/* Training "Done ?" for CPU controlled TIP */
-	if (ddr3_tip_dev_attr_get(dev_num, MV_ATTR_TIP_REV) >= MV_TIP_REV_3) {
-		for (index_cnt = 0; index_cnt < MAX_INTERFACE_NUM; index_cnt++) {
-			VALIDATE_IF_ACTIVE(tm->if_act_mask, index_cnt);
-
-			if (interface_mask & (1 << index_cnt)) {
-				/* need to check results for this Dunit */
-				for (poll_cnt = 0; poll_cnt < max_polling_for_done;
-				     poll_cnt++) {
-					CHECK_STATUS(ddr3_tip_if_read
-						     (dev_num, ACCESS_TYPE_UNICAST,
-						      index_cnt,
-						      ODPG_TRAINING_STATUS_REG,
-						      read_data, MASK_ALL_BITS));
-					if ((read_data[index_cnt] & 0x2) != 0) {
-						/*done */
-						train_status[index_cnt] =
-							HWS_TRAINING_IP_STATUS_SUCCESS;
-						break;
-					}
-				}
-
-				if (poll_cnt == max_polling_for_done) {
-					train_status[index_cnt] =
-						HWS_TRAINING_IP_STATUS_TIMEOUT;
-				}
-			}
-			/* Be sure that ODPG done */
-			if (mv_ddr_is_odpg_done(MAX_POLLING_ITERATIONS) != MV_OK)
-				return MV_FAIL;
-		}
-
-		/* Write ODPG done in Dunit */
-		CHECK_STATUS(ddr3_tip_if_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_DONE_STATUS_REG, 0, 0x1));
+	/* check for training done */
+	if (mv_ddr_is_training_done(MAX_POLLING_ITERATIONS, &data) != MV_OK) {
+		train_status[0] = HWS_TRAINING_IP_STATUS_TIMEOUT;
+	} else { /* training done; check for pass */
+		if (data == PASS)
+			train_status[0] = HWS_TRAINING_IP_STATUS_SUCCESS;
+		else
+			train_status[0] = HWS_TRAINING_IP_STATUS_FAIL;
 	}
 
-	/* wait for all Dunit tests to finish (or timeout) */
-	/* Training "Done ?" */
-	/* Training "Pass ?" */
-	for (index_cnt = 0; index_cnt < MAX_INTERFACE_NUM; index_cnt++) {
-		VALIDATE_IF_ACTIVE(tm->if_act_mask, index_cnt);
-
-		if (interface_mask & (1 << index_cnt)) {
-			/* need to check results for this Dunit */
-			for (poll_cnt = 0; poll_cnt < max_polling_for_done;
-			     poll_cnt++) {
-				CHECK_STATUS(ddr3_tip_if_read
-					     (dev_num, ACCESS_TYPE_UNICAST,
-					      index_cnt,
-					      trigger_reg_addr,
-					      read_data, MASK_ALL_BITS));
-				reg_data = read_data[index_cnt];
-				if ((reg_data & 0x2) != 0) {
-					/* done */
-					if ((reg_data & 0x4) == 0) {
-						train_status[index_cnt] =
-							HWS_TRAINING_IP_STATUS_SUCCESS;
-					} else {
-						train_status[index_cnt] =
-							HWS_TRAINING_IP_STATUS_FAIL;
-					}
-					break;
-				}
-			}
-
-			if (poll_cnt == max_polling_for_done) {
-				train_status[index_cnt] =
-					HWS_TRAINING_IP_STATUS_TIMEOUT;
-			}
-		}
-	}
-
-	CHECK_STATUS(ddr3_tip_if_write
-		     (dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-		      ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS));
+	ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
+			  ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS);
 
 	return MV_OK;
 }
