@@ -1304,6 +1304,8 @@ int mv_ddr_mc_init(void)
 
 int ddr3_tip_configure_phy(u32 dev_num)
 {
+	u32 cs_num;
+
 	/* ADLL */
 	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 					PARAM_NOT_CARE, DDR_PHY_DATA, ADLL_CFG0_PHY_REG, 0x1503));
@@ -1325,24 +1327,39 @@ int ddr3_tip_configure_phy(u32 dev_num)
 	/* data receiver calibration */
 	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 					PARAM_NOT_CARE, DDR_PHY_DATA, VREF_BCAST_PHY_REG(0), 0x20));
-	/* vref configuration */
-	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					PARAM_NOT_CARE, DDR_PHY_DATA, PAD_CFG_PHY_REG, 0x427));
 	/* data drive strength */
 	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 					PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ZRI_CAL_PHY_REG, 0x70E));
 	/*ctrl drive strength*/
 	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 					PARAM_NOT_CARE, DDR_PHY_CONTROL, PAD_ZRI_CAL_PHY_REG, 0x70C));
-	/*data ODT*/
-	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ODT_CAL_PHY_REG, 0x8<<6));
+
 	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 					PARAM_NOT_CARE, DDR_PHY_DATA, TEST_ADLL_PHY_REG, 0x1));
 	/* set the phy register core_tx_data_samp_edge to posadge */
 	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 					PARAM_NOT_CARE, DDR_PHY_DATA, PHY_CTRL_PHY_REG, 0x6002));
+	CHECK_STATUS(calc_cs_num(DEV_NUM_0, 0, &cs_num));
+	if (cs_num == 1) {
+		/* vref configuration */
+		CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+			PARAM_NOT_CARE, DDR_PHY_DATA, PAD_CFG_PHY_REG, 0x427));
 
+		/*data ODT*/
+		CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+			PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ODT_CAL_PHY_REG, 0x8 << 6));
+
+
+	} else {/* dual cs */
+		/* vref configuration */
+		CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+			PARAM_NOT_CARE, DDR_PHY_DATA, PAD_CFG_PHY_REG, 0x429));
+
+		/*data ODT*/
+		CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+			PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ODT_CAL_PHY_REG, 0x4 << 6));
+
+	}
 
 	return MV_OK;
 }
