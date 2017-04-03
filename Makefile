@@ -224,7 +224,7 @@ MV_DDR_LIB = $(OBJ_DIR)/$(MV_DDR_LIBNAME)
 
 CFLAGS = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2 -nostdinc
 # PLATFORM is set in ble/ble.mk
-CFLAGS += -march=armv8-a -fpie $(INCLUDE) -D$(PLATFORM)
+CFLAGS += -march=armv8-a -fpie $(INCLUDE)
 CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806
 #CFLAGS += -DCONFIG_MC_STATIC
 #CFLAGS += -DCONFIG_MC_STATIC_PRINT
@@ -233,8 +233,12 @@ CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806
 ifeq ($(MV_DDR4),y)
 CFLAGS += -DCONFIG_DDR4
 endif
-ifeq ($(PLATFORM),$(filter $(PLATFORM),a80x0 a80x0_cust))
+ifneq ($(findstring a80x0,$(PLATFORM)),)
 CFLAGS += -DCONFIG_64BIT
+CFLAGS += -DA80X0
+endif
+ifneq ($(findstring a70x0,$(PLATFORM)),)
+CFLAGS += -DA70X0
 endif
 ifneq ($(ARCH),)
 CFLAGS += -D$(ARCH)

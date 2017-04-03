@@ -804,7 +804,7 @@ static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 #endif
 	ddr3_tip_init_config_func(dev_num, &config_func);
 
-#if defined(a80x0) || defined(a80x0_cust)
+#if defined(A80X0)
 	ddr3_tip_register_dq_table(dev_num, dq_bit_map_2_phy_pin[DDR4_DIMM]);
 #else
 	ddr3_tip_register_dq_table(dev_num, dq_bit_map_2_phy_pin[DDR4_BRD]);
@@ -1033,10 +1033,10 @@ int mv_ddr_pre_training_soc_config(const char *ddr_type)
 	}
 
 	reg_write(0x116D8, 0x3CC);
-#if defined(a80x0) || defined(a80x0_cust)
+#if defined(A80X0)
 	reg_write(0x6F0100, 0x4480006);	/* DSS_CR0_REG_ADDR: define dimm configuration */
 #endif
-#if defined(a70x0) || defined(a70x0_cust) || defined(a7040_pcac)
+#if defined(A70X0)
 	reg_write(0x6F0100, 0x44C0006);	/* DSS_CR0_REG_ADDR: define on-board configuration */
 #endif
 	reg_write(0x119D4, 0x2);	/* DRAM_PINS_MUX_REG: defines dimm or on-board, need to change in dimm */
@@ -1106,18 +1106,18 @@ int mv_ddr_mc6_init_controller(void)
 	reg_write(0x2031c, 0x0);	/* DRAM_Config_5 CS3: RTT_Park, RTT_WR */
 	reg_write(0x20304, 0x0);	/* DRAM_Config_2 */
 	reg_write(0x20308, 0x1);	/* DRAM_Config_3 DLL_reset */
-#if defined(a80x0) || defined(a80x0_cust)
+#if defined(A80X0)
 	reg_write(0x20314, 0x0);	/* DRAM_Config_5 CS1: RTT_Park, RTT_WR - Diff1 */
 #if defined(CONFIG_64BIT)
 	reg_write(0x20044, 0x30400);	/* MC_Control_0 - bust length, data width need to configure - diff4 - config */
 #else
 	reg_write(0x20044, 0x30300);	/* MC_Control_0 - bust length, data width need to configure - diff4 - config */
 #endif	/* (CONFIG_64BIT) */
-#endif	/* #if defined(a80x0) || defined(a80x0_cust) */
-#if defined(a70x0) || defined(a70x0_cust) || defined(a7040_pcac)
+#endif	/* #if defined(A80X0) */
+#if defined(A70X0)
 	reg_write(0x20314, 0x21010000);
 	reg_write(0x20044, 0x30300);
-#endif	/* #if defined(a70x0) || defined(a70x0_cust) || defined (a7040_pcac) */
+#endif	/* #if defined(A70X0) */
 	reg_write(0x202c0, 0x6000);	/* MC_Control_1 - tw2r_dis? , acs_exit_dly timing???, config?? */
 	reg_write(0x202c4, 0x120030);	/* MC_Control_2 - sdram typ, mode 2t, mirror en, rdimm mode - config */
 	reg_write(0x20180, 0x30200);	/* RPP_Starvation_Control - default */
@@ -1252,14 +1252,14 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 		int rev_id = apn806_rev_id_get();
 		if (rev_id == APN806_REV_ID_A0) {
 			status = MV_OK;
-#if defined(a70x0) || defined(a70x0_cust) || defined(a7040_pcac)
+#if defined(A70X0)
 			reg_write(0x114CC, 0x1200D);
 			reg_write(0x114C8, 0x1840008);
 			reg_write(0x117C8, 0x28A0008);
 			reg_write(0x11DC8, 0x1840008);
 			reg_write(0x11EC8, 0x28A0008);
 #endif
-#if defined(a80x0) || defined(a80x0_cust)
+#if defined(A80X0)
 			reg_write(0x114CC, 0x1200D);
 			reg_write(0x114C8, 0x1840008);
 			reg_write(0x117C8, 0x28A0008);

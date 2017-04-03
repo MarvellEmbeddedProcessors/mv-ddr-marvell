@@ -104,14 +104,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAX_CTRL_PHY_NUM	3
 #define DUNIT_BASE_ADDR		0x10000
 
-#if defined(a80x0)
+#if defined(A80X0)
 #define DATA_PHY_REGS_NUM	44
 #define CTRL_PHY_REGS_NUM	7
 #define DUNIT_4PHY_REGS_NUM	5
 #define MC6_4PHY_REGS_NUM	3
 #define MC6_REGS_NUM		47
 #define DUNIT_REGS_NUM		26
-#endif /* a80x0 */
+#endif /* A80X0 */
 
 
 #if defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC)
@@ -127,7 +127,7 @@ struct mc_regs_config {
 #endif /* CONFIG_PHY_STATIC or CONFIG_MC_STATIC */
 
 #if defined(CONFIG_MC_STATIC_PRINT) /* print mc static configuration */
-#if defined(a80x0)
+#if defined(A80X0)
 static u32 dunit_regs_list[DUNIT_REGS_NUM] = {
 	SDRAM_CFG_REG,
 	HORZ_SSTL_CAL_MACH_CTRL_REG,
@@ -260,16 +260,16 @@ int mv_ddr_mc_static_print(void)
 
 	return MV_OK;
 }
-#else /* not a80x0 */
+#else /* not A80X0 */
 int mv_ddr_mc_static_print(void)
 {
 	return MV_OK;
 }
-#endif /* a80x0 */
+#endif /* A80X0 */
 #endif /* CONFIG_MC_STATIC_PRINT */
 
 #if defined(CONFIG_MC_STATIC) /* configure mc statically */
-#if defined(a80x0)
+#if defined(A80X0)
 static struct mc_reg_data mc_regs_data[MC6_REGS_NUM + DUNIT_REGS_NUM + 1] = {
 	{0x11400, 0x6b10cc30},
 	{0x11400, 0x7b10cc30},
@@ -371,16 +371,16 @@ int mv_ddr_mc_static_config(void)
 
 	return MV_OK;
 }
-#else /* not a80x0 */
+#else /* not A80X0 */
 int mv_ddr_mc_static_config(void)
 {
 	return MV_OK;
 }
-#endif /* a80x0 */
+#endif /* A80X0 */
 #endif /* CONFIG_MC_STATIC */
 
 #if defined(CONFIG_PHY_STATIC_PRINT) /* print phy static configuration */
-#if defined(a80x0)
+#if defined(A80X0)
 static u32 data_phy_regs_list[DATA_PHY_REGS_NUM] = {
 	WL_PHY_REG(0),
 	CTX_PHY_REG(0),
@@ -551,16 +551,16 @@ int mv_ddr_phy_static_print(void)
 
 	return MV_OK;
 }
-#else /* not a80x0 */
+#else /* not A80X0 */
 int mv_ddr_phy_static_print(void)
 {
 	return MV_OK;
 }
-#endif /* a80x0 */
+#endif /* A80X0 */
 #endif /* CONFIG_PHY_STATIC_PRINT */
 
 #if defined(CONFIG_PHY_STATIC) /* configure phy statically */
-#if defined(a80x0)
+#if defined(A80X0)
 struct data_phy_reg_data {
 	u32 addr;
 	u16 data[MAX_DATA_PHY_NUM];
@@ -707,12 +707,12 @@ int mv_ddr_phy_static_config(void)
 
 	return MV_OK;
 }
-#else /* not a80x0 */
+#else /* not A80X0 */
 int mv_ddr_phy_static_config(void)
 {
 	return MV_OK;
 }
-#endif /* a80x0 */
+#endif /* A80X0 */
 
 #endif /* CONFIG_PHY_STATIC */
 #endif /* CONFIG_*_STATIC or CONFIG_*_STATIC_PRINT */

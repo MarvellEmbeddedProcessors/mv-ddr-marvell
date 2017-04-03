@@ -2677,12 +2677,12 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 					PARAM_NOT_CARE,
 					tm->interface_params[first_active_if].
 					memory_freq);
-#if defined(a70x0) || defined(a70x0_cust) || defined(a7040_pcac) || defined(a80x0) || defined(a80x0_cust)
+#if defined(A70X0) || defined(A80X0)
 	if (apn806_rev_id_get() == APN806_REV_ID_A0) {
 		reg_write(0x6f812c, extension_avs);
 		reg_write(0x6f8130, nominal_avs);
 	}
-#endif /* #if defined(a70x0) || defined(a70x0_cust) || defined(a7040_pcac) || defined(a80x0) || defined(a80x0_cust) */
+#endif /* #if defined(A70X0) || defined(A80X0) */
 		if (is_reg_dump != 0)
 			ddr3_tip_reg_dump(dev_num);
 		if (ret != MV_OK) {
