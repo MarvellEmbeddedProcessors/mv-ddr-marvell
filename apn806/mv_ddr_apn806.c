@@ -413,14 +413,8 @@ static int mv_ddr_sar_freq_get(int dev_num, enum hws_ddr_freq *freq)
 	case CPU_1800_DDR_1050_RCLK_1050:
 		*freq = DDR_FREQ_1050;
 		break;
-	case CPU_1600_DDR_900_RCLK_900:
-		*freq = DDR_FREQ_900;
-		break;
 	case CPU_1600_DDR_1050_RCLK_1050:
 		*freq = DDR_FREQ_1050;
-		break;
-	case CPU_1600_DDR_900_RCLK_900_2:
-		*freq = DDR_FREQ_900;
 		break;
 	case CPU_1000_DDR_650_RCLK_650:
 		*freq = DDR_FREQ_650;
