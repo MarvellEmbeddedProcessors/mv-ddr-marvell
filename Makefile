@@ -240,6 +240,9 @@ endif
 ifneq ($(findstring a70x0,$(PLATFORM)),)
 CFLAGS += -DA70X0
 endif
+ifneq ($(findstring a7040,$(PLATFORM)),)
+CFLAGS += -DA70X0
+endif
 ifneq ($(ARCH),)
 CFLAGS += -D$(ARCH)
 endif
