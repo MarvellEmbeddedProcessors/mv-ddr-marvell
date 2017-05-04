@@ -993,13 +993,40 @@ int mv_ddr_early_init2(void)
 	return MV_OK;
 }
 
+#define AVS_DELTA	5
 int mv_ddr_pre_training_fixup(void)
 {
+	u32 reg_val, avs_val;
+
+	/* read and save avs voltage to restore it later */
+	nominal_avs = reg_read(AVS_ENABLED_CTRL_REG);
+	extension_avs = reg_read(AVS_DISABLED_CTRL2_REG);
+
+	/* update avs voltage for generic run */
+	reg_write(AVS_DISABLED_CTRL2_REG, 0xfde1ffff);
+	if (apn806_rev_id_get() == APN806_REV_ID_A0) {
+		reg_write(AVS_ENABLED_CTRL_REG, 0x1002f2f5);
+	} else {
+		reg_val = nominal_avs;
+		/* extract nominal avs value */
+		avs_val = (reg_val >> AVS_LOW_VDD_LMT_OFFS) & AVS_LOW_VDD_LMT_MASK;
+		/* reduce nominal avs value */
+		avs_val -= AVS_DELTA;
+		/* write reduced avs value */
+		reg_val &= ~(AVS_LOW_VDD_LMT_MASK << AVS_LOW_VDD_LMT_OFFS);
+		reg_val |= ((avs_val & AVS_LOW_VDD_LMT_MASK) << AVS_LOW_VDD_LMT_OFFS);
+		reg_val &= ~(AVS_HIGH_VDD_LMT_MASK << AVS_HIGH_VDD_LMT_OFFS);
+		reg_val |= ((avs_val & AVS_HIGH_VDD_LMT_MASK) << AVS_HIGH_VDD_LMT_OFFS);
+		reg_write(AVS_ENABLED_CTRL_REG, reg_val);
+	}
+
 	return 0;
 }
 
 int mv_ddr_post_training_fixup(void)
 {
+	reg_write(AVS_ENABLED_CTRL_REG, nominal_avs);
+
 	return 0;
 }
 
@@ -1104,16 +1131,6 @@ int ddr3_silicon_post_init(void)
 
 int mv_ddr_pre_training_soc_config(const char *ddr_type)
 {
-	if (apn806_rev_id_get() == APN806_REV_ID_A0) {
-		/* read the avs volatage and save it for later */
-		nominal_avs = reg_read(0x6f8130);
-		extension_avs = reg_read(0x6f812c);
-
-		/* in case of running generic first write to avs */
-		reg_write(0x6f812C, 0xFDE1FFFF);
-		reg_write(0x6f8130, 0x1002f2f5);
-	}
-
 	reg_write(0x116D8, 0x3CC);
 #if defined(A80X0)
 	reg_write(0x6F0100, 0x4480006);	/* DSS_CR0_REG_ADDR: define dimm configuration */
