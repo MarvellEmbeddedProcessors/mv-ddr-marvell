@@ -146,14 +146,14 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	if (page_size == 1) {
 		mc6_timing.t_faw = speed_bin_table(speed_bin_index, SPEED_BIN_TFAW1K);
 		/* printf("t_faw = %d\n", mc6_timing.t_faw); */
-		mc6_timing.t_faw = time_to_nclk(mc6_timing.t_faw, mc6_timing.t_ckclk);
 		mc6_timing.t_faw = GET_MAX_VALUE(mc6_timing.t_ckclk * 20, mc6_timing.t_faw);
+		mc6_timing.t_faw = time_to_nclk(mc6_timing.t_faw, mc6_timing.t_ckclk);
 		/* printf("t_faw = %d\n", mc6_timing.t_faw); */
 	} else {	/* page size =2, we do not support page size 0.5k */
 		mc6_timing.t_faw = speed_bin_table(speed_bin_index, SPEED_BIN_TFAW2K);
 		/* printf("t_faw = %d\n", mc6_timing.t_faw); */
-		mc6_timing.t_faw = time_to_nclk(mc6_timing.t_faw, mc6_timing.t_ckclk);
 		mc6_timing.t_faw = GET_MAX_VALUE(mc6_timing.t_ckclk * 28, mc6_timing.t_faw);
+		mc6_timing.t_faw = time_to_nclk(mc6_timing.t_faw, mc6_timing.t_ckclk);
 		/* printf("t_faw = %d\n", mc6_timing. t_faw); */
 	}
 
@@ -318,6 +318,8 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_mrd_pda = TIMING_T_MRD_PDA;
 	/* printf("t_mrd_pda = %d\n", mc6_timing.t_mrd_pda); */
 	mc6_timing.t_mrd_pda = GET_MAX_VALUE(mc6_timing.t_ckclk * 16, mc6_timing.t_mrd_pda);
+	/* printf("t_mrd_pda = %d\n", mc6_timing. t_mrd_pda); */
+	mc6_timing.t_mrd_pda = time_to_nclk(mc6_timing.t_mrd_pda, mc6_timing.t_ckclk);
 	/* printf("t_mrd_pda = %d\n", mc6_timing. t_mrd_pda); */
 
 	mc6_timing.t_xsdll = speed_bin_table(speed_bin_index, SPEED_BIN_TXSDLL);
