@@ -142,6 +142,8 @@ int ddr3_init(void)
 	/* Print mv_ddr version */
 	mv_ddr_ver_print();
 
+	mv_ddr_pre_training_fixup();
+
 	/* SoC/Board special initializations */
 	mv_ddr_pre_training_soc_config(ddr_type);
 
@@ -221,6 +223,8 @@ int ddr3_init(void)
 		else
 			ddr3_new_tip_ecc_scrub();
 	}
+
+	mv_ddr_post_training_fixup();
 
 	printf("mv_ddr: completed successfully\n");
 

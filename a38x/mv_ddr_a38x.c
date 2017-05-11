@@ -1203,6 +1203,16 @@ int mv_ddr_early_init2(void)
 	return MV_OK;
 }
 
+int mv_ddr_pre_training_fixup(void)
+{
+	return 0;
+}
+
+int mv_ddr_post_training_fixup(void)
+{
+	return 0;
+}
+
 int ddr3_post_run_alg(void)
 {
 	return MV_OK;

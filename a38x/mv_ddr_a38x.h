@@ -353,4 +353,6 @@ int mv_ddr_is_odpg_done(u32 count);
 void mv_ddr_training_enable(void);
 int mv_ddr_is_training_done(u32 count, u32 *result);
 u32 mv_ddr_dm_pad_get(void);
+int mv_ddr_pre_training_fixup(void);
+int mv_ddr_post_training_fixup(void);
 #endif /* _MV_DDR_A38X_H */

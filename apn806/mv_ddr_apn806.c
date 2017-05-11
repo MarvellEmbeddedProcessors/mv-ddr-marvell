@@ -993,6 +993,16 @@ int mv_ddr_early_init2(void)
 	return MV_OK;
 }
 
+int mv_ddr_pre_training_fixup(void)
+{
+	return 0;
+}
+
+int mv_ddr_post_training_fixup(void)
+{
+	return 0;
+}
+
 /*
  * Name:     mv_ddr_convert_read_params_from_tip2mc6.
  * Desc:     convert the read ready and the read sample from tip to mc6.
