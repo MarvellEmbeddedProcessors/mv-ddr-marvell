@@ -258,6 +258,8 @@ enum mv_ddr_mc6_bank_boundary {
 #define MC6_CH0_ODT_CTRL1_REG			(MC6_BASE + 0x340)
 #define MC6_CH0_ODT_CTRL2_REG			(MC6_BASE + 0x344)
 
+#define MC6_CH0_ECC_1BIT_ERR_COUNTER_REG	(MC6_BASE + 0x364)
+
 /* mc6 timing */
 #define MC6_CH0_DDR_INIT_TIMING_CTRL0_REG	(MC6_BASE + 0x380)
 #define INIT_COUNT_NOP_OFFS			0
