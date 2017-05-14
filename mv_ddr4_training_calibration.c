@@ -116,6 +116,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PBS_VAL_FACTOR		1000
 #define MV_DDR_VW_TX_NOISE_FILTER	8	/* adlls */
 
+u8 dq_vref_vec[MAX_BUS_NUM];	/* stability support */
+u8 rx_eye_hi_lvl[MAX_BUS_NUM];	/* rx adjust support */
+u8 rx_eye_lo_lvl[MAX_BUS_NUM];	/* rx adjust support */
+
 static u8 pbs_max = 31;
 static u8 vdq_tv; /* vref value for dq vref calibration */
 static u8 duty_cycle; /* duty cycle value for receiver calibration */
@@ -361,6 +365,7 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num, u16 (*pbs_tap_factor)[MAX_BUS_NUM][B
 		for (subphy_num = 0; subphy_num < subphy_max; subphy_num++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy_num);
 			vref_avg += center_vref[if_id][subphy_num];
+			dq_vref_vec[subphy_num] = center_vref[if_id][subphy_num];
 			vref_subphy_num++;
 		}
 
@@ -1873,6 +1878,9 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 					  ("calculating center of mass for subphy %d, valid window size %d\n",
 					   subphy_num, valid_win_size[if_id][subphy_num]));
 			if (valid_vref_cnt[if_id][subphy_num] > 0) {
+				rx_eye_hi_lvl[subphy_num] =
+					valid_vref_ptr[if_id][subphy_num][valid_vref_cnt[if_id][subphy_num] - 1];
+				rx_eye_lo_lvl[subphy_num] = valid_vref_ptr[if_id][subphy_num][0];
 				/* calculate center of mass sampling point (t, v) for each subphy */
 				status = mv_ddr4_center_of_mass_calc(dev_num, if_id, subphy_num, RX_DIR,
 								     dq_vref_start_win[if_id][subphy_num],
