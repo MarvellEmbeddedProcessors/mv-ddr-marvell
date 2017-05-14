@@ -167,13 +167,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_XOR_BASE	0x00400000
 
 /* descriptors queue memory size */
-#define MV_XOR_QMEM_SIZE		((MV_XOR_V2_MAX_DESC_NUM) * (MV_XOR_V2_EXT_DESC_SIZE))
+#define MV_XOR_QMEM_SIZE		((MV_XOR_V2_MAX_DESC_NUM) * (MV_XOR_V2_MIN_DESC_SIZE))
 #define MV_XOR_QMEM_START_ADDR		0x0
 #define MV_XOR_QMEM_END_ADDR		((MV_XOR_QMEM_START_ADDR) + (MV_XOR_QMEM_SIZE))
 
-#define MV_XOR_MAX_BURST_512B		5
-#define MV_XOR_MAX_BURST_MASK		0x1ff
-#define MV_XOR_MAX_TRANSFER_SIZE	((UINT32_MAX) & ~MV_XOR_MAX_BURST_MASK)
+#define MV_XOR_MAX_BURST_SIZE		4
+#define MV_XOR_MAX_BURST_SIZE_MASK	0xff
+#define MV_XOR_MAX_TRANSFER_SIZE	((UINT32_MAX) & ~MV_XOR_MAX_BURST_SIZE_MASK)
 
 /*
  * struct mv_xor_v2_descriptor - dma hardware descriptor
@@ -184,9 +184,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @buff_size: amount of bytes to be processed
  * @fill_pattern_src_addr: fill-pattern or source-address and
  * aw-attributes
- * @data_buff_addr: source (and might be raid 6 destination)
- * addresses of data buffers in raid 5 and raid 6
- * @reserved: reserved
  */
 struct mv_xor_v2_descriptor {
 	u16 desc_id;
@@ -212,8 +209,6 @@ struct mv_xor_v2_descriptor {
 
 	u32 buff_size;
 	u32 fill_pattern_src_addr[4];
-	u32 data_buff_addr[MV_XOR_V2_DESC_BUFF_D_ADDR_SIZE];
-	u32 reserved[MV_XOR_V2_DESC_RESERVED_SIZE];
 };
 
 /* descriptors queue memory is located in dram; dram is not coherent */
@@ -222,7 +217,7 @@ static void mv_xor_v2_init(u32 base, u32 qmem)
 	u32 reg_val;
 
 	/* set descriptor size to dma engine */
-	reg_write(base + DMA_DESQ_CTRL_OFF, DMA_DESQ_CTRL_128B);
+	reg_write(base + DMA_DESQ_CTRL_OFF, DMA_DESQ_CTRL_32B);
 
 	/* set descriptors queue size to dma engine */
 	reg_write(base + DMA_DESQ_SIZE_OFF, MV_XOR_V2_MAX_DESC_NUM);
@@ -248,13 +243,13 @@ static void mv_xor_v2_init(u32 base, u32 qmem)
 
 	/*
 	 * bandwidth control to optimize xor performance:
-	 * - set write/read burst lengths to maximum 512B write/read transactions;
+	 * - set write/read burst lengths to maximum 256B write/read transactions;
 	 * - set outstanding write/read data requests to maximum value.
 	 */
 	reg_val = (GLOB_BW_CTRL_NUM_OSTD_RD_VAL << GLOB_BW_CTRL_NUM_OSTD_RD_SHIFT) |
 		(GLOB_BW_CTRL_NUM_OSTD_WR_VAL << GLOB_BW_CTRL_NUM_OSTD_WR_SHIFT) |
-		(MV_XOR_MAX_BURST_512B << GLOB_BW_CTRL_RD_BURST_LEN_SHIFT) |
-		(MV_XOR_MAX_BURST_512B << GLOB_BW_CTRL_WR_BURST_LEN_SHIFT);
+		(MV_XOR_MAX_BURST_SIZE << GLOB_BW_CTRL_RD_BURST_LEN_SHIFT) |
+		(MV_XOR_MAX_BURST_SIZE << GLOB_BW_CTRL_WR_BURST_LEN_SHIFT);
 	reg_write(base + GLOB_BW_CTRL, reg_val);
 
 	/* disable axi timer feature */
@@ -279,8 +274,6 @@ static void mv_xor_v2_desc_create(uint64_t qmem, int desc_id, uint64_t start, ui
 	desc->fill_pattern_src_addr[1] = (u32)(data >> 32);
 	desc->fill_pattern_src_addr[2] = (u32)start;
 	desc->fill_pattern_src_addr[3] = (u32)(start >> 32);
-	desc->data_buff_addr[0] = (u32)start;
-	desc->data_buff_addr[2] = (u32)(start >> 32) & 0xffff;
 }
 
 static void mv_xor_v2_enqueue(u32 base, u32 n)
