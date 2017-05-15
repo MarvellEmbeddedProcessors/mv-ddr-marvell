@@ -329,14 +329,14 @@ void mv_ddr_mem_scrubbing(void)
 
 	/* scrub memory up to non-dram memory region */
 	if (tot_mem_sz < NON_DRAM_MEM_RGN_START_ADDR)
-		mv_ddr_xor_mem_scrubbing(0, tot_mem_sz, val);
+		mv_ddr_dma_memset(0, tot_mem_sz, val);
 	else
-		mv_ddr_xor_mem_scrubbing(0, NON_DRAM_MEM_RGN_START_ADDR, val);
+		mv_ddr_dma_memset(0, NON_DRAM_MEM_RGN_START_ADDR, val);
 
 	/* scrub memory up to the end */
 	if (tot_mem_sz > NON_DRAM_MEM_RGN_END_ADDR)
-		mv_ddr_xor_mem_scrubbing(NON_DRAM_MEM_RGN_END_ADDR,
-					 tot_mem_sz - NON_DRAM_MEM_RGN_START_ADDR, val);
+		mv_ddr_dma_memset(NON_DRAM_MEM_RGN_END_ADDR,
+				  tot_mem_sz - NON_DRAM_MEM_RGN_START_ADDR, val);
 }
 
 static u8 mv_ddr_tip_clk_ratio_get(u32 freq)

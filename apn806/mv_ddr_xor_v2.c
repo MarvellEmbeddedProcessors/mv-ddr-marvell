@@ -171,12 +171,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_XOR_QMEM_START_ADDR		0x0
 #define MV_XOR_QMEM_END_ADDR		((MV_XOR_QMEM_START_ADDR) + (MV_XOR_QMEM_SIZE))
 
-#define MV_XOR_MAX_BURST_SIZE		4
+#define MV_XOR_MAX_BURST_SIZE		4	/* 256B read or write transfers */
 #define MV_XOR_MAX_BURST_SIZE_MASK	0xff
 #define MV_XOR_MAX_TRANSFER_SIZE	((UINT32_MAX) & ~MV_XOR_MAX_BURST_SIZE_MASK)
 
+enum mv_xor_v2_desc_op_mode {
+	DESC_OP_MODE_NOP,		/* 0: idle operation */
+	DESC_OP_MODE_MEMCPY,		/* 1: pure-dma operation */
+	DESC_OP_MODE_MEMSET,		/* 2: mem-fill operation */
+	DESC_OP_MODE_MEMINIT,		/* 3: mem-init operation */
+	DESC_OP_MODE_MEMCMP,		/* 4: mem-compare operation */
+	DESC_OP_MODE_CRC32,		/* 5: crc32 calculation */
+	DESC_OP_MODE_XOR,		/* 6: raid 5 (xor) operation */
+	DESC_OP_MODE_RAID6,		/* 7: raid 6 p&q-generation */
+	DESC_OP_MODE_RAID6_REC		/* 8: raid 6 recovery */
+};
+
 /*
- * struct mv_xor_v2_descriptor - dma hardware descriptor
+ * struct mv_xor_v2_hw_desc - dma hardware descriptor
  * @desc_id: used by software; not affected by hardware
  * @flags: error and status flags
  * @crc32_result: crc32 calculation result
@@ -185,7 +197,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @fill_pattern_src_addr: fill-pattern or source-address and
  * aw-attributes
  */
-struct mv_xor_v2_descriptor {
+struct mv_xor_v2_hw_desc {
 	u16 desc_id;
 	u16 flags;
 	u32 crc32_result;
@@ -194,21 +206,12 @@ struct mv_xor_v2_descriptor {
 /* definitions for desc_ctrl */
 #define DESC_NUM_ACTIVE_D_BUF_SHIFT	22
 #define DESC_OP_MODE_SHIFT		28
-#define DESC_OP_MODE_NOP		0	/* idle operation */
-#define DESC_OP_MODE_MEMCPY		1	/* pure-dma operation */
-#define DESC_OP_MODE_MEMSET		2	/* mem-fill operation */
-#define DESC_OP_MODE_MEMINIT		3	/* mem-init operation */
-#define DESC_OP_MODE_MEM_COMPARE	4	/* mem-compare operation */
-#define DESC_OP_MODE_CRC32		5	/* crc32 calculation */
-#define DESC_OP_MODE_XOR		6	/* raid 5 (xor) operation */
-#define DESC_OP_MODE_RAID6		7	/* raid 6 p&q-generation */
-#define DESC_OP_MODE_RAID6_REC		8	/* raid 6 recovery */
-#define DESC_Q_BUFFER_ENABLE		BIT(16)
-#define DESC_P_BUFFER_ENABLE		BIT(17)
-#define DESC_IOD			BIT(27)
 
 	u32 buff_size;
-	u32 fill_pattern_src_addr[4];
+	u32 fill_pattern_src_addr_lo;
+	u32 fill_pattern_src_addr_hi;
+	u32 fill_pattern_dst_addr_lo;
+	u32 fill_pattern_dst_addr_hi;
 };
 
 /* descriptors queue memory is located in dram; dram is not coherent */
@@ -243,13 +246,13 @@ static void mv_xor_v2_init(u32 base, u32 qmem)
 
 	/*
 	 * bandwidth control to optimize xor performance:
-	 * - set write/read burst lengths to maximum 256B write/read transactions;
+	 * - set write/read burst lengths to maximum write/read transactions;
 	 * - set outstanding write/read data requests to maximum value.
 	 */
 	reg_val = (GLOB_BW_CTRL_NUM_OSTD_RD_VAL << GLOB_BW_CTRL_NUM_OSTD_RD_SHIFT) |
-		(GLOB_BW_CTRL_NUM_OSTD_WR_VAL << GLOB_BW_CTRL_NUM_OSTD_WR_SHIFT) |
-		(MV_XOR_MAX_BURST_SIZE << GLOB_BW_CTRL_RD_BURST_LEN_SHIFT) |
-		(MV_XOR_MAX_BURST_SIZE << GLOB_BW_CTRL_WR_BURST_LEN_SHIFT);
+		  (GLOB_BW_CTRL_NUM_OSTD_WR_VAL << GLOB_BW_CTRL_NUM_OSTD_WR_SHIFT) |
+		  (MV_XOR_MAX_BURST_SIZE << GLOB_BW_CTRL_RD_BURST_LEN_SHIFT) |
+		  (MV_XOR_MAX_BURST_SIZE << GLOB_BW_CTRL_WR_BURST_LEN_SHIFT);
 	reg_write(base + GLOB_BW_CTRL, reg_val);
 
 	/* disable axi timer feature */
@@ -261,19 +264,28 @@ static void mv_xor_v2_init(u32 base, u32 qmem)
 	reg_write(base + DMA_DESQ_STOP_OFF, DMA_DESQ_STOP_QUEUE_DIS_ENA << DMA_DESQ_STOP_QUEUE_DIS_OFFS);
 }
 
-static void mv_xor_v2_desc_create(uint64_t qmem, int desc_id, uint64_t start, uint64_t size, uint64_t data)
+static void mv_xor_v2_desc_prep(uint64_t qmem, int desc_id, enum mv_xor_v2_desc_op_mode op_mode,
+				      uint64_t src, uint64_t dst, uint64_t size, uint64_t data)
 {
-	struct mv_xor_v2_descriptor *desc = (struct mv_xor_v2_descriptor *)qmem;
+	struct mv_xor_v2_hw_desc *desc = (struct mv_xor_v2_hw_desc *)qmem;
 
 	desc = &desc[desc_id];
-	memset(desc, 0, sizeof(*desc));
+	memset((void *)desc, 0, sizeof(*desc));
 	desc->desc_id = desc_id;
-	desc->desc_ctrl = DESC_OP_MODE_MEMSET << DESC_OP_MODE_SHIFT;
 	desc->buff_size = size;
-	desc->fill_pattern_src_addr[0] = (u32)data;
-	desc->fill_pattern_src_addr[1] = (u32)(data >> 32);
-	desc->fill_pattern_src_addr[2] = (u32)start;
-	desc->fill_pattern_src_addr[3] = (u32)(start >> 32);
+
+	switch (op_mode) {
+	case DESC_OP_MODE_MEMSET:
+		desc->desc_ctrl = DESC_OP_MODE_MEMSET << DESC_OP_MODE_SHIFT;
+		desc->fill_pattern_src_addr_lo = (u32)data;
+		desc->fill_pattern_src_addr_hi = (u32)(data >> 32);
+		desc->fill_pattern_dst_addr_lo = (u32)dst;
+		desc->fill_pattern_dst_addr_hi = (u32)(dst >> 32);
+		break;
+	default:
+		printf("mv_ddr: dma: unsupported operation mode\n");
+		return;
+	}
 }
 
 static void mv_xor_v2_enqueue(u32 base, u32 n)
@@ -294,8 +306,8 @@ static void mv_xor_v2_finish(u32 base)
 	reg_write(base + DMA_DESQ_STOP_OFF, DMA_DESQ_STOP_QUEUE_RESET_ENA << DMA_DESQ_STOP_QUEUE_RESET_OFFS);
 }
 
-/* mv_ddr xor api */
-void mv_ddr_xor_mem_scrubbing(uint64_t start_addr, uint64_t size, uint64_t data)
+/* mv_ddr dma api */
+void mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 {
 	uint64_t start = start_addr;
 	uint64_t end = start_addr + size;
@@ -303,7 +315,7 @@ void mv_ddr_xor_mem_scrubbing(uint64_t start_addr, uint64_t size, uint64_t data)
 	int desc_id = 0;
 
 	/* initialize xor queue memory region */
-	memset(MV_XOR_QMEM_START_ADDR, 0, MV_XOR_QMEM_SIZE);
+	memset((void *)MV_XOR_QMEM_START_ADDR, 0, MV_XOR_QMEM_SIZE);
 
 	/* initialize xor engine */
 	mv_xor_v2_init(MV_XOR_BASE, MV_XOR_QMEM_START_ADDR);
@@ -314,13 +326,14 @@ void mv_ddr_xor_mem_scrubbing(uint64_t start_addr, uint64_t size, uint64_t data)
 	while (start < end) {
 		if (desc_id >= MV_XOR_V2_MAX_DESC_NUM) {
 			/* increase xor max desc number if required */
-			printf("mv_ddr: xor engine out of memory\n");
+			printf("mv_ddr: dma: out of memory\n");
 			return;
 		}
 		buffer_size = end - start;
 		if (buffer_size > MV_XOR_MAX_TRANSFER_SIZE)
 			buffer_size = MV_XOR_MAX_TRANSFER_SIZE;
-		mv_xor_v2_desc_create(MV_XOR_QMEM_START_ADDR, desc_id, start, buffer_size, data);
+		mv_xor_v2_desc_prep(MV_XOR_QMEM_START_ADDR, desc_id, DESC_OP_MODE_MEMSET,
+				    0, start, buffer_size, data);
 		mv_xor_v2_enqueue(MV_XOR_BASE, 1);
 		desc_id++;
 		start += buffer_size;

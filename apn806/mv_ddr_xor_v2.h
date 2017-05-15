@@ -98,6 +98,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_XOR_V2_H
 #define _MV_DDR_XOR_V2_H
 
-void mv_ddr_xor_mem_scrubbing(uint64_t start_addr, uint64_t size, uint64_t data);
+void mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data);
 
 #endif /* _MV_DDR_XOR_V2_H */
