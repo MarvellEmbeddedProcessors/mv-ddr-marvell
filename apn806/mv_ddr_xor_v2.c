@@ -312,7 +312,12 @@ void mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 	uint64_t start = start_addr;
 	uint64_t end = start_addr + size;
 	uint64_t buffer_size;
+	uintptr_t p;
 	int desc_id = 0;
+
+	if (start_addr < MV_XOR_QMEM_START_ADDR)
+		for (p = 0; p < MV_XOR_QMEM_START_ADDR; p += 8)
+			writeq(p, data);
 
 	/* initialize xor queue memory region */
 	memset((void *)MV_XOR_QMEM_START_ADDR, 0, MV_XOR_QMEM_SIZE);
