@@ -199,11 +199,22 @@ enum mv_xor_v2_desc_op_mode {
  */
 struct mv_xor_v2_hw_desc {
 	u16 desc_id;
+
+/* definitions for flags */
+#define DESC_BYTE_CMP_STATUS_OFFS	9
+#define DESC_BYTE_CMP_STATUS_MASK	0x1
+#define DESC_BYTE_CMP_STATUS_FAIL	0
+#define DESC_BYTE_CMP_STATUS_OK		1
+
 	u16 flags;
 	u32 crc32_result;
 	u32 desc_ctrl;
 
 /* definitions for desc_ctrl */
+#define DESC_BYTE_CMP_CRC_FIRST_SHIFT	19
+#define DESC_BYTE_CMP_CRC_FIRST_ENA	1
+#define DESC_BYTE_CMP_CRC_LAST_SHIFT	20
+#define DESC_BYTE_CMP_CRC_LAST_ENA	1
 #define DESC_NUM_ACTIVE_D_BUF_SHIFT	22
 #define DESC_OP_MODE_SHIFT		28
 
@@ -282,6 +293,22 @@ static void mv_xor_v2_desc_prep(uint64_t qmem, int desc_id, enum mv_xor_v2_desc_
 		desc->fill_pattern_dst_addr_lo = (u32)dst;
 		desc->fill_pattern_dst_addr_hi = (u32)(dst >> 32);
 		break;
+	case DESC_OP_MODE_MEMCPY:
+		desc->desc_ctrl = DESC_OP_MODE_MEMCPY << DESC_OP_MODE_SHIFT;
+		desc->fill_pattern_src_addr_lo = (u32)src;
+		desc->fill_pattern_src_addr_hi = (u32)(src >> 32);
+		desc->fill_pattern_dst_addr_lo = (u32)dst;
+		desc->fill_pattern_dst_addr_hi = (u32)(dst >> 32);
+		break;
+	case DESC_OP_MODE_MEMCMP:
+		desc->desc_ctrl = (DESC_OP_MODE_MEMCMP << DESC_OP_MODE_SHIFT) |
+				  (DESC_BYTE_CMP_CRC_FIRST_ENA << DESC_BYTE_CMP_CRC_FIRST_SHIFT) |
+				  (DESC_BYTE_CMP_CRC_LAST_ENA << DESC_BYTE_CMP_CRC_LAST_SHIFT);
+		desc->fill_pattern_src_addr_lo = (u32)src;
+		desc->fill_pattern_src_addr_hi = (u32)(src >> 32);
+		desc->fill_pattern_dst_addr_lo = (u32)dst;
+		desc->fill_pattern_dst_addr_hi = (u32)(dst >> 32);
+		break;
 	default:
 		printf("mv_ddr: dma: unsupported operation mode\n");
 		return;
@@ -304,6 +331,15 @@ static void mv_xor_v2_finish(u32 base)
 {
 	/* reset dma engine */
 	reg_write(base + DMA_DESQ_STOP_OFF, DMA_DESQ_STOP_QUEUE_RESET_ENA << DMA_DESQ_STOP_QUEUE_RESET_OFFS);
+}
+
+static u32 mv_xor_v2_memcmp_status_get(uint64_t qmem, int desc_id)
+{
+	struct mv_xor_v2_hw_desc *desc = (struct mv_xor_v2_hw_desc *)qmem;
+
+	desc = &desc[desc_id];
+
+	return (desc->flags >> DESC_BYTE_CMP_STATUS_OFFS) & DESC_BYTE_CMP_STATUS_MASK;
 }
 
 /* mv_ddr dma api */
@@ -350,4 +386,58 @@ void mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 
 	/* disable xor engine */
 	mv_xor_v2_finish(MV_XOR_BASE);
+}
+
+void mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size)
+{
+	int desc_id = 0;
+
+	/* initialize dma descriptors queue memory region */
+	memset((void *)MV_XOR_QMEM_START_ADDR, 0, MV_XOR_QMEM_SIZE);
+
+	/* initialize dma engine */
+	mv_xor_v2_init(MV_XOR_BASE, MV_XOR_QMEM_START_ADDR);
+
+	/* prepare dma hw descriptor and enqueue it to start processing */
+	mv_xor_v2_desc_prep(MV_XOR_QMEM_START_ADDR, desc_id, DESC_OP_MODE_MEMCPY,
+			    src, dst, size, 0);
+	mv_xor_v2_enqueue(MV_XOR_BASE, 1);
+	desc_id++;
+
+	/* wait for transfer completion */
+	while (mv_xor_v2_done(MV_XOR_BASE) != desc_id)
+		;
+
+	/* disable dma engine */
+	mv_xor_v2_finish(MV_XOR_BASE);
+}
+
+int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t size)
+{
+	int desc_id = 0;
+
+	/* initialize dma descriptors queue memory region */
+	memset((void *)MV_XOR_QMEM_START_ADDR, 0, MV_XOR_QMEM_SIZE);
+
+	/* initialize dma engine */
+	mv_xor_v2_init(MV_XOR_BASE, MV_XOR_QMEM_START_ADDR);
+
+	/* prepare dma hw descriptor and enqueue it to start processing */
+	mv_xor_v2_desc_prep(MV_XOR_QMEM_START_ADDR, desc_id, DESC_OP_MODE_MEMCMP,
+			    src, dst, size, 0);
+	mv_xor_v2_enqueue(MV_XOR_BASE, 1);
+	desc_id++;
+
+	/* wait for transfer completion */
+	while (mv_xor_v2_done(MV_XOR_BASE) != desc_id)
+		;
+	desc_id--;
+
+	/* disable xor engine */
+	mv_xor_v2_finish(MV_XOR_BASE);
+
+	if (mv_xor_v2_memcmp_status_get(MV_XOR_QMEM_START_ADDR, desc_id))
+		return 0; /* pass */
+
+	return 1; /* fail */
 }

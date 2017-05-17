@@ -99,5 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MV_DDR_XOR_V2_H
 
 void mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data);
+void mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size);
+int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t size);
 
 #endif /* _MV_DDR_XOR_V2_H */
