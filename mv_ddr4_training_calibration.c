@@ -1212,6 +1212,7 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 	int wl_tap, new_wl_tap;
 	int pbs_tap_factor_avg;
 	int dqs_shift[MAX_BUS_NUM]; /* dqs' pbs delay */
+	static u16 tmp_pbs_tap_factor[MAX_INTERFACE_NUM][MAX_BUS_NUM][BUS_WIDTH_IN_BITS];
 	DEBUG_TAP_TUNING_ENGINE(DEBUG_LEVEL_INFO, ("Starting ddr4 tap tuning training stage\n"));
 
 	for (i = 0; i < MAX_BUS_NUM; i++)
@@ -1497,10 +1498,19 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 						limit_div = 2;
 					}
 
-					if (limit_div != 0) {
+					/*
+					 * workaround for false tx measurements in tap tune stage
+					 * tx pbs factor will use rx pbs factor results instead
+					 */
+					if ((limit_div != 0) && (mode == RX_DIR)) {
 						pbs_tap_factor[iface][subphy][bit] =
 							PBS_VAL_FACTOR * (start_win_diff + end_win_diff) /
 							(new_pbs_per_byte[subphy] * limit_div);
+						tmp_pbs_tap_factor[iface][subphy][bit] =
+							pbs_tap_factor[iface][subphy][bit];
+					} else {
+						pbs_tap_factor[iface][subphy][bit] =
+							tmp_pbs_tap_factor[iface][subphy][bit];
 					}
 
 					DEBUG_TAP_TUNING_ENGINE(DEBUG_LEVEL_INFO,
