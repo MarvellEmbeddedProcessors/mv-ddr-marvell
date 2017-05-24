@@ -97,6 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 #include "mv_ddr_xor_v2.h"
+#include "mv_ddr_validate.h"
 
 #define DDR_INTERFACES_NUM		1
 #define DDR_INTERFACE_OCTETS_NUM	9
@@ -1024,6 +1025,13 @@ int mv_ddr_pre_training_fixup(void)
 
 int mv_ddr_post_training_fixup(void)
 {
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum hws_ddr_freq freq = DDR_FREQ_LAST;
+
+	freq = tm->interface_params[0].memory_freq;
+	if (freq_val[freq] > 800)
+		mv_ddr_validate();
+
 	reg_write(AVS_ENABLED_CTRL_REG, nominal_avs);
 
 	return 0;
