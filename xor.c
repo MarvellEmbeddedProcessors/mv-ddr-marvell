@@ -109,9 +109,10 @@ static u32 ui_xor_regs_ctrl_backup;
 static u32 ui_xor_regs_base_backup[MAX_CS_NUM + 1];
 static u32 ui_xor_regs_mask_backup[MAX_CS_NUM + 1];
 
-void mv_sys_xor_init(u32 num_of_cs, u32 cs_ena, u32 cs_size, u32 base_delta)
+void mv_sys_xor_init(u32 num_of_cs, u32 cs_ena, uint64_t cs_size, u32 base_delta)
 {
-	u32 reg, ui, base, cs_count, size_mask;
+	u32 reg, ui, cs_count;
+	uint64_t base, size_mask;
 
 	ui_xor_regs_ctrl_backup = reg_read(XOR_WINDOW_CTRL_REG(0, 0));
 	for (ui = 0; ui < MAX_CS_NUM + 1; ui++)
@@ -168,10 +169,11 @@ void mv_sys_xor_init(u32 num_of_cs, u32 cs_ena, u32 cs_size, u32 base_delta)
 				break;
 			}
 
-			reg_write(XOR_BASE_ADDR_REG(0, ui), base);
-
+			reg_write(XOR_BASE_ADDR_REG(0, ui), (u32)base);
+			size_mask = (cs_size / _64K) - 1;
+			size_mask = (size_mask << XESMRX_SIZE_MASK_OFFS) & XESMRX_SIZE_MASK_MASK;
 			/* window x - Size */
-			reg_write(XOR_SIZE_MASK_REG(0, ui), size_mask);
+			reg_write(XOR_SIZE_MASK_REG(0, ui), (u32)size_mask);
 		}
 	}
 
@@ -251,10 +253,13 @@ int mv_xor_ctrl_set(u32 chan, u32 xor_ctrl)
 	return MV_OK;
 }
 
-int mv_xor_mem_init(u32 chan, u32 start_ptr, u32 block_size,
+int mv_xor_mem_init(u32 chan, u32 start_ptr, unsigned long long block_size,
 		    u32 init_val_high, u32 init_val_low)
 {
 	u32 temp;
+
+	if (block_size == _4G)
+		block_size -= 1;
 
 	/* Parameter checking */
 	if (chan >= MV_XOR_MAX_CHAN)
@@ -427,26 +432,19 @@ void ddr3_new_tip_ecc_scrub(void)
 	u32 cs_c, max_cs;
 	u32 cs_ena = 0;
 	u32 dev_num = 0;
+	uint64_t total_mem_size, cs_mem_size = 0;
 
 	printf("DDR Training Sequence - Start scrubbing\n");
-
 	max_cs = ddr3_tip_max_cs_get(dev_num);
 	for (cs_c = 0; cs_c < max_cs; cs_c++)
 		cs_ena |= 1 << cs_c;
 
-	mv_sys_xor_init(max_cs, cs_ena, 0x80000000, 0);
-
-	mv_xor_mem_init(0, 0x00000000, 0x80000000, 0xdeadbeef, 0xdeadbeef);
+	mv_sys_xor_init(max_cs, cs_ena, cs_mem_size, 0);
+	total_mem_size = max_cs * cs_mem_size;
+	mv_xor_mem_init(0, 0, total_mem_size, 0xdeadbeef, 0xdeadbeef);
 	/* wait for previous transfer completion */
 	while (mv_xor_state_get(0) != MV_IDLE)
 		;
-
-	mv_xor_mem_init(0, 0x80000000, 0x40000000, 0xdeadbeef, 0xdeadbeef);
-
-	/* wait for previous transfer completion */
-	while (mv_xor_state_get(0) != MV_IDLE)
-		;
-
 	/* Return XOR State */
 	mv_sys_xor_finish();
 
