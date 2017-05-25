@@ -1364,7 +1364,7 @@ static int ddr3_calc_mem_cs_size(u32 cs, uint64_t *cs_size)
 static int ddr3_fast_path_dynamic_cs_size_config(u32 cs_ena)
 {
 	u32 reg, cs;
-	u32 mem_total_size = 0;
+	uint64_t mem_total_size = 0;
 	uint64_t cs_mem_size = 0;
 	uint64_t mem_total_size_c, cs_mem_size_c;
 
@@ -1426,7 +1426,7 @@ static int ddr3_fast_path_dynamic_cs_size_config(u32 cs_ena)
 			 * so to estimate the result divide mem_total_size and
 			 * cs_mem_size by 0x10000 (it is equal to >> 16)
 			 */
-			mem_total_size_c = (mem_total_size >> 16) & 0xffff;
+			mem_total_size_c = (mem_total_size >> 16) & 0xffffffffffff;
 			cs_mem_size_c = (cs_mem_size >> 16) & 0xffffffffffff;
 			/* if the sum less than 2 G - calculate the value */
 			if (mem_total_size_c + cs_mem_size_c < 0x10000)
