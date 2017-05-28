@@ -1189,9 +1189,9 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 					 * where there could be more than one phase between sub-phys
 					 */
 					if (phase_remove == 1)
-						reg_data |= ((reg_data >> WR_LVL_PH_SEL_OFFS &
-							     WR_LVL_PH_SEL_MASK) &
-							     WR_LVL_PH_SEL_PHASE1) << WR_LVL_PH_SEL_OFFS;
+						reg_data &= ~(((reg_data >> WR_LVL_PH_SEL_OFFS &
+								WR_LVL_PH_SEL_MASK) &
+							       WR_LVL_PH_SEL_PHASE1) << WR_LVL_PH_SEL_OFFS);
 
 					ddr3_tip_bus_write(
 						dev_num,
