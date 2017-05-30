@@ -215,6 +215,8 @@ int ddr3_init(void)
 	/* Post MC/PHY initializations */
 	mv_ddr_post_training_soc_config(ddr_type);
 
+	mv_ddr_post_training_fixup();
+
 	octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 	if (ddr3_if_ecc_enabled()) {
 		if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask) ||
@@ -223,8 +225,6 @@ int ddr3_init(void)
 		else
 			ddr3_new_tip_ecc_scrub();
 	}
-
-	mv_ddr_post_training_fixup();
 
 	printf("mv_ddr: completed successfully\n");
 

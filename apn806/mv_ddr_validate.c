@@ -2647,7 +2647,7 @@ int ddr4_VerticalAdjusment(int dev_num, u8 DepthStage,int EnMask,u8 byteNumber)
     struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	//u32 cs;
 	//u32 max_cs = ddr3_tip_max_cs_get(dev_num);
-	u32 octets_per_if_num = 8;//ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	
 	printf(".");
    // struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
@@ -2745,7 +2745,7 @@ int ddr4_HorezintalAdjusment(int dev_num, u8 DepthStage,int EnMask, u8 byteNumbe
     struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	//u32 cs;
 	//u32 max_cs = ddr3_tip_max_cs_get(dev_num);
-	u32 octets_per_if_num = 8;//ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	
 	printf(".");
    // struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
@@ -2830,7 +2830,7 @@ int ddr4_DiagonalAdjusment(int dev_num, u8 DepthStage,int EnMask, u8 byteNumber)
 	enum hws_access_type pup_access;
 	//u32 cs;
 	//u32 max_cs = ddr3_tip_max_cs_get(dev_num);
-	u32 octets_per_if_num = 8;//ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	
 	printf(".");
    // struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
@@ -2980,7 +2980,7 @@ int RxAdjust()
     u8 DepthStage = 2;
    // struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
-    u32 octets_per_if_num = 8;//ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 	int byteNumStart = 0;
     int ByteNumberEnd = octets_per_if_num;
 
@@ -3085,7 +3085,12 @@ int RxAdjust()
             reg_bit_clrset(MC6_REG_RAS_CTRL,0x0 << MC6_ECC_ENABLE_OFFS,MC6_ECC_ENABLE_MASK << MC6_ECC_ENABLE_OFFS);
             reg_write(MC6_REG_ECC_1bit_err_counter,0x0);
         }
-        DepthStage = 4;
+
+		if ((ddr3_if_ecc_enabled() == 1) && (byteNum == 8))
+			DepthStage = 3;
+		else
+			DepthStage = 4;
+
         EnMask = PerIF;
         
         
@@ -3115,7 +3120,7 @@ int RxAdjust()
     //Counter(2);
   //  printf("\n");
     EnMask = PerIF;
-    DepthStage = 4;
+
    // printf("\nRxAdjust::Moving to diag searc.");
    // printf("\n==============================.\n");
     for(int byteNum = byteNumStart ; byteNum<ByteNumberEnd ; byteNum++) {
@@ -3123,6 +3128,12 @@ int RxAdjust()
             reg_bit_clrset(MC6_REG_RAS_CTRL,0x0 << MC6_ECC_ENABLE_OFFS,MC6_ECC_ENABLE_MASK << MC6_ECC_ENABLE_OFFS);
             reg_write(MC6_REG_ECC_1bit_err_counter,0x0);
         }
+
+		if ((ddr3_if_ecc_enabled() == 1) && (byteNum == 8))
+			DepthStage = 3;
+		else
+			DepthStage = 4;
+
         //Counter(1);
         ddr4_DiagonalAdjusment(0,DepthStage,EnMask,byteNum);
         //Counter(2);

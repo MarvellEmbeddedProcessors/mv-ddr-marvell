@@ -268,14 +268,6 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 	}
 #endif
 
-	/* TODO: remove this wa after rx adjust ecc fix */
-	freq = tm->interface_params[0].memory_freq;
-	if (freq_val[freq] > 800) {
-		/* override to ddr4 64-bit without ecc */
-		if (tm->bus_act_mask == MV_DDR_64BIT_ECC_PUP8_BUS_MASK)
-			tm->bus_act_mask = MV_DDR_64BIT_BUS_MASK;
-	}
-
 	return tm;
 }
 
