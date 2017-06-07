@@ -1778,6 +1778,8 @@ int ddr3_tip_print_wl_supp_result(u32 dev_num)
 #define RD_FIFO_DLY		8
 #define STEP_SIZE		64
 #define RL_JITTER_WIDTH_LMT	20
+#define ADLL_TAPS_IN_CYCLE	64
+
 enum rl_dqs_burst_state {
 	RL_AHEAD = 0,
 	RL_INSIDE,
@@ -1798,6 +1800,8 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 	int min_phase, max_phase;
 	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
 	u32 rl_values[NUM_OF_CS][MAX_BUS_NUM][MAX_INTERFACE_NUM] = { { {0} } };
+	u32 rl_min_values[NUM_OF_CS][MAX_BUS_NUM][MAX_INTERFACE_NUM] = { { {0} } };
+	u32 rl_max_values[NUM_OF_CS][MAX_BUS_NUM][MAX_INTERFACE_NUM] = { { {0} } };
 	u32 rl_val, rl_min_val[NUM_OF_CS], rl_max_val[NUM_OF_CS];
 	u32 reg_val_low, reg_val_high;
 	u32 reg_val,  reg_mask;
@@ -1909,6 +1913,7 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 					    reg_val_high == RD_FIFO_DQS_RISE_EDGE_POS_4) {
 						rl_state[effective_cs][subphy_id][if_id] = RL_INSIDE;
 						rl_values[effective_cs][subphy_id][if_id] = i;
+						rl_min_values[effective_cs][subphy_id][if_id] = i;
 						DEBUG_LEVELING(DEBUG_LEVEL_TRACE,
 							       ("new state %d\n",
 								rl_state[effective_cs][subphy_id][if_id]));
@@ -1929,6 +1934,31 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 					}
 					break;
 				case RL_INSIDE:
+					if (reg_val_low == RD_FIFO_DQS_FALL_EDGE_POS_4 &&
+					    reg_val_high == RD_FIFO_DQS_RISE_EDGE_POS_4) {
+							rl_max_values[effective_cs][subphy_id][if_id] = i;
+							if ((rl_max_values[effective_cs][subphy_id][if_id] -
+							     rl_min_values[effective_cs][subphy_id][if_id]) >
+							    ADLL_TAPS_IN_CYCLE) {
+								rl_state[effective_cs][subphy_id][if_id] = RL_BEHIND;
+								rl_values[effective_cs][subphy_id][if_id] =
+									(i +
+									 rl_values[effective_cs][subphy_id][if_id]) /
+									2;
+								pass_lock_num++;
+								DEBUG_LEVELING(DEBUG_LEVEL_TRACE,
+									       ("new lock %d\n", pass_lock_num));
+							if (rl_min_val[effective_cs] >
+							    rl_values[effective_cs][subphy_id][if_id])
+								rl_min_val[effective_cs] =
+									rl_values[effective_cs][subphy_id][if_id];
+							if (rl_max_val[effective_cs] <
+							    rl_values[effective_cs][subphy_id][if_id])
+								rl_max_val[effective_cs] =
+									rl_values[effective_cs][subphy_id][if_id];
+								step = 2;
+							}
+					}
 					if (reg_val_low != RD_FIFO_DQS_FALL_EDGE_POS_4 ||
 					    reg_val_high != RD_FIFO_DQS_RISE_EDGE_POS_4) {
 						if ((i - rl_values[effective_cs][subphy_id][if_id]) <
@@ -1966,7 +1996,6 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 				}
 				DEBUG_LEVELING(DEBUG_LEVEL_TRACE, ("\n"));
 			}
-
 			DEBUG_LEVELING(DEBUG_LEVEL_TRACE, ("pass_lock_num %d\n", pass_lock_num));
 			/* exit condition */
 			if (pass_lock_num == MAX_BUS_NUM)
