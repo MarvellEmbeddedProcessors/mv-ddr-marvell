@@ -95,156 +95,85 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#ifndef CVXORDEBUG_hH
-#define CVXORDEBUG_hH
+#ifndef _MV_DDR_VALIDATE_H
+#define _MV_DDR_VALIDATE_H
 
-enum  SearchElement{
-	CRx,
-    CTx,
-    RecCal
-};
-enum MaskType{
-	OR_Mask,
-    AND_Mask
-};
-enum Maskdef{
-    PerIF,
-    PerByte_res1,
-    PerByte_res0,
-    PerDQ0
-};
-enum  SearchType{
-	Vertic,
-    Horizon,
-    diagon
+enum search_element {
+	CRX,
+	CTX,
+	REC_CAL
 };
 
-enum VP_tests{
-    XOR_CS0_general_1M,
-    XOR_CS0_general_multiaccessSize,
-    XOR_CS0_FullAddressAccess,
-    CPU_CS0_general_1M,
-    TIP2MC_equation,
-    Eye_sweep_AllCS,
-    Eye_sweepTx_CS0,
-    Eye_sweepRx_CS0,
-	Eye_sweepRx_CS0_perbit,
-    Eye_sweepRx_CS0_woPBS,
-    XOR_CS0_PartialWrite,
-    XOR_CS1_FullAddressAccess,
-    XOR_CrossCs_FullAddressAccess,
-    XOR_CS0_general_1M_AVS_Sweep,
-    CPU_RESET,
-    XOR_CS1_PartialWrite,
-    XOR_In_PageTest,
-    XOR_Page2PageTest,
-    XOR_In_BankTest,
-    Funcional_WL,
-    VP_full
+enum mask_type {
+	OR_MASK,
+	AND_MASK
 };
-enum VP_pattern{
-    All_Aggresive,
-    All_AggresiveInv,
-    Resonance,
-    Moving_one_croosand_zero,
-    Moving_zero_croosand_one,
-    VP_pattern_Last
+
+enum mask_def {
+	PER_IF,
+	PER_BYTE_RES1,
+	PER_BYTE_RES0,
+	PER_DQ0
 };
-enum CStest{
-    CS0ToCS0,
-    CS0ToCS1,
-    CS0ToCS2,
-    CS0ToCS3,
-    CS1ToCS0,
-    CS1ToCS1,
-    CS1ToCS2,
-    CS1ToCS3,
-    CS2ToCS0,
-    CS2ToCS1,
-    CS2ToCS2,
-    CS2ToCS3,
-    CS3ToCS0,
-    CS3ToCS1,
-    CS3ToCS2,
-    CS3ToCS3
-  
+
+enum search_type {
+	VERTICAL,
+	HORIZONTAL,
+	DIAGONAL
 };
-unsigned long long LowCast32to64(int var);
 
-unsigned long long HighCast32to64(int var);
+enum validation_test {
+	XOR_CS0_GENERAL_1M,
+	XOR_CS0_GENERAL_MULTI_ACCESS,
+	XOR_CS0_GENERAL_FULL_ADDR_ACCESS,
+	CPU_CS0_GENERAL_1M,
+	TIP2MC_EQUATION,
+	EYE_SWEEP_ALL_CS,
+	EYE_SWEEP_TX_CS0,
+	EYE_SWEEP_RX_CS0,
+	EYE_SWEEP_RX_CS0_PERBIT,
+	EYE_SWEEP_RX_CS0_WO_PBS,
+	XOR_CS0_PARTIAL_WR,
+	XOR_CS1_FULL_ADDR_ACCESS,
+	XOR_CROSS_CS_FULL_ADDR_ACCESS,
+	XOR_CS0_GENERAL_1M_AVS_SWEEP,
+	CPU_RESET,
+	XOR_CS1_PARTIAL_WR,
+	XOR_IN_PAGE,
+	XOR_PAGE_TO_PAGE,
+	XOR_IN_BANK,
+	FUNCTIONAL_WL,
+	VALIDATION_FULL
+};
 
-int XOT_Test_ConfigurationCheck(unsigned long long Source_Address, u32 TotalData2Test, unsigned long long End_addr_bytes);
+enum validation_pattern {
+	ALL_AGRESSIVE,
+	ALL_AGRESSIVE_INV,
+	RESONANCE,
+	MOVE_ONE_ZERO,
+	MOVE_ZERO_ONE,
+	VALIDATION_PATTERN_LAST
+};
 
-void  XorPrint(u32 TotalData2Test,int ByteCount,u32 DescBaseAddrL,u32 DescBaseAddrH,u32 Source_AddressL,u32 Source_AddressH,
-              u32 Destanation_AddressL,u32 Destanation_AddressH);
-void EccDisableEnable();
+enum cs_test {
+	CS0_TO_CS0,
+	CS0_TO_CS1,
+	CS0_TO_CS2,
+	CS0_TO_CS3,
+	CS1_TO_CS0,
+	CS1_TO_CS1,
+	CS1_TO_CS2,
+	CS1_TO_CS3,
+	CS2_TO_CS0,
+	CS2_TO_CS1,
+	CS2_TO_CS2,
+	CS2_TO_CS3,
+	CS3_TO_CS0,
+	CS3_TO_CS1,
+	CS3_TO_CS2,
+	CS3_TO_CS3
+};
 
-void Counter(int ClockOp);
-
-int SetValidationGlobals();
-
-void XOR_S2D_func(u32 NOD, int ByteCount, u32 Source_AddressL, u32 Source_AddressH, u32 Destanation_AddressL, 
-                  u32 Destanation_AddressH, int Destnation_Jap, int WrBurstLen, int RdBurstLen,u32 DESQAddr,u32 DESQAddrH,int nNumOstdRd);
-
-int XOR_ScmpD_func(u32 NOD, int ByteCount, u32 Source_AddressL, u32 Source_AddressH, u32 Destanation_AddressL, 
-                  u32 Destanation_AddressH, int Destnation_Jap, int RdBurstLen,u32 DESQAddr,u32 DESQAddrH,int nNumOstdRd);
-
-
-
-int XOR_Test(u32 TotalData2Test,u32 Source_AddressL, u32 Source_AddressH, u32 Destanation_AddressL, 
-                  u32 Destanation_AddressH, int ByteCount,int PatternType,u32 DESQAddr,u32 DESQAddrH,int nNumOstdRd);
-
-int XOR_Gradual_Test(u8 DepthStage);
-int XORsearch_1D_1E(enum hws_edge_compare edge, enum hws_search_dir search_dir , u32 Step, u32 init_val,u32 end_val,
-                    u8 DepthStage,u16 ByteNum, enum  SearchElement element);
-
-int XORsearch_1D_2E(enum hws_edge_compare SearchConcept, u32 Step, u32 init_val,u32 end_val,u8 DepthStage,u16 ByteNum, enum  SearchElement element,u8 (*VW_vector));
-
-int XORsearch_2D_1E(enum hws_edge_compare edge, enum  SearchElement element1, enum hws_search_dir search_dir1 , 
-                    u32 Step1, u32 init_val1,u32 end_val1,enum  SearchElement element2, enum hws_search_dir search_dir2 , 
-                    u32 Step2, u32 init_val2,u32 end_val2,u8 DepthStage,u16 ByteNum);
-
-int XORsearch_2D_2E(enum hws_edge_compare edge, enum  SearchElement element1, enum hws_search_dir search_dir1 , 
-                    u32 Step1, u32 init_val1,u32 end_val1,enum  SearchElement element2, enum hws_search_dir search_dir2 , 
-                    u32 Step2, u32 init_val2,u32 end_val2,u8 DepthStage,u16 ByteNum,u8 (*VW_vector));
-int XORsearch_RL(enum hws_edge_compare edge, enum hws_search_dir search_dir , u32 Step, u32 init_val,u32 end_val,u8 DepthStage,u16 ByteNum);
-
-int XOT_Test_Wrapper(u32 TotalData2Test,enum CStest CSinvovle,enum VP_pattern Pattern,int ByteCount,int index);
-
-int InnerPagetransactions(void);
-
-int Page2Pagetransactions(void);
-
-int InnerBanktransactions(void);
-
-int print_stability_log(u32 dev_num);
-
-int MemoryTestPerByte(u32 start_addres_low, u32 start_addres_high, u32 End_addres_low, u32 End_addres_high,
-                      u32 Access_Numbers, u32 ByteNum,u32 printEn,u32 TestMap);
-
-int MC_CL_CWL_impact(void);
-
-int TipIpBIST(int dev_num, int if_id, enum hws_dir direction,int init_value_used, int pattern, int cs_num);
-
-int ddr4_cpu_sweep_test(int dev_num, u32 repeat_num, u32 testLength ,u32 direction,u32 mode);
-
-int ddr4_VerticalAdjusment(int dev_num, u8 DepthStage,int EnMask, u8 byteNumber);
-
-int ddr4_HorezintalAdjusment(int dev_num, u8 DepthStage,int EnMask, u8 byteNumber);
-
-int RunValidation(enum VP_tests testNum);
-
-int RxAdjust();
-
-int bit_flip();
-
-
-
-void XOR_S2D_funcV(int NOD, int ByteCount, int Source_AddressL, int Source_AddressH, int Destanation_AddressL, 
-                  int Destanation_AddressH, int Destnation_Jap, int WrBurstLen, int RdBurstLen);
-int XOR_ScmpD_funcV(int NOD, int ByteCount, int Source_AddressL, int Source_AddressH, int Destanation_AddressL, 
-                  int Destanation_AddressH, int Destnation_Jap, int RdBurstLen);
-int XOR_TestV(int TotalData2Test,int Source_AddressL, int Source_AddressH, int Destanation_AddressL, 
-                  int Destanation_AddressH, int ByteCount,int PatternType, int nNumOstdRd);
 int mv_ddr_validate(void);
-#endif //CVXORDEBUG_hH
+
+#endif /* _MV_DDR_VALIDATE_H */
