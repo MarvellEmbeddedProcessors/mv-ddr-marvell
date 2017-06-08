@@ -922,7 +922,7 @@ int ddr3_tip_calc_cs_mask(u32 dev_num, u32 if_id, u32 effective_cs,
  */
 int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 {
-	u32 reg_data = 0, iter, if_id, bus_cnt;
+	u32 reg_data = 0, temp = 0, iter, if_id, bus_cnt;
 	u32 cs_enable_reg_val[MAX_INTERFACE_NUM] = { 0 };
 	u32 cs_mask[MAX_INTERFACE_NUM];
 	u32 read_data_sample_delay_vals[MAX_INTERFACE_NUM] = { 0 };
@@ -1188,10 +1188,11 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 					 * this will take place only in low frequency,
 					 * where there could be more than one phase between sub-phys
 					 */
-					if (phase_remove == 1)
-						reg_data &= ~(((reg_data >> WR_LVL_PH_SEL_OFFS &
-								WR_LVL_PH_SEL_MASK) &
-							       WR_LVL_PH_SEL_PHASE1) << WR_LVL_PH_SEL_OFFS);
+					if (phase_remove == 1) {
+						temp = (reg_data >> WR_LVL_PH_SEL_OFFS) & WR_LVL_PH_SEL_PHASE1;
+						reg_data &= ~(WR_LVL_PH_SEL_MASK << WR_LVL_PH_SEL_OFFS);
+						reg_data |= (temp << WR_LVL_PH_SEL_OFFS);
+					}
 
 					ddr3_tip_bus_write(
 						dev_num,
