@@ -864,11 +864,6 @@ static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 	dfs_low_freq = DFS_LOW_FREQ_VALUE;
 	calibration_update_control = 1;
 
-#ifdef CONFIG_ARMADA_38X
-	/* For a38x only, change to 2T mode to resolve low freq instability */
-	mode_2t = 1;
-#endif
-
 #if !defined(CONFIG_DDR4)
 	ddr3_tip_a38x_get_medium_freq(dev_num, &medium_freq);
 #endif /* CONFIG_DDR4 */
