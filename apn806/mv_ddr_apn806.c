@@ -335,7 +335,7 @@ void mv_ddr_mem_scrubbing(void)
 		mv_ddr_dma_memset(0, NON_DRAM_MEM_RGN_START_ADDR, val);
 
 	/* scrub memory up to the end */
-	if (tot_mem_sz > NON_DRAM_MEM_RGN_END_ADDR)
+	if (tot_mem_sz >= NON_DRAM_MEM_RGN_END_ADDR)
 		mv_ddr_dma_memset(NON_DRAM_MEM_RGN_END_ADDR,
 				  tot_mem_sz - NON_DRAM_MEM_RGN_START_ADDR, val);
 }
