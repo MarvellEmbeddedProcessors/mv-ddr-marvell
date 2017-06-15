@@ -1441,52 +1441,98 @@ static int xor_search_1d_1e(enum hws_edge_compare edge, enum hws_search_dir sear
 			    u32 step, u32 init_val, u32 end_val, u8 depth_stage,
 			    u16 byte_num, enum search_element element)
 {
-	int result = (edge == EDGE_PF) ? 0 : 1; /* start from 0 (pass) if pass */
-	int sign_step = (search_dir == HWS_LOW2HIGH) ? step : -step;
-	int param = (int)init_val;
-	u32 steps_num = (search_dir == HWS_LOW2HIGH) ? (end_val - init_val) / step :
-						       (init_val - end_val) / step;
-	u32 step_idx = 0;
+	int result;
+	int bs_left = (int)init_val;
+	int bs_middle;
+	int bs_right = (int)end_val;
+	int bs_found = -1;
 	u32 reg_addr = (element == CRX) ? CRX_PHY_BASE : CTX_PHY_BASE;
 
 	reg_addr += (4 * effective_cs);
-	if (edge == EDGE_PF) {
-#ifdef DBG_PRINT
-		printf("%s: steps_num %d, end_val %d, init_val %d, step %d\n",
-		      __func__, steps_num, end_val, init_val, step);
-#endif
+
+	if (search_dir == HWS_LOW2HIGH) {
+		while (bs_left <= bs_right) {
+			bs_middle = (bs_left + bs_right) / 2;
+
+			if (element == REC_CAL) {
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
+						   DDR_PHY_DATA, VREF_BCAST_PHY_REG(effective_cs), bs_middle);
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
+						   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 4), bs_middle);
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
+						   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 5), bs_middle);
+			} else {
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
+						   DDR_PHY_DATA, reg_addr, bs_middle);
+			}
+			result = xor_gradual_test(depth_stage);
+
+			/*
+			 * continue to search for the leftmost fail if pass found in pass-to-fail case or
+			 * for the leftmost pass if fail found in fail-to-pass case
+			 */
+			if ((result == 0 && edge == EDGE_PF) |
+			    (result != 0 && edge == EDGE_FP))
+				bs_left = bs_middle + 1;
+
+			/*
+			 * save recently found fail in pass-to-fail case or
+			 * recently found pass in fail-to-pass case
+			 */
+			if ((result != 0 && edge == EDGE_PF) |
+			    (result == 0 && edge == EDGE_FP)) {
+				bs_found = bs_middle;
+				bs_right = bs_middle - 1;
+			}
+		}
+	} else { /* search_dir == HWS_HIGH2LOW */
+		while (bs_left >= bs_right) {
+			bs_middle = (bs_left + bs_right) / 2;
+
+			if (element == REC_CAL) {
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
+						   DDR_PHY_DATA, VREF_BCAST_PHY_REG(effective_cs), bs_middle);
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
+						   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 4), bs_middle);
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
+						   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 5), bs_middle);
+			} else {
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
+						   DDR_PHY_DATA, reg_addr, bs_middle);
+			}
+			result = xor_gradual_test(depth_stage);
+
+			/*
+			 * continue to search for the leftmost fail if pass found in pass-to-fail case or
+			 * for the leftmost pass if fail found in fail-to-pass case
+			 */
+			if ((result == 0 && edge == EDGE_PF) |
+			    (result != 0 && edge == EDGE_FP))
+				bs_left = bs_middle - 1;
+
+			/*
+			 * save recently found fail in pass-to-fail case or
+			 * recently found pass in fail-to-pass case
+			 */
+			if ((result != 0 && edge == EDGE_PF) |
+			    (result == 0 && edge == EDGE_FP)) {
+				bs_found = bs_middle;
+				bs_right = bs_middle + 1;
+			}
+		}
 	}
 
-	for (step_idx = 0; step_idx <= steps_num; step_idx++) {
-		if (element == REC_CAL) {
-			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
-					   DDR_PHY_DATA, VREF_BCAST_PHY_REG(effective_cs), param);
-			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
-					   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 4), param);
-			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
-					   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 5), param);
-		} else {
-			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
-					   DDR_PHY_DATA, reg_addr, param);
-		}
-
-		result = xor_gradual_test(depth_stage);
-		if (edge == EDGE_PF) {
-#ifdef DBG_PRINT
-			printf("%s: param %d, result%d\n", __func__, param, result);
-#endif
-		}
-
-		if (((result != 0) && (edge == EDGE_PF)) || ((result == 0) && (edge == EDGE_FP)))
-			return param;
-
-		param += sign_step;
-	}
-
-	if (edge == EDGE_PF)
-		return param - sign_step; /* search on positive numbers; -1 represents fail */
+	if (bs_found >= 0)
+		result = bs_found;
+	else if (edge == EDGE_PF)
+		result = bs_right;
 	else
-		return 255;
+		result = 255;
+
+#ifdef DBG_PRINT
+	printf("%d, %d, %d\n", init_val, end_val, result);
+#endif
+	return result;
 }
 
 static int xor_search_1d_2e(enum hws_edge_compare search_concept, u32 step, u32 init_val, u32 end_val,
