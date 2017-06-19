@@ -1378,6 +1378,7 @@ static int xor_gradual_test(u8 depth_stage)
 
 	/* depth 3 */
 	tot_test_data = _8M;
+	tot_test_data = _1M;
 	byte_cnt = tot_test_data / 64;
 	pattern = ALL_AGRESSIVE_INV;
 	end_addr_bytes = (unsigned long long)((effective_cs + 1) * tmp_area_len) -
@@ -1396,7 +1397,7 @@ static int xor_gradual_test(u8 depth_stage)
 	dst_offs = _256M; /* from source of cs */
 	for (idx  = 3; idx < 6; idx++) {
 		idx = (idx == 2) ? 3 : idx; /* skip pattern 2 */
-		tot_test_data = _4M;
+		tot_test_data = _1M;
 		byte_cnt = tot_test_data / 2048;
 		pattern = idx;
 		xor_src_sram = 0; /* data in dram */
