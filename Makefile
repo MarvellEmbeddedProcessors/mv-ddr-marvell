@@ -156,10 +156,11 @@ MV_DDR_LIB = $(OBJ_DIR)/$(MV_DDR_LIBNAME)
 MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_SRCPATH),$(wildcard $(DIR)/*.c))
 MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
 # add mv_ddr build message and version string object
-MV_DDR_COBJ += $(OBJ_DIR)/mv_ddr_build_message.o
+MV_DDR_VER_COBJ = $(OBJ_DIR)/mv_ddr_build_message.o
+MV_DDR_COBJ += $(MV_DDR_VER_COBJ)
 
 .SILENT:
-all: header create_dir add_ver $(MV_DDR_LIB)
+all: header create_dir $(MV_DDR_LIB)
 
 # mv_ddr code compilation
 $(OBJ_DIR)/%.o: %.c
@@ -170,7 +171,7 @@ $(MV_DDR_LIB): $(MV_DDR_COBJ)
 	$(ECHO) "  AR      $(MV_DDR_LIBNAME)"
 	$(AR) rcs $(MV_DDR_LIB) $(MV_DDR_COBJ)
 
-add_ver:
+$(MV_DDR_VER_COBJ):
 	@echo 'const char mv_ddr_build_message[] = "("__DATE__" - "__TIME__")"; \
 	       const char mv_ddr_version_string[] = "${MV_DDR_VERSION_STRING}";' | \
 		$(CC) -x c -c $(CFLAGS) - -o $(OBJ_DIR)/mv_ddr_build_message.o
@@ -253,11 +254,12 @@ MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_SRCPATH),$(wildcard $(DIR)/*.c))
 
 MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
 # add mv_ddr build message and version string object
-MV_DDR_COBJ += $(OBJ_DIR)/mv_ddr_build_message.o
+MV_DDR_VER_COBJ = $(OBJ_DIR)/mv_ddr_build_message.o
+MV_DDR_COBJ += $(MV_DDR_VER_COBJ)
 
 .SILENT:
 
-all: check_env header create_dir add_ver $(MV_DDR_LIB)
+all: check_env header create_dir $(MV_DDR_LIB)
 
 # mv_ddr code compilation
 $(OBJ_DIR)/%.o: %.c
@@ -268,7 +270,7 @@ $(MV_DDR_LIB): $(MV_DDR_COBJ)
 	$(ECHO) "  AR      $(MV_DDR_LIBNAME)"
 	$(AR) rcs $(MV_DDR_LIB) $(MV_DDR_COBJ)
 
-add_ver:
+$(MV_DDR_VER_COBJ):
 	@echo 'const char mv_ddr_build_message[] = "("__DATE__" - "__TIME__")"; \
 	       const char mv_ddr_version_string[] = "${MV_DDR_VERSION_STRING}";' | \
 		$(CC) -x c -c $(CFLAGS) - -o $(OBJ_DIR)/mv_ddr_build_message.o
