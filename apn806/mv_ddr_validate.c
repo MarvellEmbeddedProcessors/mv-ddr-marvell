@@ -524,6 +524,7 @@ static void xor_memcpy(u32 desc_num, int byte_cnt,
 		mmio_write_32(CV_XOR_DESQ_BASE_ADDR_LOW_REG(glob_reg_base), desq_addr);
 		mmio_write_32(CV_XOR_DESQ_BASE_ADDR_HIGH_REG(glob_reg_base), desq_addr_hi);
 	} else {
+		/* enable secure mode in xor engine 0 xorg secure reg */
 		mmio_write_32(CV_XOR_SECURE_REG(glob_reg_base), 0x0 << CV_XOR_SECURE_OFFSET);
 		paddr = ((uintptr_t)&transfer_desc[align_idx]) & (uintptr_t)(0xffffffff);
 		mmio_write_32(CV_XOR_DESQ_BASE_ADDR_LOW_REG(glob_reg_base), paddr);
@@ -551,6 +552,10 @@ static void xor_memcpy(u32 desc_num, int byte_cnt,
 
 	/* remove desc from xor */
 	mmio_write_32(CV_XOR_DESQ_DEALLOC_REG(glob_reg_base), desc_num);
+
+	/* disable secure mode in xor engine 0 xorg secure reg */
+	if (desc_num <= MAX_XOR_SRAM_DESC_SIZE)
+		mmio_write_32(CV_XOR_SECURE_REG(glob_reg_base), 0x1 << CV_XOR_SECURE_OFFSET);
 }
 
 /*
@@ -671,6 +676,7 @@ static int xor_memcmp(u32 desc_num, int byte_cnt,
 		mmio_write_32(CV_XOR_DESQ_BASE_ADDR_LOW_REG(glob_reg_base), desq_addr);
 		mmio_write_32(CV_XOR_DESQ_BASE_ADDR_HIGH_REG(glob_reg_base), desq_addr_hi);
 	} else {
+		/* enable secure mode in xor engine 0 xorg secure reg */
 		mmio_write_32(CV_XOR_SECURE_REG(glob_reg_base), 0x0 << CV_XOR_SECURE_OFFSET);
 		paddr = ((uintptr_t)&transfer_desc[align_idx]) & (uintptr_t)(0xffffffff);
 		mmio_write_32(CV_XOR_DESQ_BASE_ADDR_LOW_REG(glob_reg_base), paddr);
@@ -726,6 +732,10 @@ static int xor_memcmp(u32 desc_num, int byte_cnt,
 		mmio_write_32(CV_XOR_DESQ_DEALLOC_REG(glob_reg_base), 1);
 		idx++;
 	}
+
+	/* disable secure mode in xor engine 0 xorg secure reg */
+	if (desc_num <= MAX_XOR_SRAM_DESC_SIZE)
+		mmio_write_32(CV_XOR_SECURE_REG(glob_reg_base), 0x1 << CV_XOR_SECURE_OFFSET);
 
 	return bcs_idx;
 }
