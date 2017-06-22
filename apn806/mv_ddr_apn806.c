@@ -282,6 +282,9 @@ int mv_ddr_mc_remap(void)
 	uint64_t remap_size = NON_DRAM_MEM_RGN_END_ADDR - NON_DRAM_MEM_RGN_START_ADDR;
 	u32 val;
 
+	if (remap_source < NON_DRAM_MEM_RGN_START_ADDR)
+		return MV_OK;
+
 	if ((remap_size == 0) ||		/* can't be zero */
 	    (remap_size >> 32) ||		/* can't be more than 4GB */
 	    (remap_size % (1 << 20))) {		/* must be multiple of 1MB */
