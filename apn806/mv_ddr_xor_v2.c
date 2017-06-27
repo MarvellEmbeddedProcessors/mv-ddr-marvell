@@ -133,7 +133,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DMA_DESQ_DEALLOC_OFF		0x804
 #define DMA_DESQ_ADD_OFF		0x808
 
-/* xor global registers */
+/* dma engine global registers */
 #define GLOB_BW_CTRL				0x10004
 #define GLOB_BW_CTRL_NUM_OSTD_RD_SHIFT		0
 #define GLOB_BW_CTRL_NUM_OSTD_RD_VAL		64
@@ -151,6 +151,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define GLOB_SYS_INT_MASK			0x10204
 #define GLOB_MEM_INT_CAUSE			0x10220
 #define GLOB_MEM_INT_MASK			0x10224
+#define GLOB_SECURE				0x10300
+#define GLOB_SECURE_SECURE			0
+#define GLOB_SECURE_UNSECURE			1
+#define GLOB_SECURE_SECURE_OFF			0
+#define GLOB_SECURE_SECURE_MASK			0x1
 
 #define MV_XOR_V2_MIN_DESC_SIZE	32
 #define MV_XOR_V2_EXT_DESC_SIZE	128
@@ -163,13 +168,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* descriptors queue size; set to 32, but can be increased, if required */
 #define MV_XOR_V2_MAX_DESC_NUM			32
 
-/* xor base address */
+/* dma engine base address */
 #define MV_XOR_BASE	0x00400000
-
-/* descriptors queue memory size */
-#define MV_XOR_QMEM_SIZE		((MV_XOR_V2_MAX_DESC_NUM) * (MV_XOR_V2_MIN_DESC_SIZE))
-#define MV_XOR_QMEM_START_ADDR		0x0
-#define MV_XOR_QMEM_END_ADDR		((MV_XOR_QMEM_START_ADDR) + (MV_XOR_QMEM_SIZE))
 
 #define MV_XOR_MAX_BURST_SIZE		4	/* 256B read or write transfers */
 #define MV_XOR_MAX_BURST_SIZE_MASK	0xff
@@ -225,8 +225,10 @@ struct mv_xor_v2_hw_desc {
 	u32 fill_pattern_dst_addr_hi;
 };
 
-/* descriptors queue memory is located in dram; dram is not coherent */
-static void mv_xor_v2_init(u32 base, u32 qmem)
+/* locate dma descriptors queue in sram with 256B alignment per hw requirement */
+static struct mv_xor_v2_hw_desc qmem[MV_XOR_V2_MAX_DESC_NUM] __aligned(0x100);
+
+static void mv_xor_v2_init(u32 base)
 {
 	u32 reg_val;
 
@@ -236,12 +238,20 @@ static void mv_xor_v2_init(u32 base, u32 qmem)
 	/* set descriptors queue size to dma engine */
 	reg_write(base + DMA_DESQ_SIZE_OFF, MV_XOR_V2_MAX_DESC_NUM);
 
+	/*
+	 * enable secure mode in dma engine xorg secure reg to align
+	 * dma operations between sram and dram because of secure mode
+	 * of sram at ble stage
+	 */
+	reg_bit_clrset(base + GLOB_SECURE, GLOB_SECURE_SECURE << GLOB_SECURE_SECURE_OFF,
+		       GLOB_SECURE_SECURE_MASK << GLOB_SECURE_SECURE_OFF);
+
 	/* set descriptors queue address to dma engine */
-	reg_write(base + DMA_DESQ_BALR_OFF, qmem);
-	reg_write(base + DMA_DESQ_BAHR_OFF, 0);
+	reg_write(base + DMA_DESQ_BALR_OFF, (u32)((uint64_t)qmem & 0xffffffff));
+	reg_write(base + DMA_DESQ_BAHR_OFF, (u32)((uint64_t)qmem >> 32));
 
 	/*
-	 * set attributes for reading and writing data buffers and descriptors to:
+	 * set attributes for reading and writing data buffers to:
 	 * - outer-shareable - snoops to be performed on cpu caches;
 	 * - enable cacheable - bufferable, modifiable, other allocate, and allocate.
 	 */
@@ -256,7 +266,7 @@ static void mv_xor_v2_init(u32 base, u32 qmem)
 	reg_write(base + DMA_DESQ_AWATTR_OFF, reg_val);
 
 	/*
-	 * bandwidth control to optimize xor performance:
+	 * bandwidth control to optimize dma performance:
 	 * - set write/read burst lengths to maximum write/read transactions;
 	 * - set outstanding write/read data requests to maximum value.
 	 */
@@ -275,12 +285,11 @@ static void mv_xor_v2_init(u32 base, u32 qmem)
 	reg_write(base + DMA_DESQ_STOP_OFF, DMA_DESQ_STOP_QUEUE_DIS_ENA << DMA_DESQ_STOP_QUEUE_DIS_OFFS);
 }
 
-static void mv_xor_v2_desc_prep(uint64_t qmem, int desc_id, enum mv_xor_v2_desc_op_mode op_mode,
-				      uint64_t src, uint64_t dst, uint64_t size, uint64_t data)
+static void mv_xor_v2_desc_prep(int desc_id, enum mv_xor_v2_desc_op_mode op_mode,
+				uint64_t src, uint64_t dst, uint64_t size, uint64_t data)
 {
-	struct mv_xor_v2_hw_desc *desc = (struct mv_xor_v2_hw_desc *)qmem;
+	struct mv_xor_v2_hw_desc *desc = &qmem[desc_id];
 
-	desc = &desc[desc_id];
 	memset((void *)desc, 0, sizeof(*desc));
 	desc->desc_id = desc_id;
 	desc->buff_size = size;
@@ -331,13 +340,18 @@ static void mv_xor_v2_finish(u32 base)
 {
 	/* reset dma engine */
 	reg_write(base + DMA_DESQ_STOP_OFF, DMA_DESQ_STOP_QUEUE_RESET_ENA << DMA_DESQ_STOP_QUEUE_RESET_OFFS);
+
+	/*
+	 * disable secure mode in dma engine xorg secure reg to return dma
+	 * to the state (unsecure) prior to mv_xor_v2_init() call
+	 */
+	reg_bit_clrset(base + GLOB_SECURE, GLOB_SECURE_UNSECURE << GLOB_SECURE_SECURE_OFF,
+		       GLOB_SECURE_SECURE_MASK << GLOB_SECURE_SECURE_OFF);
 }
 
-static u32 mv_xor_v2_memcmp_status_get(uint64_t qmem, int desc_id)
+static u32 mv_xor_v2_memcmp_status_get(int desc_id)
 {
-	struct mv_xor_v2_hw_desc *desc = (struct mv_xor_v2_hw_desc *)qmem;
-
-	desc = &desc[desc_id];
+	struct mv_xor_v2_hw_desc *desc = &qmem[desc_id];
 
 	return (desc->flags >> DESC_BYTE_CMP_STATUS_OFFS) & DESC_BYTE_CMP_STATUS_MASK;
 }
@@ -348,21 +362,13 @@ int mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 	uint64_t start = start_addr;
 	uint64_t end = start_addr + size;
 	uint64_t buffer_size;
-	uintptr_t p;
 	int desc_id = 0;
 
-	if (start_addr < MV_XOR_QMEM_START_ADDR)
-		for (p = 0; p < MV_XOR_QMEM_START_ADDR; p += 8)
-			writeq(p, data);
+	/* initialize dma descriptors queue memory region */
+	memset((void *)qmem, 0, sizeof(qmem));
 
-	/* initialize xor queue memory region */
-	memset((void *)MV_XOR_QMEM_START_ADDR, 0, MV_XOR_QMEM_SIZE);
-
-	/* initialize xor engine */
-	mv_xor_v2_init(MV_XOR_BASE, MV_XOR_QMEM_START_ADDR);
-
-	if (start < MV_XOR_QMEM_END_ADDR)
-		start = MV_XOR_QMEM_END_ADDR;
+	/* initialize dma engine */
+	mv_xor_v2_init(MV_XOR_BASE);
 
 	while (start < end) {
 		if (desc_id >= MV_XOR_V2_MAX_DESC_NUM) {
@@ -373,7 +379,7 @@ int mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 		buffer_size = end - start;
 		if (buffer_size > MV_XOR_MAX_TRANSFER_SIZE)
 			buffer_size = MV_XOR_MAX_TRANSFER_SIZE;
-		mv_xor_v2_desc_prep(MV_XOR_QMEM_START_ADDR, desc_id, DESC_OP_MODE_MEMSET,
+		mv_xor_v2_desc_prep(desc_id, DESC_OP_MODE_MEMSET,
 				    0, start, buffer_size, data);
 		mv_xor_v2_enqueue(MV_XOR_BASE, 1);
 		desc_id++;
@@ -384,7 +390,7 @@ int mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 	while (mv_xor_v2_done(MV_XOR_BASE) != desc_id)
 		;
 
-	/* disable xor engine */
+	/* disable dma engine */
 	mv_xor_v2_finish(MV_XOR_BASE);
 
 	return 0; /* pass */
@@ -395,13 +401,13 @@ int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size)
 	int desc_id = 0;
 
 	/* initialize dma descriptors queue memory region */
-	memset((void *)MV_XOR_QMEM_START_ADDR, 0, MV_XOR_QMEM_SIZE);
+	memset((void *)qmem, 0, sizeof(qmem));
 
 	/* initialize dma engine */
-	mv_xor_v2_init(MV_XOR_BASE, MV_XOR_QMEM_START_ADDR);
+	mv_xor_v2_init(MV_XOR_BASE);
 
 	/* prepare dma hw descriptor and enqueue it to start processing */
-	mv_xor_v2_desc_prep(MV_XOR_QMEM_START_ADDR, desc_id, DESC_OP_MODE_MEMCPY,
+	mv_xor_v2_desc_prep(desc_id, DESC_OP_MODE_MEMCPY,
 			    src, dst, size, 0);
 	mv_xor_v2_enqueue(MV_XOR_BASE, 1);
 	desc_id++;
@@ -421,13 +427,13 @@ int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t size)
 	int desc_id = 0;
 
 	/* initialize dma descriptors queue memory region */
-	memset((void *)MV_XOR_QMEM_START_ADDR, 0, MV_XOR_QMEM_SIZE);
+	memset((void *)qmem, 0, sizeof(qmem));
 
 	/* initialize dma engine */
-	mv_xor_v2_init(MV_XOR_BASE, MV_XOR_QMEM_START_ADDR);
+	mv_xor_v2_init(MV_XOR_BASE);
 
 	/* prepare dma hw descriptor and enqueue it to start processing */
-	mv_xor_v2_desc_prep(MV_XOR_QMEM_START_ADDR, desc_id, DESC_OP_MODE_MEMCMP,
+	mv_xor_v2_desc_prep(desc_id, DESC_OP_MODE_MEMCMP,
 			    src, dst, size, 0);
 	mv_xor_v2_enqueue(MV_XOR_BASE, 1);
 	desc_id++;
@@ -437,10 +443,10 @@ int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t size)
 		;
 	desc_id--;
 
-	/* disable xor engine */
+	/* disable dma engine */
 	mv_xor_v2_finish(MV_XOR_BASE);
 
-	if (mv_xor_v2_memcmp_status_get(MV_XOR_QMEM_START_ADDR, desc_id))
+	if (mv_xor_v2_memcmp_status_get(desc_id))
 		return 0; /* pass */
 
 	return 1; /* fail */
