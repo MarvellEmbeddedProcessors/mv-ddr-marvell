@@ -173,7 +173,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_XOR_V2_MAX_DESC_NUM			128
 
 /* dma engine base address */
-#define MV_XOR_BASE	0x00400000
+#define MV_XOR_BASE		0x00400000
+#define MV_XOR_ENGINE(n)	(MV_XOR_BASE + (n) * 0x20000)
+#define MV_XOR_ENGINE_NUM	4
 
 #define MV_XOR_MAX_BURST_SIZE		4	/* 256B read or write transfers */
 #define MV_XOR_MAX_BURST_SIZE_MASK	0xff
@@ -229,45 +231,53 @@ struct mv_xor_v2_hw_desc {
 	u32 fill_pattern_dst_addr_hi;
 };
 
-/* locate dma descriptors queue in sram with 256B alignment per hw requirement */
-static struct mv_xor_v2_hw_desc qmem[MV_XOR_V2_MAX_DESC_NUM] __aligned(0x100);
+enum {
+	DMA_ENG_0,
+	DMA_ENG_1,
+	DMA_ENG_2,
+	DMA_ENG_3
+};
 
-static void mv_xor_v2_init(u32 base)
+/* locate dma descriptors queue in sram with 256B alignment per hw requirement */
+static struct mv_xor_v2_hw_desc qmem[MV_XOR_ENGINE_NUM][MV_XOR_V2_MAX_DESC_NUM] __aligned(0x100);
+
+static void mv_xor_v2_init(u32 xor_id)
 {
 	u32 reg_val;
+	u32 xor_base = MV_XOR_ENGINE(xor_id);
 
 	/* set descriptor size to dma engine */
-	reg_write(base + DMA_DESQ_CTRL_OFF, DMA_DESQ_CTRL_32B);
+	reg_write(xor_base + DMA_DESQ_CTRL_OFF, DMA_DESQ_CTRL_32B);
 
 	/* set descriptors queue size to dma engine */
-	reg_write(base + DMA_DESQ_SIZE_OFF, MV_XOR_V2_MAX_DESC_NUM);
+	reg_write(xor_base + DMA_DESQ_SIZE_OFF, MV_XOR_V2_MAX_DESC_NUM);
 
 	/*
 	 * enable secure mode in dma engine xorg secure reg to align
 	 * dma operations between sram and dram because of secure mode
 	 * of sram at ble stage
 	 */
-	reg_bit_clrset(base + GLOB_SECURE, GLOB_SECURE_SECURE << GLOB_SECURE_SECURE_OFF,
+	reg_bit_clrset(xor_base + GLOB_SECURE, GLOB_SECURE_SECURE << GLOB_SECURE_SECURE_OFF,
 		       GLOB_SECURE_SECURE_MASK << GLOB_SECURE_SECURE_OFF);
 
 	/* set descriptors queue address to dma engine */
-	reg_write(base + DMA_DESQ_BALR_OFF, (u32)((uint64_t)qmem & 0xffffffff));
-	reg_write(base + DMA_DESQ_BAHR_OFF, (u32)((uint64_t)qmem >> 32));
+	reg_write(xor_base + DMA_DESQ_BALR_OFF, (u32)((uint64_t)qmem[xor_id] & 0xffffffff));
+	reg_write(xor_base + DMA_DESQ_BAHR_OFF, (u32)((uint64_t)qmem[xor_id] >> 32));
 
 	/*
 	 * set attributes for reading and writing data buffers to:
 	 * - outer-shareable - snoops to be performed on cpu caches;
 	 * - enable cacheable - bufferable, modifiable, other allocate, and allocate.
 	 */
-	reg_val = reg_read(base + DMA_DESQ_ARATTR_OFF);
+	reg_val = reg_read(xor_base + DMA_DESQ_ARATTR_OFF);
 	reg_val &= ~DMA_DESQ_ATTR_CACHE_MASK;
 	reg_val |= DMA_DESQ_ATTR_OUTER_SHAREABLE | DMA_DESQ_ATTR_CACHEABLE;
-	reg_write(base + DMA_DESQ_ARATTR_OFF, reg_val);
+	reg_write(xor_base + DMA_DESQ_ARATTR_OFF, reg_val);
 
-	reg_val = reg_read(base + DMA_DESQ_AWATTR_OFF);
+	reg_val = reg_read(xor_base + DMA_DESQ_AWATTR_OFF);
 	reg_val &= ~DMA_DESQ_ATTR_CACHE_MASK;
 	reg_val |= DMA_DESQ_ATTR_OUTER_SHAREABLE | DMA_DESQ_ATTR_CACHEABLE;
-	reg_write(base + DMA_DESQ_AWATTR_OFF, reg_val);
+	reg_write(xor_base + DMA_DESQ_AWATTR_OFF, reg_val);
 
 	/*
 	 * bandwidth control to optimize dma performance:
@@ -278,21 +288,21 @@ static void mv_xor_v2_init(u32 base)
 		  (GLOB_BW_CTRL_NUM_OSTD_WR_VAL << GLOB_BW_CTRL_NUM_OSTD_WR_SHIFT) |
 		  (MV_XOR_MAX_BURST_SIZE << GLOB_BW_CTRL_RD_BURST_LEN_SHIFT) |
 		  (MV_XOR_MAX_BURST_SIZE << GLOB_BW_CTRL_WR_BURST_LEN_SHIFT);
-	reg_write(base + GLOB_BW_CTRL, reg_val);
+	reg_write(xor_base + GLOB_BW_CTRL, reg_val);
 
 	/* disable axi timer feature */
-	reg_val = reg_read(base + GLOB_PAUSE);
+	reg_val = reg_read(xor_base + GLOB_PAUSE);
 	reg_val |= GLOB_PAUSE_AXI_TIME_DIS_VAL;
-	reg_write(base + GLOB_PAUSE, reg_val);
+	reg_write(xor_base + GLOB_PAUSE, reg_val);
 
 	/* enable dma engine */
-	reg_write(base + DMA_DESQ_STOP_OFF, DMA_DESQ_STOP_QUEUE_DIS_ENA << DMA_DESQ_STOP_QUEUE_DIS_OFFS);
+	reg_write(xor_base + DMA_DESQ_STOP_OFF, DMA_DESQ_STOP_QUEUE_DIS_ENA << DMA_DESQ_STOP_QUEUE_DIS_OFFS);
 }
 
-static void mv_xor_v2_desc_prep(int desc_id, enum mv_xor_v2_desc_op_mode op_mode,
+static void mv_xor_v2_desc_prep(u32 xor_id, u32 desc_id, enum mv_xor_v2_desc_op_mode op_mode,
 				uint64_t src, uint64_t dst, uint64_t size, uint64_t data)
 {
-	struct mv_xor_v2_hw_desc *desc = &qmem[desc_id];
+	struct mv_xor_v2_hw_desc *desc = &qmem[xor_id][desc_id];
 
 	memset((void *)desc, 0, sizeof(*desc));
 	desc->desc_id = desc_id;
@@ -328,34 +338,40 @@ static void mv_xor_v2_desc_prep(int desc_id, enum mv_xor_v2_desc_op_mode op_mode
 	}
 }
 
-static void mv_xor_v2_enqueue(u32 base, u32 desc_num)
+static void mv_xor_v2_enqueue(u32 xor_id, u32 desc_num)
 {
+	u32 xor_base = MV_XOR_ENGINE(xor_id);
+
 	/* write a number of new descriptors in the descriptors queue */
-	reg_write(base + DMA_DESQ_ADD_OFF, desc_num);
+	reg_write(xor_base + DMA_DESQ_ADD_OFF, desc_num);
 }
 
-static u32 mv_xor_v2_done(u32 base)
+static u32 mv_xor_v2_done(u32 xor_id)
 {
+	u32 xor_base = MV_XOR_ENGINE(xor_id);
+
 	/* return a number of completed descriptors */
-	return reg_read(base + DMA_DESQ_DONE_OFF) & DMA_DESQ_DONE_PENDING_MASK;
+	return reg_read(xor_base + DMA_DESQ_DONE_OFF) & DMA_DESQ_DONE_PENDING_MASK;
 }
 
-static void mv_xor_v2_finish(u32 base)
+static void mv_xor_v2_finish(u32 xor_id)
 {
+	u32 xor_base = MV_XOR_ENGINE(xor_id);
+
 	/* reset dma engine */
-	reg_write(base + DMA_DESQ_STOP_OFF, DMA_DESQ_STOP_QUEUE_RESET_ENA << DMA_DESQ_STOP_QUEUE_RESET_OFFS);
+	reg_write(xor_base + DMA_DESQ_STOP_OFF, DMA_DESQ_STOP_QUEUE_RESET_ENA << DMA_DESQ_STOP_QUEUE_RESET_OFFS);
 
 	/*
 	 * disable secure mode in dma engine xorg secure reg to return dma
 	 * to the state (unsecure) prior to mv_xor_v2_init() call
 	 */
-	reg_bit_clrset(base + GLOB_SECURE, GLOB_SECURE_UNSECURE << GLOB_SECURE_SECURE_OFF,
+	reg_bit_clrset(xor_base + GLOB_SECURE, GLOB_SECURE_UNSECURE << GLOB_SECURE_SECURE_OFF,
 		       GLOB_SECURE_SECURE_MASK << GLOB_SECURE_SECURE_OFF);
 }
 
-static u32 mv_xor_v2_memcmp_status_get(int desc_id)
+static u32 mv_xor_v2_memcmp_status_get(u32 xor_id, u32 desc_id)
 {
-	struct mv_xor_v2_hw_desc *desc = &qmem[desc_id];
+	struct mv_xor_v2_hw_desc *desc = &qmem[xor_id][desc_id];
 
 	return (desc->flags >> DESC_BYTE_CMP_STATUS_OFFS) & DESC_BYTE_CMP_STATUS_MASK;
 }
@@ -366,13 +382,13 @@ int mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 	uint64_t start = start_addr;
 	uint64_t end = start_addr + size;
 	uint64_t buffer_size;
-	int desc_id = 0;
+	u32 desc_id = 0;
 
 	/* initialize dma descriptors queue memory region */
 	memset((void *)qmem, 0, sizeof(qmem));
 
 	/* initialize dma engine */
-	mv_xor_v2_init(MV_XOR_BASE);
+	mv_xor_v2_init(DMA_ENG_0);
 
 	while (start < end) {
 		if (desc_id >= MV_XOR_V2_MAX_DESC_NUM) {
@@ -384,26 +400,34 @@ int mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 		buffer_size = end - start;
 		if (buffer_size > MV_XOR_MAX_TRANSFER_SIZE)
 			buffer_size = MV_XOR_MAX_TRANSFER_SIZE;
-		mv_xor_v2_desc_prep(desc_id, DESC_OP_MODE_MEMSET,
+		mv_xor_v2_desc_prep(DMA_ENG_0, desc_id, DESC_OP_MODE_MEMSET,
 				    0, start, buffer_size, data);
-		mv_xor_v2_enqueue(MV_XOR_BASE, 1);
+		mv_xor_v2_enqueue(DMA_ENG_0, 1);
 		desc_id++;
 		start += buffer_size;
 	}
 
 	/* wait for transfer completion */
-	while (mv_xor_v2_done(MV_XOR_BASE) != desc_id)
+	while (mv_xor_v2_done(DMA_ENG_0) != desc_id)
 		;
 
 	/* disable dma engine */
-	mv_xor_v2_finish(MV_XOR_BASE);
+	mv_xor_v2_finish(DMA_ENG_0);
 
 	return 0; /* pass */
 }
 
-int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size, u32 desc_num)
+int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t dst_gap,
+		      uint64_t size, u32 dma_num, u32 desc_num)
 {
-	int desc_id;
+	uint64_t dma_dst, desc_dst;
+	u32 dma_id, desc_id;
+
+	if (dma_num > MV_XOR_ENGINE_NUM) {
+		printf("mv_ddr: error: dma engines number limit (%d) reached\n",
+		       MV_XOR_ENGINE_NUM);
+		return 1; /* fail */
+	}
 
 	if (desc_num > MV_XOR_V2_MAX_DESC_NUM) {
 		/* increase dma max desc number if required */
@@ -415,63 +439,90 @@ int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size, u32 desc_num)
 	/* initialize dma descriptors queue memory region */
 	memset((void *)qmem, 0, sizeof(qmem));
 
-	/* initialize dma engine */
-	mv_xor_v2_init(MV_XOR_BASE);
+	/* initialize dma engines */
+	for (dma_id = 0; dma_id < dma_num; dma_id++)
+		mv_xor_v2_init(dma_id);
 
-	for (desc_id = 0; desc_id < desc_num; desc_id++) {
-		/* prepare dma hw descriptor */
-		mv_xor_v2_desc_prep(desc_id, DESC_OP_MODE_MEMCPY,
-				    src, dst + size * desc_id, size, 0);
+	for (dma_id = 0; dma_id < dma_num; dma_id++) {
+		dma_dst = dst + dma_id * (size * desc_num + dst_gap);
+		for (desc_id = 0; desc_id < desc_num; desc_id++) {
+			desc_dst = dma_dst + size * desc_id;
+			/* prepare dma hw descriptor */
+			mv_xor_v2_desc_prep(dma_id, desc_id, DESC_OP_MODE_MEMCPY,
+					    src, desc_dst, size, 0);
+		}
 	}
 	/* enqueue dma descriptors to start processing */
-	mv_xor_v2_enqueue(MV_XOR_BASE, desc_id);
+	for (dma_id = 0; dma_id < dma_num; dma_id++)
+		mv_xor_v2_enqueue(dma_id, desc_num);
 
 	/* wait for transfer completion */
-	while (mv_xor_v2_done(MV_XOR_BASE) != desc_id)
-		;
+	for (dma_id = 0; dma_id < dma_num; dma_id++)
+		while (mv_xor_v2_done(dma_id) != desc_num)
+			;
 
-	/* disable dma engine */
-	mv_xor_v2_finish(MV_XOR_BASE);
+	/* disable dma engines */
+	for (dma_id = 0; dma_id < dma_num; dma_id++)
+		mv_xor_v2_finish(dma_id);
 
 	return 0; /* pass */
 }
 
-int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t size, u32 desc_num)
+int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t dst_gap,
+		      uint64_t size, u32 dma_num, u32 desc_num)
 {
-	int desc_id;
+	uint64_t dma_dst, desc_dst;
+	u32 dma_id, desc_id;
+	int fail_cnt = 0;
+
+	if (dma_num > MV_XOR_ENGINE_NUM) {
+		printf("mv_ddr: error: dma engines number limit (%d) reached\n",
+		       MV_XOR_ENGINE_NUM);
+		return -1; /* fail */
+	}
 
 	if (desc_num > MV_XOR_V2_MAX_DESC_NUM) {
 		/* increase dma max desc number if required */
 		printf("mv_ddr: error: dma desq size limit (%d) reached\n",
 		       MV_XOR_V2_MAX_DESC_NUM);
-		return 1; /* fail */
+		return -1; /* fail */
 	}
 
 	/* initialize dma descriptors queue memory region */
 	memset((void *)qmem, 0, sizeof(qmem));
 
-	/* initialize dma engine */
-	mv_xor_v2_init(MV_XOR_BASE);
+	/* initialize dma engines */
+	for (dma_id = 0; dma_id < dma_num; dma_id++)
+		mv_xor_v2_init(dma_id);
 
-	for (desc_id = 0; desc_id < desc_num; desc_id++) {
-		/* prepare dma hw descriptor and enqueue it to start processing */
-		mv_xor_v2_desc_prep(desc_id, DESC_OP_MODE_MEMCMP,
-				    src, dst + size * desc_id, size, 0);
+	for (dma_id = 0; dma_id < dma_num; dma_id++) {
+		dma_dst = dst + dma_id * (size * desc_num + dst_gap);
+		for (desc_id = 0; desc_id < desc_num; desc_id++) {
+			desc_dst = dma_dst + size * desc_id;
+			/* prepare dma hw descriptor */
+			mv_xor_v2_desc_prep(dma_id, desc_id, DESC_OP_MODE_MEMCMP,
+					    src, desc_dst, size, 0);
+		}
 	}
 	/* enqueue dma descriptors to start processing */
-	mv_xor_v2_enqueue(MV_XOR_BASE, desc_id);
+	for (dma_id = 0; dma_id < dma_num; dma_id++)
+		mv_xor_v2_enqueue(dma_id, desc_num);
 
 	/* wait for transfer completion */
-	while (mv_xor_v2_done(MV_XOR_BASE) != desc_id)
-		;
+	for (dma_id = 0; dma_id < dma_num; dma_id++)
+		while (mv_xor_v2_done(dma_id) != desc_num)
+			;
 
-	/* disable dma engine */
-	mv_xor_v2_finish(MV_XOR_BASE);
+	/* disable dma engines */
+	for (dma_id = 0; dma_id < dma_num; dma_id++)
+		mv_xor_v2_finish(dma_id);
 
-	for (desc_id = 0; desc_id < desc_num; desc_id++) {
-		if (mv_xor_v2_memcmp_status_get(desc_id) == 0)
-			return 1; /* fail */
+	for (dma_id = 0; dma_id < dma_num; dma_id++) {
+		for (desc_id = 0; desc_id < desc_num; desc_id++) {
+			if (mv_xor_v2_memcmp_status_get(dma_id, desc_id) == 0)
+				fail_cnt++; /* count a number of failures */
+		}
 	}
 
-	return 0; /* pass */
+	return fail_cnt;
 }
