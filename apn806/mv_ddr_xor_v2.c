@@ -165,8 +165,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MV_XOR_V2_CMD_LINE_NUM_MAX_D_BUF	8
 
-/* descriptors queue size; set to 32, but can be increased, if required */
-#define MV_XOR_V2_MAX_DESC_NUM			32
+/*
+ * descriptors queue size;
+ * 128 descriptors per dma engine is the current minimum
+ * to support a few dma engines operation
+ */
+#define MV_XOR_V2_MAX_DESC_NUM			128
 
 /* dma engine base address */
 #define MV_XOR_BASE	0x00400000
@@ -324,10 +328,10 @@ static void mv_xor_v2_desc_prep(int desc_id, enum mv_xor_v2_desc_op_mode op_mode
 	}
 }
 
-static void mv_xor_v2_enqueue(u32 base, u32 n)
+static void mv_xor_v2_enqueue(u32 base, u32 desc_num)
 {
 	/* write a number of new descriptors in the descriptors queue */
-	reg_write(base + DMA_DESQ_ADD_OFF, n);
+	reg_write(base + DMA_DESQ_ADD_OFF, desc_num);
 }
 
 static u32 mv_xor_v2_done(u32 base)
@@ -372,8 +376,9 @@ int mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 
 	while (start < end) {
 		if (desc_id >= MV_XOR_V2_MAX_DESC_NUM) {
-			/* increase xor max desc number if required */
-			printf("mv_ddr: dma: out of memory\n");
+			/* increase dma max desc number if required */
+			printf("mv_ddr: error: dma desq size limit (%d) reached\n",
+			       MV_XOR_V2_MAX_DESC_NUM);
 			return 1; /* fail */
 		}
 		buffer_size = end - start;
@@ -396,9 +401,16 @@ int mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 	return 0; /* pass */
 }
 
-int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size)
+int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size, u32 desc_num)
 {
-	int desc_id = 0;
+	int desc_id;
+
+	if (desc_num > MV_XOR_V2_MAX_DESC_NUM) {
+		/* increase dma max desc number if required */
+		printf("mv_ddr: error: dma desq size limit (%d) reached\n",
+		       MV_XOR_V2_MAX_DESC_NUM);
+		return 1; /* fail */
+	}
 
 	/* initialize dma descriptors queue memory region */
 	memset((void *)qmem, 0, sizeof(qmem));
@@ -406,11 +418,13 @@ int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size)
 	/* initialize dma engine */
 	mv_xor_v2_init(MV_XOR_BASE);
 
-	/* prepare dma hw descriptor and enqueue it to start processing */
-	mv_xor_v2_desc_prep(desc_id, DESC_OP_MODE_MEMCPY,
-			    src, dst, size, 0);
-	mv_xor_v2_enqueue(MV_XOR_BASE, 1);
-	desc_id++;
+	for (desc_id = 0; desc_id < desc_num; desc_id++) {
+		/* prepare dma hw descriptor */
+		mv_xor_v2_desc_prep(desc_id, DESC_OP_MODE_MEMCPY,
+				    src, dst + size * desc_id, size, 0);
+	}
+	/* enqueue dma descriptors to start processing */
+	mv_xor_v2_enqueue(MV_XOR_BASE, desc_id);
 
 	/* wait for transfer completion */
 	while (mv_xor_v2_done(MV_XOR_BASE) != desc_id)
@@ -422,9 +436,16 @@ int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size)
 	return 0; /* pass */
 }
 
-int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t size)
+int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t size, u32 desc_num)
 {
-	int desc_id = 0;
+	int desc_id;
+
+	if (desc_num > MV_XOR_V2_MAX_DESC_NUM) {
+		/* increase dma max desc number if required */
+		printf("mv_ddr: error: dma desq size limit (%d) reached\n",
+		       MV_XOR_V2_MAX_DESC_NUM);
+		return 1; /* fail */
+	}
 
 	/* initialize dma descriptors queue memory region */
 	memset((void *)qmem, 0, sizeof(qmem));
@@ -432,22 +453,25 @@ int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t size)
 	/* initialize dma engine */
 	mv_xor_v2_init(MV_XOR_BASE);
 
-	/* prepare dma hw descriptor and enqueue it to start processing */
-	mv_xor_v2_desc_prep(desc_id, DESC_OP_MODE_MEMCMP,
-			    src, dst, size, 0);
-	mv_xor_v2_enqueue(MV_XOR_BASE, 1);
-	desc_id++;
+	for (desc_id = 0; desc_id < desc_num; desc_id++) {
+		/* prepare dma hw descriptor and enqueue it to start processing */
+		mv_xor_v2_desc_prep(desc_id, DESC_OP_MODE_MEMCMP,
+				    src, dst + size * desc_id, size, 0);
+	}
+	/* enqueue dma descriptors to start processing */
+	mv_xor_v2_enqueue(MV_XOR_BASE, desc_id);
 
 	/* wait for transfer completion */
 	while (mv_xor_v2_done(MV_XOR_BASE) != desc_id)
 		;
-	desc_id--;
 
 	/* disable dma engine */
 	mv_xor_v2_finish(MV_XOR_BASE);
 
-	if (mv_xor_v2_memcmp_status_get(desc_id))
-		return 0; /* pass */
+	for (desc_id = 0; desc_id < desc_num; desc_id++) {
+		if (mv_xor_v2_memcmp_status_get(desc_id) == 0)
+			return 1; /* fail */
+	}
 
-	return 1; /* fail */
+	return 0; /* pass */
 }
