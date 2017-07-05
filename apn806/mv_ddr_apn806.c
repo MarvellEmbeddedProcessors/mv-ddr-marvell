@@ -1358,24 +1358,21 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 
 	/* FIXME: in case calibration failure set static calibration values, remove this in next release (A0 only) */
 	if (status == MV_FAIL) {
-		int rev_id = apn806_rev_id_get();
-		if (rev_id == APN806_REV_ID_A0) {
-			status = MV_OK;
+		status = MV_OK;
 #if defined(A70X0)
-			reg_write(0x114CC, 0x1200D);
-			reg_write(0x114C8, 0x1840008);
-			reg_write(0x117C8, 0x28A0008);
-			reg_write(0x11DC8, 0x1840008);
-			reg_write(0x11EC8, 0x28A0008);
+		reg_write(0x114CC, 0x1200D);
+		reg_write(0x114C8, 0x1840008);
+		reg_write(0x117C8, 0x28A0008);
+		reg_write(0x11DC8, 0x1840008);
+		reg_write(0x11EC8, 0x28A0008);
 #endif
 #if defined(A80X0)
-			reg_write(0x114CC, 0x1200D);
-			reg_write(0x114C8, 0x1840008);
-			reg_write(0x117C8, 0x28A0008);
-			reg_write(0x11DC8, 0x1840008);
-			reg_write(0x11EC8, 0x28A0008);
+		reg_write(0x114CC, 0x1200D);
+		reg_write(0x114C8, 0x1840008);
+		reg_write(0x117C8, 0x28A0008);
+		reg_write(0x11DC8, 0x1840008);
+		reg_write(0x11EC8, 0x28A0008);
 #endif
-		}
 	}
 
 	return status;
