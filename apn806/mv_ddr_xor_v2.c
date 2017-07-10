@@ -343,7 +343,7 @@ static u32 mv_xor_v2_memcmp_status_get(uint64_t qmem, int desc_id)
 }
 
 /* mv_ddr dma api */
-void mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
+int mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 {
 	uint64_t start = start_addr;
 	uint64_t end = start_addr + size;
@@ -368,7 +368,7 @@ void mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 		if (desc_id >= MV_XOR_V2_MAX_DESC_NUM) {
 			/* increase xor max desc number if required */
 			printf("mv_ddr: dma: out of memory\n");
-			return;
+			return 1; /* fail */
 		}
 		buffer_size = end - start;
 		if (buffer_size > MV_XOR_MAX_TRANSFER_SIZE)
@@ -386,9 +386,11 @@ void mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 
 	/* disable xor engine */
 	mv_xor_v2_finish(MV_XOR_BASE);
+
+	return 0; /* pass */
 }
 
-void mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size)
+int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size)
 {
 	int desc_id = 0;
 
@@ -410,6 +412,8 @@ void mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t size)
 
 	/* disable dma engine */
 	mv_xor_v2_finish(MV_XOR_BASE);
+
+	return 0; /* pass */
 }
 
 int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t size)
