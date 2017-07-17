@@ -417,10 +417,9 @@ int mv_ddr_dma_memset(uint64_t start_addr, uint64_t size, uint64_t data)
 	return 0; /* pass */
 }
 
-int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t dst_gap,
-		      uint64_t size, u32 dma_num, u32 desc_num)
+int mv_ddr_dma_memcpy(uint64_t *src, uint64_t *dst, uint64_t size, u32 dma_num, u32 desc_num)
 {
-	uint64_t dma_dst, desc_dst;
+	uint64_t desc_dst;
 	u32 dma_id, desc_id;
 
 	if (dma_num > MV_XOR_ENGINE_NUM) {
@@ -444,12 +443,11 @@ int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t dst_gap,
 		mv_xor_v2_init(dma_id);
 
 	for (dma_id = 0; dma_id < dma_num; dma_id++) {
-		dma_dst = dst + dma_id * (size * desc_num + dst_gap);
 		for (desc_id = 0; desc_id < desc_num; desc_id++) {
-			desc_dst = dma_dst + size * desc_id;
+			desc_dst = dst[dma_id] + size * desc_id;
 			/* prepare dma hw descriptor */
 			mv_xor_v2_desc_prep(dma_id, desc_id, DESC_OP_MODE_MEMCPY,
-					    src, desc_dst, size, 0);
+					    src[dma_id], desc_dst, size, 0);
 		}
 	}
 	/* enqueue dma descriptors to start processing */
@@ -468,10 +466,9 @@ int mv_ddr_dma_memcpy(uint64_t src, uint64_t dst, uint64_t dst_gap,
 	return 0; /* pass */
 }
 
-int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t dst_gap,
-		      uint64_t size, u32 dma_num, u32 desc_num)
+int mv_ddr_dma_memcmp(uint64_t *src, uint64_t *dst, uint64_t size, u32 dma_num, u32 desc_num)
 {
-	uint64_t dma_dst, desc_dst;
+	uint64_t desc_dst;
 	u32 dma_id, desc_id;
 	int fail_cnt = 0;
 
@@ -496,12 +493,11 @@ int mv_ddr_dma_memcmp(uint64_t src, uint64_t dst, uint64_t dst_gap,
 		mv_xor_v2_init(dma_id);
 
 	for (dma_id = 0; dma_id < dma_num; dma_id++) {
-		dma_dst = dst + dma_id * (size * desc_num + dst_gap);
 		for (desc_id = 0; desc_id < desc_num; desc_id++) {
-			desc_dst = dma_dst + size * desc_id;
+			desc_dst = dst[dma_id] + size * desc_id;
 			/* prepare dma hw descriptor */
 			mv_xor_v2_desc_prep(dma_id, desc_id, DESC_OP_MODE_MEMCMP,
-					    src, desc_dst, size, 0);
+					    src[dma_id], desc_dst, size, 0);
 		}
 	}
 	/* enqueue dma descriptors to start processing */
