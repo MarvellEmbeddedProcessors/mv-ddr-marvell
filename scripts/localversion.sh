@@ -1,5 +1,6 @@
+#!/bin/sh
 #*******************************************************************************
-# Copyright (C) 2016 Marvell International Ltd.
+# Copyright (C) 2017 Marvell International Ltd.
 #
 # This software file (the "File") is owned and distributed by Marvell
 # International Ltd. and/or its affiliates ("Marvell") under the following
@@ -95,186 +96,41 @@
 #
 #*******************************************************************************
 
-MV_DDR_ROOT = .
+# get mv_ddr directory path
+MV_DDR_ROOT=$1
 
-# set mv_ddr build message and version string source file
-MV_DDR_VER_CSRC = mv_ddr_build_message.c
+# get mv_ddr build message and version string c-file name
+MV_DDR_VER_CSRC=$2
 
-# create mv_ddr build message and version string source file
-$(shell $(MV_DDR_ROOT)/scripts/localversion.sh $(MV_DDR_ROOT) $(MV_DDR_VER_CSRC) 2> /dev/null)
+# get mv_ddr git commit id
+MV_DDR_COMMIT_ID=`git -C $MV_DDR_ROOT rev-parse --verify --quiet --short HEAD 2> /dev/null`
+if [ "$MV_DDR_COMMIT_ID" = "" ]; then
+	MV_DDR_COMMIT_ID="???"
+fi
 
-# ******************
-# U-BOOT SPL SUPPORT
-# ******************
-ifdef CONFIG_SPL_BUILD
-obj-$(CONFIG_SPL_BUILD) += ddr3_a38x.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_a38x_training.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_debug.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_hws_hw_training.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_init.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_training.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_training_bist.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_training_centralization.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_training_db.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_training_hw_algo.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_training_ip_engine.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_training_leveling.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_training_pbs.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_training_static.o
-obj-$(CONFIG_SPL_BUILD) += xor.o
+# check for uncommitted changes in mv_ddr git
+MV_DDR_DIRTY_CHK=`git -C $MV_DDR_ROOT diff-index --name-only HEAD 2> /dev/null`
+if [ "$MV_DDR_DIRTY_CHK" != "" ]; then
+	MV_DDR_COMMIT_ID="${MV_DDR_COMMIT_ID}-dirty"
+fi
 
-# ******************************
-# U-BOOT MARVELL 2013.01 SUPPORT
-# ******************************
-else ifeq ($(DDR3LIB), 3)
-BH_PATH ?= $(MV_DDR_ROOT)/../..
-include $(BH_PATH)/base.mk
+# get mv_ddr version from localversion file in mv_ddr directory
+MV_DDR_VERSION=`awk '{$1=$1;print}' $MV_DDR_ROOT/localversion 2> /dev/null`
+if [ "$MV_DDR_VERSION" = "" ]; then
+	MV_DDR_VERSION="???"
+fi
 
-OBJ_DIR = $(BH_PATH)/src_ddr/lib
-MV_DDR_SRCPATH = $(MV_DDR_ROOT) $(MV_DDR_ROOT)/a38x
-INCPATH = $(MV_DDR_SRCPATH)
-INCLUDE = $(addprefix -I,$(INCPATH))
-INCLUDE += -I$(BH_PATH)/inc/common
+# set mv_ddr version string to be printed out
+MV_DDR_VERSION_STRING="mv_ddr: ${MV_DDR_VERSION}-g${MV_DDR_COMMIT_ID}"
 
-MV_DDR_LIBNAME = $(MV_DDR_ROOT)/$(DDRTYPE)_training_$(LIBNAME).lib
-MV_DDR_LIB = $(OBJ_DIR)/$(MV_DDR_LIBNAME)
+# get date and time to set mv_ddr build message
+MONTH=`LC_TIME=en_US date +%b`
+DAY=`LC_TIME=en_US date +%d`
+YEAR=`LC_TIME=en_US date +%Y`
+DATE="$MONTH $DAY $YEAR"
+TIME=`LC_TIME=en_US date +%X`
 
-MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_SRCPATH),$(wildcard $(DIR)/*.c))
-MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
-# add mv_ddr build message and version string object
-MV_DDR_VER_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_VER_CSRC))
-MV_DDR_COBJ += $(MV_DDR_VER_COBJ)
-
-.SILENT:
-all: header create_dir $(MV_DDR_LIB)
-
-# mv_ddr code compilation
-$(OBJ_DIR)/%.o: %.c
-	$(ECHO) "  CC      $<"
-	$(CC) $(INCLUDE) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
-
-$(MV_DDR_LIB): $(MV_DDR_COBJ)
-	$(ECHO) "  AR      $(MV_DDR_LIBNAME)"
-	$(AR) rcs $(MV_DDR_LIB) $(MV_DDR_COBJ)
-
-$(MV_DDR_VER_COBJ):
-	$(ECHO) "  CC      $(MV_DDR_VER_CSRC)"
-	$(CC) -c $(CFLAGS) -o $@ $(MV_DDR_VER_CSRC)
-
-create_dir:
-	$(MKDIR) $(OBJ_DIR)/a38x
-
-header:
-	$(ECHO) "\nBuilding DRAM driver"
-
-clean:
-	$(ECHO) "  CLEAN"
-	@$(RM) $(MV_DDR_COBJ) $(MV_DDR_LIB)
-
-# *******************
-# MARVELL ATF SUPPORT
-# *******************
-else
-CROSS    = $(CROSS_COMPILE)
-
-LD       = $(CROSS)ld
-CC       = $(CROSS)gcc
-AS       = $(CROSS)gcc
-AR       = $(CROSS)ar
-OBJCOPY  = $(CROSS)objcopy
-OBJDUMP  = $(CROSS)objdump
-STRIP    = $(CROSS)strip
-
-RM       = @rm -rf
-MKDIR    = @mkdir -p
-CD       = @cd
-MV       = @mv
-CP       = @cp
-CAT      = @cat
-PWD      = @pwd
-ECHO     = @echo
-
-# OBJ_DIR set in ble/ble.mk
-OBJ_DIR ?= $(MV_DDR_ROOT)
-MV_DDR4 = y
-
-MV_DDR_SRCPATH = $(MV_DDR_ROOT) $(MV_DDR_ROOT)/apn806
-
-INCPATH = $(MV_DDR_SRCPATH)
-INCLUDE = $(addprefix -I,$(INCPATH))
-# PLAT_INCLUDES set in ble/ble.mk
-INCLUDE += $(PLAT_INCLUDES)
-
-MV_DDR_LIBNAME = mv_ddr_lib.a
-MV_DDR_LIB = $(OBJ_DIR)/$(MV_DDR_LIBNAME)
-
-CFLAGS = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2 -nostdinc
-# PLATFORM is set in ble/ble.mk
-CFLAGS += -march=armv8-a -fpie $(INCLUDE)
-CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806
-#CFLAGS += -DCONFIG_MC_STATIC
-#CFLAGS += -DCONFIG_MC_STATIC_PRINT
-#CFLAGS += -DCONFIG_PHY_STATIC
-#CFLAGS += -DCONFIG_PHY_STATIC_PRINT
-ifeq ($(MV_DDR4),y)
-CFLAGS += -DCONFIG_DDR4
-endif
-ifneq ($(findstring a80x0,$(PLATFORM)),)
-CFLAGS += -DCONFIG_64BIT
-CFLAGS += -DA80X0
-endif
-ifneq ($(findstring a70x0,$(PLATFORM)),)
-CFLAGS += -DA70X0
-endif
-ifneq ($(findstring a7040,$(PLATFORM)),)
-CFLAGS += -DA70X0
-endif
-ifneq ($(findstring a3900,$(PLATFORM)),)
-CFLAGS += -DA70X0
-endif
-ifneq ($(ARCH),)
-CFLAGS += -D$(ARCH)
-endif
-
-LDFLAGS = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
-
-MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_SRCPATH),$(wildcard $(DIR)/*.c))
-
-MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
-# add mv_ddr build message and version string object
-MV_DDR_VER_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_VER_CSRC))
-MV_DDR_COBJ += $(MV_DDR_VER_COBJ)
-
-.SILENT:
-
-all: check_env header create_dir $(MV_DDR_LIB)
-
-# mv_ddr code compilation
-$(OBJ_DIR)/%.o: %.c
-	$(ECHO) "  CC      $<"
-	$(CC) -c $(CFLAGS) -o $@ $<
-
-$(MV_DDR_LIB): $(MV_DDR_COBJ)
-	$(ECHO) "  AR      $(MV_DDR_LIBNAME)"
-	$(AR) rcs $(MV_DDR_LIB) $(MV_DDR_COBJ)
-
-$(MV_DDR_VER_COBJ):
-	$(ECHO) "  CC      $(MV_DDR_VER_CSRC)"
-	$(CC) -c $(CFLAGS) -o $@ $(MV_DDR_VER_CSRC)
-
-create_dir:
-	$(MKDIR) $(OBJ_DIR)/apn806
-
-header:
-	$(ECHO) "\nBuilding DRAM driver"
-
-check_env:
-ifndef PLATFORM
-	$(error PLATFORM is undefined. please set PLATFORM variable)
-endif
-
-clean:
-	$(ECHO) "  CLEAN"
-	@$(RM) $(MV_DDR_COBJ) $(MV_DDR_LIB)
-
-endif
+# write mv_ddr build message and version string to c-file
+echo "const char mv_ddr_build_message[] = \"($DATE - $TIME)\"; \
+      const char mv_ddr_version_string[] = \"$MV_DDR_VERSION_STRING\";" > \
+      $MV_DDR_ROOT/$MV_DDR_VER_CSRC
