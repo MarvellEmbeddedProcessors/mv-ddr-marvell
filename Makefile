@@ -95,7 +95,12 @@
 #
 #*******************************************************************************
 
+# set mv_ddr directory
+ifdef CONFIG_SPL_BUILD
+MV_DDR_ROOT = $(src)
+else
 MV_DDR_ROOT = .
+endif
 
 # set mv_ddr build message and version string source file
 MV_DDR_VER_CSRC = mv_ddr_build_message.c
@@ -107,10 +112,12 @@ $(shell $(MV_DDR_ROOT)/scripts/localversion.sh $(MV_DDR_ROOT) $(MV_DDR_VER_CSRC)
 # U-BOOT SPL SUPPORT
 # ******************
 ifdef CONFIG_SPL_BUILD
-obj-$(CONFIG_SPL_BUILD) += ddr3_a38x.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_a38x_training.o
+obj-$(CONFIG_SPL_BUILD) += a38x/mv_ddr_plat.o
+obj-$(CONFIG_SPL_BUILD) += a38x/mv_ddr_brd.o
+obj-$(CONFIG_SPL_BUILD) += a38x/mv_ddr_static.o
+obj-$(CONFIG_SPL_BUILD) += a38x/mv_ddr_sys_env_lib.o
+obj-$(CONFIG_SPL_BUILD) += ddr_init.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_debug.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_hws_hw_training.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_init.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_training.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_training_bist.o
@@ -120,7 +127,15 @@ obj-$(CONFIG_SPL_BUILD) += ddr3_training_hw_algo.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_training_ip_engine.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_training_leveling.o
 obj-$(CONFIG_SPL_BUILD) += ddr3_training_pbs.o
-obj-$(CONFIG_SPL_BUILD) += ddr3_training_static.o
+obj-$(CONFIG_SPL_BUILD) += mv_ddr_build_message.o
+obj-$(CONFIG_SPL_BUILD) += mv_ddr_common.o
+obj-$(CONFIG_SPL_BUILD) += mv_ddr_spd.o
+obj-$(CONFIG_SPL_BUILD) += mv_ddr_topology.o
+obj-$(CONFIG_SPL_BUILD) += mv_ddr4_mpr_pda_if.o
+obj-$(CONFIG_SPL_BUILD) += mv_ddr4_training.o
+obj-$(CONFIG_SPL_BUILD) += mv_ddr4_training_calibration.o
+obj-$(CONFIG_SPL_BUILD) += mv_ddr4_training_db.o
+obj-$(CONFIG_SPL_BUILD) += mv_ddr4_training_leveling.o
 obj-$(CONFIG_SPL_BUILD) += xor.o
 
 # ******************************
