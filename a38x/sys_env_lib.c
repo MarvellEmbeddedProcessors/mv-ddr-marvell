@@ -343,23 +343,6 @@ u8 sys_env_device_rev_get(void)
 }
 
 /*
- * sys_env_dlb_config_ptr_get
- *
- * DESCRIPTION: defines pointer to to DLB COnfiguration table
- *
- * INPUT: none
- *
- * OUTPUT: pointer to DLB COnfiguration table
- *
- * RETURN:
- *       returns pointer to DLB COnfiguration table
- */
-struct dlb_config *sys_env_dlb_config_ptr_get(void)
-{
-	return &ddr3_dlb_config_table[0];
-}
-
-/*
  * sys_env_get_cs_ena_from_reg
  *
  * DESCRIPTION: Get bit mask of enabled CS

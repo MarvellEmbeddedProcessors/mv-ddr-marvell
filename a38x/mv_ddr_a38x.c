@@ -127,7 +127,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TSEN_STATUS_TEMP_OUT_MASK	(0x3ff << TSEN_STATUS_TEMP_OUT_OFFSET)
 
 #if defined(CONFIG_DDR4)
-struct dlb_config ddr3_dlb_config_table[] = {
+static struct dlb_config ddr3_dlb_config_table[] = {
 	{DLB_CTRL_REG, 0x2000005f},
 	{DLB_BUS_OPT_WT_REG, 0x00880000},
 	{DLB_AGING_REG, 0x3f7f007f},
@@ -143,8 +143,8 @@ struct dlb_config ddr3_dlb_config_table[] = {
 	{DLB_USER_CMD_REG, 0x00000000},
 	{0x0, 0x0}
 };
-#else /* CONFIG_DDR4 */
-struct dlb_config ddr3_dlb_config_table[] = {
+#else /* !CONFIG_DDR4 */
+static struct dlb_config ddr3_dlb_config_table[] = {
 	{DLB_CTRL_REG, 0x2000005c},
 	{DLB_BUS_OPT_WT_REG, 0x00880000},
 	{DLB_AGING_REG, 0x0f7f007f},
@@ -161,6 +161,11 @@ struct dlb_config ddr3_dlb_config_table[] = {
 	{0x0, 0x0}
 };
 #endif /* CONFIG_DDR4 */
+
+static struct dlb_config *sys_env_dlb_config_ptr_get(void)
+{
+	return &ddr3_dlb_config_table[0];
+}
 
 #if defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC)
 struct dram_modes {
@@ -183,7 +188,7 @@ static struct dram_modes ddr_modes[] = {
 
 #ifdef STATIC_ALGO_SUPPORT
 /* This array hold the board round trip delay (DQ and CK) per <interface,bus> */
-struct trip_delay_element a38x_board_round_trip_delay_array[] = {
+static struct trip_delay_element a38x_board_round_trip_delay_array[] = {
 	/* 1st board */
 	/* Interface bus DQS-delay CK-delay */
 	{ 3952, 5060 },

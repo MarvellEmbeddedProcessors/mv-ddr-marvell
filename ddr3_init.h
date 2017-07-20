@@ -246,8 +246,6 @@ extern u32 mem_size[];
 extern u32 nominal_avs;
 extern u32 extension_avs;
 
-extern struct dlb_config ddr3_dlb_config_table[];
-
 #if defined(CONFIG_DDR4)
 /* if 1, SSTL & POD have same Vref and workaround is required */
 extern u8 vref_calibration_wa;
