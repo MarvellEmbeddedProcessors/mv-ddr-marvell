@@ -98,6 +98,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _DDR_MV_WRAPPER_H
 #define _DDR_MV_WRAPPER_H
 
+#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
+#define INTER_REGS_BASE	0xd0000000
+#endif
+
 #include "mv_os.h"
 #include "printf.h"
 #include "mvUart.h"

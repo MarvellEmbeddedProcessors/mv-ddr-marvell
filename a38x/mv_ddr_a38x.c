@@ -109,8 +109,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DDR_INTERFACES_NUM		1
 #define DDR_INTERFACE_OCTETS_NUM	5
 
-#define SAR_DEV_ID_OFFS			27
-#define SAR_DEV_ID_MASK			0x7
+/*
+ * 1. L2 filter should be set at binary header to 0xD000000,
+ *    to avoid conflict with internal register IO.
+ * 2. U-Boot modifies internal registers base to 0xf100000,
+ *    and than should update L2 filter accordingly to 0xf000000 (3.75 GB)
+ */
+#define L2_FILTER_FOR_MAX_MEMORY_SIZE	0xC0000000 /* temporary limit l2 filter to 3gb (LSP issue) */
+#define ADDRESS_FILTERING_END_REGISTER	0x8c04
 
 #define DYNAMIC_CS_SIZE_CONFIG
 #define DISABLE_L2_FILTERING_DURING_DDR_TRAINING
@@ -1440,7 +1446,7 @@ static int ddr3_fast_path_dynamic_cs_size_config(u32 cs_ena)
 static int ddr3_restore_and_set_final_windows(u32 *win, const char *ddr_type)
 {
 	u32 win_ctrl_reg, num_of_win_regs;
-	u32 cs_ena = sys_env_get_cs_ena_from_reg();
+	u32 cs_ena = mv_ddr_sys_env_get_cs_ena_from_reg();
 	u32 ui;
 
 	win_ctrl_reg = REG_XBAR_WIN_4_CTRL_ADDR;
@@ -1570,7 +1576,7 @@ int mv_ddr_pre_training_soc_config(const char *ddr_type)
 	 * suspend i.e the DRAM values will not be overwritten / reset when
 	 * waking from suspend
 	 */
-	if (sys_env_suspend_wakeup_check() ==
+	if (mv_ddr_sys_env_suspend_wakeup_check() ==
 	    SUSPEND_WAKEUP_ENABLED_GPIO_DETECTED) {
 		reg_bit_set(SDRAM_INIT_CTRL_REG,
 			    DRAM_RESET_MASK_MASKED << DRAM_RESET_MASK_OFFS);
