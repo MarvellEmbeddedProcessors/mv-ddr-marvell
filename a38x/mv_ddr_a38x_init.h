@@ -111,7 +111,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "mv_ddr_a38x.h"
-#include "mv_ddr_a38x_topology.h"
 
 /* A38x revisions */
 #define MV_88F68XX_Z1_ID		0x0

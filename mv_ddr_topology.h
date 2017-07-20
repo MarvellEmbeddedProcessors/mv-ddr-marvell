@@ -98,6 +98,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_TOPOLOGY_H
 #define _MV_DDR_TOPOLOGY_H
 
+/* ddr bus masks */
+#define BUS_MASK_32BIT			0xf
+#define BUS_MASK_32BIT_ECC		0x1f
+#define BUS_MASK_16BIT			0x3
+#define BUS_MASK_16BIT_ECC		0x13
+#define BUS_MASK_16BIT_ECC_PUP3		0xb
+#define MV_DDR_64BIT_BUS_MASK		0xff
+#define MV_DDR_64BIT_ECC_PUP8_BUS_MASK	0x1ff
+#define MV_DDR_32BIT_ECC_PUP8_BUS_MASK	0x10f
+
 /* source of ddr configuration data */
 enum mv_ddr_cfg_src {
 	MV_DDR_CFG_DEFAULT,	/* based on data in mv_ddr_topology_map structure */

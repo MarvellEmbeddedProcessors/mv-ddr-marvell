@@ -100,16 +100,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr_topology_def.h"
 
-/* Bus mask variants */
-#define BUS_MASK_32BIT			0xf
-#define BUS_MASK_32BIT_ECC		0x1f
-#define BUS_MASK_16BIT			0x3 /* TODO: check if needed */
-#define BUS_MASK_16BIT_ECC		0x13 /* TODO: check if needed */
-#define BUS_MASK_16BIT_ECC_PUP3		0xb /* TODO: check if needed */
-#define MV_DDR_64BIT_BUS_MASK		0xff
-#define MV_DDR_64BIT_ECC_PUP8_BUS_MASK	0x1ff
-#define MV_DDR_32BIT_ECC_PUP8_BUS_MASK	0x10f
-
-#define DYNAMIC_CS_SIZE_CONFIG
-
 #endif /* _MV_DDR_AP806_TOPOLOGY_H */
