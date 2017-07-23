@@ -98,6 +98,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_A38X_H
 #define _MV_DDR_A38X_H
 
+#include "mv_ddr_static.h"
+
 #define MAX_INTERFACE_NUM		1
 #define MAX_BUS_NUM			5
 #define DDR_IF_CTRL_SUBPHYS_NUM		3
@@ -324,25 +326,6 @@ extern u16 odt_intercept[];
 int mv_ddr_pre_training_soc_config(const char *ddr_type);
 int mv_ddr_post_training_soc_config(const char *ddr_type);
 void mv_ddr_mem_scrubbing(void);
-
-#ifdef CONFIG_MC_STATIC
-struct mv_ddr_mc_reg_config {
-	u32 reg_addr;
-	u32 reg_data;
-	u32 reg_mask;
-};
-
-int mv_ddr_mc_static_config(void);
-#endif /* CONFIG_MC_STATIC */
-
-#ifdef CONFIG_PHY_STATIC
-struct mv_ddr_subphys_reg_config {
-	u32 reg_addr;
-	u32 reg_data[5];
-};
-
-void mv_ddr_phy_static_config(void);
-#endif /* CONFIG_PHY_STATIC */
 
 void mv_ddr_odpg_enable(void);
 void mv_ddr_odpg_disable(void);

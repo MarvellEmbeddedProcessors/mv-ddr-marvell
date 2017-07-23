@@ -99,13 +99,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "sys_env_lib.h"
 
-#if defined(CONFIG_PHY_STATIC)
-#include "mv_ddr_a38x_phy_static.h"
-#endif
-#if defined(CONFIG_MC_STATIC)
-#include "mv_ddr_a38x_mc_static.h"
-#endif
-
 #define DDR_INTERFACES_NUM		1
 #define DDR_INTERFACE_OCTETS_NUM	5
 
@@ -175,25 +168,6 @@ static struct dlb_config *sys_env_dlb_config_ptr_get(void)
 {
 	return &ddr3_dlb_config_table[0];
 }
-
-#if defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC)
-struct dram_modes {
-	char *mode_name;
-	u8 cpu_freq;
-	struct reg_data *mc_regs;
-	struct mv_ddr_subphys_reg_config *ctrl_phy_regs;
-	struct mv_ddr_subphys_reg_config *data_phy_regs;
-};
-
-static struct dram_modes ddr_modes[] = {
-	/* Conf name, DDR Frequency, MC regs, PHY cntrl, PHY data */
-#if !defined(CONFIG_DDR4)
-	{"a38x_600", DDR_FREQ_600, a38x_mc_600, a38x_ctrl_phy_600, a38x_data_phy_600},
-#endif
-	{"a38x_800", DDR_FREQ_800, a38x_mc_800, a38x_ctrl_phy_800, a38x_data_phy_800},
-	{"", DDR_FREQ_LAST, NULL, NULL, NULL}
-};
-#endif /* CONFIG_PHY_STATIC || CONFIG_MC_STATIC */
 
 static u8 a38x_bw_per_freq[DDR_FREQ_LAST] = {
 	0x3,			/* DDR_FREQ_100 */
@@ -1173,33 +1147,6 @@ u32 mv_ddr_init_freq_get(void)
 	return freq;
 }
 
-#if defined(CONFIG_PHY_STATIC) || defined(CONFIG_MC_STATIC)
-/*
- * Name:     ddr3_get_static_ddr_mode - Init Memory controller with
- *           static parameters
- * Desc:     Use this routine to init the controller without the HW training
- *           procedure.
- *           User must provide compatible header file with registers data.
- * Args:     None.
- * Notes:
- * Returns:  None.
- */
-
-u32 ddr3_get_static_ddr_mode(void)
-{
-	u32 i;
-
-	for (i = 0; ddr_modes[i].mc_regs != NULL; i++) {
-		if (mv_ddr_init_freq_get() == ddr_modes[i].cpu_freq)
-			return i;
-	}
-
-	DEBUG_INIT_S("\n*** Error: ddr3_get_static_ddr_mode: No match for requested DDR mode. ***\n\n");
-
-	return 0;
-}
-#endif
-
 static u32 ddr3_get_bus_width(void)
 {
 	u32 bus_width;
@@ -1819,62 +1766,3 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 	return status;
 }
 #endif /* CONFIG_DDR4 */
-
-#ifdef CONFIG_MC_STATIC
-int mv_ddr_mc_static_config(void)
-{
-	u32 mode, i = 0;
-
-	mode = ddr3_get_static_ddr_mode();
-	while (ddr_modes[mode].mc_regs[i].reg_addr != 0xffffffff) {
-		ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-				  ddr_modes[mode].mc_regs[i].reg_addr,
-				  ddr_modes[mode].mc_regs[i].reg_data,
-				  ddr_modes[mode].mc_regs[i].reg_mask);
-		i++;
-	}
-
-	CHECK_STATUS(ddr3_tip_enable_init_sequence(0));
-
-	return MV_OK;
-}
-#endif /* CONFIG_MV_DDR_STATIC_MC */
-
-#ifdef CONFIG_PHY_STATIC
-static int mv_ddr_a38x_phy_static_config(u32 if_id, u32 subphys_num, enum hws_ddr_phy subphy_type)
-{
-	u32 i, mode, subphy_id, dev_num = 0;
-
-	mode = ddr3_get_static_ddr_mode();
-	if (subphy_type == DDR_PHY_DATA) {
-		for (subphy_id = 0; subphy_id < subphys_num; subphy_id++) {
-			i = 0;
-			while (ddr_modes[mode].data_phy_regs[i].reg_addr != 0xffffffff) {
-				ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ACCESS_TYPE_UNICAST,
-							subphy_id, subphy_type, ddr_modes[mode].data_phy_regs[i].reg_addr,
-							ddr_modes[mode].data_phy_regs[i].reg_data[subphy_id]);
-				i++;
-			}
-		}
-	} else {
-		for (subphy_id = 0; subphy_id < subphys_num; subphy_id++) {
-			i = 0;
-			while (ddr_modes[mode].ctrl_phy_regs[i].reg_addr != 0xffffffff) {
-				ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ACCESS_TYPE_UNICAST,
-							subphy_id, subphy_type, ddr_modes[mode].ctrl_phy_regs[i].reg_addr,
-							ddr_modes[mode].ctrl_phy_regs[i].reg_data[subphy_id]);
-				i++;
-			}
-		}
-	}
-
-	return MV_OK;
-}
-
-void mv_ddr_phy_static_config(void)
-{
-/* TODO: Need to use variable for subphys number */
-	mv_ddr_a38x_phy_static_config(0, 4, DDR_PHY_DATA);
-	mv_ddr_a38x_phy_static_config(0, 3, DDR_PHY_CONTROL);
-}
-#endif

@@ -274,9 +274,9 @@ enum  mv_ddr_tip_byte_state{
 };
 
 struct reg_data {
-	u32 reg_addr;
-	u32 reg_data;
-	u32 reg_mask;
+	unsigned int reg_addr;
+	unsigned int reg_data;
+	unsigned int reg_mask;
 };
 
 enum dm_direction {
