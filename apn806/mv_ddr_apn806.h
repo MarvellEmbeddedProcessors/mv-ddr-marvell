@@ -204,9 +204,6 @@ enum{
 #define DFS_LOW_FREQ_VALUE		100
 #define SDRAM_CS_SIZE			0x7fffffffUL	/* FIXME: implement a function for cs size for each platform */
 
-/* right now, we're not supporting this in mainline */
-#undef SUPPORT_STATIC_DUNIT_CONFIG
-
 /* Controler bus divider 1 for 32 bit, 2 for 64 bit */
 #define DDR_CONTROLLER_BUS_WIDTH_MULTIPLIER	1
 

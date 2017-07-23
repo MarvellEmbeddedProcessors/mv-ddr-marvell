@@ -109,9 +109,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AP_INT_REG_START_ADDR		0xd0000000
 #define AP_INT_REG_END_ADDR		0xd0100000
 
-/* right now, we're not supporting this in mainline */
-#undef SUPPORT_STATIC_DUNIT_CONFIG
-
 /* Controler bus divider 1 for 32 bit, 2 for 64 bit */
 #define DDR_CONTROLLER_BUS_WIDTH_MULTIPLIER	1
 

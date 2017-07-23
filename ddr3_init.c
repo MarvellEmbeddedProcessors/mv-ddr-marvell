@@ -119,8 +119,6 @@ static char *ddr_type = "DDR3";
 /*
  * generic_init_controller controls D-unit configuration:
  * '1' - dynamic D-unit configuration,
- * '0' - D-unit values configured by ddr3_tip_init_specific_reg_config
- *		(supported by A380& AC3)
  */
 u8 generic_init_controller = 1;
 

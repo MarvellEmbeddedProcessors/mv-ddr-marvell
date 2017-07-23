@@ -193,72 +193,7 @@ static struct dram_modes ddr_modes[] = {
 	{"a38x_800", DDR_FREQ_800, a38x_mc_800, a38x_ctrl_phy_800, a38x_data_phy_800},
 	{"", DDR_FREQ_LAST, NULL, NULL, NULL}
 };
-#endif /* SUPPORT_STATIC_DUNIT_CONFIG */
-
-#ifdef STATIC_ALGO_SUPPORT
-/* This array hold the board round trip delay (DQ and CK) per <interface,bus> */
-static struct trip_delay_element a38x_board_round_trip_delay_array[] = {
-	/* 1st board */
-	/* Interface bus DQS-delay CK-delay */
-	{ 3952, 5060 },
-	{ 3192, 4493 },
-	{ 4785, 6677 },
-	{ 3413, 7267 },
-	{ 4282, 6086 },	/* ECC PUP */
-	{ 3952, 5134 },
-	{ 3192, 4567 },
-	{ 4785, 6751 },
-	{ 3413, 7341 },
-	{ 4282, 6160 },	/* ECC PUP */
-
-	/* 2nd board */
-	/* Interface bus DQS-delay CK-delay */
-	{ 3952, 5060 },
-	{ 3192, 4493 },
-	{ 4785, 6677 },
-	{ 3413, 7267 },
-	{ 4282, 6086 },	/* ECC PUP */
-	{ 3952, 5134 },
-	{ 3192, 4567 },
-	{ 4785, 6751 },
-	{ 3413, 7341 },
-	{ 4282, 6160 }	/* ECC PUP */
-};
-
-/* package trace */
-static struct trip_delay_element a38x_package_round_trip_delay_array[] = {
-	/* IF BUS DQ_DELAY CK_DELAY */
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 }
-};
-
-static int a38x_silicon_delay_offset[] = {
-	/* board 0 */
-	0,
-	/* board 1 */
-	0,
-	/* board 2 */
-	0
-};
-#endif /* STATIC_ALGO_SUPPORT */
+#endif /* CONFIG_PHY_STATIC || CONFIG_MC_STATIC */
 
 static u8 a38x_bw_per_freq[DDR_FREQ_LAST] = {
 	0x3,			/* DDR_FREQ_100 */
@@ -938,23 +873,6 @@ static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_INTERLEAVE_WA, 0);
 #endif
 
-#ifdef STATIC_ALGO_SUPPORT
-	{
-		struct hws_tip_static_config_info static_config;
-		u32 board_offset =
-		    board_id * DDR_INTERFACES_NUM *
-		    DDR_INTERFACE_OCTETS_NUM;
-
-		static_config.silicon_delay =
-			a38x_silicon_delay_offset[board_id];
-		static_config.package_trace_arr =
-			a38x_package_round_trip_delay_array;
-		static_config.board_trace_arr =
-			&a38x_board_round_trip_delay_array[board_offset];
-		ddr3_tip_init_static_config_db(dev_num, &static_config);
-	}
-#endif
-
 	ca_delay = 0;
 	delay_enable = 1;
 	dfs_low_freq = DFS_LOW_FREQ_VALUE;
@@ -1622,19 +1540,6 @@ int mv_ddr_pre_training_soc_config(const char *ddr_type)
 	 */
 	/* Set X-BAR windows for the training sequence */
 	ddr3_save_and_set_training_windows(win);
-
-#ifdef SUPPORT_STATIC_DUNIT_CONFIG
-	/*
-	 * Load static controller configuration (in case dynamic/generic init
-	 * is not enabled
-	 */
-	if (generic_init_controller == 0) {
-		ddr3_tip_init_specific_reg_config(0,
-						  ddr_modes
-						  [ddr3_get_static_ddr_mode
-						   ()].regs);
-	}
-#endif
 
 	return MV_OK;
 }

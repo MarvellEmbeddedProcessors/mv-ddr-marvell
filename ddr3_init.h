@@ -121,7 +121,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_training_ip_flow.h"
 #include "ddr3_training_ip_pbs.h"
 #include "ddr3_training_ip_prv_if.h"
-#include "ddr3_training_ip_static.h"
 #include "ddr3_training_leveling.h"
 #include "xor.h"
 
@@ -290,8 +289,6 @@ void print_topology(struct mv_ddr_topology_map *tm);
 u32 mv_board_id_get(void);
 
 int ddr3_load_topology_map(void);
-int ddr3_tip_init_specific_reg_config(u32 dev_num,
-				      struct reg_data *reg_config_arr);
 void ddr3_hws_set_log_level(enum ddr_lib_debug_block block, u8 level);
 void mv_ddr_user_log_level_set(enum ddr_lib_debug_block block);
 int ddr3_tip_tune_training_params(u32 dev_num,
@@ -306,10 +303,6 @@ int hws_ddr3_cs_base_adr_calc(u32 if_id, u32 cs, u32 *cs_base_addr);
 
 int ddr3_tip_print_pbs_result(u32 dev_num, u32 cs_num, enum pbs_dir pbs_mode);
 int ddr3_tip_clean_pbs_result(u32 dev_num, enum pbs_dir pbs_mode);
-
-int ddr3_tip_static_round_trip_arr_build(u32 dev_num,
-					 struct trip_delay_element *table_ptr,
-					 int is_wl, u32 *round_trip_delay_arr);
 
 u32 mv_ddr_init_freq_get(void);
 void mv_ddr_mc_config(void);
