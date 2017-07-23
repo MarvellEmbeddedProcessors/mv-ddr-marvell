@@ -97,7 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 
-#include "sys_env_lib.h"
+#include "mv_ddr_sys_env_lib.h"
 
 #define DDR_INTERFACES_NUM		1
 #define DDR_INTERFACE_OCTETS_NUM	5
@@ -514,7 +514,7 @@ int mv_ddr_is_training_done(u32 count, u32 *result)
 }
 
 #define DM_PAD	10
-u32 mv_ddr_dm_pad_get()
+u32 mv_ddr_dm_pad_get(void)
 {
 	return DM_PAD;
 }
@@ -569,6 +569,7 @@ static int mv_ddr_sar_freq_get(int dev_num, enum hws_ddr_freq *freq)
 			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
 					      ("Warning: Unsupported freq mode for 333Mhz configured(%d)\n",
 					      reg));
+			/* fallthrough */
 		case 0x0:
 			*freq = DDR_FREQ_333;
 			break;
@@ -576,6 +577,7 @@ static int mv_ddr_sar_freq_get(int dev_num, enum hws_ddr_freq *freq)
 			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
 					      ("Warning: Unsupported freq mode for 400Mhz configured(%d)\n",
 					      reg));
+			/* fallthrough */
 		case 0x2:
 			*freq = DDR_FREQ_400;
 			break;
@@ -583,6 +585,7 @@ static int mv_ddr_sar_freq_get(int dev_num, enum hws_ddr_freq *freq)
 			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
 					      ("Warning: Unsupported freq mode for 533Mhz configured(%d)\n",
 					      reg));
+			/* fallthrough */
 		case 0x4:
 			*freq = DDR_FREQ_533;
 			break;
@@ -595,6 +598,7 @@ static int mv_ddr_sar_freq_get(int dev_num, enum hws_ddr_freq *freq)
 			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
 					      ("Warning: Unsupported freq mode for 667Mhz configured(%d)\n",
 					      reg));
+			/* fallthrough */
 		case 0x8:
 			*freq = DDR_FREQ_667;
 			break;
@@ -603,6 +607,7 @@ static int mv_ddr_sar_freq_get(int dev_num, enum hws_ddr_freq *freq)
 			DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
 					      ("Warning: Unsupported freq mode for 800Mhz configured(%d)\n",
 					      reg));
+			/* fallthrough */
 		case 0xc:
 			*freq = DDR_FREQ_800;
 			break;
@@ -1428,10 +1433,13 @@ int mv_ddr_pre_training_soc_config(const char *ddr_type)
 	case 0x3:
 		reg_bit_set(CPU_CONFIGURATION_REG(3), CPU_MRVL_ID_OFFSET);
 		reg_bit_set(CPU_CONFIGURATION_REG(2), CPU_MRVL_ID_OFFSET);
+		/* fallthrough */
 	case 0x1:
 		reg_bit_set(CPU_CONFIGURATION_REG(1), CPU_MRVL_ID_OFFSET);
+		/* fallthrough */
 	case 0x0:
 		reg_bit_set(CPU_CONFIGURATION_REG(0), CPU_MRVL_ID_OFFSET);
+		/* fallthrough */
 	default:
 		break;
 	}
@@ -1558,14 +1566,12 @@ void mv_ddr_mc_config(void)
 	init_param.init_phy = 1;
 	init_param.msys_init = 1;
 	status = hws_ddr3_tip_init_controller(0, &init_param);
-	if (MV_OK != status) {
+	if (status != MV_OK)
 		printf("DDR3 init controller - FAILED 0x%x\n", status);
-	}
 
 	status = mv_ddr_mc_init();
-	if (MV_OK != status) {
+	if (status != MV_OK)
 		printf("DDR3 init_sequence - FAILED 0x%x\n", status);
-	}
 }
 /* function: mv_ddr_mc_init
  * this function enables the dunit after init controller configuration
@@ -1730,8 +1736,8 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 			   cal_p, cal_n));
 	if ((cal_n >= 56) || (cal_n <= 6) || (cal_p >= 59) || (cal_p <= 7)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
-				  ("ddr4TipCalibrationValidate: Error:DDR4 SSTL calib val - Pcal = 0x%x,\
-				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
+				  ("%s: Error:DDR4 SSTL calib val - Pcal = 0x%x, Ncal = 0x%x are out of range\n",
+				  __func__, cal_p, cal_n));
 		status = MV_FAIL;
 	}
 
@@ -1744,8 +1750,8 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 			  cal_p, cal_n));
 	if ((cal_n >= 56) || (cal_n <= 6) || (cal_p >= 59) || (cal_p <= 7)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
-				  ("ddr4TipCalibrationValidate: Error:DDR4 POD-V calib val - Pcal = 0x%x , Ncal= 0x%x \
-				   are out of range\n", cal_p, cal_n));
+				  ("%s: Error:DDR4 POD-V calib val - Pcal = 0x%x , Ncal= 0x%x are out of range\n",
+				  __func__, cal_p, cal_n));
 		status = MV_FAIL;
 	}
 
@@ -1754,12 +1760,12 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
 	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
-			  ("ddr4TipCalibrationValidate::DDR4 POD-H calib val - Pcal = 0x%x , Ncal = 0x%x \n",
+			  ("ddr4TipCalibrationValidate::DDR4 POD-H calib val - Pcal = 0x%x , Ncal = 0x%x\n",
 			  cal_p, cal_n));
 	if ((cal_n >= 56) || (cal_n <= 6) || (cal_p >= 59) || (cal_p <= 7)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
-				  ("ddr4TipCalibrationValidate: Error:DDR4 POD-H calib val - Pcal = 0x%x, \
-				   Ncal = 0x%x are out of range\n", cal_p, cal_n));
+				  ("%s: Error:DDR4 POD-H calib val - Pcal = 0x%x, Ncal = 0x%x are out of range\n",
+				  __func__, cal_p, cal_n));
 		status = MV_FAIL;
 	}
 
