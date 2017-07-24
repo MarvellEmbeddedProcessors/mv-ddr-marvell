@@ -95,7 +95,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include "mv_ddr_regs.h"
+#include "../mv_ddr_regs.h"
 #include "mv_ddr_sys_env_lib.h"
 
 static u32 mv_ddr_board_id_get(void)

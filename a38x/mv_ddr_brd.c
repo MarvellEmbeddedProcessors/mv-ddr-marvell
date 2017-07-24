@@ -95,7 +95,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include "ddr3_init.h"
+#include "../ddr3_init.h"
 
 /*
  * Define the DDR layout / topology here in the board file. This will

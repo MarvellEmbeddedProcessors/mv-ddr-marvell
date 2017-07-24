@@ -102,7 +102,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_topology_def.h"
 
 #if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
-#include "mv_ddr_plat.h"
+#include "a38x/mv_ddr_plat.h"
 #elif defined(CONFIG_APN806)
 #include "mv_ddr_apn806.h"
 #endif

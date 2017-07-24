@@ -96,7 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "mv_ddr_static.h"
-#include "ddr3_training_ip_def.h"
+#include "../ddr3_training_ip_def.h"
 
 #ifdef CONFIG_MC_STATIC
 static struct reg_data a38x_mc_800[] = {

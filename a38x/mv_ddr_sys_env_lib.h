@@ -99,9 +99,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MV_DDR_SYS_ENV_LIB_H
 
 #if defined(MV_DDR) /* U-BOOT MARVELL 2013.01 */
-#include "ddr_mv_wrapper.h"
+#include "../ddr_mv_wrapper.h"
 #else /* U-BOOT SPL */
-#include "ddr_ml_wrapper.h"
+#include "../ddr_ml_wrapper.h"
 #endif
 
 /* device revision */
