@@ -1407,7 +1407,7 @@ int ddr3_tip_ip_training_wrapper(u32 dev_num, enum hws_access_type access_type,
 							ACCESS_TYPE_UNICAST, sybphy_id, bit_id,
 							search_dir_id, direction, result_type,
 							TRAINING_LOAD_OPERATION_UNLOAD, CS_SINGLE,
-							&result[search_dir_id], MV_TRUE, 0, MV_FALSE);
+							&result[search_dir_id], 1, 0, 0);
 
 					if (MV_OK != status)
 						return status;
@@ -1523,7 +1523,7 @@ int ddr3_tip_ip_training_wrapper(u32 dev_num, enum hws_access_type access_type,
 							(dev_num, if_id, ACCESS_TYPE_UNICAST, sybphy_id,
 							 bit_id, HWS_LOW2HIGH, direction, result_type,
 							 TRAINING_LOAD_OPERATION_UNLOAD, CS_SINGLE,
-							 &l2h_if_train_res, MV_FALSE, 0, MV_TRUE);
+							 &l2h_if_train_res, 0, 0, 1);
 
 						if (MV_OK != status)
 							return status;

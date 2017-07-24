@@ -773,7 +773,7 @@ static int xor_test(u32 tot_test_data,
 	int loop_idx;
 	int pattern;
 	int idx, data32_2;
-	int writethruodpg = (pattern_type > 2) ? MV_FALSE : MV_TRUE;
+	int writethruodpg = (pattern_type > 2) ? 0 : 1;
 	int dev_byte_num;
 	int shift;
 	int byte_idx;
@@ -2279,7 +2279,7 @@ int cpu_sweep_test(u32 repeat, u32 test_len, u32 dir, u32 mode)
 				mmio_write_32(0xf00116d8, 0x3cc);
 				duty_cycle_idx = duty_cycle;
 				/* insert dram to vref training mode */
-				mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, MV_TRUE);
+				mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, 1);
 				/* set new vref training value in dram */
 				mv_ddr4_vref_tap_set(0, 0, ACCESS_TYPE_MULTICAST, duty_cycle_idx,
 						     MV_DDR4_VREF_TAP_START);
@@ -2331,7 +2331,7 @@ int cpu_sweep_test(u32 repeat, u32 test_len, u32 dir, u32 mode)
 					} else {
 						mmio_write_32(0xf00116d8, 0x3cc);
 						/* insert dram to vref training mode */
-						mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, MV_TRUE);
+						mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, 1);
 						/* set new vref training value in dram */
 						mv_ddr4_vref_tap_set(0, 0, ACCESS_TYPE_MULTICAST, dq_vref_vec[sphy],
 								     MV_DDR4_VREF_TAP_START);
@@ -2385,7 +2385,7 @@ int cpu_sweep_test(u32 repeat, u32 test_len, u32 dir, u32 mode)
 						mmio_write_32(0xf00116d8, 0x3cc);
 						duty_cycle_idx = duty_cycle;
 						/* insert dram to vref training mode */
-						mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, MV_TRUE);
+						mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, 1);
 						/* set new vref training value in dram */
 						mv_ddr4_vref_tap_set(0, 0, ACCESS_TYPE_MULTICAST, duty_cycle_idx,
 								     MV_DDR4_VREF_TAP_START);
@@ -2426,7 +2426,7 @@ int cpu_sweep_test(u32 repeat, u32 test_len, u32 dir, u32 mode)
 		} else {
 			duty_cycle_idx = duty_cycle;
 			/* insert dram to vref training mode */
-			mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, MV_TRUE);
+			mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, 1);
 			/* set new vref training value in dram */
 			mv_ddr4_vref_tap_set(0, 0, ACCESS_TYPE_MULTICAST, dq_vref_vec[sphy], MV_DDR4_VREF_TAP_START);
 			/* close vref range*/

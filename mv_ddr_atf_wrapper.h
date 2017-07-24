@@ -147,8 +147,6 @@ typedef unsigned int u32;
 
 #define MV_STATUS	int
 #define MV_BOOL		int
-#define MV_TRUE		(int)(1)
-#define MV_FALSE	(int)(0)
 #define MV_U8		u8
 #define MV_U16		u16
 #define MV_U32		u32

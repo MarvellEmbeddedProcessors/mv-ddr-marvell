@@ -600,7 +600,7 @@ int mv_ddr4_training_main_flow(u32 dev_num)
 			ddr3_tip_reg_dump(dev_num);
 		if (status != MV_OK) {
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_receiver_calibrate failure\n"));
-			if (debug_mode == MV_FALSE)
+			if (debug_mode == 0)
 				return status;
 		}
 	}
@@ -613,7 +613,7 @@ int mv_ddr4_training_main_flow(u32 dev_num)
 			ddr3_tip_reg_dump(dev_num);
 		if (status != MV_OK) {
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_dynamic_wl_supp failure\n"));
-			if (debug_mode == MV_FALSE)
+			if (debug_mode == 0)
 				return status;
 		}
 	}
@@ -626,7 +626,7 @@ int mv_ddr4_training_main_flow(u32 dev_num)
 			ddr3_tip_reg_dump(dev_num);
 		if (status != MV_OK) {
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_dq_vref_calibrate failure\n"));
-			if (debug_mode == MV_FALSE)
+			if (debug_mode == 0)
 				return status;
 		}
 	}
@@ -639,7 +639,7 @@ int mv_ddr4_training_main_flow(u32 dev_num)
 			ddr3_tip_reg_dump(dev_num);
 		if (status != MV_OK) {
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_dm_tuning failure\n"));
-			if (debug_mode == MV_FALSE)
+			if (debug_mode == 0)
 				return status;
 		}
 	}
@@ -652,7 +652,7 @@ int mv_ddr4_training_main_flow(u32 dev_num)
 			ddr3_tip_reg_dump(dev_num);
 		if (status != MV_OK) {
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_dq_pins_mapping failure\n"));
-			if (debug_mode == MV_FALSE)
+			if (debug_mode == 0)
 				return status;
 		}
 	}

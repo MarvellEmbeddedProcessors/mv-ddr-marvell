@@ -179,7 +179,7 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num, u16 (*pbs_tap_factor)[MAX_BUS_NUM][B
 	int vref_range_min;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	enum mv_ddr4_vref_subphy_cal_state all_subphys_state = MV_DDR4_VREF_SUBPHY_CAL_ABOVE;
-	int tap_tune_passed = MV_FALSE;
+	int tap_tune_passed = 0;
 	enum mv_ddr4_vref_tap_state vref_tap_set_state = MV_DDR4_VREF_TAP_START;
 	enum hws_result *flow_result = ddr3_tip_get_result_ptr(training_stage);
 	u8 subphy_max = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
@@ -201,10 +201,10 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num, u16 (*pbs_tap_factor)[MAX_BUS_NUM][B
 	}
 
 	if (mv_ddr4_tap_tuning(dev_num, pbs_tap_factor, TX_DIR) == MV_OK)
-		tap_tune_passed = MV_TRUE;
+		tap_tune_passed = 1;
 
 	/* place dram to vref training mode */
-	mv_ddr4_vref_training_mode_ctrl(dev_num, 0, ACCESS_TYPE_MULTICAST, MV_TRUE);
+	mv_ddr4_vref_training_mode_ctrl(dev_num, 0, ACCESS_TYPE_MULTICAST, 1);
 
 	/* main loop for 2d scan (low_to_high voltage scan) */
 	vref_tap_idx = MV_DDR4_VREF_MAX_RANGE;
@@ -222,9 +222,9 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num, u16 (*pbs_tap_factor)[MAX_BUS_NUM][B
 		/* set new vref training value in dram */
 		mv_ddr4_vref_tap_set(dev_num, 0, ACCESS_TYPE_MULTICAST, vref_tap_idx, vref_tap_set_state);
 
-		if (tap_tune_passed == MV_FALSE) {
+		if (tap_tune_passed == 0) {
 			if (mv_ddr4_tap_tuning(dev_num, pbs_tap_factor, TX_DIR) == MV_OK)
-				tap_tune_passed = MV_TRUE;
+				tap_tune_passed = 1;
 			else
 				continue;
 		}
@@ -284,7 +284,7 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num, u16 (*pbs_tap_factor)[MAX_BUS_NUM][B
 		}
 	}
 
-	if (tap_tune_passed == MV_FALSE) {
+	if (tap_tune_passed == 0) {
 		DEBUG_CALIBRATION(DEBUG_LEVEL_INFO,
 				  ("%s: tap tune not passed on any dq_vref value\n", __func__));
 		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
@@ -380,7 +380,7 @@ int mv_ddr4_dq_vref_calibration(u8 dev_num, u16 (*pbs_tap_factor)[MAX_BUS_NUM][B
 	}
 
 	/* return dram from vref DRAM from vref training mode */
-	mv_ddr4_vref_training_mode_ctrl(dev_num, 0, ACCESS_TYPE_MULTICAST, MV_FALSE);
+	mv_ddr4_vref_training_mode_ctrl(dev_num, 0, ACCESS_TYPE_MULTICAST, 0);
 
 	/* dqs tx reposition calculation */
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
@@ -545,7 +545,7 @@ static int mv_ddr4_centralization(u8 dev_num, u16 (*lambda)[MAX_BUS_NUM][BUS_WID
 									       search_dir, direction, result_type,
 									       TRAINING_LOAD_OPERATION_UNLOAD,
 									       CS_SINGLE, &result[search_dir],
-									       MV_TRUE, 0, MV_FALSE);
+									       1, 0, 0);
 					if (status != MV_OK)
 						return status;
 
@@ -729,7 +729,7 @@ static int mv_ddr4_centralization(u8 dev_num, u16 (*lambda)[MAX_BUS_NUM][BUS_WID
 					vw_size[if_id][subphy_num] = 0;
 					status = MV_OK;
 
-					if (debug_mode == MV_FALSE) {
+					if (debug_mode == 0) {
 						/*
 						 * TODO: print out error message(s) only when all points fail
 						 * as temporary solution, commented out debug level set to TRACE
@@ -1150,7 +1150,7 @@ static int mv_ddr4_center_of_mass_calc(u8 dev_num, u8 if_id, u8 subphy_num, u8 m
 		DEBUG_CALIBRATION(DEBUG_LEVEL_ERROR,
 				  ("%s: if %d, subphy %d: poligon area too small %d (dmin %d)\n",
 				   __func__, if_id, subphy_num, polygon_area, d_min));
-		if (debug_mode == MV_FALSE)
+		if (debug_mode == 0)
 			return MV_FAIL;
 	}
 
@@ -1295,7 +1295,7 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 								      ALL_BITS_PER_PUP, search_dir, dir,
 								      result_type, TRAINING_LOAD_OPERATION_UNLOAD,
 								      CS_SINGLE, &(result[subphy][search_dir]),
-								      MV_TRUE, 0, MV_FALSE);
+								      1, 0, 0);
 
 					DEBUG_TAP_TUNING_ENGINE(DEBUG_LEVEL_INFO,
 								("cs %d if %d subphy %d mode %d result: "
@@ -1428,7 +1428,7 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 							      dir, result_type,
 							      TRAINING_LOAD_OPERATION_UNLOAD, CS_SINGLE,
 							      &(result[subphy][search_dir]),
-							      MV_TRUE, 0, MV_FALSE);
+							      1, 0, 0);
 
 				DEBUG_TAP_TUNING_ENGINE(DEBUG_LEVEL_INFO,
 							("cs %d if %d subphy %d mode %d result: "
@@ -1449,10 +1449,10 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 				start_win_diff = 0;
 				end_win_diff = 0;
 				limit_div = 0;
-				if ((GET_LOCK_RESULT(result1[subphy][HWS_LOW2HIGH][bit]) == MV_TRUE) &&
-				    (GET_LOCK_RESULT(result1[subphy][HWS_HIGH2LOW][bit]) == MV_TRUE) &&
-				    (GET_LOCK_RESULT(result[subphy][HWS_LOW2HIGH][bit]) == MV_TRUE) &&
-				    (GET_LOCK_RESULT(result[subphy][HWS_HIGH2LOW][bit]) == MV_TRUE)) {
+				if ((GET_LOCK_RESULT(result1[subphy][HWS_LOW2HIGH][bit]) == 1) &&
+				    (GET_LOCK_RESULT(result1[subphy][HWS_HIGH2LOW][bit]) == 1) &&
+				    (GET_LOCK_RESULT(result[subphy][HWS_LOW2HIGH][bit]) == 1) &&
+				    (GET_LOCK_RESULT(result[subphy][HWS_HIGH2LOW][bit]) == 1)) {
 					curr_start_win = GET_TAP_RESULT(result1[subphy][HWS_LOW2HIGH][bit],
 									EDGE_1);
 					curr_end_win = GET_TAP_RESULT(result1[subphy][HWS_HIGH2LOW][bit],
@@ -1734,7 +1734,7 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 	u8 pbs_res_per_bus[MAX_INTERFACE_NUM][MAX_BUS_NUM][BUS_WIDTH_IN_BITS];
 	u16 lambda_per_dq[MAX_INTERFACE_NUM][MAX_BUS_NUM][BUS_WIDTH_IN_BITS];
 	u8 dqs_pbs = 0, const_pbs;
-	int tap_tune_passed = MV_FALSE;
+	int tap_tune_passed = 0;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	enum hws_result *flow_result = ddr3_tip_get_result_ptr(training_stage);
 	u8 subphy_max = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
@@ -1801,7 +1801,7 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 #endif
 
 	if (mv_ddr4_tap_tuning(dev_num, lambda_per_dq, RX_DIR) == MV_OK)
-		tap_tune_passed = MV_TRUE;
+		tap_tune_passed = 1;
 
 	/* main loop for 2d scan (low_to_high voltage scan) */
 	for (duty_cycle = RECEIVER_DC_MIN_RANGE;
@@ -1826,9 +1826,9 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 		if (status != MV_OK)
 			return status;
 
-		if (tap_tune_passed == MV_FALSE) {
+		if (tap_tune_passed == 0) {
 			if (mv_ddr4_tap_tuning(dev_num, lambda_per_dq, RX_DIR) == MV_OK) {
-				tap_tune_passed = MV_TRUE;
+				tap_tune_passed = 1;
 			} else {
 				DEBUG_CALIBRATION(DEBUG_LEVEL_ERROR,
 						  ("rc, tap tune failed inside calibration\n"));
@@ -1840,7 +1840,7 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 					   valid_win_size, RX_DIR, vdq_tv, duty_cycle) != MV_OK) {
 			DEBUG_CALIBRATION(DEBUG_LEVEL_ERROR,
 					  ("error: ddr4 centralization failed (duty_cycle %d)!!!\n", duty_cycle));
-			if (debug_mode == MV_FALSE)
+			if (debug_mode == 0)
 				break;
 		}
 
@@ -1868,7 +1868,7 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 		} /* if */
 	} /* duty_cycle */
 
-	if (tap_tune_passed == MV_FALSE) {
+	if (tap_tune_passed == 0) {
 		DEBUG_CALIBRATION(DEBUG_LEVEL_INFO,
 				  ("%s: tap tune not passed on any duty_cycle value\n", __func__));
 		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
@@ -2212,7 +2212,7 @@ int mv_ddr4_dm_tuning(u32 cs, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WIDTH_IN_BI
 							      ALL_BITS_PER_PUP, search_dir, dir, result_type,
 							      TRAINING_LOAD_OPERATION_UNLOAD, CS_SINGLE,
 							      &(result[subphy][search_dir]),
-							      MV_TRUE, 0, MV_FALSE);
+							      1, 0, 0);
 				DEBUG_DM_TUNING(DEBUG_LEVEL_INFO,
 						("dm cs %d if %d subphy %d result: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",
 						 cs, 0, subphy,
