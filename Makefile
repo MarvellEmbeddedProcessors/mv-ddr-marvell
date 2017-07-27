@@ -139,6 +139,35 @@ obj-$(CONFIG_SPL_BUILD) += mv_ddr4_training_leveling.o
 obj-$(CONFIG_SPL_BUILD) += xor.o
 
 # ******************************
+# TOOLS SUPPORT
+# ******************************
+else ifneq ($(TOOL),)
+
+CC       = gcc
+RM       = @rm -rf
+ECHO     = @echo
+
+TOOL_PATH = $(MV_DDR_ROOT)/tools/$(TOOL)
+TOOL_CSRC = $(foreach DIR,$(TOOL_PATH),$(wildcard $(DIR)/*.c))
+TOOL_COBJ = $(patsubst %.c,%.o,$(TOOL_CSRC))
+
+.SILENT:
+all: header $(TOOL)
+
+$(TOOL_PATH)/%.o: %.c
+	$(CC) -c -o $@ $<
+
+$(TOOL): $(TOOL_COBJ)
+	$(CC) -o $@ $(TOOL_COBJ)
+
+header:
+	echo "Building mv_ddr tool: $(TOOL)"
+
+clean:
+	$(ECHO) "Cleaning mv_ddr tool: $(TOOL)"
+	$(RM) $(TOOL_COBJ) $(TOOL)
+
+# ******************************
 # U-BOOT MARVELL 2013.01 SUPPORT
 # ******************************
 else ifeq ($(DDR3LIB), 3)
