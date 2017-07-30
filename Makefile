@@ -243,8 +243,9 @@ OBJ_DIR ?= $(MV_DDR_ROOT)
 MV_DDR4 = y
 
 MV_DDR_SRCPATH = $(MV_DDR_ROOT) $(MV_DDR_ROOT)/apn806
+MV_DDR_DRVPATH = $(MV_DDR_ROOT)/drivers
 
-INCPATH = $(MV_DDR_SRCPATH)
+INCPATH = $(MV_DDR_SRCPATH) $(MV_DDR_DRVPATH)
 INCLUDE = $(addprefix -I,$(INCPATH))
 # PLAT_INCLUDES set in ble/ble.mk
 INCLUDE += $(PLAT_INCLUDES)
@@ -283,6 +284,7 @@ endif
 LDFLAGS = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
 MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_SRCPATH),$(wildcard $(DIR)/*.c))
+MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_mc6.c
 
 MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
 # add mv_ddr build message and version string object
@@ -307,6 +309,7 @@ $(MV_DDR_VER_COBJ):
 	$(CC) -c $(CFLAGS) -o $@ $(MV_DDR_VER_CSRC)
 
 create_dir:
+	$(MKDIR) $(OBJ_DIR)/drivers
 	$(MKDIR) $(OBJ_DIR)/apn806
 
 header:
