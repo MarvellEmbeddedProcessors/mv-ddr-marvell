@@ -287,5 +287,6 @@ int ddr3_tip_write_adll_value(u32 dev_num,
 			      u32 reg_addr);
 int ddr3_tip_tune_training_params(u32 dev_num,
 				  struct tune_train_params *params);
+struct page_element *mv_ddr_page_tbl_get(void);
 
 #endif /* _DDR3_TRAINING_IP_FLOW_H_ */

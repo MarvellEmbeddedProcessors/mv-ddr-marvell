@@ -98,14 +98,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_mc6.h"
 #include "ddr3_init.h"
 
-/* extern */
-extern struct page_element page_param[];	/* FIXME: this data base should have get, set functions */
-
 void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 {
 	struct mv_ddr_mc6_timing mc6_timing;
 	unsigned int page_size;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct page_element *page_param = mv_ddr_page_tbl_get();
 
 	/* get the spped bin index */
 	enum hws_speed_bin speed_bin_index = tm->interface_params[IF_ID_0].speed_bin_index;

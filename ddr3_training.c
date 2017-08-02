@@ -205,7 +205,7 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 			       u32 if_id, enum hws_ddr_freq frequency);
 #endif /* CONFIG_DDR4 */
 
-struct page_element page_param[] = {
+static struct page_element page_tbl[] = {
 	/*
 	 * 8bits	16 bits
 	 * page-size(K)	page-size(K)	mask
@@ -230,6 +230,11 @@ struct page_element page_param[] = {
 	{0, 0, 0}  /* TODO: placeholder for 24-Mbit die capacity */
 
 };
+
+struct page_element *mv_ddr_page_tbl_get(void)
+{
+	return &page_tbl[0];
+}
 
 static u8 mem_size_config[MV_DDR_DIE_CAP_LAST] = {
 	0x2,			/* 512Mbit  */
@@ -1831,6 +1836,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	enum hws_speed_bin speed_bin_index;
 	enum mv_ddr_die_capacity memory_size = MV_DDR_DIE_CAP_2GBIT;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct page_element *page_param = mv_ddr_page_tbl_get();
 
 	speed_bin_index = tm->interface_params[if_id].speed_bin_index;
 	memory_size = tm->interface_params[if_id].memory_size;
@@ -1979,6 +1985,7 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	enum hws_speed_bin speed_bin_index;
 	enum mv_ddr_die_capacity memory_size;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct page_element *page_param = mv_ddr_page_tbl_get();
 
 	speed_bin_index = tm->interface_params[if_id].speed_bin_index;
 	memory_size = tm->interface_params[if_id].memory_size;
