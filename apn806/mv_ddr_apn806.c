@@ -1028,12 +1028,7 @@ int mv_ddr_pre_training_fixup(void)
 
 int mv_ddr_post_training_fixup(void)
 {
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	enum hws_ddr_freq freq = DDR_FREQ_LAST;
-
-	freq = tm->interface_params[0].memory_freq;
-	if (freq_val[freq] > 800)
-		mv_ddr_validate();
+	mv_ddr_validate();
 
 	reg_write(AVS_ENABLED_CTRL_REG, nominal_avs);
 
