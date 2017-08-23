@@ -229,16 +229,6 @@ typedef unsigned int u32;
 /* mdelay function */
 #include "../../../include/drivers/delay_timer.h"
 
-#define mdelay mdelay_ddr
-static inline void mdelay_ddr(u32 t)
-{
-	udelay(t*10);
-}
-
-static inline void mdelay_full(u32 t)
-{
-	udelay(t*1000);
-}
 /* memcpy function */
 #include "../../../include/lib/mmio.h"
 
