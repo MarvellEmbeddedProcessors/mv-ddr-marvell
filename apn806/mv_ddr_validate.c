@@ -99,6 +99,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr4_mpr_pda_if.h"
 #include "mv_ddr_validate.h"
 #include "mv_ddr_xor_v2.h"
+#include "../../drivers/marvell/thermal.h"
+
+/* temperature correction steps */
+#define VREF_TEMP_CORR_STEP1	20
+#define VREF_TEMP_CORR_STEP2	10
+#define VREF_TEMP_CORR_STEP3	0
+#define VREF_TEMP_CORR_STEP4	(-15)
+#define CRX_TEMP_CORR_STEP1	50
+#define CRX_TEMP_CORR_STEP2	25
+#define CRX_TEMP_CORR_STEP3	0
+#define CRX_TEMP_CORR_STEP4	(-15)
+
+#define MAX_VREF_RANGE		64
+#define MAX_ADLL_RANGE		32
+#define VREF_CORR_FACTOR	4
 
 #define DBG_DMA_DATA_SIZE		0x2000		/* 4KB; can be modified with proper alignment */
 #define DBG_DMA_DESC_NUM		128
@@ -114,6 +129,62 @@ static uint64_t dma_src[DBG_MAX_CS_NUM][DBG_DMA_ENG_NUM], dma_dst[DBG_MAX_CS_NUM
 extern u8 dq_vref_vec[MAX_BUS_NUM];	/* stability support */
 extern u8 rx_eye_hi_lvl[MAX_BUS_NUM];	/* vertical adjustment support */
 extern u8 rx_eye_lo_lvl[MAX_BUS_NUM];	/* vertical adjustment support */
+
+static int new_vref_calc(u8 vref_low, u8 vref_hi, u32 *new_vref)
+{
+	u32 curr_vref;
+	u32 eye_vref_height;
+	u32 vref_corr;
+
+	if (vref_hi < vref_low) {
+		printf("%s: incorrect input parameters found\n", __func__);
+		return 1; /* fail */
+	}
+
+	eye_vref_height = vref_hi - vref_low;
+	curr_vref = vref_low + (eye_vref_height / 2);
+	vref_corr = (eye_vref_height * eye_vref_height) /
+		    (VREF_CORR_FACTOR * MAX_VREF_RANGE);
+	*new_vref = curr_vref - vref_corr;
+
+	return 0;
+}
+
+static u32 vref_temp_corr_calc(int cdeg)
+{
+	u32 corr;
+
+	if (cdeg > VREF_TEMP_CORR_STEP1)
+		corr = 10;
+	else if (cdeg > VREF_TEMP_CORR_STEP2)
+		corr = 6;
+	else if (cdeg > VREF_TEMP_CORR_STEP3)
+		corr = 3;
+	else if (cdeg > VREF_TEMP_CORR_STEP4)
+		corr = 1;
+	else
+		corr = 0;
+
+	return corr;
+}
+
+static u32 crx_temp_corr_calc(int cdeg)
+{
+	u32 corr;
+
+	if (cdeg > CRX_TEMP_CORR_STEP1)
+		corr = 2;
+	else if (cdeg > CRX_TEMP_CORR_STEP2)
+		corr = 1;
+	else if (cdeg > CRX_TEMP_CORR_STEP3)
+		corr = 0;
+	else if (cdeg > CRX_TEMP_CORR_STEP4)
+		corr = 0;
+	else
+		corr = 0;
+
+	return corr;
+}
 
 static uint64_t dma_gap_calc(uint64_t size)
 {
@@ -742,7 +813,7 @@ static int vertical_adjust(int ena_mask, u8 byte_num)
 	return 0;
 }
 
-static int horizontal_adjust(int ena_mask, u8 byte_num)
+static int horizontal_adjust(int ena_mask, u8 byte_num, u8 *valid_crx_matrix)
 {
 	u32 sphy = 0, start_sphy = 0, end_sphy = 0;
 	u8 vw[2];
@@ -809,7 +880,9 @@ static int horizontal_adjust(int ena_mask, u8 byte_num)
 		}
 
 		if (fpf != 255) {
-			opt_crx = 0.5 * ((int)vw[1] + (int)vw[0]);
+			opt_crx = ((int)vw[1] + (int)vw[0]) / 2;
+			valid_crx_matrix[effective_cs * MAX_BUS_NUM * 2 + 2 * sphy] = vw[0];
+			valid_crx_matrix[effective_cs * MAX_BUS_NUM * 2 + 2 * sphy + 1] = vw[1];
 		} else {
 			if (print_ena == 1) {
 #ifdef DBG_PRINT
@@ -992,7 +1065,7 @@ static int diagonal_adjust(int ena_mask, u8 byte_num)
 	return 0;
 }
 
-static int rx_adjust(void)
+static int rx_adjust(u8 *valid_crx_matrix)
 {
 	int dbg_flag = 1;
 	enum mask_def ena_mask = PER_BYTE_RES1;
@@ -1026,7 +1099,7 @@ static int rx_adjust(void)
 				if (search == VERTICAL)
 					result = vertical_adjust(ena_mask, byte);
 				else
-					result = horizontal_adjust(ena_mask, byte);
+					result = horizontal_adjust(ena_mask, byte, valid_crx_matrix);
 
 				switch (alg_loop) {
 				case 0:
@@ -1122,7 +1195,7 @@ static int rx_adjust(void)
 		reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
 		ena_mask = PER_IF;
-		result = horizontal_adjust(ena_mask, byte);
+		result = horizontal_adjust(ena_mask, byte, valid_crx_matrix);
 		if (result != 0) {
 #ifdef DBG_PRINT
 			printf("%s: cs[%d]: byte %d, second level of horizontal adjust failed\n",
@@ -1275,8 +1348,18 @@ int mv_ddr_validate(void)
 	uint64_t curr_dst;
 	uint64_t val;
 	int i, j;
-	u32 cs;
+	u32 cs, sphy;
 	u32 max_cs = ddr3_tip_max_cs_get(0);
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct tsen_config *tsen = marvell_thermal_config_get();
+	int cdeg; /* temperature in celsius degrees */
+	u32 corr;
+	u32 curr_vref = 0;
+	u32 new_vref = 0;
+	u32 curr_crx = 0;
+	u32 new_crx = 0;
+	u8 valid_crx_matrix[DBG_MAX_CS_NUM * MAX_BUS_NUM * 2] = {0};
 
 	if (max_cs > DBG_MAX_CS_NUM) {
 		printf("mv_ddr: error: DBG_MAX_CS_NUM limit (%d) reached\n",
@@ -1300,15 +1383,69 @@ int mv_ddr_validate(void)
 		mv_ddr_dma_memcpy(dma_src[cs], dma_dst[cs], DBG_DMA_DATA_SIZE, DBG_DMA_ENG_NUM, DBG_DMA_DESC_NUM);
 	}
 
-	for (effective_cs = 0; effective_cs < max_cs; effective_cs++)
-		rx_adjust();
+	for (effective_cs = 0; effective_cs < max_cs; effective_cs++) {
+		/* vref adjust stage prior to rx_adjust call */
+		for (sphy = 0; sphy < octets_per_if_num; sphy++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
+			if (new_vref_calc(rx_eye_lo_lvl[sphy], rx_eye_hi_lvl[sphy], &new_vref)) {
+				printf("new vref value calculation failed\n");
+				return 1; /* fail */
+			}
+			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
+					   DDR_PHY_DATA, VREF_BCAST_PHY_REG(effective_cs), new_vref);
+			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
+					   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 4), new_vref);
+			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
+					   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 5), new_vref);
+		}
+
+		/* rx adjust depends on effective_cs global var */
+		rx_adjust(valid_crx_matrix);
+
+		/* temperature adjustment stage after rx_adjust call */
+		marvell_thermal_init(tsen);
+
+		if (marvell_thermal_read(tsen, &cdeg)) {
+			printf("temperature read failed\n");
+			return 1; /* fail */
+		}
+
+#ifdef DBG_PRINT
+		printf("%s: tsen val %d\n", __func__, cdeg);
+#endif
+
+		/* apply vertical and horizontal fix to the post rx_adjust sampling point */
+		for (sphy = 0; sphy < octets_per_if_num; sphy++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
+			/* vref correction */
+			ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
+					  VREF_BCAST_PHY_REG(effective_cs), &curr_vref);
+			corr = vref_temp_corr_calc(cdeg);
+			new_vref = (curr_vref >= corr) ? (curr_vref - corr) : 0;
+
+			/* write new value to register */
+			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
+					   DDR_PHY_DATA, VREF_BCAST_PHY_REG(effective_cs), new_vref);
+			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
+					   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 4), new_vref);
+			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
+					   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 5), new_vref);
+
+			/* crx correction */
+			ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
+					  CRX_PHY_REG(effective_cs), &curr_crx);
+			corr = crx_temp_corr_calc(cdeg);
+			if ((curr_crx + corr) < MAX_ADLL_RANGE)
+				new_crx = curr_crx + corr;
+			else
+				new_crx = MAX_ADLL_RANGE - 1;
+			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
+					   CRX_PHY_REG(effective_cs), new_crx);
+		}
+	}
 
 #if defined(DBG_CPU_SWEEP_TEST)
 	int repeat = 1;
-	int sphy = 0;
-	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-
 	for (effective_cs = 0; effective_cs < max_cs; effective_cs++) {
 		/* print out rx stats */
 		for (sphy = 0;  sphy < octets_per_if_num; sphy++) {
