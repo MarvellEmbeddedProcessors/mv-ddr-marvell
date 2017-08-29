@@ -405,6 +405,13 @@ void mv_ddr_odpg_disable(void)
 		    ODPG_DISABLE_DIS << ODPG_DISABLE_OFFS);
 }
 
+void mv_ddr_odpg_done_clr(void)
+{
+	dunit_write(ODPG_DONE_STATUS_REG,
+		    ODPG_DONE_STATUS_BIT_MASK << ODPG_DONE_STATUS_BIT_OFFS,
+		    ODPG_DONE_STATUS_BIT_CLR << ODPG_DONE_STATUS_BIT_OFFS);
+}
+
 int mv_ddr_is_odpg_done(u32 count)
 {
 	u32 i, data;
@@ -421,9 +428,7 @@ int mv_ddr_is_odpg_done(u32 count)
 		return MV_FAIL;
 	}
 
-	dunit_write(ODPG_DONE_STATUS_REG,
-		    ODPG_DONE_STATUS_BIT_MASK << ODPG_DONE_STATUS_BIT_OFFS,
-		    ODPG_DONE_STATUS_BIT_CLR << ODPG_DONE_STATUS_BIT_OFFS);
+	mv_ddr_odpg_done_clr();
 
 	return MV_OK;
 }

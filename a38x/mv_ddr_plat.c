@@ -449,6 +449,11 @@ void mv_ddr_odpg_disable(void)
 		    ODPG_DIS_DIS << ODPG_DIS_OFFS);
 }
 
+void mv_ddr_odpg_done_clr(void)
+{
+	return;
+}
+
 int mv_ddr_is_odpg_done(u32 count)
 {
 	u32 i, data;
