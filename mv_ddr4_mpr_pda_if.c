@@ -705,11 +705,11 @@ int mv_ddr4_pda_pattern_odpg_load(u32 dev_num, enum hws_access_type access_type,
 	if (status != MV_OK)
 		return status;
 
-	if (subphy_mask != 0xf)
+	if (subphy_mask != 0xf) {
 		for (subphy_num = 0; subphy_num < 4; subphy_num++)
 			if (((subphy_mask >> subphy_num) & 0x1) == 0)
 				data_low[0] = (data_low[0] | (0xff << (subphy_num * 8)));
-	else
+	} else
 		data_low[0] = 0;
 
 	for (pattern_len_count = 0; pattern_len_count < 4; pattern_len_count++) {
