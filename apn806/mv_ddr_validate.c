@@ -692,7 +692,9 @@ static int vertical_adjust(int ena_mask, u8 byte_num)
 			fpf = xor_search_1d_2e(EDGE_PF, step, rx_eye_lo_lvl[sphy], rx_eye_hi_lvl[sphy],
 					       sphy, REC_CAL, vw);
 		} else {
+#ifdef DBG_PRINT
 			printf("%s: failed on first try (fail to pass)\n", __func__);
+#endif
 			fpf = xor_search_1d_2e(EDGE_FP, step, rx_eye_lo_lvl[sphy], rx_eye_hi_lvl[sphy],
 					       sphy, REC_CAL, vw);
 		}
@@ -791,7 +793,9 @@ static int horizontal_adjust(int ena_mask, u8 byte_num)
 		if (result == 0) {
 			fpf = xor_search_1d_2e(EDGE_PF, step, 0, 31, sphy, CRX, vw);
 		} else {
+#ifdef DBG_PRINT
 			printf("%s: failed on first try (fail to pass)\n", __func__);
+#endif
 			fpf = xor_search_1d_2e(EDGE_FP, step, 0, 31, sphy, CRX, vw);
 		}
 
