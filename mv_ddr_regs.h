@@ -514,6 +514,20 @@ enum {
 #define CRX_PHY_REG(cs)				(CRX_PHY_BASE + (cs) * 0x4)
 
 #define PHY_CTRL_PHY_REG			0x90
+#define INV_PAD0_OFFS				2
+#define INV_PAD1_OFFS				3
+#define INV_PAD2_OFFS				4
+#define INV_PAD3_OFFS				5
+#define INV_PAD4_OFFS				6
+#define INV_PAD5_OFFS				7
+#define INV_PAD6_OFFS				8
+#define INV_PAD7_OFFS				9
+#define INV_PAD8_OFFS				10
+#define INV_PAD9_OFFS				11
+#define INV_PAD10_OFFS				12
+#define INV_PAD_MASK				0x1
+#define INVERT_PAD				1
+
 #define ADLL_CFG0_PHY_REG			0x92
 #define ADLL_CFG1_PHY_REG			0x93
 #define ADLL_CFG2_PHY_REG			0x94

@@ -242,6 +242,11 @@ enum{
 
 #define MAX_DQ_NUM				72
 
+/* ck swap control subphy number */
+#define CK0_SWAP_CTRL_PHY_NUM		0
+#define CK1_A70X0_SWAP_CTRL_PHY_NUM	2
+#define CK1_A80X0_SWAP_CTRL_PHY_NUM	1
+
 /* Subphy result control per byte registers */
 #define RESULT_CONTROL_BYTE_PUP_0_REG	0x1830
 #define RESULT_CONTROL_BYTE_PUP_1_REG	0x1834

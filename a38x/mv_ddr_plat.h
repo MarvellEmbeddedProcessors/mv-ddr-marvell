@@ -226,6 +226,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DLB_QUEUE_MAP_REG		0x1784
 #define DLB_SPLIT_REG			0x1788
 
+/* ck swap control subphy number */
+#define CK_SWAP_CTRL_PHY_NUM	2
+
 /* Subphy result control per byte registers */
 #define RESULT_CONTROL_BYTE_PUP_0_REG		0x1830
 #define RESULT_CONTROL_BYTE_PUP_1_REG		0x1834

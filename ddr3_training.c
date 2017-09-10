@@ -324,7 +324,74 @@ struct mv_ddr_mr_data mr_data[] = {
 };
 #endif
 
-static int ddr3_tip_pad_inv(u32 dev_num, u32 if_id);
+/* inverse pads */
+static int ddr3_tip_pad_inv(void)
+{
+	u32 sphy, data;
+	u32 sphy_max = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 ck_swap_ctrl_sphy;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+
+	for (sphy = 0; sphy < sphy_max; sphy++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
+		if (tm->interface_params[0].
+		    as_bus_params[sphy].is_dqs_swap == 1) {
+			data = (INVERT_PAD << INV_PAD4_OFFS |
+				INVERT_PAD << INV_PAD5_OFFS);
+			/* dqs swap */
+			ddr3_tip_bus_read_modify_write(0, ACCESS_TYPE_UNICAST,
+						       0, sphy,
+						       DDR_PHY_DATA,
+						       PHY_CTRL_PHY_REG,
+						       data, data);
+		}
+
+		if (tm->interface_params[0].as_bus_params[sphy].
+		    is_ck_swap == 1 && sphy == 0) {
+#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
+			/* clock swap for both cs0 and cs1 */
+			data = (INVERT_PAD << INV_PAD2_OFFS |
+				INVERT_PAD << INV_PAD6_OFFS |
+				INVERT_PAD << INV_PAD4_OFFS |
+				INVERT_PAD << INV_PAD5_OFFS);
+			ck_swap_ctrl_sphy = CK_SWAP_CTRL_PHY_NUM;
+			ddr3_tip_bus_read_modify_write(0, ACCESS_TYPE_UNICAST,
+						       0, ck_swap_ctrl_sphy,
+						       DDR_PHY_CONTROL,
+						       PHY_CTRL_PHY_REG,
+						       data, data);
+#elif defined(CONFIG_APN806)
+			/* clock swap for ck0 (cs0) */
+			data = (INVERT_PAD << INV_PAD4_OFFS |
+				INVERT_PAD << INV_PAD5_OFFS);
+			ck_swap_ctrl_sphy = CK0_SWAP_CTRL_PHY_NUM;
+			ddr3_tip_bus_read_modify_write(0, ACCESS_TYPE_UNICAST,
+						       0, ck_swap_ctrl_sphy,
+						       DDR_PHY_CONTROL,
+						       PHY_CTRL_PHY_REG,
+						       data, data);
+			/* clock swap for ck1 (cs1) */
+#if defined(A70X0)
+			ck_swap_ctrl_sphy = CK1_A70X0_SWAP_CTRL_PHY_NUM;
+#elif defined(A80X0)
+			ck_swap_ctrl_sphy = CK1_A80X0_SWAP_CTRL_PHY_NUM;
+#else /* !A70X0 && !A80X0 */
+#error "unknown platform to define ddr clock swap control subphy"
+#endif
+			ddr3_tip_bus_read_modify_write(0, ACCESS_TYPE_UNICAST,
+						       0, ck_swap_ctrl_sphy,
+						       DDR_PHY_CONTROL,
+						       PHY_CTRL_PHY_REG,
+						       data, data);
+#else /* !CONFIG_ARMADA_38X && !CONFIG_ARMADA_39X && !CONFIG_APN806 */
+#error "unknown platform to configure ddr clock swap"
+#endif
+		}
+	}
+
+	return MV_OK;
+}
+
 static int ddr3_tip_rank_control(u32 dev_num, u32 if_id);
 
 /*
@@ -781,9 +848,8 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		CHECK_STATUS(ddr3_tip_rank_control(dev_num, if_id));
 
-		if (init_cntr_prm->do_mrs_phy) {
-			CHECK_STATUS(ddr3_tip_pad_inv(dev_num, if_id));
-		}
+		if (init_cntr_prm->do_mrs_phy)
+			ddr3_tip_pad_inv();
 
 		/* Pad calibration control - disable */
 		CHECK_STATUS(ddr3_tip_if_write
@@ -905,48 +971,6 @@ static int ddr3_tip_rank_control(u32 dev_num, u32 if_id)
 		return ddr3_tip_rev2_rank_control(dev_num, if_id);
 	else
 		return ddr3_tip_rev3_rank_control(dev_num, if_id);
-}
-
-/*
- * PAD Inverse Flow
- */
-static int ddr3_tip_pad_inv(u32 dev_num, u32 if_id)
-{
-	u32 bus_cnt, data_value, ck_swap_pup_ctrl;
-	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-
-	for (bus_cnt = 0; bus_cnt < octets_per_if_num; bus_cnt++) {
-		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
-		if (tm->interface_params[if_id].
-		    as_bus_params[bus_cnt].is_dqs_swap == 1) {
-			/* dqs swap */
-			ddr3_tip_bus_read_modify_write(dev_num, ACCESS_TYPE_UNICAST,
-						       if_id, bus_cnt,
-						       DDR_PHY_DATA,
-						       PHY_CTRL_PHY_REG, 0xc0,
-						       0xc0);
-		}
-
-		if (tm->interface_params[if_id].
-		    as_bus_params[bus_cnt].is_ck_swap == 1) {
-			if (bus_cnt <= 1)
-				data_value = 0x5 << 2;
-			else
-				data_value = 0xa << 2;
-
-			/* mask equals data */
-			/* ck swap pup is only control pup #0 ! */
-			ck_swap_pup_ctrl = 0;
-			ddr3_tip_bus_read_modify_write(dev_num, ACCESS_TYPE_UNICAST,
-						       if_id, ck_swap_pup_ctrl,
-						       DDR_PHY_CONTROL,
-						       PHY_CTRL_PHY_REG,
-						       data_value, data_value);
-		}
-	}
-
-	return MV_OK;
 }
 
 /*
