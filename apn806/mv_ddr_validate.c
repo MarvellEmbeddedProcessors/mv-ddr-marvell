@@ -197,6 +197,9 @@ static int xor_search_1d_1e(enum hws_edge_compare edge, enum hws_search_dir sear
 						   DDR_PHY_DATA, reg_addr, bs_middle);
 			}
 
+			/* reset phy fifo pointer after rx adll or rx cal change */
+			ddr3_tip_reset_fifo_ptr(0);
+
 			if (byte_num == 8)
 				reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
@@ -238,6 +241,9 @@ static int xor_search_1d_1e(enum hws_edge_compare edge, enum hws_search_dir sear
 				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num,
 						   DDR_PHY_DATA, reg_addr, bs_middle);
 			}
+
+			/* reset phy fifo pointer after rx adll or rx cal change */
+			ddr3_tip_reset_fifo_ptr(0);
 
 			if (byte_num == 8)
 				reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
@@ -399,6 +405,9 @@ static int xor_search_2d_1e(enum hws_edge_compare edge,
 				   VREF_PHY_REG(effective_cs, 5), param2);
 		ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, byte_num, DDR_PHY_DATA,
 				   reg_addr1, param1);
+
+		/* reset phy fifo pointer after rx adll or rx cal change */
+		ddr3_tip_reset_fifo_ptr(0);
 
 		if (byte_num == 8)
 			reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
