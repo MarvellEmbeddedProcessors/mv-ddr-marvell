@@ -557,7 +557,7 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 				mmio_write_32(0xf00116d8, 0x3cc);
 				duty_cycle_idx = duty_cycle;
 				/* insert dram to vref training mode */
-				mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, 0);
+				mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, 1);
 				/* set new vref training value in dram */
 				mv_ddr4_vref_tap_set(0, 0, ACCESS_TYPE_MULTICAST, duty_cycle_idx,
 						     MV_DDR4_VREF_TAP_START);
