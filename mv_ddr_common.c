@@ -100,6 +100,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr_mv_wrapper.h"
 #elif defined(MV_DDR_ATF) /* MARVELL ATF */
 #include "mv_ddr_atf_wrapper.h"
+#elif defined(CONFIG_A3700)
+#include "mv_ddr_a3700_wrapper.h"
 #else /* U-BOOT SPL */
 #include "ddr_ml_wrapper.h"
 #endif

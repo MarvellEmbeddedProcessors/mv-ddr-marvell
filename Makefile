@@ -215,6 +215,71 @@ clean:
 	$(ECHO) "  CLEAN"
 	@$(RM) $(MV_DDR_COBJ) $(MV_DDR_LIB)
 
+# *********************
+# MARVELL A3700 SUPPORT
+# *********************
+else ifneq ($(findstring a3700,$(PLATFORM)),)
+CC       = gcc
+RM       = @rm -rf
+ECHO     = @echo
+
+OBJ_DIR ?= $(MV_DDR_ROOT)
+
+MV_DDR_SRCPATH = $(MV_DDR_ROOT)/a3700
+MV_DDR_DRVPATH = $(MV_DDR_ROOT)/drivers
+
+INCPATH = $(MV_DDR_ROOT) $(MV_DDR_SRCPATH) $(MV_DDR_DRVPATH)
+INCLUDE = $(addprefix -I,$(INCPATH))
+
+CFLAGS = $(INCLUDE) -Wall -Werror
+
+ifneq ($(findstring DDR3,$(DDR_TYPE)),)
+CFLAGS += -DCONFIG_DDR3
+else ifneq ($(findstring DDR4,$(DDR_TYPE)),)
+CFLAGS += -DCONFIG_DDR4
+else
+$(error set DDR_TYPE to DDR3 or DDR4)
+endif
+
+CFLAGS += -DCONFIG_A3700 -DSILENT_LIB
+
+MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_SRCPATH),$(wildcard $(DIR)/*.c))
+MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_mc6.c
+MV_DDR_CSRC += $(MV_DDR_ROOT)/mv_ddr4_training_db.c
+MV_DDR_CSRC += $(MV_DDR_ROOT)/ddr3_training_db.c
+MV_DDR_CSRC += $(MV_DDR_ROOT)/mv_ddr_common.c
+
+MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
+# add mv_ddr build message and version string object
+MV_DDR_VER_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_VER_CSRC))
+MV_DDR_COBJ += $(MV_DDR_VER_COBJ)
+
+.SILENT:
+all: check_env header a3700_tool
+
+$(OBJ_DIR)/%.o: %.c
+	$(ECHO) "  CC      $<"
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+a3700_tool: $(MV_DDR_COBJ)
+	$(CC) -o a3700_tool $(MV_DDR_COBJ)
+
+$(MV_DDR_VER_COBJ):
+	$(ECHO) "  CC      $(MV_DDR_VER_CSRC)"
+	$(CC) -c $(CFLAGS) -o $@ $(MV_DDR_VER_CSRC)
+
+header:
+	$(ECHO) "\nBuilding a3700 tool"
+
+check_env:
+ifndef DDR_TYPE
+	$(error DDR_TYPE is undefined; set DDR_TYPE to DDR3 or DDR4)
+endif
+
+clean:
+	$(ECHO) "Cleaning a3700 tool"
+	@$(RM) $(MV_DDR_COBJ) a3700_tool
+
 # *******************
 # MARVELL ATF SUPPORT
 # *******************

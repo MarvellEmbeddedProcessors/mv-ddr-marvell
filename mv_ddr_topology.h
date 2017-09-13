@@ -108,6 +108,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_DDR_64BIT_ECC_PUP8_BUS_MASK	0x1ff
 #define MV_DDR_32BIT_ECC_PUP8_BUS_MASK	0x10f
 
+#define MV_DDR_CS_BITMASK_1CS		0x1
+#define MV_DDR_CS_BITMASK_2CS		0x3
+
 /* source of ddr configuration data */
 enum mv_ddr_cfg_src {
 	MV_DDR_CFG_DEFAULT,	/* based on data in mv_ddr_topology_map structure */

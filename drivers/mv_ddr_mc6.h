@@ -133,7 +133,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define	TIMING_READ_GAP_EXTEND			4 /* for dual cs */
 
 /* registers definition */
+#if defined(CONFIG_A3700)
+#define MC6_BASE				0x0
+#else
 #define MC6_BASE				0x20000
+#endif
 
 #define MC6_USER_CMD0_REG			(MC6_BASE + 0x20)
 #define USER_CMD0_CS_OFFS			24

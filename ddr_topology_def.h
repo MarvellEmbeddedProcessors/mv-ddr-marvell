@@ -105,6 +105,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "a38x/mv_ddr_plat.h"
 #elif defined(CONFIG_APN806)
 #include "mv_ddr_apn806.h"
+#elif defined(CONFIG_A3700)
+#include "a3700/mv_ddr_plat.h"
 #endif
 
 #include "mv_ddr_topology.h"
