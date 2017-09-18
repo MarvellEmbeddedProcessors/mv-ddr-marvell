@@ -915,8 +915,7 @@ static int mv_ddr_training_mask_set(void)
 			  WL_PHASE_CORRECTION_MASK_BIT |
 			  RL_DQS_BURST_MASK_BIT |
 			  RECEIVER_CALIBRATION_MASK_BIT |
-			  DQ_VREF_CALIBRATION_MASK_BIT |
-			  DM_TUNING_MASK_BIT);
+			  DQ_VREF_CALIBRATION_MASK_BIT);
 	rl_mid_freq_wa = 0;
 #else /* CONFIG_DDR4 */
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
@@ -1214,7 +1213,7 @@ int mv_ddr_mc6_init_controller(void)
 	reg_write(0x20310, 0x21000000);	/* DRAM_Config_5 CS0: RTT_Park, RTT_WR */
 	reg_write(0x20318, 0x0);	/* DRAM_Config_5 CS2: RTT_Park, RTT_WR */
 	reg_write(0x2031c, 0x0);	/* DRAM_Config_5 CS3: RTT_Park, RTT_WR */
-	reg_write(0x20304, 0x400);	/* DRAM_Config_2 */
+	reg_write(0x20304, 0x0);	/* DRAM_Config_2 */
 	reg_write(0x20308, 0x1);	/* DRAM_Config_3 DLL_reset */
 #if defined(A80X0)
 	reg_write(0x20314, 0x0);	/* DRAM_Config_5 CS1: RTT_Park, RTT_WR - Diff1 */
