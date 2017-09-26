@@ -1,4 +1,4 @@
-DDR Porting Guide
+Armada-70x0/80x0/38x DDR Porting Guide
 =================
 
 This document provides with instructions for porting Marvell mv_ddr package to a customer board.
