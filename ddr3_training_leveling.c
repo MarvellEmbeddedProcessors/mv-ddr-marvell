@@ -1949,14 +1949,14 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 								pass_lock_num++;
 								DEBUG_LEVELING(DEBUG_LEVEL_TRACE,
 									       ("new lock %d\n", pass_lock_num));
-							if (rl_min_val[effective_cs] >
-							    rl_values[effective_cs][subphy_id][if_id])
-								rl_min_val[effective_cs] =
-									rl_values[effective_cs][subphy_id][if_id];
-							if (rl_max_val[effective_cs] <
-							    rl_values[effective_cs][subphy_id][if_id])
-								rl_max_val[effective_cs] =
-									rl_values[effective_cs][subphy_id][if_id];
+								if (rl_min_val[effective_cs] >
+								    rl_values[effective_cs][subphy_id][if_id])
+									rl_min_val[effective_cs] =
+										rl_values[effective_cs][subphy_id][if_id];
+								if (rl_max_val[effective_cs] <
+								    rl_values[effective_cs][subphy_id][if_id])
+									rl_max_val[effective_cs] =
+										rl_values[effective_cs][subphy_id][if_id];
 								step = 2;
 							}
 					}
