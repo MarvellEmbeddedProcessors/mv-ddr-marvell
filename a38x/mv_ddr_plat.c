@@ -1777,3 +1777,8 @@ MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
 	return status;
 }
 #endif /* CONFIG_DDR4 */
+
+int mv_ddr_manual_cal_do(void)
+{
+	return 0;
+}
