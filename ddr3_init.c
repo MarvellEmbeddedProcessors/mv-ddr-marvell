@@ -136,6 +136,7 @@ int ddr3_init(void)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 octets_per_if_num;
 	int status;
+	int is_manual_cal_done;
 
 	/* Print mv_ddr version */
 	mv_ddr_ver_print();
@@ -173,17 +174,21 @@ int ddr3_init(void)
 	mv_ddr_mc_config();
 #endif
 
+	is_manual_cal_done = mv_ddr_manual_cal_do();
+
 	mv_ddr_mc_init();
 
+	if (!is_manual_cal_done) {
 #if !defined(CONFIG_MC_STATIC)
 #if defined(CONFIG_DDR4)
-	status = mv_ddr4_calibration_adjust(0, 1, 0);
-	if (MV_OK != status) {
-		printf("calibration adjust - FAILED 0x%x\n", status);
-		return status;
+		status = mv_ddr4_calibration_adjust(0, 1, 0);
+		if (status != MV_OK) {
+			printf("%s: failed (0x%x)\n", __func__, status);
+			return status;
+		}
+#endif
+#endif
 	}
-#endif
-#endif
 
 #if defined(CONFIG_MC_STATIC_PRINT)
 	mv_ddr_mc_static_print();

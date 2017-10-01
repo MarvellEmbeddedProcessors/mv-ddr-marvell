@@ -1699,3 +1699,8 @@ int apn806_rev_id_get(void)
 {
 	return (mmio_read_32(MVEBU_CSS_GWD_CTRL_IIDR2_REG) >> GWD_IIDR2_REV_ID_OFFSET) & GWD_IIDR2_REV_ID_MASK;
 }
+
+int mv_ddr_manual_cal_do(void)
+{
+	return 0;
+}
