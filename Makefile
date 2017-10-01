@@ -275,7 +275,7 @@ ifneq ($(findstring a7040,$(PLATFORM)),)
 CFLAGS += -DA70X0
 endif
 ifneq ($(findstring a3900,$(PLATFORM)),)
-CFLAGS += -DA70X0
+CFLAGS += -DA70X0 -DA3900
 endif
 ifneq ($(ARCH),)
 CFLAGS += -D$(ARCH)
