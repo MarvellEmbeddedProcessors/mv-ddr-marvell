@@ -717,7 +717,7 @@ static int vertical_adjust(int ena_mask, u8 byte_num)
 	u8 vw[2];
 	int print_ena = 0;
 	int step = (ena_mask == 0) ? 2 : 4;
-	int opt_rc = 0;
+	u8 opt_rc = 0;
 	int fpf;
 	int result;
 	enum hws_access_type sphy_access;
@@ -780,7 +780,7 @@ static int vertical_adjust(int ena_mask, u8 byte_num)
 		}
 
 		if (fpf != 255) {
-			opt_rc = ((int)vw[1] + (int)vw[0]) / 2;
+			opt_rc = (vw[1] + vw[0]) / 2;
 		} else {
 			if (print_ena == 1) {
 #ifdef DBG_PRINT
@@ -819,7 +819,7 @@ static int horizontal_adjust(int ena_mask, u8 byte_num, u8 *valid_crx_matrix)
 	u8 vw[2];
 	int print_ena = 0;
 	int step = (ena_mask == 0) ? 1 : 2;
-	int opt_crx = 0;
+	u8 opt_crx = 0;
 	int fpf;
 	int result;
 	enum hws_access_type sphy_access;
@@ -880,7 +880,7 @@ static int horizontal_adjust(int ena_mask, u8 byte_num, u8 *valid_crx_matrix)
 		}
 
 		if (fpf != 255) {
-			opt_crx = ((int)vw[1] + (int)vw[0]) / 2;
+			opt_crx = (vw[1] + vw[0]) / 2;
 			valid_crx_matrix[effective_cs * MAX_BUS_NUM * 2 + 2 * sphy] = vw[0];
 			valid_crx_matrix[effective_cs * MAX_BUS_NUM * 2 + 2 * sphy + 1] = vw[1];
 		} else {
