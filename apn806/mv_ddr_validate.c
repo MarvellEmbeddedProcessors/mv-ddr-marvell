@@ -986,10 +986,10 @@ static int diagonal_adjust(int ena_mask, u8 byte_num)
 
 		if (final != 255) {
 			/* vw contains a number of steps done per search */
-			tmp_nom_adll = 0.5 * ((vw[0] * step1 + init_val1) + (end_val1 - vw[1] * step1));
+			tmp_nom_adll = ((vw[0] * step1 + init_val1) + (end_val1 - vw[1] * step1)) / 2;
 			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, sphy_access, sphy, DDR_PHY_DATA,
 					   CRX_PHY_REG(effective_cs), tmp_nom_adll);
-			tmp_nom_rc = 0.5 * ((vw[0] * step2 + init_val2) + (end_val2 - vw[1] * step2));
+			tmp_nom_rc = ((vw[0] * step2 + init_val2) + (end_val2 - vw[1] * step2)) / 2;
 			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, sphy_access, sphy, DDR_PHY_DATA,
 					   VREF_BCAST_PHY_REG(effective_cs), tmp_nom_rc);
 			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, sphy_access, sphy, DDR_PHY_DATA,
@@ -1040,10 +1040,10 @@ static int diagonal_adjust(int ena_mask, u8 byte_num)
 		       __func__, final, vw[0], vw[1]);
 #endif
 		if (final != 255) {
-			tmp_nom_adll = 0.5 * ((vw[0] * step1 + init_val1) + (end_val1 - vw[1] * step1));
+			tmp_nom_adll = ((vw[0] * step1 + init_val1) + (end_val1 - vw[1] * step1)) / 2;
 			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, sphy_access, sphy, DDR_PHY_DATA,
 					   CRX_PHY_REG(effective_cs), tmp_nom_adll);
-			tmp_nom_rc = 0.5 * ((init_val2 - vw[0] * step2) + (end_val2 + vw[1] * step2));
+			tmp_nom_rc = ((init_val2 - vw[0] * step2) + (end_val2 + vw[1] * step2)) / 2;
 			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, sphy_access, sphy, DDR_PHY_DATA,
 					   VREF_BCAST_PHY_REG(effective_cs), tmp_nom_rc);
 			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, sphy_access, sphy, DDR_PHY_DATA,
