@@ -342,12 +342,14 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.cl = tm->interface_params[IF_ID_0].cas_l;
 	mc6_timing.cwl = tm->interface_params[IF_ID_0].cas_wl;
 
+#ifndef CONFIG_A3700
 	/* configure the timing registers */
 		reg_bit_clrset(MC6_CH0_DRAM_CFG1_REG,
 			       mc6_timing.cwl << CWL_OFFS | mc6_timing.cl << CL_OFFS,
 			       CWL_MASK << CWL_OFFS | CL_MASK << CL_OFFS);
 	/* printf("MC6_CH0_DRAM_CFG1_REG addr 0x%x, data 0x%x\n", MC6_CH0_DRAM_CFG1_REG,
 	       reg_read(MC6_CH0_DRAM_CFG1_REG)); */
+#endif
 
 	reg_bit_clrset(MC6_CH0_DDR_INIT_TIMING_CTRL0_REG,
 		       mc6_timing.t_restcke << INIT_COUNT_NOP_OFFS,
@@ -486,6 +488,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("MC6_CH0_CAS_RAS_TIMING1_REG addr 0x%x, data 0x%x\n", MC6_CH0_CAS_RAS_TIMING1_REG,
 	       reg_read(MC6_CH0_CAS_RAS_TIMING1_REG)); */
 
+#ifndef CONFIG_A3700
 	reg_bit_clrset(MC6_CH0_OFF_SPEC_TIMING0_REG,
 		       mc6_timing.t_ccd_ccs_ext_dly << TCCD_CCS_EXT_DLY_OFFS |
 		       mc6_timing.t_ccd_ccs_wr_ext_dly << TCCD_CCS_WR_EXT_DLY_OFFS |
@@ -530,6 +533,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 		       TMRD_PDA_MASK << TMRD_PDA_OFFS);
 	/* printf("MC6_CH0_DRAM_PDA_TIMING_REG addr 0x%x, data 0x%x\n", MC6_CH0_DRAM_PDA_TIMING_REG,
 	       reg_read(MC6_CH0_DRAM_PDA_TIMING_REG)); */
+#endif
 }
 
 void mv_ddr_mc6_and_dram_timing_set(void)
@@ -967,7 +971,9 @@ void mv_ddr_mc6_sizes_cfg(void)
 {
 	unsigned int cs_idx;
 	unsigned int cs_num;
+#ifndef CONFIG_A3700
 	unsigned int reserved_mem_idx;
+#endif
 	unsigned long long area_length_bits;
 	unsigned int are_length_mega_bytes;
 	unsigned long long start_addr_bytes;
@@ -1029,6 +1035,7 @@ void mv_ddr_mc6_sizes_cfg(void)
 			       BANK_MAP_MASK << BANK_MAP_OFFS);
 	}
 
+#ifndef CONFIG_A3700
 	/* configure here the channel 1 reg_map_low and reg_map_high to unused memory area due to mc6 bug */
 	for (cs_idx = 0, reserved_mem_idx = cs_num; cs_idx < cs_num; cs_idx++, reserved_mem_idx++) {
 		start_addr_bytes = area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * reserved_mem_idx;
@@ -1053,6 +1060,7 @@ void mv_ddr_mc6_sizes_cfg(void)
 		/* printf("MC6_CH1_MMAP_HIGH_REG(cs_idx) addr 0x%x, data 0x%x\n", MC6_CH1_MMAP_HIGH_REG(cs_idx),
 			  reg_read(MC6_CH1_MMAP_HIGH_REG(cs_idx))); */
 	}
+#endif
 }
 
 void  mv_ddr_mc6_ecc_enable(void)
