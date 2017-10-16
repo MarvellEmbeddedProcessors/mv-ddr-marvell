@@ -221,7 +221,8 @@ enum speed_bin_table_elements {
 	SPEED_BIN_TRTP,
 	SPEED_BIN_TWR,
 	SPEED_BIN_TMOD,
-	SPEED_BIN_TXPDLL
+	SPEED_BIN_TXPDLL,
+	SPEED_BIN_TXSDLL
 };
 #endif /* CONFIG_DDR4 */
 

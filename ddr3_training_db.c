@@ -632,6 +632,9 @@ u32 speed_bin_table(u8 index, enum speed_bin_table_elements element)
 	case SPEED_BIN_TXPDLL:
 		result = 24000;
 		break;
+	case SPEED_BIN_TXSDLL:
+		result = 512;
+		break;
 	default:
 		break;
 	}
