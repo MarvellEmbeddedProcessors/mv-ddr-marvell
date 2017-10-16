@@ -179,6 +179,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_wtr = time_to_nclk(mc6_timing.t_wtr, mc6_timing.t_ckclk);
 	/* printf("t_wtr = %d\n", mc6_timing.t_wtr); */
 
+#ifdef CONFIG_DDR4
 	/* calculate t_wtr_l */
 	mc6_timing.t_wtr_l = speed_bin_table(speed_bin_index, SPEED_BIN_TWTRL);
 	/* printf("t_wtr_l = %d\n", mc6_timing.t_wtr_l); */
@@ -186,6 +187,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_wtr_l = %d\n", mc6_timing.t_wtr_l); */
 	mc6_timing.t_wtr_l = time_to_nclk(mc6_timing.t_wtr_l, mc6_timing.t_ckclk);
 	/* printf("t_wtr_l = %d\n", mc6_timing.t_wtr_l); */
+#endif
 
 	/* calculate t_xp */
 	mc6_timing.t_xp = TIMING_T_XP;
@@ -257,9 +259,11 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_rrd_l = time_to_nclk(mc6_timing.t_rrd_l, mc6_timing.t_ckclk);
 	/* printf("t_rrd_l = %d\n", mc6_timing.t_rrd_l); */
 
+#ifdef CONFIG_DDR4
 	/* calculate t_ccd_l */
 	mc6_timing.t_ccd_l = 6; /* FIXME: insert to speed bin table */
 	/* printf("t_ccd_l = %d\n", mc6_timing.t_ccd_l); */
+#endif
 
 	/* calculate t_rc */
 	mc6_timing.t_rc = speed_bin_table(speed_bin_index, SPEED_BIN_TRC);
@@ -451,6 +455,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("MC6_CH0_PRECHARGE_TIMING_REG addr 0x%x, data 0x%x\n", MC6_CH0_PRECHARGE_TIMING_REG,
 	       reg_read(MC6_CH0_PRECHARGE_TIMING_REG)); */
 
+#ifdef CONFIG_DDR4
 	reg_bit_clrset(MC6_CH0_CAS_RAS_TIMING0_REG,
 		       mc6_timing.t_wtr << TWTR_S_OFFS |
 		       mc6_timing.t_wtr_l << TWTR_OFFS |
@@ -460,6 +465,13 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 		       TWTR_MASK << TWTR_OFFS |
 		       TCCD_S_MASK << TCCD_S_OFFS |
 		       TCCD_MASK << TCCD_OFFS);
+#else /* CONFIG_DDR3 */
+	reg_bit_clrset(MC6_CH0_CAS_RAS_TIMING0_REG,
+		       mc6_timing.t_wtr << TWTR_OFFS |
+		       mc6_timing.t_ccd << TCCD_OFFS,
+		       TWTR_MASK << TWTR_OFFS |
+		       TCCD_MASK << TCCD_OFFS);
+#endif
 	/* printf("MC6_CH0_CAS_RAS_TIMING0_REG addr 0x%x, data 0x%x\n", MC6_CH0_CAS_RAS_TIMING0_REG,
 	       reg_read(MC6_CH0_CAS_RAS_TIMING0_REG)); */
 
