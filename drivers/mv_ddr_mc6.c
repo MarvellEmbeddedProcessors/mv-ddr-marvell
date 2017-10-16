@@ -251,15 +251,16 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_xs = mc6_timing.t_rfc + time_to_nclk(TIMING_T_XS_OVER_TRFC, mc6_timing.t_ckclk);
 	/* printf("t_xs = %d\n", mc6_timing.t_xs); */
 
+#ifdef CONFIG_DDR4
 	/* calculate t_rrd_l */
-	mc6_timing.t_rrd_l = TIMING_T_RRDL;
+	mc6_timing.t_rrd_l = (page_size == 1) ? speed_bin_table(speed_bin_index, SPEED_BIN_TRRDL1K) :
+						speed_bin_table(speed_bin_index, SPEED_BIN_TRRDL2K);
 	/* printf("t_rrd_l = %d\n", mc6_timing.t_rrd_l); */
 	mc6_timing.t_rrd_l = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_rrd_l);
 	/* printf("t_rrd_l = %d\n", mc6_timing. t_rrd_l); */
 	mc6_timing.t_rrd_l = time_to_nclk(mc6_timing.t_rrd_l, mc6_timing.t_ckclk);
 	/* printf("t_rrd_l = %d\n", mc6_timing.t_rrd_l); */
 
-#ifdef CONFIG_DDR4
 	/* calculate t_ccd_l */
 	mc6_timing.t_ccd_l = 6; /* FIXME: insert to speed bin table */
 	/* printf("t_ccd_l = %d\n", mc6_timing.t_ccd_l); */
@@ -477,6 +478,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("MC6_CH0_CAS_RAS_TIMING0_REG addr 0x%x, data 0x%x\n", MC6_CH0_CAS_RAS_TIMING0_REG,
 	       reg_read(MC6_CH0_CAS_RAS_TIMING0_REG)); */
 
+#ifdef CONFIG_DDR4
 	/* TODO: check why change default of 17:16 tDQS2DQ from '1' to '0' */
 	reg_bit_clrset(MC6_CH0_CAS_RAS_TIMING1_REG,
 		       mc6_timing.t_rrd << TRRD_S_OFFS |
@@ -485,6 +487,13 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 		       TRRD_S_MASK << TRRD_S_OFFS |
 		       TRRD_MASK << TRRD_OFFS |
 		       TDQS2DQ_MASK << TDQS2DQ_OFFS);
+#else /* CONFIG_DDR3 */
+	reg_bit_clrset(MC6_CH0_CAS_RAS_TIMING1_REG,
+		       mc6_timing.t_rrd << TRRD_OFFS |
+		       TDQS2DQ_VAL << TDQS2DQ_OFFS,
+		       TRRD_MASK << TRRD_OFFS |
+		       TDQS2DQ_MASK << TDQS2DQ_OFFS);
+#endif
 	/* printf("MC6_CH0_CAS_RAS_TIMING1_REG addr 0x%x, data 0x%x\n", MC6_CH0_CAS_RAS_TIMING1_REG,
 	       reg_read(MC6_CH0_CAS_RAS_TIMING1_REG)); */
 
