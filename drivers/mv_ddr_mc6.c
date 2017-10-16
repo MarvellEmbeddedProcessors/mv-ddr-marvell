@@ -217,7 +217,11 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_ckesr = %d\n", mc6_timing.t_ckesr); */
 
 	/* calculate t_cpded */
-	mc6_timing.t_cpded = mc6_timing.t_ckclk * 4;
+#ifdef CONFIG_DDR4
+	mc6_timing.t_cpded = 4;
+#else /* CONFIG_DDR3 */
+	mc6_timing.t_cpded = 1;
+#endif
 	/* printf("t_cpded = %d\n", mc6_timing.t_cpded); */
 
 	/* calculate t_cksrx */
