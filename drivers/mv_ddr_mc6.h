@@ -103,7 +103,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_common.h"
 
 /* fclk definition is used for trefi */
+#ifdef CONFIG_A3700
+#define FCLK_KHZ				125000
+#else
 #define FCLK_KHZ				200000
+#endif /* CONFIG_A3700 */
 
 /* mc6 default timing parameters */
 #define TIMING_T_RES				100000
