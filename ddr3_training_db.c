@@ -570,19 +570,19 @@ u32 speed_bin_table(u8 index, enum speed_bin_table_elements element)
 		result = speed_bin_table_t_rc[index];
 		break;
 	case SPEED_BIN_TRRD1K:
-		if (index < SPEED_BIN_DDR_800E)
+		if (index <= SPEED_BIN_DDR_800E)
 			result = 10000;
-		else if (index < SPEED_BIN_DDR_1066G)
+		else if (index <= SPEED_BIN_DDR_1066G)
 			result = 7500;
-		else if (index < SPEED_BIN_DDR_1600K)
+		else if (index <= SPEED_BIN_DDR_1600K)
 			result = 6000;
 		else
 			result = 5000;
 		break;
 	case SPEED_BIN_TRRD2K:
-		if (index < SPEED_BIN_DDR_1066G)
+		if (index <= SPEED_BIN_DDR_1066G)
 			result = 10000;
-		else if (index < SPEED_BIN_DDR_1600K)
+		else if (index <= SPEED_BIN_DDR_1600K)
 			result = 7500;
 		else
 			result = 6000;
