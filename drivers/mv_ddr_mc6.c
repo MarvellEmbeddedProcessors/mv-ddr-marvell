@@ -166,7 +166,11 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* calculate t_mode */
 	mc6_timing.t_mod = speed_bin_table(speed_bin_index, SPEED_BIN_TMOD);
 	/* printf("t_mod = %d\n", mc6_timing.t_mod); */
+#ifdef CONFIG_DDR4
 	mc6_timing.t_mod = GET_MAX_VALUE(mc6_timing.t_ckclk * 24, mc6_timing.t_mod);
+#else /* CONFIG_DDR3 */
+	mc6_timing.t_mod = GET_MAX_VALUE(mc6_timing.t_ckclk * 12, mc6_timing.t_mod);
+#endif
 	/* printf("t_mod = %d\n", mc6_timing.t_mod); */
 	mc6_timing.t_mod = time_to_nclk(mc6_timing.t_mod, mc6_timing.t_ckclk);
 	/* printf("t_mod = %d\n",mc6_timing. t_mod); */
