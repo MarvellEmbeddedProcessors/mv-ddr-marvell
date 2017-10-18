@@ -273,7 +273,9 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_rrd_l = %d\n", mc6_timing.t_rrd_l); */
 
 	/* calculate t_ccd_l */
-	mc6_timing.t_ccd_l = 6; /* FIXME: insert to speed bin table */
+	mc6_timing.t_ccd_l = speed_bin_table(speed_bin_index, SPEED_BIN_TCCDL);
+	mc6_timing.t_ccd_l = GET_MAX_VALUE(mc6_timing.t_ckclk * 5, mc6_timing.t_ccd_l);
+	mc6_timing.t_ccd_l = time_to_nclk(mc6_timing.t_ccd_l, mc6_timing.t_ckclk);
 	/* printf("t_ccd_l = %d\n", mc6_timing.t_ccd_l); */
 #endif
 

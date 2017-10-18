@@ -438,6 +438,18 @@ u32 speed_bin_table(u8 index, enum speed_bin_table_elements element)
 				result = 768;	/* in number of clocks */
 		}
 		break;
+	case SPEED_BIN_TCCDL:
+		if (tm->cfg_src == MV_DDR_CFG_SPD)
+			result = 6250;
+		else {
+			if (index <= SPEED_BIN_DDR_1600L)
+				result = 6250;
+			else if (index <= SPEED_BIN_DDR_2133R)
+				result = 5355;
+			else
+				result = 5000;
+		}
+		break;
 	default:
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
 				  ("speed_bin_table: error, element id not valid (%d)\n",
