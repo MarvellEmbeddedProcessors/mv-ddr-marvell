@@ -197,6 +197,13 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_xp = time_to_nclk(mc6_timing.t_xp, mc6_timing.t_ckclk);
 	/* printf("t_xp = %d\n", mc6_timing.t_xp); */
 
+#ifdef CONFIG_DDR3
+	/* calculate t_xpdll */
+	mc6_timing.t_xpdll = speed_bin_table(speed_bin_index, SPEED_BIN_TXPDLL);
+	mc6_timing.t_xpdll = GET_MAX_VALUE(mc6_timing.t_ckclk * 10, mc6_timing.t_xpdll);
+	mc6_timing.t_xpdll = time_to_nclk(mc6_timing.t_xpdll, mc6_timing.t_ckclk);
+#endif
+
 	/* calculate t_cke */
 	mc6_timing.t_cke = TIMING_T_CKE;
 	/* printf("t_cke = %d\n", mc6_timing.t_cke); */
@@ -409,7 +416,11 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	       reg_read(MC6_CH0_SELFREFRESH_TIMING1_REG)); */
 
 	reg_bit_clrset(MC6_CH0_PWRDOWN_TIMING0_REG,
-		       TXARDS_VAL << TCKSRX_OFFS |
+#ifdef CONFIG_DDR4
+		       TXARDS_VAL << TXARDS_OFFS |
+#else /* CONFIG_DDR3 */
+		       mc6_timing.t_xpdll << TXARDS_OFFS |
+#endif
 		       mc6_timing.t_xp << TXP_OFFS |
 		       mc6_timing.t_ckesr << TCKESR_OFFS |
 		       mc6_timing.t_cpded << TCPDED_OFFS,

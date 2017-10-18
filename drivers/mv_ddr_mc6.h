@@ -428,6 +428,7 @@ struct mv_ddr_mc6_timing {
 	unsigned int t_rtp;
 	unsigned int t_mod;
 	unsigned int t_xp;
+	unsigned int t_xpdll;
 	unsigned int t_xs;
 	unsigned int t_xs_fast;
 	unsigned int t_ckesr;
