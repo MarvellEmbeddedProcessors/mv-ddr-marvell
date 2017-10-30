@@ -115,12 +115,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TIMING_T_ZQOPER				512
 #define TIMING_T_ZQINIT				1024
 #define TIMING_T_ZQCS				128
+#define TIMING_T_MRD				8
 #else /* CONFIG_DDR3 */
 #define TIMING_T_ACTPDEN			1
 #define TIMING_T_ZQINIT				640000 /* 640 ns */
+#define TIMING_T_MRD				4
 #endif
 #define TIMING_T_CCD				4
-#define TIMING_T_MRD				8
 #define TIMING_T_MPX_LH				12000
 #define TIMING_T_MPX_S				1
 #define TIMING_T_XMP_OVER_TRFC			10000
