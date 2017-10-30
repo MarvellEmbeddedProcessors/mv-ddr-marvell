@@ -289,9 +289,6 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.read_gap_extend = TIMING_READ_GAP_EXTEND;
 	/* printf("read_gap_extend = %d\n", mc6_timing.read_gap_extend); */
 
-	mc6_timing.t_zqoper = TIMING_T_ZQOPER;
-	/* printf("t_zqoper = %d\n", mc6_timing.t_zqoper); */
-
 	mc6_timing.t_res = TIMING_T_RES;
 	/* printf("t_res = %d\n", mc6_timing.t_res); */
 	mc6_timing.t_res = time_to_nclk(mc6_timing.t_res, mc6_timing.t_ckclk);
@@ -310,10 +307,22 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_actpden = TIMING_T_ACTPDEN;
 	/* printf("t_actpden = %d\n", mc6_timing.t_actpden); */
 
+#ifdef CONFIG_DDR4
 	mc6_timing.t_zqinit = TIMING_T_ZQINIT;
-	/* printf("t_zqinit = %d\n", mc6_timing.t_zqinit); */
-
+	mc6_timing.t_zqoper = TIMING_T_ZQOPER;
 	mc6_timing.t_zqcs = TIMING_T_ZQCS;
+#else /* CONFIG_DDR3 */
+	mc6_timing.t_zqinit = TIMING_T_ZQINIT;
+	mc6_timing.t_zqinit = GET_MAX_VALUE(mc6_timing.t_ckclk * 512, mc6_timing.t_zqinit);
+	mc6_timing.t_zqinit = time_to_nclk(mc6_timing.t_zqinit, mc6_timing.t_ckclk);
+
+	/* tzqoper is 1/2 of tzqinit per jedec spec */
+	mc6_timing.t_zqoper = mc6_timing.t_zqinit / 2;
+	/* tzqcs is 1/8 of tzqinit per jedec spec */
+	mc6_timing.t_zqcs = mc6_timing.t_zqinit / 8;
+#endif
+	/* printf("t_zqinit = %d\n", mc6_timing.t_zqinit); */
+	/* printf("t_zqoper = %d\n", mc6_timing.t_zqoper); */
 	/* printf("t_zqcs = %d\n", mc6_timing.t_zqcs); */
 
 	mc6_timing.t_ccd = TIMING_T_CCD;
