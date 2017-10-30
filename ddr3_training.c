@@ -348,6 +348,7 @@ static int ddr3_tip_pad_inv(void)
 
 		if (tm->interface_params[0].as_bus_params[sphy].
 		    is_ck_swap == 1 && sphy == 0) {
+/* TODO: move this code to per platform one */
 #if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
 			/* clock swap for both cs0 and cs1 */
 			data = (INVERT_PAD << INV_PAD2_OFFS |
@@ -376,7 +377,7 @@ static int ddr3_tip_pad_inv(void)
 #elif defined(A80X0)
 			ck_swap_ctrl_sphy = CK1_A80X0_SWAP_CTRL_PHY_NUM;
 #else /* !A70X0 && !A80X0 */
-#error "unknown platform to define ddr clock swap control subphy"
+#pragma message "unknown platform to define ddr clock swap control subphy"
 #endif
 			ddr3_tip_bus_read_modify_write(0, ACCESS_TYPE_UNICAST,
 						       0, ck_swap_ctrl_sphy,
@@ -384,7 +385,7 @@ static int ddr3_tip_pad_inv(void)
 						       PHY_CTRL_PHY_REG,
 						       data, data);
 #else /* !CONFIG_ARMADA_38X && !CONFIG_ARMADA_39X && !CONFIG_APN806 */
-#error "unknown platform to configure ddr clock swap"
+#pragma message "unknown platform to configure ddr clock swap"
 #endif
 		}
 	}
