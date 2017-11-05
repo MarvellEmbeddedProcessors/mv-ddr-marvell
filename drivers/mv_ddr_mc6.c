@@ -588,116 +588,109 @@ void mv_ddr_mc6_and_dram_timing_set(void)
 }
 
 
-struct mv_ddr_addressing_table mv_ddr_addresing_table_get(enum mv_ddr_die_capacity memory_size,
-						   enum mv_ddr_dev_width bus_width)
+struct mv_ddr_addr_table {
+	unsigned int num_of_bank_groups;
+	unsigned int num_of_bank_addr_in_bank_group;
+	unsigned int row_addr;
+	unsigned int column_addr;
+	unsigned int page_size_k_byte;
+};
+
+static int mv_ddr_addr_table_set(struct mv_ddr_addr_table *addr_tbl,
+				 enum mv_ddr_die_capacity memory_size,
+				 enum mv_ddr_dev_width bus_width)
 {
-	struct mv_ddr_addressing_table addr_table;
 	switch (memory_size) {
 	case MV_DDR_DIE_CAP_2GBIT:
-	{
 		switch (bus_width) {
 		case MV_DDR_DEV_WIDTH_8BIT:
-			addr_table.num_of_bank_groups = 4;
-			addr_table.num_of_bank_addr_in_bank_group = 4;
-			addr_table.row_addr = 14;
-			addr_table.column_addr = 10;
-			addr_table.page_size_k_byte = 1;
+			addr_tbl->num_of_bank_groups = 4;
+			addr_tbl->num_of_bank_addr_in_bank_group = 4;
+			addr_tbl->row_addr = 14;
+			addr_tbl->column_addr = 10;
+			addr_tbl->page_size_k_byte = 1;
 			break;
-
 		case MV_DDR_DEV_WIDTH_16BIT:
-			addr_table.num_of_bank_groups = 2;
-			addr_table.num_of_bank_addr_in_bank_group = 4;
-			addr_table.row_addr = 14;
-			addr_table.column_addr = 10;
-			addr_table.page_size_k_byte = 2;
+			addr_tbl->num_of_bank_groups = 2;
+			addr_tbl->num_of_bank_addr_in_bank_group = 4;
+			addr_tbl->row_addr = 14;
+			addr_tbl->column_addr = 10;
+			addr_tbl->page_size_k_byte = 2;
 			break;
-
 		default:
-			printf("%s: the current bus width in not supported\n", __func__);
+			printf("%s: unsupported bus width found\n", __func__);
+			return -1;
 		}
-	}
 		break;
-
 	case MV_DDR_DIE_CAP_4GBIT:
-	{
 		switch (bus_width) {
 		case MV_DDR_DEV_WIDTH_8BIT:
-			addr_table.num_of_bank_groups = 4;
-			addr_table.num_of_bank_addr_in_bank_group = 4;
-			addr_table.row_addr = 15;
-			addr_table.column_addr = 10;
-			addr_table.page_size_k_byte = 1;
+			addr_tbl->num_of_bank_groups = 4;
+			addr_tbl->num_of_bank_addr_in_bank_group = 4;
+			addr_tbl->row_addr = 15;
+			addr_tbl->column_addr = 10;
+			addr_tbl->page_size_k_byte = 1;
 			break;
-
 		case MV_DDR_DEV_WIDTH_16BIT:
-			addr_table.num_of_bank_groups = 2;
-			addr_table.num_of_bank_addr_in_bank_group = 4;
-			addr_table.row_addr = 15;
-			addr_table.column_addr = 10;
-			addr_table.page_size_k_byte = 2;
+			addr_tbl->num_of_bank_groups = 2;
+			addr_tbl->num_of_bank_addr_in_bank_group = 4;
+			addr_tbl->row_addr = 15;
+			addr_tbl->column_addr = 10;
+			addr_tbl->page_size_k_byte = 2;
 			break;
-
 		default:
-			printf("%s: the current bus width in not supported\n", __func__);
+			printf("%s: unsupported bus width found\n", __func__);
+			return -1;
 		}
-	}
 		break;
-
 	case MV_DDR_DIE_CAP_8GBIT:
-	{
 		switch (bus_width) {
 		case MV_DDR_DEV_WIDTH_8BIT:
-			addr_table.num_of_bank_groups = 4;
-			addr_table.num_of_bank_addr_in_bank_group = 4;
-			addr_table.row_addr = 16;
-			addr_table.column_addr = 10;
-			addr_table.page_size_k_byte = 1;
+			addr_tbl->num_of_bank_groups = 4;
+			addr_tbl->num_of_bank_addr_in_bank_group = 4;
+			addr_tbl->row_addr = 16;
+			addr_tbl->column_addr = 10;
+			addr_tbl->page_size_k_byte = 1;
 			break;
-
 		case MV_DDR_DEV_WIDTH_16BIT:
-			addr_table.num_of_bank_groups = 2;
-			addr_table.num_of_bank_addr_in_bank_group = 4;
-			addr_table.row_addr = 16;
-			addr_table.column_addr = 10;
-			addr_table.page_size_k_byte = 2;
+			addr_tbl->num_of_bank_groups = 2;
+			addr_tbl->num_of_bank_addr_in_bank_group = 4;
+			addr_tbl->row_addr = 16;
+			addr_tbl->column_addr = 10;
+			addr_tbl->page_size_k_byte = 2;
 			break;
-
 		default:
-			printf("%s: the current bus width in not supported\n", __func__);
+			printf("%s: unsupported bus width found\n", __func__);
+			return -1;
 		}
-	}
 		break;
-
 	case MV_DDR_DIE_CAP_16GBIT:
-	{
 		switch (bus_width) {
 		case MV_DDR_DEV_WIDTH_8BIT:
-			addr_table.num_of_bank_groups = 4;
-			addr_table.num_of_bank_addr_in_bank_group = 4;
-			addr_table.row_addr = 17;
-			addr_table.column_addr = 10;
-			addr_table.page_size_k_byte = 1;
+			addr_tbl->num_of_bank_groups = 4;
+			addr_tbl->num_of_bank_addr_in_bank_group = 4;
+			addr_tbl->row_addr = 17;
+			addr_tbl->column_addr = 10;
+			addr_tbl->page_size_k_byte = 1;
 			break;
-
 		case MV_DDR_DEV_WIDTH_16BIT:
-			addr_table.num_of_bank_groups = 2;
-			addr_table.num_of_bank_addr_in_bank_group = 4;
-			addr_table.row_addr = 17;
-			addr_table.column_addr = 10;
-			addr_table.page_size_k_byte = 2;
+			addr_tbl->num_of_bank_groups = 2;
+			addr_tbl->num_of_bank_addr_in_bank_group = 4;
+			addr_tbl->row_addr = 17;
+			addr_tbl->column_addr = 10;
+			addr_tbl->page_size_k_byte = 2;
 			break;
-
 		default:
-			printf("%s: the current bus width in not supported\n", __func__);
+			printf("%s: unsupported bus width found\n", __func__);
+			return -1;
 		}
-	}
 		break;
-
 	default:
-		printf("%s: the current memory size in not supported\n", __func__);
+		printf("%s: unsupported memory size found\n", __func__);
+		return -1;
 	}
 
-	return addr_table;
+	return 0;
 }
 
 unsigned int mv_ddr_area_length_convert(unsigned int area_length)
@@ -1018,14 +1011,16 @@ void mv_ddr_mc6_sizes_cfg(void)
 	unsigned long long start_addr_bytes;
 	unsigned int start_addr_low, start_addr_high;
 
+	struct mv_ddr_addr_table addr_tbl = {0};
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	calc_cs_num(DEV_NUM_0, IF_ID_0, &cs_num);
 
 	area_length_bits = mv_ddr_get_memory_size_per_cs_in_bits();
 	are_length_mega_bytes = area_length_bits / (MV_DDR_MEGA_BITS * MV_DDR_NUM_BITS_IN_BYTE);
 
-	struct mv_ddr_addressing_table addr_tbl = mv_ddr_addresing_table_get(tm->interface_params[IF_ID_0].memory_size,
-									     tm->interface_params[IF_ID_0].bus_width);
+	mv_ddr_addr_table_set(&addr_tbl,
+			      tm->interface_params[0].memory_size,
+			      tm->interface_params[0].bus_width);
 	/* configure all length per cs here and activate the cs */
 	for (cs_idx = 0; cs_idx < cs_num; cs_idx++) {
 		start_addr_bytes = area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * cs_idx;
