@@ -596,99 +596,52 @@ struct mv_ddr_addr_table {
 	unsigned int page_size_k_byte;
 };
 
-static int mv_ddr_addr_table_set(struct mv_ddr_addr_table *addr_tbl,
-				 enum mv_ddr_die_capacity memory_size,
+#define MV_DDR_DIE_CAP_MIN_IDX	MV_DDR_DIE_CAP_2GBIT
+#define MV_DDR_DIE_CAP_MAX_IDX	MV_DDR_DIE_CAP_16GBIT
+#define MV_DDR_DIE_CAP_SZ	(MV_DDR_DIE_CAP_MAX_IDX - MV_DDR_DIE_CAP_MIN_IDX + 1)
+#define MV_DDR_DEV_WID_MIN_IDX	MV_DDR_DEV_WIDTH_8BIT
+#define MV_DDR_DEV_WID_MAX_IDX	MV_DDR_DEV_WIDTH_16BIT
+#define MV_DDR_DEV_WID_SZ	(MV_DDR_DEV_WID_MAX_IDX - MV_DDR_DEV_WID_MIN_IDX + 1)
+
+static struct mv_ddr_addr_table addr_table_db[MV_DDR_DIE_CAP_SZ][MV_DDR_DEV_WID_SZ] = {
+	{ /* MV_DDR_DIE_CAP_2GBIT */
+		{4, 4, 14, 10, 1}, /* MV_DDR_DEV_WIDTH_8BIT*/
+		{2, 4, 14, 10, 2}, /* MV_DDR_DEV_WIDTH_16BIT*/
+	},
+	{ /* MV_DDR_DIE_CAP_4GBIT */
+		{4, 4, 15, 10, 1},
+		{2, 4, 15, 10, 2}
+	},
+	{ /* MV_DDR_DIE_CAP_8GBIT */
+		{4, 4, 16, 10, 1},
+		{2, 4, 16, 10, 2},
+	},
+	{ /* MV_DDR_DIE_CAP_16GBIT */
+		{4, 4, 17, 10, 1},
+		{2, 4, 17, 10, 2},
+	},
+};
+
+static int mv_ddr_addr_table_set(struct mv_ddr_addr_table *addr_table,
+				 enum mv_ddr_die_capacity mem_size,
 				 enum mv_ddr_dev_width bus_width)
 {
-	switch (memory_size) {
-	case MV_DDR_DIE_CAP_2GBIT:
-		switch (bus_width) {
-		case MV_DDR_DEV_WIDTH_8BIT:
-			addr_tbl->num_of_bank_groups = 4;
-			addr_tbl->num_of_bank_addr_in_bank_group = 4;
-			addr_tbl->row_addr = 14;
-			addr_tbl->column_addr = 10;
-			addr_tbl->page_size_k_byte = 1;
-			break;
-		case MV_DDR_DEV_WIDTH_16BIT:
-			addr_tbl->num_of_bank_groups = 2;
-			addr_tbl->num_of_bank_addr_in_bank_group = 4;
-			addr_tbl->row_addr = 14;
-			addr_tbl->column_addr = 10;
-			addr_tbl->page_size_k_byte = 2;
-			break;
-		default:
-			printf("%s: unsupported bus width found\n", __func__);
-			return -1;
-		}
-		break;
-	case MV_DDR_DIE_CAP_4GBIT:
-		switch (bus_width) {
-		case MV_DDR_DEV_WIDTH_8BIT:
-			addr_tbl->num_of_bank_groups = 4;
-			addr_tbl->num_of_bank_addr_in_bank_group = 4;
-			addr_tbl->row_addr = 15;
-			addr_tbl->column_addr = 10;
-			addr_tbl->page_size_k_byte = 1;
-			break;
-		case MV_DDR_DEV_WIDTH_16BIT:
-			addr_tbl->num_of_bank_groups = 2;
-			addr_tbl->num_of_bank_addr_in_bank_group = 4;
-			addr_tbl->row_addr = 15;
-			addr_tbl->column_addr = 10;
-			addr_tbl->page_size_k_byte = 2;
-			break;
-		default:
-			printf("%s: unsupported bus width found\n", __func__);
-			return -1;
-		}
-		break;
-	case MV_DDR_DIE_CAP_8GBIT:
-		switch (bus_width) {
-		case MV_DDR_DEV_WIDTH_8BIT:
-			addr_tbl->num_of_bank_groups = 4;
-			addr_tbl->num_of_bank_addr_in_bank_group = 4;
-			addr_tbl->row_addr = 16;
-			addr_tbl->column_addr = 10;
-			addr_tbl->page_size_k_byte = 1;
-			break;
-		case MV_DDR_DEV_WIDTH_16BIT:
-			addr_tbl->num_of_bank_groups = 2;
-			addr_tbl->num_of_bank_addr_in_bank_group = 4;
-			addr_tbl->row_addr = 16;
-			addr_tbl->column_addr = 10;
-			addr_tbl->page_size_k_byte = 2;
-			break;
-		default:
-			printf("%s: unsupported bus width found\n", __func__);
-			return -1;
-		}
-		break;
-	case MV_DDR_DIE_CAP_16GBIT:
-		switch (bus_width) {
-		case MV_DDR_DEV_WIDTH_8BIT:
-			addr_tbl->num_of_bank_groups = 4;
-			addr_tbl->num_of_bank_addr_in_bank_group = 4;
-			addr_tbl->row_addr = 17;
-			addr_tbl->column_addr = 10;
-			addr_tbl->page_size_k_byte = 1;
-			break;
-		case MV_DDR_DEV_WIDTH_16BIT:
-			addr_tbl->num_of_bank_groups = 2;
-			addr_tbl->num_of_bank_addr_in_bank_group = 4;
-			addr_tbl->row_addr = 17;
-			addr_tbl->column_addr = 10;
-			addr_tbl->page_size_k_byte = 2;
-			break;
-		default:
-			printf("%s: unsupported bus width found\n", __func__);
-			return -1;
-		}
-		break;
-	default:
+	if (mem_size < MV_DDR_DIE_CAP_MIN_IDX ||
+	    mem_size > MV_DDR_DIE_CAP_MAX_IDX) {
 		printf("%s: unsupported memory size found\n", __func__);
 		return -1;
 	}
+
+	if (bus_width < MV_DDR_DEV_WID_MIN_IDX ||
+	    bus_width > MV_DDR_DEV_WID_MAX_IDX) {
+		printf("%s: unsupported bus width found\n", __func__);
+		return -1;
+	}
+
+	memcpy((void *)addr_table,
+	       (void *)&addr_table_db[mem_size - MV_DDR_DIE_CAP_MIN_IDX]
+				   [bus_width - MV_DDR_DEV_WID_MIN_IDX],
+	       sizeof(struct mv_ddr_addr_table));
 
 	return 0;
 }
