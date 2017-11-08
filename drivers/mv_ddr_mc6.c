@@ -596,14 +596,20 @@ struct mv_ddr_addr_table {
 	unsigned int page_size_k_byte;
 };
 
+#ifdef CONFIG_DDR4
 #define MV_DDR_DIE_CAP_MIN_IDX	MV_DDR_DIE_CAP_2GBIT
 #define MV_DDR_DIE_CAP_MAX_IDX	MV_DDR_DIE_CAP_16GBIT
+#else /* CONFIG_DDR3 */
+#define MV_DDR_DIE_CAP_MIN_IDX	MV_DDR_DIE_CAP_512MBIT
+#define MV_DDR_DIE_CAP_MAX_IDX	MV_DDR_DIE_CAP_8GBIT
+#endif
 #define MV_DDR_DIE_CAP_SZ	(MV_DDR_DIE_CAP_MAX_IDX - MV_DDR_DIE_CAP_MIN_IDX + 1)
 #define MV_DDR_DEV_WID_MIN_IDX	MV_DDR_DEV_WIDTH_8BIT
 #define MV_DDR_DEV_WID_MAX_IDX	MV_DDR_DEV_WIDTH_16BIT
 #define MV_DDR_DEV_WID_SZ	(MV_DDR_DEV_WID_MAX_IDX - MV_DDR_DEV_WID_MIN_IDX + 1)
 
 static struct mv_ddr_addr_table addr_table_db[MV_DDR_DIE_CAP_SZ][MV_DDR_DEV_WID_SZ] = {
+#ifdef CONFIG_DDR4
 	{ /* MV_DDR_DIE_CAP_2GBIT */
 		{4, 4, 14, 10, 1}, /* MV_DDR_DEV_WIDTH_8BIT*/
 		{2, 4, 14, 10, 2}, /* MV_DDR_DEV_WIDTH_16BIT*/
@@ -620,6 +626,28 @@ static struct mv_ddr_addr_table addr_table_db[MV_DDR_DIE_CAP_SZ][MV_DDR_DEV_WID_
 		{4, 4, 17, 10, 1},
 		{2, 4, 17, 10, 2},
 	},
+#else /* CONFIG_DDR3 */
+	{ /* MV_DDR_DIE_CAP_512MBIT */
+		{1, 8, 13, 10, 1}, /* MV_DDR_DEV_WIDTH_8BIT*/
+		{1, 8, 12, 10, 2}, /* MV_DDR_DEV_WIDTH_16BIT*/
+	},
+	{ /* MV_DDR_DIE_CAP_1GBIT */
+		{1, 8, 14, 10, 1},
+		{1, 8, 13, 10, 2},
+	},
+	{ /* MV_DDR_DIE_CAP_2GBIT */
+		{1, 8, 15, 10, 1},
+		{1, 8, 14, 10, 2},
+	},
+	{ /* MV_DDR_DIE_CAP_4GBIT */
+		{1, 8, 16, 10, 1},
+		{1, 8, 15, 10, 2}
+	},
+	{ /* MV_DDR_DIE_CAP_8GBIT */
+		{1, 8, 16, 11, 2},
+		{1, 8, 16, 10, 2},
+	},
+#endif
 };
 
 static int mv_ddr_addr_table_set(struct mv_ddr_addr_table *addr_table,
