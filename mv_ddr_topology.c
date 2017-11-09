@@ -159,10 +159,6 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 	unsigned char val = 0;
 	int i;
 
-#ifdef CONFIG_APN806
-	int rev_id = apn806_rev_id_get();
-#endif
-
 	if (tm->interface_params[0].memory_freq == DDR_FREQ_SAR)
 		tm->interface_params[0].memory_freq = mv_ddr_init_freq_get();
 
@@ -191,14 +187,8 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 
 		/* update cs bit mask in topology map */
 		val = mv_ddr_spd_cs_bit_mask_get(&tm->spd_data);
-		for (i = 0; i < octets_per_if_num; i++) {
-#ifdef CONFIG_APN806
-			if (rev_id == APN806_REV_ID_A0)
-				tm->interface_params[0].as_bus_params[i].cs_bitmask = 0x1;
-			else
-#endif
-				tm->interface_params[0].as_bus_params[i].cs_bitmask = val;
-		}
+		for (i = 0; i < octets_per_if_num; i++)
+			tm->interface_params[0].as_bus_params[i].cs_bitmask = val;
 
 		/* check dram module type */
 		val = mv_ddr_spd_module_type_get(&tm->spd_data);
@@ -217,14 +207,8 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 
 		/* update mirror bit mask in topology map */
 		val = mv_ddr_spd_mem_mirror_get(&tm->spd_data);
-		for (i = 0; i < octets_per_if_num; i++) {
-#ifdef CONFIG_APN806
-			if (rev_id == APN806_REV_ID_A0)
-				tm->interface_params[0].as_bus_params[i].mirror_enable_bitmask = 0;
-			else
-#endif
-				tm->interface_params[0].as_bus_params[i].mirror_enable_bitmask = val << 1;
-		}
+		for (i = 0; i < octets_per_if_num; i++)
+			tm->interface_params[0].as_bus_params[i].mirror_enable_bitmask = val << 1;
 
 		tclk = 1000000 / freq_val[tm->interface_params[0].memory_freq];
 		/* update cas write latency (cwl) */
@@ -256,17 +240,6 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 			tm->interface_params[0].cas_wl =
 				cas_write_latency_table[speed_bin_index].cl_val[freq];
 	}
-
-#ifdef CONFIG_APN806
-	/*
-	 * workaround for the apn806, rev a0 patterns fifo using ecc issue:
-	 * reconfigure the bus active mask set to 32-bit ecc to 32-bit only
-	 */
-	if (rev_id == APN806_REV_ID_A0) {
-		if (tm->bus_act_mask == MV_DDR_32BIT_ECC_PUP8_BUS_MASK)
-			tm->bus_act_mask = BUS_MASK_32BIT;
-	}
-#endif
 
 	return tm;
 }

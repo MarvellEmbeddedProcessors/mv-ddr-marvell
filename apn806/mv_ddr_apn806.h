@@ -101,15 +101,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../drivers/mv_ddr_mc6.h"
 
 #define INTER_REGS_BASE	0xf0000000
-/* revision id register address */
-#define MVEBU_CSS_GWD_CTRL_IIDR2_REG	(INTER_REGS_BASE + 0x610fcc)
-#define GWD_IIDR2_REV_ID_OFFSET		12
-#define GWD_IIDR2_REV_ID_MASK		0xf
-#define APN806_REV_ID_A0		0
-#define APN806_REV_ID_A1		1
 
 #define IF_ID_0				0
-
 #define MAX_INTERFACE_NUM		1
 #define MAX_BUS_NUM			9
 #define DDR_IF_CTRL_SUBPHYS_NUM		3
@@ -407,7 +400,6 @@ int mv_ddr_mc6_init_controller(void);	/* FIXME: remove to mc6 driver when implem
 int mv_ddr_dq_mapping_detect(u32 dev_num);
 #endif
 void mv_ddr_mem_scrubbing(void);
-int apn806_rev_id_get(void);
 void mv_ddr_odpg_enable(void);
 void mv_ddr_odpg_disable(void);
 void mv_ddr_odpg_done_clr(void);

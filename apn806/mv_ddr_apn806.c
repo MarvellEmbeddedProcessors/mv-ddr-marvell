@@ -962,30 +962,12 @@ static int mv_ddr_training_mask_set(void)
 
 int mv_ddr_early_init(void)
 {
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	int rev_id = apn806_rev_id_get();
-	int subphy_num;
-
 	/* in case of calibration adjust
 	 * this flag checks if to run a workaround where v pod and v sstl are wired
 	 */
 	vref_calibration_wa = 0;
 	mode_2t = 1;
 	mv_ddr_sw_db_init(0, 0);
-
-	/* TODO: consider to move this platform specific code into mv_ddr_topology_update() */
-	if (rev_id == APN806_REV_ID_A0) {
-		/* update the number of cs to be 'single cs in case of A0 */
-		for (subphy_num = 0; subphy_num < MAX_BUS_NUM; subphy_num++) {
-			tm->interface_params[IF_ID_0].as_bus_params[subphy_num].cs_bitmask = 0x1;
-			tm->interface_params[IF_ID_0].as_bus_params[subphy_num].mirror_enable_bitmask = 0x0;
-		}
-		reg_write(0x114cc, 0x1200d);
-		reg_write(0x114c8, 0x1840008);
-		reg_write(0x117c8, 0x28a0008);
-		reg_write(0x11dc8, 0x1840008);
-		reg_write(0x11ec8, 0x28a0008);
-	}
 
 	return MV_OK;
 }
@@ -1012,21 +994,17 @@ int mv_ddr_pre_training_fixup(void)
 
 	/* update avs voltage for generic run */
 	reg_write(AVS_DISABLED_CTRL2_REG, 0xfde1ffff);
-	if (apn806_rev_id_get() == APN806_REV_ID_A0) {
-		reg_write(AVS_ENABLED_CTRL_REG, 0x1002f2f5);
-	} else {
-		reg_val = nominal_avs;
-		/* extract nominal avs value */
-		avs_val = (reg_val >> AVS_LOW_VDD_LMT_OFFS) & AVS_LOW_VDD_LMT_MASK;
-		/* reduce nominal avs value */
-		avs_val -= AVS_DELTA;
-		/* write reduced avs value */
-		reg_val &= ~(AVS_LOW_VDD_LMT_MASK << AVS_LOW_VDD_LMT_OFFS);
-		reg_val |= ((avs_val & AVS_LOW_VDD_LMT_MASK) << AVS_LOW_VDD_LMT_OFFS);
-		reg_val &= ~(AVS_HIGH_VDD_LMT_MASK << AVS_HIGH_VDD_LMT_OFFS);
-		reg_val |= ((avs_val & AVS_HIGH_VDD_LMT_MASK) << AVS_HIGH_VDD_LMT_OFFS);
-		reg_write(AVS_ENABLED_CTRL_REG, reg_val);
-	}
+	reg_val = nominal_avs;
+	/* extract nominal avs value */
+	avs_val = (reg_val >> AVS_LOW_VDD_LMT_OFFS) & AVS_LOW_VDD_LMT_MASK;
+	/* reduce nominal avs value */
+	avs_val -= AVS_DELTA;
+	/* write reduced avs value */
+	reg_val &= ~(AVS_LOW_VDD_LMT_MASK << AVS_LOW_VDD_LMT_OFFS);
+	reg_val |= ((avs_val & AVS_LOW_VDD_LMT_MASK) << AVS_LOW_VDD_LMT_OFFS);
+	reg_val &= ~(AVS_HIGH_VDD_LMT_MASK << AVS_HIGH_VDD_LMT_OFFS);
+	reg_val |= ((avs_val & AVS_HIGH_VDD_LMT_MASK) << AVS_HIGH_VDD_LMT_OFFS);
+	reg_write(AVS_ENABLED_CTRL_REG, reg_val);
 
 	return 0;
 }
@@ -1675,11 +1653,6 @@ int mv_ddr_dq_mapping_detect(u32 dev_num)
 }
 
 #endif
-
-int apn806_rev_id_get(void)
-{
-	return (mmio_read_32(MVEBU_CSS_GWD_CTRL_IIDR2_REG) >> GWD_IIDR2_REV_ID_OFFSET) & GWD_IIDR2_REV_ID_MASK;
-}
 
 int mv_ddr_manual_cal_do(void)
 {
