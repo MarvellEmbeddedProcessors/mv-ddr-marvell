@@ -197,7 +197,7 @@ void ddr3_hws_set_log_level(enum ddr_lib_debug_block block, u8 level)
 #endif /* SILENT_LIB */
 
 #if defined(DDR_VIEWER_TOOL)
-static char *convert_freq(enum hws_ddr_freq freq);
+static char *convert_freq(enum mv_ddr_freq freq);
 #if defined(EXCLUDE_SWITCH_DEBUG)
 u32 ctrl_sweepres[ADLL_LENGTH][MAX_INTERFACE_NUM][MAX_BUS_NUM];
 u32 ctrl_adll[MAX_CS_NUM * MAX_INTERFACE_NUM * MAX_BUS_NUM];
@@ -334,53 +334,53 @@ int ddr3_tip_get_device_info(u32 dev_num, struct ddr3_device_info *info_ptr)
 /*
  * Convert freq to character string
  */
-static char *convert_freq(enum hws_ddr_freq freq)
+static char *convert_freq(enum mv_ddr_freq freq)
 {
 	switch (freq) {
-	case DDR_FREQ_LOW_FREQ:
-		return "DDR_FREQ_LOW_FREQ";
+	case MV_DDR_FREQ_LOW_FREQ:
+		return "MV_DDR_FREQ_LOW_FREQ";
 
 #if !defined(CONFIG_DDR4)
-	case DDR_FREQ_400:
+	case MV_DDR_FREQ_400:
 		return "400";
 
-	case DDR_FREQ_533:
+	case MV_DDR_FREQ_533:
 		return "533";
 #endif /* CONFIG_DDR4 */
 
-	case DDR_FREQ_667:
+	case MV_DDR_FREQ_667:
 		return "667";
 
-	case DDR_FREQ_800:
+	case MV_DDR_FREQ_800:
 		return "800";
 
-	case DDR_FREQ_933:
+	case MV_DDR_FREQ_933:
 		return "933";
 
-	case DDR_FREQ_1066:
+	case MV_DDR_FREQ_1066:
 		return "1066";
 
 #if !defined(CONFIG_DDR4)
-	case DDR_FREQ_311:
+	case MV_DDR_FREQ_311:
 		return "311";
 
-	case DDR_FREQ_333:
+	case MV_DDR_FREQ_333:
 		return "333";
 
-	case DDR_FREQ_467:
+	case MV_DDR_FREQ_467:
 		return "467";
 
-	case DDR_FREQ_850:
+	case MV_DDR_FREQ_850:
 		return "850";
 
-	case DDR_FREQ_900:
+	case MV_DDR_FREQ_900:
 		return "900";
 
-	case DDR_FREQ_360:
-		return "DDR_FREQ_360";
+	case MV_DDR_FREQ_360:
+		return "MV_DDR_FREQ_360";
 
-	case DDR_FREQ_1000:
-		return "DDR_FREQ_1000";
+	case MV_DDR_FREQ_1000:
+		return "MV_DDR_FREQ_1000";
 #endif /* CONFIG_DDR4 */
 
 	default:
@@ -484,7 +484,7 @@ int ddr3_tip_print_log(u32 dev_num, u32 mem_addr)
 	if ((is_validate_window_per_if != 0) ||
 	    (is_validate_window_per_pup != 0)) {
 		u32 is_pup_log = 0;
-		enum hws_ddr_freq freq;
+		enum mv_ddr_freq freq;
 
 		freq = tm->interface_params[first_active_if].memory_freq;
 
@@ -1133,11 +1133,11 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		break;
 
 	case 0x2:
-		low_freq = (enum hws_ddr_freq)value;
+		low_freq = (enum mv_ddr_freq)value;
 		break;
 
 	case 0x3:
-		medium_freq = (enum hws_ddr_freq)value;
+		medium_freq = (enum mv_ddr_freq)value;
 		break;
 
 	case 0x4:
@@ -1203,7 +1203,7 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		break;
 
 	case 0x36:
-		*ptr = (u32 *)&(freq_val[DDR_FREQ_LOW_FREQ]);
+		*ptr = (u32 *)&(freq_val[MV_DDR_FREQ_LOW_FREQ]);
 		break;
 
 	case 0x37:

@@ -196,30 +196,30 @@ static u32 dq_bit_map_2_phy_pin[LAST_DDR_CFG_OPT][MAX_DQ_NUM] = {
 	{/* DDR3_BRD */}
 };
 
-static u8 bw_per_freq[DDR_FREQ_LAST] = {
-	0x3,	/* DDR_FREQ_100 */
-	0x5,	/* DDR_FREQ_650 */
-	0x5,	/* DDR_FREQ_667 */
-	0x5,	/* DDR_FREQ_800 */
-	0x5,	/* DDR_FREQ_933 */
-	0x5,	/* DDR_FREQ_1066 */
-	0x5,	/* DDR_FREQ_900 */
-	0x5,	/* DDR_FREQ_1000 */
-	0x5,	/* DDR_FREQ_1050 */
-	0x5,	/* DDR_FREQ_1200 */
+static u8 bw_per_freq[MV_DDR_FREQ_LAST] = {
+	0x3,	/* MV_DDR_FREQ_100 */
+	0x5,	/* MV_DDR_FREQ_650 */
+	0x5,	/* MV_DDR_FREQ_667 */
+	0x5,	/* MV_DDR_FREQ_800 */
+	0x5,	/* MV_DDR_FREQ_933 */
+	0x5,	/* MV_DDR_FREQ_1066 */
+	0x5,	/* MV_DDR_FREQ_900 */
+	0x5,	/* MV_DDR_FREQ_1000 */
+	0x5,	/* MV_DDR_FREQ_1050 */
+	0x5,	/* MV_DDR_FREQ_1200 */
 };
 
-static u8 rate_per_freq[DDR_FREQ_LAST] = {
-	0x1,	/* DDR_FREQ_100 */
-	0x2,	/* DDR_FREQ_650 */
-	0x2,	/* DDR_FREQ_667 */
-	0x2,	/* DDR_FREQ_800 */
-	0x3,	/* DDR_FREQ_933 */
-	0x3,	/* DDR_FREQ_1066 */
-	0x3,	/* DDR_FREQ_900 */
-	0x3,	/* DDR_FREQ_1000 */
-	0x3,	/* DDR_FREQ_1050 */
-	0x3,	/* DDR_FREQ_1200 */
+static u8 rate_per_freq[MV_DDR_FREQ_LAST] = {
+	0x1,	/* MV_DDR_FREQ_100 */
+	0x2,	/* MV_DDR_FREQ_650 */
+	0x2,	/* MV_DDR_FREQ_667 */
+	0x2,	/* MV_DDR_FREQ_800 */
+	0x3,	/* MV_DDR_FREQ_933 */
+	0x3,	/* MV_DDR_FREQ_1066 */
+	0x3,	/* MV_DDR_FREQ_900 */
+	0x3,	/* MV_DDR_FREQ_1000 */
+	0x3,	/* MV_DDR_FREQ_1050 */
+	0x3,	/* MV_DDR_FREQ_1200 */
 };
 
 /*
@@ -345,7 +345,7 @@ void mv_ddr_mem_scrubbing(void)
 
 static u8 mv_ddr_tip_clk_ratio_get(u32 freq)
 {
-	if ((freq == DDR_FREQ_LOW_FREQ) || (freq_val[freq] <= 400))
+	if ((freq == MV_DDR_FREQ_LOW_FREQ) || (freq_val[freq] <= 400))
 		return 1;
 
 	return 2;
@@ -359,7 +359,7 @@ static u8 mv_ddr_tip_clk_ratio_get(u32 freq)
  * Notes:
  * Returns:	MV_OK if success, other error code if fail
  */
-static int mv_ddr_tip_freq_config_get(u8 dev_num, enum hws_ddr_freq freq,
+static int mv_ddr_tip_freq_config_get(u8 dev_num, enum mv_ddr_freq freq,
 				      struct hws_tip_freq_config_info
 					*freq_config_info)
 {
@@ -487,7 +487,7 @@ u32 mv_ddr_dm_pad_get()
 #define CPU_600_DDR_800_RCLK_800	0x1b
 #define CPU_800_DDR_800_RCLK_800	0x1c
 #define CPU_1000_DDR_800_RCLK_800	0x1d
-static int mv_ddr_sar_freq_get(int dev_num, enum hws_ddr_freq *freq)
+static int mv_ddr_sar_freq_get(int dev_num, enum mv_ddr_freq *freq)
 {
 	u32 ddr_clk_config;
 
@@ -498,46 +498,46 @@ static int mv_ddr_sar_freq_get(int dev_num, enum hws_ddr_freq *freq)
 
 	switch (ddr_clk_config) {
 	case CPU_2000_DDR_1200_RCLK_1200:
-		*freq = DDR_FREQ_1200;
+		*freq = MV_DDR_FREQ_1200;
 		break;
 	case CPU_2000_DDR_1050_RCLK_1050:
-		*freq = DDR_FREQ_1050;
+		*freq = MV_DDR_FREQ_1050;
 		break;
 	case CPU_1600_DDR_800_RCLK_800:
-		*freq = DDR_FREQ_800;
+		*freq = MV_DDR_FREQ_800;
 		break;
 	case CPU_1800_DDR_1200_RCLK_1200:
-		*freq = DDR_FREQ_1200;
+		*freq = MV_DDR_FREQ_1200;
 		break;
 	case CPU_1800_DDR_1050_RCLK_1050:
-		*freq = DDR_FREQ_1050;
+		*freq = MV_DDR_FREQ_1050;
 		break;
 	case CPU_1600_DDR_1050_RCLK_1050:
-		*freq = DDR_FREQ_1050;
+		*freq = MV_DDR_FREQ_1050;
 		break;
 	case CPU_1000_DDR_650_RCLK_650:
-		*freq = DDR_FREQ_650;
+		*freq = MV_DDR_FREQ_650;
 		break;
 	case CPU_1300_DDR_800_RCLK_800:
-		*freq = DDR_FREQ_800;
+		*freq = MV_DDR_FREQ_800;
 		break;
 	case CPU_1300_DDR_650_RCLK_650:
-		*freq = DDR_FREQ_650;
+		*freq = MV_DDR_FREQ_650;
 		break;
 	case CPU_1200_DDR_800_RCLK_800:
-		*freq = DDR_FREQ_800;
+		*freq = MV_DDR_FREQ_800;
 		break;
 	case CPU_1400_DDR_800_RCLK_800:
-		*freq = DDR_FREQ_800;
+		*freq = MV_DDR_FREQ_800;
 		break;
 	case CPU_600_DDR_800_RCLK_800:
-		*freq = DDR_FREQ_800;
+		*freq = MV_DDR_FREQ_800;
 		break;
 	case CPU_800_DDR_800_RCLK_800:
-		*freq = DDR_FREQ_800;
+		*freq = MV_DDR_FREQ_800;
 		break;
 	case CPU_1000_DDR_800_RCLK_800:
-		*freq = DDR_FREQ_800;
+		*freq = MV_DDR_FREQ_800;
 		break;
 	default:
 		*freq = 0;
@@ -582,7 +582,7 @@ static u32 mv_ddr_target_div_calc(u32 curr_div, u32 curr_freq, u32 target_freq)
  * Notes:
  * Returns:	status MV_OK or fail
  */
-static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum hws_ddr_freq target_ddr_freq)
+static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum mv_ddr_freq target_ddr_freq)
 {
 	static u32 ddr_div = 0xffffffff;
 	u32 mc_target_div, ddr_target_div;
@@ -590,7 +590,7 @@ static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum hws_ddr_freq targ
 	u32 target_ddr_freq_val;
 	static int mv_ddr_first_time_setting = 1;
 	u32 reg;
-	enum hws_ddr_freq init_ddr_freq;
+	enum mv_ddr_freq init_ddr_freq;
 
 	if (if_id != 0) {
 		DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
@@ -873,7 +873,7 @@ static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 {
 	struct hws_tip_config_func_db config_func;
 #if !defined(CONFIG_DDR4)
-	enum hws_ddr_freq ddr_freq = DDR_FREQ_LOW_FREQ;
+	enum mv_ddr_freq ddr_freq = MV_DDR_FREQ_LOW_FREQ;
 #endif
 
 	/* new read leveling version */
@@ -932,7 +932,7 @@ static int mv_ddr_training_mask_set(void)
 	rl_mid_freq_wa = 0;
 #else /* CONFIG_DDR4 */
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	enum hws_ddr_freq ddr_freq = tm->interface_params[0].memory_freq;
+	enum mv_ddr_freq ddr_freq = tm->interface_params[0].memory_freq;
 
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
 			  LOAD_PATTERN_MASK_BIT |
@@ -949,7 +949,7 @@ static int mv_ddr_training_mask_set(void)
 			  CENTRALIZATION_TX_MASK_BIT);
 	rl_mid_freq_wa = 1;
 
-	if ((ddr_freq == DDR_FREQ_333) || (ddr_freq == DDR_FREQ_400)) {
+	if ((ddr_freq == MV_DDR_FREQ_333) || (ddr_freq == MV_DDR_FREQ_400)) {
 		mask_tune_func = (WRITE_LEVELING_MASK_BIT |
 				  LOAD_PATTERN_2_MASK_BIT |
 				  WRITE_LEVELING_SUPP_MASK_BIT |
@@ -1157,7 +1157,7 @@ int mv_ddr_post_training_soc_config(const char *ddr_type)
 
 u32 mv_ddr_init_freq_get(void)
 {
-	enum hws_ddr_freq freq;
+	enum mv_ddr_freq freq;
 
 	mv_ddr_sar_freq_get(DEV_NUM_0, &freq);
 

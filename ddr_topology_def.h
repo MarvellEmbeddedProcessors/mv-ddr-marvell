@@ -144,7 +144,7 @@ struct if_params {
 	enum mv_ddr_die_capacity memory_size;
 
 	/* The DDR frequency for each interfaces */
-	enum hws_ddr_freq memory_freq;
+	enum mv_ddr_freq memory_freq;
 
 	/*
 	 * delay CAS Write Latency

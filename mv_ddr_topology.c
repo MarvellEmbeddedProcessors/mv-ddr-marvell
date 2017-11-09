@@ -154,12 +154,12 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	unsigned int octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 	enum hws_speed_bin speed_bin_index;
-	enum hws_ddr_freq freq = DDR_FREQ_LAST;
+	enum mv_ddr_freq freq = MV_DDR_FREQ_LAST;
 	unsigned int tclk;
 	unsigned char val = 0;
 	int i;
 
-	if (tm->interface_params[0].memory_freq == DDR_FREQ_SAR)
+	if (tm->interface_params[0].memory_freq == MV_DDR_FREQ_SAR)
 		tm->interface_params[0].memory_freq = mv_ddr_init_freq_get();
 
 	if (tm->cfg_src == MV_DDR_CFG_SPD) {

@@ -64,7 +64,7 @@ Porting procedure
 				/* total sdram capacity per die, megabits */
 				enum mv_ddr_die_capacity memory_size;
 
-				enum hws_ddr_freq memory_freq; /* ddr interface frequency */
+				enum mv_ddr_freq memory_freq; /* ddr interface frequency */
 
 				u8 cas_wl; /* delay cas write latency */
 
@@ -198,7 +198,7 @@ Porting procedure
 			   SPEED_BIN_DDR_2400S,		/* speed_bin */
 			   MV_DDR_DEV_WIDTH_8BIT,	/* sdram device width */
 			   MV_DDR_DIE_CAP_8GBIT,	/* die capacity */
-			   DDR_FREQ_800,		/* frequency */
+			   MV_DDR_FREQ_800,		/* frequency */
 			   0, 0,			/* cas_l, cas_wl */
 			   MV_DDR_TEMP_LOW} },		/* temperature */
 			MV_DDR_64BIT_ECC_PUP8_BUS_MASK, /* active busses */

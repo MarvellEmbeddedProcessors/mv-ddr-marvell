@@ -204,24 +204,24 @@ static inline u32 pattern_table_get_killer_word_4(u8 dqs, u8 index)
 	return byte | (byte << 8) | (byte << 16) | (byte << 24);
 }
 #else /* !CONFIG_DDR4 */
-/* List of allowed frequency listed in order of enum hws_ddr_freq */
-u32 freq_val[DDR_FREQ_LAST] = {
-	0,			/*DDR_FREQ_LOW_FREQ */
-	400,			/*DDR_FREQ_400, */
-	533,			/*DDR_FREQ_533, */
-	666,			/*DDR_FREQ_667, */
-	800,			/*DDR_FREQ_800, */
-	933,			/*DDR_FREQ_933, */
-	1066,			/*DDR_FREQ_1066, */
-	311,			/*DDR_FREQ_311, */
-	333,			/*DDR_FREQ_333, */
-	467,			/*DDR_FREQ_467, */
-	850,			/*DDR_FREQ_850, */
-	600,			/*DDR_FREQ_600 */
-	300,			/*DDR_FREQ_300 */
-	900,			/*DDR_FREQ_900 */
-	360,			/*DDR_FREQ_360 */
-	1000			/*DDR_FREQ_1000 */
+/* List of allowed frequency listed in order of enum mv_ddr_freq */
+u32 freq_val[MV_DDR_FREQ_LAST] = {
+	0,			/*MV_DDR_FREQ_LOW_FREQ */
+	400,			/*MV_DDR_FREQ_400, */
+	533,			/*MV_DDR_FREQ_533, */
+	666,			/*MV_DDR_FREQ_667, */
+	800,			/*MV_DDR_FREQ_800, */
+	933,			/*MV_DDR_FREQ_933, */
+	1066,			/*MV_DDR_FREQ_1066, */
+	311,			/*MV_DDR_FREQ_311, */
+	333,			/*MV_DDR_FREQ_333, */
+	467,			/*MV_DDR_FREQ_467, */
+	850,			/*MV_DDR_FREQ_850, */
+	600,			/*MV_DDR_FREQ_600 */
+	300,			/*MV_DDR_FREQ_300 */
+	900,			/*MV_DDR_FREQ_900 */
+	360,			/*MV_DDR_FREQ_360 */
+	1000			/*MV_DDR_FREQ_1000 */
 };
 
 /* Table for CL values per frequency for each speed bin index */

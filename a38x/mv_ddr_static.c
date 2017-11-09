@@ -1227,10 +1227,10 @@ struct dram_modes {
 static struct dram_modes ddr_modes[] = {
 	/* Conf name, DDR Frequency, MC regs, PHY cntrl, PHY data */
 #if !defined(CONFIG_DDR4)
-	{"a38x_600", DDR_FREQ_600, a38x_mc_600, a38x_ctrl_phy_600, a38x_data_phy_600},
+	{"a38x_600", MV_DDR_FREQ_600, a38x_mc_600, a38x_ctrl_phy_600, a38x_data_phy_600},
 #endif
-	{"a38x_800", DDR_FREQ_800, a38x_mc_800, a38x_ctrl_phy_800, a38x_data_phy_800},
-	{"", DDR_FREQ_LAST, NULL, NULL, NULL}
+	{"a38x_800", MV_DDR_FREQ_800, a38x_mc_800, a38x_ctrl_phy_800, a38x_data_phy_800},
+	{"", MV_DDR_FREQ_LAST, NULL, NULL, NULL}
 };
 
 /*

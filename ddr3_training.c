@@ -106,8 +106,8 @@ u32 phy_reg0_val = 0;
 u32 phy_reg1_val = 8;
 u32 phy_reg2_val = 0;
 u32 phy_reg3_val = PARAM_UNDEFINED;
-enum hws_ddr_freq low_freq = DDR_FREQ_LOW_FREQ;
-enum hws_ddr_freq medium_freq;
+enum mv_ddr_freq low_freq = MV_DDR_FREQ_LOW_FREQ;
+enum mv_ddr_freq medium_freq;
 u32 debug_dunit = 0;
 u32 odt_additional = 1;
 u32 *dq_map_table = NULL;
@@ -197,12 +197,12 @@ static int odt_test(u32 dev_num, enum hws_algo_type algo_type);
 #endif
 
 int adll_calibration(u32 dev_num, enum hws_access_type access_type,
-		     u32 if_id, enum hws_ddr_freq frequency);
+		     u32 if_id, enum mv_ddr_freq frequency);
 static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
-			       u32 if_id, enum hws_ddr_freq frequency);
+			       u32 if_id, enum mv_ddr_freq frequency);
 #if defined(CONFIG_DDR4)
 static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
-			       u32 if_id, enum hws_ddr_freq frequency);
+			       u32 if_id, enum mv_ddr_freq frequency);
 #endif /* CONFIG_DDR4 */
 
 static struct page_element page_tbl[] = {
@@ -552,7 +552,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 	u32 data_read[MAX_INTERFACE_NUM];
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	enum hws_ddr_freq freq = tm->interface_params[0].memory_freq;
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
 
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE,
 			  ("Init_controller, do_mrs_phy=%d, is_ctrl64_bit=%d\n",
@@ -1327,7 +1327,7 @@ int ddr3_tip_bus_read_modify_write(u32 dev_num, enum hws_access_type access_type
  * ADLL Calibration
  */
 int adll_calibration(u32 dev_num, enum hws_access_type access_type,
-		     u32 if_id, enum hws_ddr_freq frequency)
+		     u32 if_id, enum mv_ddr_freq frequency)
 {
 	struct hws_tip_freq_config_info freq_config_info;
 	u32 bus_cnt = 0;
@@ -1374,7 +1374,7 @@ int adll_calibration(u32 dev_num, enum hws_access_type access_type,
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, access_type, if_id, DRAM_PHY_CFG_REG,
 		      0, (0x80000000 | 0x40000000)));
-	mdelay(100 / (freq_val[frequency] / freq_val[DDR_FREQ_LOW_FREQ]));
+	mdelay(100 / (freq_val[frequency] / freq_val[MV_DDR_FREQ_LOW_FREQ]));
 	CHECK_STATUS(ddr3_tip_if_write
 		     (dev_num, access_type, if_id, DRAM_PHY_CFG_REG,
 		      (0x80000000 | 0x40000000), (0x80000000 | 0x40000000)));
@@ -1400,7 +1400,7 @@ int adll_calibration(u32 dev_num, enum hws_access_type access_type,
 }
 
 int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
-		      u32 if_id, enum hws_ddr_freq frequency)
+		      u32 if_id, enum mv_ddr_freq frequency)
 {
 	u32 cl_value = 0, cwl_value = 0, mem_mask = 0, val = 0,
 		bus_cnt = 0, t_wr = 0, t_ckclk = 0,
@@ -1423,7 +1423,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 			  ("dev %d access %d IF %d freq %d\n", dev_num,
 			   access_type, if_id, frequency));
 
-	if (frequency == DDR_FREQ_LOW_FREQ)
+	if (frequency == MV_DDR_FREQ_LOW_FREQ)
 		is_dll_off = 1;
 	if (access_type == ACCESS_TYPE_MULTICAST) {
 		start_if = 0;
@@ -1486,7 +1486,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 				   dev_num, access_type, if_id,
 				   frequency, speed_bin_index));
 
-		for (cnt_id = 0; cnt_id < DDR_FREQ_LAST; cnt_id++) {
+		for (cnt_id = 0; cnt_id < MV_DDR_FREQ_LAST; cnt_id++) {
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE,
 					  ("%d ",
 					   cas_latency_table[speed_bin_index].
@@ -1685,7 +1685,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 			     (dev_num, access_type, if_id,
 			      DRAM_PHY_CFG_REG, 0,
 			      (0x80000000 | 0x40000000)));
-		mdelay(100 / (freq_val[frequency] / freq_val[DDR_FREQ_LOW_FREQ]));
+		mdelay(100 / (freq_val[frequency] / freq_val[MV_DDR_FREQ_LOW_FREQ]));
 		CHECK_STATUS(ddr3_tip_if_write
 			     (dev_num, access_type, if_id,
 			      DRAM_PHY_CFG_REG, (0x80000000 | 0x40000000),
@@ -1850,7 +1850,7 @@ static int ddr3_tip_write_odt(u32 dev_num, enum hws_access_type access_type,
  * Set Timing values for training
  */
 static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
-			       u32 if_id, enum hws_ddr_freq frequency)
+			       u32 if_id, enum mv_ddr_freq frequency)
 {
 	u32 t_ckclk = 0, t_ras = 0;
 	u32 t_rcd = 0, t_rp = 0, t_wr = 0, t_wtr = 0, t_rrd = 0, t_rtp = 0,
@@ -2003,7 +2003,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 
 #if defined(CONFIG_DDR4)
 static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
-			       u32 if_id, enum hws_ddr_freq frequency)
+			       u32 if_id, enum mv_ddr_freq frequency)
 {
 	u32 t_rrd_l = 0, t_wtr_l = 0, t_ckclk = 0, t_mod = 0, t_ccd = 0;
 	u32 page_size = 0, val = 0, mask = 0;
@@ -2375,7 +2375,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	u32 if_id;
 	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	enum hws_ddr_freq freq = tm->interface_params[0].memory_freq;
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
 
 #ifdef DDR_VIEWER_TOOL
 	if (debug_training == DEBUG_LEVEL_TRACE) {
@@ -2391,7 +2391,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	/* Set to 0 after each loop to avoid illegal value may be used */
 	effective_cs = 0;
 
-	freq_val[DDR_FREQ_LOW_FREQ] = dfs_low_freq;
+	freq_val[MV_DDR_FREQ_LOW_FREQ] = dfs_low_freq;
 
 	if (is_pll_before_init != 0) {
 		for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {

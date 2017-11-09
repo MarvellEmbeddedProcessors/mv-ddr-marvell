@@ -157,8 +157,8 @@ extern u8 debug_training, debug_calibration, debug_ddr4_centralization,
 	debug_tap_tuning, debug_dm_tuning;
 extern u8 is_reg_dump;
 extern u8 generic_init_controller;
-/* list of allowed frequency listed in order of enum hws_ddr_freq */
-extern u32 freq_val[DDR_FREQ_LAST];
+/* list of allowed frequency listed in order of enum mv_ddr_freq */
+extern u32 freq_val[MV_DDR_FREQ_LAST];
 extern u32 is_pll_old;
 extern struct cl_val_per_freq cas_latency_table[];
 extern struct pattern_info pattern_table[];
@@ -195,10 +195,10 @@ extern u32 mask_tune_func;
 extern u32 rl_version;
 extern int rl_mid_freq_wa;
 extern u8 calibration_update_control; /* 2 external only, 1 is internal only */
-extern enum hws_ddr_freq medium_freq;
+extern enum mv_ddr_freq medium_freq;
 
 extern enum hws_result training_result[MAX_STAGE_LIMIT][MAX_INTERFACE_NUM];
-extern enum hws_ddr_freq low_freq;
+extern enum mv_ddr_freq low_freq;
 extern enum auto_tune_stage training_stage;
 extern u32 is_pll_before_init;
 extern u32 is_adll_calib_before_init;
@@ -225,7 +225,7 @@ extern u32 odt_additional;
 extern u32 debug_mode;
 extern u32 debug_dunit;
 extern u32 clamp_tbl[];
-extern u32 freq_mask[MAX_DEVICE_NUM][DDR_FREQ_LAST];
+extern u32 freq_mask[MAX_DEVICE_NUM][MV_DDR_FREQ_LAST];
 
 extern u32 maxt_poll_tries;
 extern u32 is_bist_reset_bit;

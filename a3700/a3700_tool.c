@@ -332,7 +332,7 @@ static int ddr_cfg_parse(struct config_item *clist, struct ddr_porting_cfg *cfg)
 	cfg->map.interface_params[0].speed_bin_index = strtol(clist[DDR_SPEEDBIN_INDEX].value, (char **)NULL, 0);
 	cfg->map.interface_params[0].bus_width = strtol(clist[DDR_BUS_WIDTH_INDEX].value, (char **)NULL, 0);
 	cfg->map.interface_params[0].memory_size = strtol(clist[DDR_MEM_SIZE_INDEX].value, (char **)NULL, 0);
-	cfg->map.interface_params[0].memory_freq = DDR_FREQ_800;
+	cfg->map.interface_params[0].memory_freq = MV_DDR_FREQ_800;
 
 	cfg->map.bus_act_mask = BUS_MASK_16BIT;
 

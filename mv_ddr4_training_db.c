@@ -101,18 +101,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 
-/* list of allowed frequencies listed in order of enum hws_ddr_freq */
-u32 freq_val[DDR_FREQ_LAST] = {
-	130,	/* DDR_FREQ_LOW_FREQ */
-	650,	/* DDR_FREQ_650 */
-	666,	/* DDR_FREQ_667 */
-	800,	/* DDR_FREQ_800 */
-	933,	/* DDR_FREQ_933 */
-	1066,	/* DDR_FREQ_1066 */
-	900,	/* DDR_FREQ_900 */
-	1000,	/* DDR_FREQ_1000 */
-	1050,	/* DDR_FREQ_1050 */
-	1200	/* DDR_FREQ_1200 */
+/* list of allowed frequencies listed in order of enum mv_ddr_freq */
+u32 freq_val[MV_DDR_FREQ_LAST] = {
+	130,	/* MV_DDR_FREQ_LOW_FREQ */
+	650,	/* MV_DDR_FREQ_650 */
+	666,	/* MV_DDR_FREQ_667 */
+	800,	/* MV_DDR_FREQ_800 */
+	933,	/* MV_DDR_FREQ_933 */
+	1066,	/* MV_DDR_FREQ_1066 */
+	900,	/* MV_DDR_FREQ_900 */
+	1000,	/* MV_DDR_FREQ_1000 */
+	1050,	/* MV_DDR_FREQ_1050 */
+	1200	/* MV_DDR_FREQ_1200 */
 };
 
 /* non-dbi mode - table for cl values per frequency for each speed bin index */

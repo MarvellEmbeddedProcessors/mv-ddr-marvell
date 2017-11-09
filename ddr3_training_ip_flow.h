@@ -221,10 +221,10 @@ struct page_element {
 };
 
 int ddr3_tip_write_leveling_static_config(u32 dev_num, u32 if_id,
-					  enum hws_ddr_freq frequency,
+					  enum mv_ddr_freq frequency,
 					  u32 *round_trip_delay_arr);
 int ddr3_tip_read_leveling_static_config(u32 dev_num, u32 if_id,
-					 enum hws_ddr_freq frequency,
+					 enum mv_ddr_freq frequency,
 					 u32 *total_round_trip_delay_arr);
 int ddr3_tip_if_write(u32 dev_num, enum hws_access_type interface_access,
 		      u32 if_id, u32 reg_addr, u32 data_value, u32 mask);
@@ -246,7 +246,7 @@ int ddr3_tip_bus_write(u32 dev_num, enum hws_access_type e_interface_access,
 		       enum hws_ddr_phy e_phy_type, u32 reg_addr,
 		       u32 data_value);
 int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type e_access, u32 if_id,
-		      enum hws_ddr_freq memory_freq);
+		      enum mv_ddr_freq memory_freq);
 int ddr3_tip_adjust_dqs(u32 dev_num);
 int ddr3_tip_init_controller(u32 dev_num);
 int ddr3_tip_ext_read(u32 dev_num, u32 if_id, u32 reg_addr,
