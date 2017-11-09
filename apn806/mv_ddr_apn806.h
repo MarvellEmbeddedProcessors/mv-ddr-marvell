@@ -178,22 +178,6 @@ enum{
 #define BLOCK_PHI_RST_VAL			0
 #define RING_CLK_VAL				0
 
-/* FIXME: locate the definition in mc6 driver file when generated */
-#define CPU_2000_DDR_1200_RCLK_1200	0x0
-#define CPU_2000_DDR_1050_RCLK_1050	0x1
-#define CPU_1600_DDR_800_RCLK_800	0x4
-#define CPU_1800_DDR_1200_RCLK_1200	0x6
-#define CPU_1800_DDR_1050_RCLK_1050	0x7
-#define CPU_1600_DDR_1050_RCLK_1050	0x0d
-#define CPU_1000_DDR_650_RCLK_650	0x13
-#define CPU_1300_DDR_800_RCLK_800	0x14
-#define CPU_1300_DDR_650_RCLK_650	0x17
-#define CPU_1200_DDR_800_RCLK_800	0x19
-#define CPU_1400_DDR_800_RCLK_800	0x1a
-#define CPU_600_DDR_800_RCLK_800	0x1b
-#define CPU_800_DDR_800_RCLK_800	0x1c
-#define CPU_1000_DDR_800_RCLK_800	0x1d
-
 #define DFS_LOW_FREQ_VALUE		100
 #define SDRAM_CS_SIZE			0x7fffffffUL	/* FIXME: implement a function for cs size for each platform */
 
