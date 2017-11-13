@@ -99,6 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MV_DDR_AP806_H
 
 #include "../drivers/mv_ddr_mc6.h"
+#include "mv_ddr_static.h"
 
 #define INTER_REGS_BASE	0xf0000000
 
