@@ -125,7 +125,7 @@ u16 odt_intercept[] = {
 	61
 };
 
-/* Map of scratch PHY registers used to store stability value */
+/* scratch phy registers map to store stability value */
 /* FIXME: the following array is a placeholder; fill it with appropriate values */
 u32 dmin_phy_reg_table[MAX_BUS_NUM * MAX_CS_NUM][2] = {
 	/* subphy, addr */
@@ -222,9 +222,7 @@ static u8 rate_per_freq[MV_DDR_FREQ_LAST] = {
 	0x3,	/* MV_DDR_FREQ_1200 */
 };
 
-/*
- * Accessor functions for the registers
- */
+/* accessor functions for the registers */
 void reg_write(u32 addr, u32 val)
 {
 	mmio_write_32(INTER_REGS_BASE + addr, val);
@@ -283,43 +281,44 @@ int mv_ddr_mc_remap(void)
 	u32 val;
 
 	if (remap_source < NON_DRAM_MEM_RGN_START_ADDR)
-		return MV_OK;
+		return 0;
 
-	if ((remap_size == 0) ||		/* can't be zero */
-	    (remap_size >> 32) ||		/* can't be more than 4GB */
-	    (remap_size % (1 << 20))) {		/* must be multiple of 1MB */
+	if ((remap_size == 0) || /* can't be zero */
+	    (remap_size >> 32) || /* can't be more than 4GB */
+	    (remap_size % (1 << 20))) { /* must be multiple of 1MB */
 		printf("%s: incorrect mc remap size found\n", __func__);
-		return MV_FAIL;
+		return -1;
 	}
 
-	if (remap_target % remap_size) {	/* must be multiple of remap size */
+	if (remap_target % remap_size) { /* must be multiple of remap size */
 		printf("%s: incorrect mc remap target base addr found\n", __func__);
-		return MV_FAIL;
+		return -1;
 	}
 
-	if (remap_source % remap_size) {	/* must be multiple of remap size */
+	if (remap_source % remap_size) { /* must be multiple of remap size */
 		printf("%s: incorrect mc remap source base addr found\n", __func__);
-		return MV_FAIL;
+		return -1;
 	}
 
 	/* set mc remap source base to the top of dram */
-	remap_source >>= 20;	/* in MB */
+	remap_source >>= 20; /* in MB */
 	val = (remap_source & SOURCE_BASE_MASK) << SOURCE_BASE_OFFS;
 	reg_write(CCU_MC_RSBR_REG, val);
 
 	/* set mc remap target base to the overlapping dram region */
-	remap_target >>= 20;	/* in MB */
+	remap_target >>= 20; /* in MB */
 	val = (remap_target & TARGET_BASE_MASK) << TARGET_BASE_OFFS;
 	reg_write(CCU_MC_RTBR_REG, val);
 
 	/* set mc remap size to the size of the overlapping dram region */
-	remap_size >>= 20;	/* in MB */
+	remap_size >>= 20; /* in MB */
 	val = ((remap_size - 1) & REMAP_SIZE_MASK) << REMAP_SIZE_OFFS;
+
 	/* enable remapping */
 	val |= (REMAP_EN_ENA << REMAP_EN_OFFS);
 	reg_write(CCU_MC_RCR_REG, val);
 
-	return MV_OK;
+	return 0;
 }
 
 void mv_ddr_mem_scrubbing(void)
@@ -351,26 +350,18 @@ static u8 mv_ddr_tip_clk_ratio_get(u32 freq)
 	return 2;
 }
 
-
-/*
- * Name:	mv_ddr_tip_freq_config_get
- * Desc:
- * Args:
- * Notes:
- * Returns:	MV_OK if success, other error code if fail
- */
 static int mv_ddr_tip_freq_config_get(u8 dev_num, enum mv_ddr_freq freq,
 				      struct hws_tip_freq_config_info
 					*freq_config_info)
 {
 	if (freq_config_info == NULL)
-		return MV_BAD_PARAM;
+		return -1;
 
 	freq_config_info->bw_per_freq = bw_per_freq[freq];
 	freq_config_info->rate_per_freq = rate_per_freq[freq];
 	freq_config_info->is_supported = 1;
 
-	return MV_OK;
+	return 0;
 }
 
 static void dunit_read(u32 addr, u32 mask, u32 *data)
@@ -425,12 +416,12 @@ int mv_ddr_is_odpg_done(u32 count)
 
 	if (i >= count) {
 		printf("%s: timeout\n", __func__);
-		return MV_FAIL;
+		return -1;
 	}
 
 	mv_ddr_odpg_done_clr();
 
-	return MV_OK;
+	return 0;
 }
 
 void mv_ddr_training_enable(void)
@@ -446,7 +437,7 @@ int mv_ddr_is_training_done(u32 count, u32 *result)
 
 	if (result == NULL) {
 		printf("%s: NULL result pointer found\n", __func__);
-		return MV_FAIL;
+		return -1;
 	}
 
 	for (i = 0; i < count; i++) {
@@ -458,16 +449,16 @@ int mv_ddr_is_training_done(u32 count, u32 *result)
 
 	if (i >= count) {
 		printf("%s: timeout\n", __func__);
-		return MV_FAIL;
+		return -1;
 	}
 
 	*result = (data >> TRAINING_RESULT_OFFS) & TRAINING_RESULT_MASK;
 
-	return MV_OK;
+	return 0;
 }
 
 #define DM_PAD	3
-u32 mv_ddr_dm_pad_get()
+u32 mv_ddr_dm_pad_get(void)
 {
 	return DM_PAD;
 }
@@ -491,7 +482,7 @@ static int mv_ddr_sar_freq_get(int dev_num, enum mv_ddr_freq *freq)
 {
 	u32 ddr_clk_config;
 
-	/* Read ddr clk config from sar */
+	/* read ddr clk config from sar */
 	ddr_clk_config = (reg_read(SAR_REG_ADDR) >>
 		RST2_CLOCK_FREQ_MODE_OFFS) &
 		RST2_CLOCK_FREQ_MODE_MASK;
@@ -544,18 +535,14 @@ static int mv_ddr_sar_freq_get(int dev_num, enum mv_ddr_freq *freq)
 		return MV_NOT_SUPPORTED;
 	}
 
-	return MV_OK;
+	return 0;
 }
 
 /*
- * Name:	mv_ddr_target_div_calc
- * Desc:	calculates and returns target mc clk divider value
- * Args:
-		curr_div -  current mc clk divider value
-		curr_freq  - current frequency configured to
-		target_freq - target frequency to step to
- * Notes:
- * Returns:	target mc clk divider value
+ * calculate and return target mc clk divider value
+ * curr_div -  current mc clk divider value
+ * curr_freq  - current frequency configured to
+ * target_freq - target frequency to step to
  */
 static u32 mv_ddr_target_div_calc(u32 curr_div, u32 curr_freq, u32 target_freq)
 {
@@ -567,20 +554,13 @@ static u32 mv_ddr_target_div_calc(u32 curr_div, u32 curr_freq, u32 target_freq)
 }
 
 /*
- * Name:	mv_ddr_clk_dividers_set
- * Desc:	sets target frequency
-		- changes clk dividers for mc6 and dunit
-		  and executes DFS procedure.
-		- dunit and mc6 freqs to be configured;
-		  other freqs (e.g., hclk, fclk) are derivatives.
-		- the DFS flow is as follows:
-		  -> save specific SoC configurations (e.g., ODT),
-		  -> turn DLL off (no need at low freq)
-		  -> put memory in self-refresh mode
- * Args:
-		ddr target frequency
- * Notes:
- * Returns:	status MV_OK or fail
+ * set target frequency
+ * change clk dividers for mc6 and dunit and execute DFS procedure
+ * configure dunit and mc6 frequencies; other freqs (e.g., hclk, fclk) - derivatives
+ * dfs flow:
+ * - save specific soc configuration (e.g., odt),
+ * - turn dll off (no need at low freq)
+ * - put memory in self-refresh mode
  */
 static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum mv_ddr_freq target_ddr_freq)
 {
@@ -594,9 +574,9 @@ static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum mv_ddr_freq targe
 
 	if (if_id != 0) {
 		DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
-			              ("mv_ddr: a70x0: interface 0x%x not supported\n",
+				      ("mv_ddr: a70x0: interface 0x%x not supported\n",
 				       if_id));
-		return MV_BAD_PARAM;
+		return -1;
 	}
 
 	if (mv_ddr_first_time_setting) {
@@ -619,11 +599,13 @@ static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum mv_ddr_freq targe
 	mc_target_div = ddr_target_div * 2;
 
 	reg = reg_read(DEV_GEN_CTRL1_REG_ADDR);
-	reg &= ~(MISC_CLKDIV_RATIO_2_MASK << MISC_CLKDIV_RATIO_2_OFFS | MISC_CLKDIV_RATIO_1_MASK << MISC_CLKDIV_RATIO_1_OFFS);
-	reg |= mc_target_div << MISC_CLKDIV_RATIO_2_OFFS | ddr_target_div << MISC_CLKDIV_RATIO_1_OFFS;
+	reg &= ~(MISC_CLKDIV_RATIO_2_MASK << MISC_CLKDIV_RATIO_2_OFFS |
+		 MISC_CLKDIV_RATIO_1_MASK << MISC_CLKDIV_RATIO_1_OFFS);
+	reg |= mc_target_div << MISC_CLKDIV_RATIO_2_OFFS |
+	       ddr_target_div << MISC_CLKDIV_RATIO_1_OFFS;
 	reg_write(DEV_GEN_CTRL1_REG_ADDR, reg);
 
-	/* Reload force, relax enable, align enable set */
+	/* reload force, relax enable, align enable set */
 	reg = reg_read(DEV_GEN_CTRL3_REG_ADDR);
 	reg &= ~(MISC_CLKDIV_RELOAD_FORCE_MASK << MISC_CLKDIV_RELOAD_FORCE_OFFS |
 		 MISC_CLKDIV_RELAX_EN_MASK << MISC_CLKDIV_RELAX_EN_OFFS |
@@ -633,13 +615,13 @@ static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum mv_ddr_freq targe
 	       ALIGN_EN_VAL << MISC_CLKDIV_ALIGN_EN_OFFS;
 	reg_write(DEV_GEN_CTRL3_REG_ADDR, reg);
 
-	/* Reload smooth */
+	/* reload smooth */
 	reg = reg_read(DEV_GEN_CTRL4_REG_ADDR);
 	reg &= ~(MISC_CLKDIV_RELOAD_SMOOTH_MASK << MISC_CLKDIV_RELOAD_SMOOTH_OFFS);
 	reg |= RELOAD_SMOOTH_VAL << MISC_CLKDIV_RELOAD_SMOOTH_OFFS;
 	reg_write(DEV_GEN_CTRL4_REG_ADDR, reg);
 
-	/* Toggle reload ratio first 0x1 then 0x0*/
+	/* toggle reload ratio first 0x1 then 0x0*/
 	reg = reg_read(DEV_GEN_CTRL4_REG_ADDR);
 	reg &= ~(MISC_CLKDIV_RELOAD_RATIO_MASK << MISC_CLKDIV_RELOAD_RATIO_OFFS);
 	reg |= RELOAD_RATIO_VAL << MISC_CLKDIV_RELOAD_RATIO_OFFS;
@@ -651,7 +633,7 @@ static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum mv_ddr_freq targe
 	reg &= ~(MISC_CLKDIV_RELOAD_RATIO_MASK << MISC_CLKDIV_RELOAD_RATIO_OFFS);
 	reg_write(DEV_GEN_CTRL4_REG_ADDR, reg);
 
-	/* Unblock phase_sync_mc_clk in RFU */
+	/* unblock phase_sync_mc_clk in rfu */
 	reg = reg_read(CLKS_CTRL_REG_ADDR);
 	reg &= ~(BLOCK_PHI_RST_TO_RING_TO_MC_CLK_MASK << BLOCK_PHI_RST_TO_RING_TO_MC_CLK_OFFS);
 	reg_write(CLKS_CTRL_REG_ADDR, reg);
@@ -659,7 +641,7 @@ static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum mv_ddr_freq targe
 	/* delay between toggles */
 	mdelay(10); /* TODO: check the delay value */
 
-	/* Ring-MC clock f2s reset toggle */
+	/* ring-mc clock f2s reset toggle */
 	reg = reg_read(CLKS_CTRL_REG_ADDR);
 	reg &= ~(RING_CLK_TO_ALL_CLK_PHI_RST_MASK << RING_CLK_TO_ALL_CLK_PHI_RST_OFFS);
 	reg_write(CLKS_CTRL_REG_ADDR, reg);
@@ -677,34 +659,23 @@ static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum mv_ddr_freq targe
 	reg |= (BLOCK_PHI_RST_TO_RING_TO_MC_CLK_MASK << BLOCK_PHI_RST_TO_RING_TO_MC_CLK_OFFS);
 	reg_write(CLKS_CTRL_REG_ADDR, reg);
 
-	return MV_OK;
+	return 0;
 }
 
-/*
- * Name:     ddr3_tip_apn806_select_ddr_controller.
- * Desc:     Enable/Disable access to Marvell's server.
- * Args:     dev_num     - device number
- *           enable        - whether to enable or disable the server
- * Notes:
- * Returns:  MV_OK if success, other error code if fail.
- */
+/* enable or disable access to the server */
 static int ddr3_tip_apn806_select_ddr_controller(u8 dev_num, int enable)
 {
 	u32 reg;
 
 	reg = reg_read(DUAL_DUNIT_CFG_REG);
-
 	reg &= ~(TUNING_ACTIVE_SEL_MASK << TUNING_ACTIVE_SEL_OFFS);
 	reg |= (enable << TUNING_ACTIVE_SEL_OFFS);
-
 	reg_write(DUAL_DUNIT_CFG_REG, reg);
 
-	return MV_OK;
+	return 0;
 }
 
-/*
- * external read from memory
- */
+/* external read from memory */
 int ddr3_tip_ext_read(u32 dev_num, u32 if_id, u32 reg_addr,
 		      u32 num_of_bursts, u32 *data)
 {
@@ -713,12 +684,10 @@ int ddr3_tip_ext_read(u32 dev_num, u32 if_id, u32 reg_addr,
 	for (burst_num = 0; burst_num < num_of_bursts * 8; burst_num++)
 		data[burst_num] = readl(reg_addr + 4 * burst_num);
 
-	return MV_OK;
+	return 0;
 }
 
-/*
- * external write to memory
- */
+/* external write to memory */
 int ddr3_tip_ext_write(u32 dev_num, u32 if_id, u32 reg_addr,
 		       u32 num_of_bursts, u32 *data) {
 	u32 burst_num;
@@ -726,7 +695,7 @@ int ddr3_tip_ext_write(u32 dev_num, u32 if_id, u32 reg_addr,
 	for (burst_num = 0; burst_num < num_of_bursts * 8; burst_num++)
 		writel(data[burst_num], reg_addr + 4 * burst_num);
 
-	return MV_OK;
+	return 0;
 }
 
 #ifdef MV_DDR_PRFA
@@ -739,14 +708,14 @@ static int is_prfa_done(void)
 	do {
 		if (iter++ > MAX_POLLING_ITERATIONS) {
 			printf("error: %s: polling timeout\n", __func__);
-			return MV_FAIL;
+			return -1;
 		}
 		dunit_read(PHY_REG_FILE_ACCESS_REG, MASK_ALL_BITS, &reg_val);
 		reg_val >>= PRFA_REQ_OFFS;
 		reg_val &= PRFA_REQ_MASK;
 	} while (reg_val == PRFA_REQ_ENA); /* request pending */
 
-	return MV_OK;
+	return 0;
 }
 
 /* write to phy register thru indirect access */
@@ -765,11 +734,11 @@ static int prfa_write(enum hws_access_type phy_access, u32 phy,
 	reg_val |= (PRFA_REQ_ENA << PRFA_REQ_OFFS);
 	dunit_write(PHY_REG_FILE_ACCESS_REG, MASK_ALL_BITS, reg_val);
 
-	/* polling for prfa request completion */
-	if (is_prfa_done() != MV_OK)
-		return MV_FAIL;
+	/* poll for prfa request completion */
+	if (is_prfa_done() != 0)
+		return -1;
 
-	return MV_OK;
+	return 0;
 }
 
 /* read from phy register thru indirect access */
@@ -783,19 +752,19 @@ static int prfa_read(enum hws_access_type phy_access, u32 phy,
 	if (phy_access == ACCESS_TYPE_MULTICAST) {
 		for (i = 0; i < max_phy; i++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, i);
-			if (prfa_write(ACCESS_TYPE_UNICAST, i, phy_type, addr, 0, OPERATION_READ) != MV_OK)
-				return MV_FAIL;
+			if (prfa_write(ACCESS_TYPE_UNICAST, i, phy_type, addr, 0, OPERATION_READ) != 0)
+				return -1;
 			dunit_read(PHY_REG_FILE_ACCESS_REG, MASK_ALL_BITS, &reg_val);
 			data[i] = (reg_val >> PRFA_DATA_OFFS) & PRFA_DATA_MASK;
 		}
 	} else {
-		if (prfa_write(phy_access, phy, phy_type, addr, 0, OPERATION_READ) != MV_OK)
-			return MV_FAIL;
+		if (prfa_write(phy_access, phy, phy_type, addr, 0, OPERATION_READ) != 0)
+			return -1;
 		dunit_read(PHY_REG_FILE_ACCESS_REG, MASK_ALL_BITS, &reg_val);
 		*data = (reg_val >> PRFA_DATA_OFFS) & PRFA_DATA_MASK;
 	}
 
-	return MV_OK;
+	return 0;
 }
 #else /* MV_DDR_PRDA */
 #define PRDA_DATA_OFFS			0
@@ -833,7 +802,7 @@ static int prda_write(enum hws_access_type phy_access, u32 phy,
 
 	dunit_write(reg_addr, MASK_ALL_BITS, reg_val);
 
-	return MV_OK;
+	return 0;
 }
 
 /* read from phy register thry direct access */
@@ -865,7 +834,7 @@ static int prda_read(enum hws_access_type phy_access, u32 phy,
 		*data = (reg_val >> PRDA_DATA_OFFS) & PRDA_DATA_MASK;
 	}
 
-	return MV_OK;
+	return 0;
 }
 #endif
 
@@ -902,6 +871,7 @@ static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 #else
 	ddr3_tip_register_dq_table(dev_num, dq_bit_map_2_phy_pin[DDR4_BRD]);
 #endif
+
 	/* set device attributes*/
 	ddr3_tip_dev_attr_init(dev_num);
 	ddr3_tip_dev_attr_set(dev_num, MV_ATTR_TIP_REV, MV_TIP_REV_4);
@@ -914,7 +884,7 @@ static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 	dfs_low_freq = DFS_LOW_FREQ_VALUE;
 	calibration_update_control = 1;
 
-	return MV_OK;
+	return 0;
 }
 
 static int mv_ddr_training_mask_set(void)
@@ -962,7 +932,7 @@ static int mv_ddr_training_mask_set(void)
 		rl_mid_freq_wa = 0; /* WA not needed if 333/400 is TF */
 	}
 
-	/* Supplementary not supported for ECC modes */
+	/* supplementary not supported for ecc modes */
 	if (1 == ddr3_if_ecc_enabled()) {
 		mask_tune_func &= ~WRITE_LEVELING_SUPP_TF_MASK_BIT;
 		mask_tune_func &= ~WRITE_LEVELING_SUPP_MASK_BIT;
@@ -971,19 +941,20 @@ static int mv_ddr_training_mask_set(void)
 	}
 #endif /* CONFIG_DDR4 */
 
-	return MV_OK;
+	return 0;
 }
 
 int mv_ddr_early_init(void)
 {
-	/* in case of calibration adjust
-	 * this flag checks if to run a workaround where v pod and v sstl are wired
+	/*
+	 * in case of calibration adjust this flag checks if
+	 * to run a workaround where v pod and v sstl are wired
 	 */
 	vref_calibration_wa = 0;
 	mode_2t = 1;
 	mv_ddr_sw_db_init(0, 0);
 
-	return MV_OK;
+	return 0;
 }
 
 int mv_ddr_early_init2(void)
@@ -991,10 +962,10 @@ int mv_ddr_early_init2(void)
 	mv_ddr_training_mask_set();
 
 	/* remap overlapping dram region to the top */
-	if (mv_ddr_mc_remap() != MV_OK)
-		return MV_FAIL;
+	if (mv_ddr_mc_remap() != 0)
+		return -1;
 
-	return MV_OK;
+	return 0;
 }
 
 #define AVS_DELTA	5
@@ -1009,10 +980,13 @@ int mv_ddr_pre_training_fixup(void)
 	/* update avs voltage for generic run */
 	reg_write(AVS_DISABLED_CTRL2_REG, 0xfde1ffff);
 	reg_val = nominal_avs;
+
 	/* extract nominal avs value */
 	avs_val = (reg_val >> AVS_LOW_VDD_LMT_OFFS) & AVS_LOW_VDD_LMT_MASK;
+
 	/* reduce nominal avs value */
 	avs_val -= AVS_DELTA;
+
 	/* write reduced avs value */
 	reg_val &= ~(AVS_LOW_VDD_LMT_MASK << AVS_LOW_VDD_LMT_OFFS);
 	reg_val |= ((avs_val & AVS_LOW_VDD_LMT_MASK) << AVS_LOW_VDD_LMT_OFFS);
@@ -1032,19 +1006,13 @@ int mv_ddr_post_training_fixup(void)
 	return 0;
 }
 
-/*
- * Name:     mv_ddr_convert_read_params_from_tip2mc6.
- * Desc:     convert the read ready and the read sample from tip to mc6.
- * Args:
- * Notes:
- * Returns:
- */
+/* convert read ready and read sample from tip to mc6 */
 static void mv_ddr_convert_read_params_from_tip2mc6(void)
 {
 	u32	if_id, cs, cl_val, cwl_val, phy_rl_cycle_dly_mc6, rd_smp_dly_tip, phy_rfifo_rptr_dly_val;
 	u32	mb_read_data_latency;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	u32 max_cs = ddr3_tip_max_cs_get(DEV_NUM_0);
+	u32 max_cs = ddr3_tip_max_cs_get(0);
 
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
@@ -1082,12 +1050,12 @@ static void mv_ddr_convert_read_params_from_tip2mc6(void)
 	}
 
 	/* TODO: change these constant initialization below to functions */
-	phy_rfifo_rptr_dly_val = 9;	/*FIXME: this parameter should be between 6 to 12 */
+	phy_rfifo_rptr_dly_val = 9; /* FIXME: this parameter should be between 6 to 12 */
 	reg_bit_clrset(MC6_CH0_PHY_CTRL1_REG,
 		       phy_rfifo_rptr_dly_val << PHY_RFIFO_RPTR_DLY_VAL_OFFS,
 		       PHY_RFIFO_RPTR_DLY_VAL_MASK << PHY_RFIFO_RPTR_DLY_VAL_OFFS);
 
-	mb_read_data_latency = 8;	/*FIXME: this parameter should be between 4 to 12 */
+	mb_read_data_latency = 8; /* FIXME: this parameter should be between 4 to 12 */
 	reg_bit_clrset(MC6_RD_DPATH_CTRL_REG,
 		       mb_read_data_latency << MB_RD_DATA_LATENCY_CH0_OFFS,
 		       MB_RD_DATA_LATENCY_CH0_MASK << MB_RD_DATA_LATENCY_CH0_OFFS);
@@ -1109,43 +1077,43 @@ static int mv_ddr_dunit_pre_charge(void)
 		    (CMD_PRECHARGE << SDRAM_OP_CMD_OFFS));
 
 	if (ddr3_tip_if_polling(0, ACCESS_TYPE_UNICAST, 0, 0, SDRAM_OP_CMD_MASK,
-				SDRAM_OP_REG, MAX_POLLING_ITERATIONS) != MV_OK) {
+				SDRAM_OP_REG, MAX_POLLING_ITERATIONS) != 0) {
 		printf("error: %s: polling timeout\n", __func__);
-		return MV_FAIL;
+		return -1;
 	}
 
-	return MV_OK;
+	return 0;
 }
 
 int ddr3_post_run_alg(void)
 {
 	mv_ddr_convert_read_params_from_tip2mc6();
-	if (mv_ddr_dunit_pre_charge() != MV_OK)
-		return MV_FAIL;
+	if (mv_ddr_dunit_pre_charge() != 0)
+		return -1;
 
-	return MV_OK;
+	return 0;
 }
 
 int ddr3_silicon_post_init(void)
 {
-	return MV_OK;
+	return 0;
 }
 
 int mv_ddr_pre_training_soc_config(const char *ddr_type)
 {
-	reg_write(0x116D8, 0x3CC);
+	reg_write(0x116d8, 0x3cc);
 #if defined(A80X0)
-	reg_write(0x6F0100, 0x4480006);	/* DSS_CR0_REG_ADDR: define dimm configuration */
+	reg_write(0x6f0100, 0x4480006); /* DSS_CR0_REG_ADDR: define dimm configuration */
 #endif
 #if defined(A70X0)
-	reg_write(0x6F0100, 0x44C0006);	/* DSS_CR0_REG_ADDR: define on-board configuration */
+	reg_write(0x6f0100, 0x44c0006); /* DSS_CR0_REG_ADDR: define on-board configuration */
 #endif
-	reg_write(0x119D4, 0x2);	/* DRAM_PINS_MUX_REG: defines dimm or on-board, need to change in dimm */
-	reg_write(DEV_GENERAL_CTRL38_REG, 0x6c6c0000);	/* vref calibration values */
-	reg_write(0x6F4360, 0xFFFF0044);	/* ref range select */
-	reg_write(0x11524, 0x8800);	/* DDR_IO_REG: data and control CMOS buffer and clk dram phy clk ration */
+	reg_write(0x119d4, 0x2); /* DRAM_PINS_MUX_REG: defines dimm or on-board, need to change in dimm */
+	reg_write(DEV_GENERAL_CTRL38_REG, 0x6c6c0000); /* vref calibration values */
+	reg_write(0x6f4360, 0xffff0044); /* ref range select */
+	reg_write(0x11524, 0x8800); /* DDR_IO_REG: data and control CMOS buffer and clk dram phy clk ration */
 
-	return MV_OK;
+	return 0;
 }
 
 int mv_ddr_post_training_soc_config(const char *ddr_type)
@@ -1153,21 +1121,21 @@ int mv_ddr_post_training_soc_config(const char *ddr_type)
 	/* set mux to MC6 */
 	mmio_write_32(0xf00116d8, 0x38c);
 
-	return MV_OK;
+	return 0;
 }
 
 u32 mv_ddr_init_freq_get(void)
 {
 	enum mv_ddr_freq freq;
 
-	mv_ddr_sar_freq_get(DEV_NUM_0, &freq);
+	mv_ddr_sar_freq_get(0, &freq);
 
 	return freq;
 }
 
 void mv_ddr_mc_config(void)
 {
-	/* Memory controller initializations */
+	/* memory controller initializations */
 	struct init_cntr_param init_param;
 	int status;
 
@@ -1177,15 +1145,15 @@ void mv_ddr_mc_config(void)
 	init_param.msys_init = 1;
 
 	status = hws_ddr3_tip_init_controller(0, &init_param);
-	if (MV_OK != status)
-		printf("mv_ddr %s: failed: err code 0x%x\n", __FUNCTION__, status);
+	if (status != 0)
+		printf("%s: failed: err code 0x%x\n", __func__, status);
 
 	status = mv_ddr_mc6_init_controller();
-	if (MV_OK != status)
-		printf("mv_ddr %s: failed: err code 0x%x\n", __FUNCTION__, status);
+	if (status != 0)
+		printf("%s: failed: err code 0x%x\n", __func__, status);
 }
 
-/* FIXME: this is a place holder for the mc6 generic init currently hard coded */
+/* FIXME: this is a placeholder for mc6 generic init currently hard coded */
 int mv_ddr_mc6_init_controller(void)
 {
 	mv_ddr_mc6_and_dram_timing_set();
@@ -1226,135 +1194,124 @@ int mv_ddr_mc6_init_controller(void)
 	reg_write(0x20054, 0x4c0);	/* MC_pwr_ctl - default */
 	reg_write(0x2030c, 0x90000);	/* DRAM_Config_4: vref training value, odt? - config */
 
-	return MV_OK;
+	return 0;
 }
 
 #if defined(CONFIG_DDR4)
-/* function: ddr4TipCalibrationValidate
- * this function validates the calibration values
- * the function is per soc due to the different processes the calibration values are different
- */
-MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
+/* validate calibration values; per soc due to their process dependency */
+int mv_ddr4_calibration_validate(u32 dev_num)
 {
-	MV_STATUS status = MV_OK;
-	MV_U8 if_id = 0;
-	MV_U32 read_data[MAX_INTERFACE_NUM];
-	MV_U32 cal_n = 0, cal_p = 0;
+	int status = 0;
+	u8 if_id = 0;
+	u32 read_data[MAX_INTERFACE_NUM];
+	u32 cal_n = 0, cal_p = 0;
 
 	/*
-	 * Pad calibration control enable: during training set the calibration to be internal
+	 * pad calibration control enable: during training set the calibration to be internal
 	 * at the end of the training it should be fixed to external to be configured by the mc6
 	 * FIXME: set the calibration to external in the end of the training
 	 */
 
-	/* pad calibration control enable */
-	CHECK_STATUS(ddr3_tip_if_write
-			(DEV_NUM_0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, MAIN_PADS_CAL_MACH_CTRL_REG,
-			DYN_PADS_CAL_ENABLE_ENA << DYN_PADS_CAL_ENABLE_OFFS |
-			CAL_UPDATE_CTRL_INT << CAL_UPDATE_CTRL_OFFS,
-			DYN_PADS_CAL_ENABLE_MASK << DYN_PADS_CAL_ENABLE_OFFS |
-			CAL_UPDATE_CTRL_MASK << CAL_UPDATE_CTRL_OFFS));
+	/* enable pad calibration control */
+	ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST,
+			  PARAM_NOT_CARE, MAIN_PADS_CAL_MACH_CTRL_REG,
+			  DYN_PADS_CAL_ENABLE_ENA << DYN_PADS_CAL_ENABLE_OFFS |
+			  CAL_UPDATE_CTRL_INT << CAL_UPDATE_CTRL_OFFS,
+			  DYN_PADS_CAL_ENABLE_MASK << DYN_PADS_CAL_ENABLE_OFFS |
+			  CAL_UPDATE_CTRL_MASK << CAL_UPDATE_CTRL_OFFS);
 
-	/* Polling initial calibration is done*/
+	/* poll for init calibration completion */
 	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,
 				CAL_MACH_RDY << CAL_MACH_STATUS_OFFS,
 				CAL_MACH_STATUS_MASK << CAL_MACH_STATUS_OFFS,
-				MAIN_PADS_CAL_MACH_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
-		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(0)\n"));
+				MAIN_PADS_CAL_MACH_CTRL_REG, MAX_POLLING_ITERATIONS) != 0)
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("%s: ddr4 cal poll failed(0)\n", __func__));
 
-	/* Polling that calibration propagate to io */
-	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x3FFFFFF, 0x3FFFFFF, PHY_LOCK_STATUS_REG,
-				MAX_POLLING_ITERATIONS) != MV_OK)
-		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(1)\n"));
+	/* poll for calibration propagation to io */
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x3ffffff, 0x3ffffff, PHY_LOCK_STATUS_REG,
+				MAX_POLLING_ITERATIONS) != 0)
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("%s: ddr4 cal poll failed(1)\n", __func__));
 
 	/* TODO - debug why polling not enough*/
 	mdelay(10);
 
-	/* pad calibration control disable */
-	CHECK_STATUS(ddr3_tip_if_write
-			(DEV_NUM_0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, MAIN_PADS_CAL_MACH_CTRL_REG,
-			DYN_PADS_CAL_ENABLE_DIS << DYN_PADS_CAL_ENABLE_OFFS |
-			CAL_UPDATE_CTRL_INT << CAL_UPDATE_CTRL_OFFS,
-			DYN_PADS_CAL_ENABLE_MASK << DYN_PADS_CAL_ENABLE_OFFS |
-			CAL_UPDATE_CTRL_MASK << CAL_UPDATE_CTRL_OFFS));
+	/* disable calibration control */
+	ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST,
+			  PARAM_NOT_CARE, MAIN_PADS_CAL_MACH_CTRL_REG,
+			  DYN_PADS_CAL_ENABLE_DIS << DYN_PADS_CAL_ENABLE_OFFS |
+			  CAL_UPDATE_CTRL_INT << CAL_UPDATE_CTRL_OFFS,
+			  DYN_PADS_CAL_ENABLE_MASK << DYN_PADS_CAL_ENABLE_OFFS |
+			  CAL_UPDATE_CTRL_MASK << CAL_UPDATE_CTRL_OFFS);
 
-	/* Polling initial calibration is done */
+	/* poll for init calibration completion */
 	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,
 				CAL_MACH_RDY << CAL_MACH_STATUS_OFFS,
 				CAL_MACH_STATUS_MASK << CAL_MACH_STATUS_OFFS,
-				MAIN_PADS_CAL_MACH_CTRL_REG, MAX_POLLING_ITERATIONS) != MV_OK)
-		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(0)\n"));
+				MAIN_PADS_CAL_MACH_CTRL_REG, MAX_POLLING_ITERATIONS) != 0)
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("%s: ddr4 cal poll failed(0)\n", __func__));
 
-	/* Polling that calibration propagate to io */
-	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x3FFFFFF, 0x3FFFFFF, PHY_LOCK_STATUS_REG,
-				MAX_POLLING_ITERATIONS) != MV_OK)
-		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("ddr4TipCalibrationAdjust: DDR4 calibration poll failed(1)\n"));
+	/* poll for calibration propagation to io */
+	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x3ffffff, 0x3ffffff, PHY_LOCK_STATUS_REG,
+				MAX_POLLING_ITERATIONS) != 0)
+		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("%s: ddr4 cal poll failed(1)\n", __func__));
 
 	/* TODO - debug why polling not enough */
 	mdelay(10);
 
-	/* Read Cal value and set to manual val */
-	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1DC8, read_data, MASK_ALL_BITS));
-	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
-	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
+	/* read cal value and set to manual one */
+	ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1dc8, read_data, MASK_ALL_BITS);
+	cal_n = (read_data[if_id] & ((0x3f) << 10)) >> 10;
+	cal_p = (read_data[if_id] & ((0x3f) << 4)) >> 4;
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
-			  ("ddr4TipCalibrationValidate::DDR4 SSTL calib val - Pcal = 0x%x , Ncal = 0x%x\n",
-			   cal_p, cal_n));
+			  ("%s: ddr4 sstl cal val: p-cal = 0x%x, n-cal = 0x%x\n", __func__, cal_p, cal_n));
 	if ((cal_n >= 19) || (cal_n <= 2) || (cal_p >= 25) || (cal_p <= 4)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr: manual calibration\n"));
-				/* ("ddr4TipCalibrationValidate: DDR4 SSTL calib val - Pcal = 0x%x , Ncal = 0x%x \
-				   are out of range\n", cal_p, cal_n)); */
-		status = MV_FAIL;
+		/* ("%s: ddr4 sstl cal val: p-cal = 0x%x, n-cal = 0x%x out of range\n", __func__, cal_p, cal_n)); */
+		status = -1;
 	}
 
-	/* 14C8 - Horizontal TODO: check if this is horizontal, in 380 it is vertical */
-	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x14C8, read_data, MASK_ALL_BITS));
-	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
-	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
-	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO, ("ddr4TipCalibrationValidate::DDR4 SSTL-H calib val - Pcal = 0x%x, \
-					     Ncal = 0x%x \n", cal_p, cal_n));
+	/* 14c8 - horizontal; TODO: check if horizontal, in a38x it is vertical */
+	ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x14c8, read_data, MASK_ALL_BITS);
+	cal_n = (read_data[if_id] & ((0x3f) << 10)) >> 10;
+	cal_p = (read_data[if_id] & ((0x3f) << 4)) >> 4;
+	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
+			  ("%s: ddr4 sstl-h cal val: p-cal = 0x%x, n-cal = 0x%x\n", __func__, cal_p, cal_n));
 	if ((cal_n >= 19) || (cal_n <= 2) || (cal_p >= 25) || (cal_p <= 4)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr: manual calibration\n"));
-				/* ("ddr4TipCalibrationValidate: DDR4 SSTL-H calib val - Pcal = 0x%x, \
-				   Ncal = 0x%x are out of range\n", cal_p, cal_n)); */
-		status = MV_FAIL;
+		/* ("%s: ddr4 sstl-h cal val: p-cal = 0x%x, n-cal = 0x%x out of range\n", __func__, cal_p, cal_n)); */
+		status = -1;
 	}
 
-	/* 17C8 - Horizontal */
-	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x17C8, read_data, MASK_ALL_BITS));
-	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
-	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
+	/* 17c8 - horizontal */
+	ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x17c8, read_data, MASK_ALL_BITS);
+	cal_n = (read_data[if_id] & ((0x3f) << 10)) >> 10;
+	cal_p = (read_data[if_id] & ((0x3f) << 4)) >> 4;
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
-			  ("ddr4TipCalibrationValidate::DDR4 POD-H calib val - Pcal = 0x%x , Ncal = 0x%x\n",
-			   cal_p, cal_n));
+			  ("%s: ddr4 pod-h cal val: p-cal = 0x%x, n-cal = 0x%x\n", __func__, cal_p, cal_n));
 	if ((cal_n >= 32) || (cal_n <= 4) || (cal_p >= 17) || (cal_p <= 3)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr: manual calibration\n"));
-				/* ("ddr4TipCalibrationValidate: DDR4 POD-H calib val - Pcal = 0x%x , \
-				   Ncal = 0x%x are out of range\n", cal_p, cal_n)); */
-		status = MV_FAIL;
+		/* ("%s: ddr4 pod-h cal val: p-cal = 0x%x, n-cal = 0x%x out of range\n", __func__, cal_p, cal_n)); */
+		status = -1;
 	}
 
-	/* 1EC8 - Vertical */
-	CHECK_STATUS(ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1EC8, read_data, MASK_ALL_BITS));
-	cal_n = (read_data[if_id] & ((0x3F) << 10)) >> 10;
-	cal_p = (read_data[if_id] & ((0x3F) << 4)) >> 4;
+	/* 1ec8 - vertical */
+	ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, 0x1ec8, read_data, MASK_ALL_BITS);
+	cal_n = (read_data[if_id] & ((0x3f) << 10)) >> 10;
+	cal_p = (read_data[if_id] & ((0x3f) << 4)) >> 4;
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
-			  ("ddr4TipCalibrationValidate::DDR4 POD-V calib val - Pcal = 0x%x , Ncal = 0x%x\n",
-			   cal_p, cal_n));
+			  ("%s: ddr4 pod-v cal val: p-cal = 0x%x, n-cal = 0x%x\n", __func__, cal_p, cal_n));
 	if ((cal_n >= 32) || (cal_n <= 4) || (cal_p >= 17) || (cal_p <= 3)) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr: manual calibration\n"));
-				/* ("ddr4TipCalibrationValidate: DDR4 POD-V calib val - Pcal = 0x%x , \
-				   Ncal = 0x%x are out of range\n", cal_p, cal_n)); */
-		status = MV_FAIL;
+		/* ("%s: ddr4 pod-v cal val: p-cal = 0x%x, n-cal = 0x%x out of range\n", __func__, cal_p, cal_n)); */
+		status = -1;
 	}
 
 	return status;
 }
 #endif /* CONFIG_DDR4 */
 
-/* function: mv_ddr_set_calib_controller
- * this function sets the controller which will control
- * the calibration cycle in the end of the training.
+/*
+ * set a controller to control calibration cycle in the training's end
  * 1 - internal controller
  * 2 - external controller
  */
@@ -1363,17 +1320,15 @@ void mv_ddr_set_calib_controller(void)
 	calibration_update_control = CAL_UPDATE_CTRL_EXT;
 }
 
-/* function: mv_ddr_mc_init
- * enables the controllers dunit and mc6 in all relevant cs
- */
+/* enable dunit and mc6 controllers in all relevant cs */
 int mv_ddr_mc_init(void)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
-	ddr3_tip_apn806_select_ddr_controller(DEV_NUM_0, TUNING_ACTIVE_SEL_TIP);
+	ddr3_tip_apn806_select_ddr_controller(0, TUNING_ACTIVE_SEL_TIP);
 
 	/* enable dunit - the init is per cs and reference to 15e0 'DDR3_RANK_CTRL_REG' */
-	ddr3_tip_if_write(DEV_NUM_0, ACCESS_TYPE_UNICAST, IF_ID_0, SDRAM_INIT_CTRL_REG, 0x1, 0x1);
+	ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, SDRAM_INIT_CTRL_REG, 0x1, 0x1);
 
 	/* enable mc6 - the init is per cs in mc6 and not referenced */
 	reg_write(MC6_USER_CMD0_REG, 0x10000001 |
@@ -1384,7 +1339,7 @@ int mv_ddr_mc_init(void)
 	/* FIXME: change the delay to polling on bit '0' */
 	mdelay(10);
 
-	return MV_OK;
+	return 0;
 }
 
 int ddr3_tip_configure_phy(u32 dev_num)
@@ -1392,31 +1347,31 @@ int ddr3_tip_configure_phy(u32 dev_num)
 	u32 cs_num;
 	u32 vref;
 
-	/* ADLL */
-	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					PARAM_NOT_CARE, DDR_PHY_DATA, ADLL_CFG0_PHY_REG, 0x1503));
-	/* ADLL */
-	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					PARAM_NOT_CARE, DDR_PHY_DATA, ADLL_CFG1_PHY_REG, 0x50));
-	/* ADLL */
-	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					PARAM_NOT_CARE, DDR_PHY_DATA, ADLL_CFG2_PHY_REG, 0x12));
-	/* ADLL */
-	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					PARAM_NOT_CARE, DDR_PHY_CONTROL, ADLL_CFG0_PHY_REG, 0x1503));
-	/* ADLL */
-	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					PARAM_NOT_CARE, DDR_PHY_CONTROL, ADLL_CFG1_PHY_REG, 0x50));
-	/* ADLL */
-	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					PARAM_NOT_CARE, DDR_PHY_CONTROL, ADLL_CFG2_PHY_REG, 0x12));
-	/* data receiver calibration */
-	CHECK_STATUS(ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
-					PARAM_NOT_CARE, DDR_PHY_DATA, VREF_BCAST_PHY_REG(0), 0x20));
-	/* data drive strength */
+	/* set adll */
+	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+			   PARAM_NOT_CARE, DDR_PHY_DATA, ADLL_CFG0_PHY_REG, 0x1503);
+	/* set adll */
+	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+			   PARAM_NOT_CARE, DDR_PHY_DATA, ADLL_CFG1_PHY_REG, 0x50);
+	/* set adll */
+	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+			   PARAM_NOT_CARE, DDR_PHY_DATA, ADLL_CFG2_PHY_REG, 0x12);
+	/* set adll */
+	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+			   PARAM_NOT_CARE, DDR_PHY_CONTROL, ADLL_CFG0_PHY_REG, 0x1503);
+	/* set adll */
+	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+			   PARAM_NOT_CARE, DDR_PHY_CONTROL, ADLL_CFG1_PHY_REG, 0x50);
+	/* set adll */
+	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+			   PARAM_NOT_CARE, DDR_PHY_CONTROL, ADLL_CFG2_PHY_REG, 0x12);
+	/* set data receiver calibration */
+	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
+			   PARAM_NOT_CARE, DDR_PHY_DATA, VREF_BCAST_PHY_REG(0), 0x20);
+	/* set data drive strength */
 	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 			   PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ZRI_CAL_PHY_REG, 0x78f);
-	/* ctrl drive strength */
+	/* set ctrl drive strength */
 	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 			   PARAM_NOT_CARE, DDR_PHY_CONTROL, PAD_ZRI_CAL_PHY_REG, 0x78f);
 
@@ -1432,11 +1387,11 @@ int ddr3_tip_configure_phy(u32 dev_num)
 #else /* A80X0 */
 	vref = 0x425;
 #endif
-	/* vref configuration */
+	/* configure vref */
 	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 			   PARAM_NOT_CARE, DDR_PHY_DATA, PAD_CFG_PHY_REG, vref);
 
-	/* data odt */
+	/* set data odt */
 	if (cs_num == 1)
 		ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 				   PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ODT_CAL_PHY_REG, 0x8 << 6);
@@ -1444,7 +1399,7 @@ int ddr3_tip_configure_phy(u32 dev_num)
 		ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 				   PARAM_NOT_CARE, DDR_PHY_DATA, PAD_ODT_CAL_PHY_REG, 0x4 << 6);
 
-	return MV_OK;
+	return 0;
 }
 
 /*
@@ -1485,8 +1440,8 @@ static u32 mv_ddr_pad_to_dq_detect(u32 dev_num, u32 iface, u32 subphy, u32 pad)
 					  OPER_WRITE, RESULT_PER_BIT,
 					  TRAINING_LOAD_OPERATION_UNLOAD,
 					  CS_SINGLE, &result[search_dir],
-					  1, 0, 0) != MV_OK)
-		return MV_FAIL;
+					  1, 0, 0) != 0)
+		return -1;
 
 	/* save prior to delay insertion results */
 	for (i = 0; i < BUS_WIDTH_IN_BITS; i++)
@@ -1495,7 +1450,7 @@ static u32 mv_ddr_pad_to_dq_detect(u32 dev_num, u32 iface, u32 subphy, u32 pad)
 	ddr3_hws_set_log_level(DEBUG_BLOCK_CENTRALIZATION, DEBUG_LEVEL_INFO);
 
 #if MV_DDR_DQ_MAPPING_DETECT_VERBOSE == 1
-	printf("MV_DDR: %s: Prior to DQ shift: if %d, subphy %d, pad %d,\n"
+	printf("%s: prior to dq shift: if %d, subphy %d, pad %d,\n"
 	       "\tregs: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",
 	       __func__, iface, subphy, pad,
 	       prior_result[0], prior_result[1], prior_result[2], prior_result[3],
@@ -1527,15 +1482,15 @@ static u32 mv_ddr_pad_to_dq_detect(u32 dev_num, u32 iface, u32 subphy, u32 pad)
 					  OPER_WRITE, RESULT_PER_BIT,
 					  TRAINING_LOAD_OPERATION_UNLOAD,
 					  CS_SINGLE, &result[search_dir],
-					  1, 0, 0) != MV_OK)
-		return MV_FAIL;
+					  1, 0, 0) != 0)
+		return -1;
 
 	/* save post delay insertion results */
 	for (i = 0; i < BUS_WIDTH_IN_BITS; i++)
 		post_result[i] = result[search_dir][i] & 0xff;
 
 #if MV_DDR_DQ_MAPPING_DETECT_VERBOSE == 1
-	printf("MV_DDR: %s: After DQ shift: if %d, subphy %d, pad %d,\n"
+	printf("%s: after dq shift: if %d, subphy %d, pad %d,\n"
 	       "\tregs: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",
 	       __func__, iface, subphy, pad,
 	       post_result[0], post_result[1], post_result[2], post_result[3],
@@ -1567,14 +1522,14 @@ static u32 mv_ddr_pad_to_dq_detect(u32 dev_num, u32 iface, u32 subphy, u32 pad)
 		}
 	}
 #if MV_DDR_DQ_MAPPING_DETECT_VERBOSE == 1
-	printf("MV_DDR: %s: if %d, subphy %d, pad %d, max diff = %d, max diff count = %d, dq = %d\n",
+	printf("%s: if %d, subphy %d, pad %d, max diff = %d, max diff count = %d, dq = %d\n",
 	       __func__, iface, subphy, pad, max_diff, max_diff_cnt, dq);
 #endif
 
 	/* check for pad to dq pairing criteria */
 	if (max_diff > 2 && max_diff_cnt == 0)
 #if MV_DDR_DQ_MAPPING_DETECT_VERBOSE == 1
-		printf("MV_DDR: %s: if %d, subphy %d, DQ[%d] = PAD[%d]\n",
+		printf("%s: if %d, subphy %d, dq[%d] = pad[%d]\n",
 		       __func__, iface, subphy, dq, pad);
 #else
 		;
@@ -1586,7 +1541,6 @@ static u32 mv_ddr_pad_to_dq_detect(u32 dev_num, u32 iface, u32 subphy, u32 pad)
 }
 
 #define MV_DDR_DQ_MAPPING_DETECT_NTRIES 5
-
 int mv_ddr_dq_mapping_detect(u32 dev_num)
 {
 	u32 iface, subphy, pad, dq_detected;
@@ -1628,7 +1582,7 @@ int mv_ddr_dq_mapping_detect(u32 dev_num)
 				} while (dq_detected == 0xff && ntries > 0);
 
 				if (dq_detected == 0xff)
-					printf("MV_DDR: %s: Error: if %d, subphy %d, DQ for PAD[%d] not found after %d tries!\n",
+					printf("%s: error: if %d, subphy %d, dq for pad[%d] not found after %d tries!\n",
 					       __func__, iface, subphy, pad, MV_DDR_DQ_MAPPING_DETECT_NTRIES - ntries);
 				else
 					mv_ddr_dq_mapping_detected[iface][subphy][dq_detected] = pad;
@@ -1645,7 +1599,7 @@ int mv_ddr_dq_mapping_detect(u32 dev_num)
 				  MASK_ALL_BITS);
 	}
 
-	printf("MV_DDR: %s: dq to pad mapping detection results:\n", __func__);
+	printf("%s: dq to pad mapping detection results:\n", __func__);
 	for (iface = 0; iface < MAX_INTERFACE_NUM; iface++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, iface);
 		printf("if/subphy:\tdq0\tdq1\tdq2\tdq3\tdq4\tdq5\tdq6\tdq7\n");
@@ -1663,7 +1617,7 @@ int mv_ddr_dq_mapping_detect(u32 dev_num)
 		}
 	}
 
-	return MV_OK;
+	return 0;
 }
 
 #endif
