@@ -102,14 +102,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_training_ip.h"
 #include "ddr3_training_ip_prv_if.h"
 
-/* MARVELL U-BOOT 20013.01 & ATF SUPPORT */
-#if defined(MV_DDR) || defined(MV_DDR_ATF)
-#include "sys_env_lib.h"
-/* U-BOOT SPL SUPPORT */
-#else
-/* TODO: no support in SPL */
-#endif
-
 #include "mv_ddr_apn806.h"
 #include "mv_ddr_apn806_topology.h"
 #include "mv_ddr_static.h"
