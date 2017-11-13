@@ -99,6 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	defined(CONFIG_MC_STATIC)  || defined(CONFIG_MC_STATIC_PRINT)
 
 #include "ddr3_init.h"
+#include "mv_ddr_mc6.h"
 
 #define MAX_DATA_PHY_NUM	MAX_BUS_NUM
 #define MAX_CTRL_PHY_NUM	3

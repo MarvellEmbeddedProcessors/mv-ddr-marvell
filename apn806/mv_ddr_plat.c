@@ -96,6 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ddr3_init.h"
+#include "mv_ddr_mc6.h"
 #include "mv_ddr_xor_v2.h"
 #include "mv_ddr_validate.h"
 

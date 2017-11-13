@@ -98,6 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_init.h"
 #include "mv_ddr4_mpr_pda_if.h"
 #include "mv_ddr_validate.h"
+#include "mv_ddr_mc6.h"
 #include "mv_ddr_xor_v2.h"
 #include "../../drivers/marvell/thermal.h"
 
