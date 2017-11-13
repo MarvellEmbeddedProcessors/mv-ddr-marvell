@@ -111,7 +111,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
 #include "a38x/mv_ddr_plat.h"
 #elif defined(CONFIG_APN806)
-#include "mv_ddr_apn806.h"
+#include "apn806/mv_ddr_plat.h"
 #elif defined(CONFIG_A3700)
 #include "a3700/mv_ddr_plat.h"
 #endif
