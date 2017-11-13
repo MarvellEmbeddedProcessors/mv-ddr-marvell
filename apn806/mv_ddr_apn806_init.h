@@ -103,7 +103,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_training_ip_prv_if.h"
 
 #include "mv_ddr_apn806.h"
-#include "mv_ddr_apn806_topology.h"
 #include "mv_ddr_static.h"
 
 #endif /* _MV_DDR_AP806_INIT_H */
