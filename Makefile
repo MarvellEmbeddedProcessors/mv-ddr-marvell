@@ -350,6 +350,7 @@ LDFLAGS = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
 MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_SRCPATH),$(wildcard $(DIR)/*.c))
 MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_mc6.c
+MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_xor_v2.c
 
 MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
 # add mv_ddr build message and version string object
