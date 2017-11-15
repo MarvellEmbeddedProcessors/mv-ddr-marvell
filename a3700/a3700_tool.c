@@ -346,14 +346,14 @@ static int ddr_cfg_parse(struct config_item *clist, struct ddr_porting_cfg *cfg)
 		return -1;
 	}
 
-#ifdef CONFIG_DDR3
-	if (cfg->type != DDR3) {
-		ERROR("only DDR3 supported, check CFG_FILE\n");
-		return -1;
-	}
-#elif defined(CONFIG_DDR4)
+#ifdef CONFIG_DDR4
 	if (cfg->type != DDR4) {
 		ERROR("only DDR4 supported, check CFG_FILE\n");
+		return -1;
+	}
+#else /* CONFIG_DDR3 */
+	if (cfg->type != DDR3) {
+		ERROR("only DDR3 supported, check CFG_FILE\n");
 		return -1;
 	}
 #endif

@@ -201,7 +201,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_xp = time_to_nclk(mc6_timing.t_xp, mc6_timing.t_ckclk);
 	/* printf("t_xp = %d\n", mc6_timing.t_xp); */
 
-#ifdef CONFIG_DDR3
+#ifndef CONFIG_DDR4 /* CONFIG_DDR3 */
 	/* calculate t_xpdll */
 	mc6_timing.t_xpdll = speed_bin_table(speed_bin_index, SPEED_BIN_TXPDLL);
 	mc6_timing.t_xpdll = GET_MAX_VALUE(mc6_timing.t_ckclk * 10, mc6_timing.t_xpdll);

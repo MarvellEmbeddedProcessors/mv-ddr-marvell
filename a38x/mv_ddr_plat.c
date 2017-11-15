@@ -985,7 +985,7 @@ static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 
 		/* Set KNL values */
 		switch (frequency) {
-#ifdef CONFIG_DDR3
+#ifndef CONFIG_DDR4 /* CONFIG_DDR3 */
 		case MV_DDR_FREQ_467:
 			async_val = 0x806f012;
 			break;
@@ -1002,7 +1002,7 @@ static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 		case MV_DDR_FREQ_800:
 			async_val = 0x807f00a;
 			break;
-#ifdef CONFIG_DDR3
+#ifndef CONFIG_DDR4 /* CONFIG_DDR3 */
 		case MV_DDR_FREQ_850:
 			async_val = 0x80cb012;
 			break;
