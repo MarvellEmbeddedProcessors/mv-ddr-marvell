@@ -140,15 +140,44 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* registers definition */
 #if defined(CONFIG_A3700)
 #define MC6_BASE				0x0
+#elif defined(CONFIG_MC6P)
+#define MC6_BASE				0xfe0000
 #else
 #define MC6_BASE				0x20000
 #endif
 
 #define MC6_USER_CMD0_REG			(MC6_BASE + 0x20)
+#define USER_CMD0_CH0_OFFS			28
+#define USER_CMD0_CH0_VAL			0x1
+#define USER_CMD0_CH0_MASK			0x1
 #define USER_CMD0_CS_OFFS			24
 #define USER_CMD0_CS_MASK			0xf
+#define SR_REQ_OFFS				6
+#define SR_REQ_MASK				0x3
+enum mv_ddr_mc6_sr_modes {
+	ENTER_SR_MODE = 0x1,
+	EXIT_SR_MODE
+};
+#define WCP_DRAIN_REQ_OFFS			1
+#define WCP_DRAIN_REQ_VAL			0x1
+#define WCP_DRAIN_REQ_MASK			0x1
+#define SDRAM_INIT_REQ_OFFS			0
+#define SDRAM_INIT_REQ_VAL			0x1
+#define SDRAM_INIT_REQ_MASK			0x1
 
 #define MC6_MC_CTRL0_REG			(MC6_BASE + 0x44)
+#ifdef CONFIG_MC6P
+#define MVN_EN_OFFS				12
+#define MVN_EN_MASK				0x7
+#define MVN_ENABLE				1
+#define MVN_DISABLE				0
+#endif
+#define DATA_WIDTH_OFFS				8
+#define DATA_WIDTH_MASK				0x7
+#define DATA_WIDTH_X8				0x1
+#define DATA_WIDTH_X16				0x2
+#define DATA_WIDTH_X32				0x3
+#define DATA_WIDTH_X64				0x4
 
 #define MC6_RAS_CTRL_REG			(MC6_BASE + 0x4c)
 #define ECC_EN_OFFS				1
@@ -156,13 +185,66 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ECC_EN_ENA				1
 
 #define MC6_SPOOL_CTRL_REG			(MC6_BASE + 0x50)
+#define STARV_TIMER_INIT_OFFS			0
+#define STARV_TIMER_INIT_MASK			0xff
+#define STARV_TIMER_VAL				0xff
+#ifdef CONFIG_MC6P
+#define SPOOL_ORDER_FILTER_EN_OFFS		9
+#define SPOOL_ORDER_FILTER_EN_MASK		0x1
+#define SPOOL_ORDER_FILTER_EN			0x1
+#define SPOOL_ORDER_FILTER_DIS			0x0
+#define SPOOL_SMART_AUTO_PRECHARGE_EN_OFFS	10
+#define SPOOL_SMART_AUTO_PRECHARGE_EN_MASK	0x1
+#define SPOOL_SMART_AUTO_PRECHARGE_EN		0x1
+#define SPOOL_SMART_AUTO_PRECHARGE_DIS		0x0
+#endif
+
 #define MC6_MC_PWR_CTRL_REG			(MC6_BASE + 0x54)
+#define AC_ON_DLY_OFFS				8
+#define AC_ON_DLY_VAL				0x4
+#define AC_ON_DLY_MASK				0xf
+#define AC_OFF_DLY_OFFS				4
+#define AC_OFF_DLY_VAL				0xc
+#define AC_OFF_DLY_MASK				0xf
+
+#define MC6_MC_WR_BUF_CTRL_REG			(MC6_BASE + 0x58)
+#define TIME_SHARE_EN_CH0_OFFS			5
+#define TIME_SHARE_EN_CH0_MASK			0x1
+#ifdef CONFIG_MC6P
+#define TIME_SHARE_EN_CH0_VAL			0x0
+#else
+#define TIME_SHARE_EN_CH0_VAL			0x0
+#endif
+#define TIME_SHARE_RD_REQ_CH0_OFFS		16
+#define TIME_SHARE_RD_REQ_CH0_MASK		0x3ff
+#ifdef CONFIG_MC6P
+#define TIME_SHARE_RD_REQ_CH0_VAL		0x40
+#else
+#define TIME_SHARE_RD_REQ_CH0_VAL		0xff
+#endif
 
 #define MC6_RD_DPATH_CTRL_REG			(MC6_BASE + 0x64)
 #define MB_RD_DATA_LATENCY_CH0_OFFS		0
 #define MB_RD_DATA_LATENCY_CH0_MASK		0x3f
+#ifndef CONFIG_MC6P
+#define MB_RD_DATA_LATENCY_CH0_VAL		0x6
+#define MB_RD_DATA_LATENCY_CH1_OFFS		8
+#define MB_RD_DATA_LATENCY_CH1_MASK		0x3f
+#define MB_RD_DATA_LATENCY_CH1_VAL		0x6
+#else
+#define MB_RD_DATA_LATENCY_CH0_VAL		0x5
+#endif
 
 #define MC6_RPP_STARVATION_CTRL_REG		(MC6_BASE + 0x180)
+#define BW_ALLOC_MODE_SEL_OFFS			17
+#define BW_ALLOC_MODE_SEL_VAL			0x1
+#define BW_ALLOC_MODE_SEL_MASK			0x1
+#define RPP_STARVATION_EN_OFFS			16
+#define RPP_STARVATION_EN_VAL			0x1
+#define RPP_STARVATION_EN_MASK			0x1
+#define RPP_STARV_TIMER_INIT_OFFS		0
+#define RPP_STARV_TIMER_INIT_VAL		0x200
+#define RPP_STARV_TIMER_INIT_MASK		0xffff
 
 /* timing registers */
 #define MC6_CH0_MMAP_LOW_BASE			(MC6_BASE + 0x200)
@@ -209,8 +291,50 @@ enum {
 #define DEVICE_TYPE_MASK			0x3
 
 #define MC6_CH0_MC_CTRL1_REG			(MC6_BASE + 0x2c0)
+#define PHY_MASK_OFFS				3
+#define PHY_MASK_VAL				0x0
+#define PHY_MASK_MASK				0x1
+#ifdef CONFIG_MC6P
+#define RETRY_MODE_OFFS				10
+#define RETRY_MODE_VAL				0x1
+#define RETRY_MODE_MASK				0x1
+#endif
+#define ACS_EXIT_DLY_OFFS			12
+#define ACS_EXIT_DLY_VAL			0x6
+#define ACS_EXIT_DLY_MASK			0x7
+
 #define MC6_CH0_MC_CTRL2_REG			(MC6_BASE + 0x2c4)
+#define RDIMM_CS_MODE_OFFS			23
+#define RDIMM_CS_MODE_MASK			0x3
+#define RDIMM_MODE_OFFS				22
+#define RDIMM_MODE_MASK				0x1
+#define MODE_2T_OFFS				20
+#define MODE_2T_VAL				0x1
+#define MODE_2T_MASK				0x1
+#define ADDR_MIRROR_EN_OFFS			16
+enum mv_ddr_mc6_mirror {
+	CS0_MIRROR = 0x1,
+	CS1_MIRROR = 0x2
+};
+#define ADDR_MIRROR_EN_MASK			0xf
+#define SDRAM_TYPE_OFFS				4
+enum mv_ddr_mc6_sdram_type {
+	DDR4_TYPE = 0x3,
+/* mc6p supports only ddr4 type */
+#ifndef CONFIG_MC6P
+	DDR3_TYPE = 0x2,
+	LPDDR4_TYPE = 0xb
+#endif
+};
+#define SDRAM_TYPE_MASK				0xf
+
 #define MC6_CH0_MC_CTRL3_REG			(MC6_BASE + 0x2c8)
+#define PHY_OUT_FF_BYPASS_OFFS			8
+#define PHY_OUT_FF_BYPASS_VAL			0xfe
+#define PHY_OUT_FF_BYPASS_MASK			0xff
+#define PHY_IN_FF_BYPASS_OFFS			0
+#define PHY_IN_FF_BYPASS_VAL			0xfe
+#define PHY_IN_FF_BYPASS_MASK			0xff
 
 /* dram timing */
 #define MC6_CH0_DRAM_CFG1_REG			(MC6_BASE + 0x300)
@@ -226,14 +350,35 @@ enum {
 #define CL_MASK					0x3f
 
 #define MC6_CH0_DRAM_CFG2_REG			(MC6_BASE + 0x304)
+#define DRAM_CFG2_DM_OFFS				10
+#define DRAM_CFG2_DM_MASK				0x1
+enum mv_ddr_mc6_dm {
+	DM_DIS,
+	DM_EN
+};
+
 #define MC6_CH0_DRAM_CFG3_REG			(MC6_BASE + 0x308)
+#define DLL_RESET_OFFS				0
+#define DLL_RESET_VAL				0x1
+#define DLL_RESET_MASK				0x1
+
 #define MC6_CH0_DRAM_CFG4_REG			(MC6_BASE + 0x30c)
+#define VREF_TRAINING_VALUE_DQ_OFFS		16
+#define VREF_TRAINING_VALUE_DQ_VAL		0x9
+#define VREF_TRAINING_VALUE_DQ_MASK		0x3f
 
 #define MC6_CH0_DRAM_CFG5_BASE			(MC6_BASE + 0x310)
 #define MC6_CH0_DRAM_CFG5_REG(cs)		(MC6_CH0_DRAM_CFG5_BASE + (cs) * 0x4)
+/* TODO: remove this hard-coded define after electrical infrastructure implementation */
+#define MC6_CH0_DRAM_CFG5_VAL			0x21000000
 
 #define MC6_CH0_ODT_CTRL1_REG			(MC6_BASE + 0x340)
+/* TODO: remove this hard-coded define after electrical infrastructure implementation */
+#define MC6_CH0_ODT_CTRL1_VAL			0x0
+
 #define MC6_CH0_ODT_CTRL2_REG			(MC6_BASE + 0x344)
+/* TODO: remove this hard-coded define after electrical infrastructure implementation */
+#define MC6_CH0_ODT_CTRL2_VAL			0x30000000
 
 #define MC6_CH0_ECC_1BIT_ERR_COUNTER_REG	(MC6_BASE + 0x364)
 
@@ -384,6 +529,60 @@ enum {
 #define PHY_RL_CYCLE_DLY_OFFS			8
 #define PHY_RL_CYCLE_DLY_MASK			0xf
 
+#ifdef CONFIG_MC6P
+#define MC6_DFI_PHY_USER_CMD_0_REG		(MC6_BASE + 0x13d0)
+#define DFI_USER_CMD_0_CH_OFFS			28
+#define DFI_USER_CMD_0_CH_MASK			0xf
+#define DFI_USER_CMD_0_CH0_VAL			0x1
+#define DFI_USER_CMD_0_CS_OFFS			24
+#define DFI_USER_CMD_0_CS_MASK			0xf
+enum mv_ddr_mc6_dfi_cs {
+	DFI_USER_CMD_0_CS0 = (1 << 0),
+	DFI_USER_CMD_0_CS1 = (1 << 1),
+	DFI_USER_CMD_0_CS2 = (1 << 2),
+	DFI_USER_CMD_0_CS3 = (1 << 3)
+};
+#define DFI_PHY_INIT_DDR_DONE_REQ_OFFS		8
+#define DFI_PHY_INIT_DDR_DONE_REQ_MASK		0x1
+#define DFI_PHY_INIT_DDR_DONE_REQ_VAL		0x1
+#define DFI_PHY_INIT_REQ_OFFS			0
+#define DFI_PHY_INIT_REQ_MASK			0x1
+#define DFI_PHY_INIT_REQ_VAL			0x1
+
+#define MC6_DFI_PHY_CTRL_0_REG			(MC6_BASE + 0x13e0)
+#define TPHY_RDCSLAT_OFFS			24
+#define TPHY_RDCSLAT_MASK			0xff
+#define TPHY_RDCSLAT_VAL			0x6
+#define TPHY_WRCSLAT_OFFS			16
+#define TPHY_WRCSLAT_MASK			0xff
+#define TPHY_WRCSLAT_VAL			0x6
+#define DFI_DRAM_CLK_DIS_OFFS			0
+#define DFI_DRAM_CLK_DIS_MASK			0x1
+enum mv_ddr_mc6_dfi_dram_clk {
+	DFI_DRAM_CLK_EN,
+	DFI_DRAM_CLK_DIS
+};
+
+#define MC6_DFI_PHY_CTRL_1_REG			(MC6_BASE + 0x13e4)
+#define TRDDATA_EN_OFFS				24
+#define TRDDATA_EN_VAL				0x6
+#define TRDDATA_EN_MASK				0xff
+#define TPHY_RDLAT_OFFS				16
+#define TPHY_RDLAT_VAL				0x12
+#define TPHY_RDLAT_MASK				0xff
+#define TPHY_WRLAT_OFFS				8
+#define TPHY_WRLAT_VAL				0x6
+#define TPHY_WRLAT_MASK				0xff
+#define TPHY_WRDATA_OFFS			0
+#define TPHY_WRDATA_VAL				0x2
+#define TPHY_WRDATA_MASK			0xff
+
+#define DFI_PHY_LEVELING_STATUS_REG		(MC6_BASE + 0x13fc)
+#define DFI_PHY_INIT_DONE_OFFS			31
+#define DFI_PHY_INIT_DONE_MASK			0x1
+#define DFI_PHY_INIT_DONE_VAL			0x1
+#endif
+
 /* structures definitions */
 /* struct used for DLB configuration array */
 struct mv_ddr_mc6_timing {
@@ -438,6 +637,7 @@ struct mv_ddr_mc6_timing {
 /* functions declaration */
 int mv_ddr_mc6_config(int ecc_is_ena);
 void mv_ddr_mc6_and_dram_timing_set(void);
+void mv_ddr_mc6_cfg_set(void);
 void mv_ddr_mc6_sizes_cfg(void);
 void mv_ddr_mc6_ecc_enable(void);
 void mv_ddr_mc6_init(void);

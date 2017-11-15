@@ -633,6 +633,297 @@ void mv_ddr_mc6_and_dram_timing_set(void)
 	mv_ddr_mc6_timing_regs_cfg(freq_mhz);
 }
 
+/* TODO:  get relevant parameters from topology */
+void mv_ddr_mc6_cfg_set(void)
+{
+	/*
+	 * configure data width, mvn and burst length (burst length is default BL8)
+	 * TODO: get data width from topology
+	 */
+	reg_bit_clrset(MC6_MC_CTRL0_REG,
+#ifdef CONFIG_MC6P
+		       MVN_ENABLE << MVN_EN_OFFS |
+#endif
+		       /* TODO: get 64bit parameter outside of the driver */
+#ifdef CONFIG_64BIT
+		       DATA_WIDTH_X64 << DATA_WIDTH_OFFS,
+#else
+		       DATA_WIDTH_X32 << DATA_WIDTH_OFFS,
+#endif
+#ifdef CONFIG_MC6P
+		       MVN_EN_MASK << MVN_EN_OFFS |
+#endif
+		       DATA_WIDTH_MASK << DATA_WIDTH_OFFS);
+	/* printf("MC6_MC_CTRL0_REG addr 0x%x, data 0x%x\n", MC6_MC_CTRL0_REG,
+		  reg_read(MC6_MC_CTRL0_REG)); */
+
+	/* configure starvation timer order filter and auto precharge */
+	reg_bit_clrset(MC6_SPOOL_CTRL_REG,
+#ifdef CONFIG_MC6P
+		       SPOOL_ORDER_FILTER_EN << SPOOL_ORDER_FILTER_EN_OFFS |
+		       SPOOL_SMART_AUTO_PRECHARGE_EN << SPOOL_SMART_AUTO_PRECHARGE_EN_OFFS |
+#endif
+		       STARV_TIMER_VAL << STARV_TIMER_INIT_OFFS,
+#ifdef CONFIG_MC6P
+		       SPOOL_ORDER_FILTER_EN_MASK << SPOOL_ORDER_FILTER_EN_OFFS |
+		       SPOOL_SMART_AUTO_PRECHARGE_EN_MASK << SPOOL_SMART_AUTO_PRECHARGE_EN_OFFS |
+#endif
+		       STARV_TIMER_INIT_MASK << STARV_TIMER_INIT_OFFS);
+	/* printf("MC6_SPOOL_CTRL_REG addr 0x%x, data 0x%x\n", MC6_SPOOL_CTRL_REG,
+		  reg_read(MC6_SPOOL_CTRL_REG)); */
+
+	/* configure share enable and share read request */
+	reg_bit_clrset(MC6_MC_WR_BUF_CTRL_REG,
+		       TIME_SHARE_EN_CH0_VAL << TIME_SHARE_EN_CH0_OFFS |
+		       TIME_SHARE_RD_REQ_CH0_VAL << TIME_SHARE_RD_REQ_CH0_OFFS,
+		       TIME_SHARE_EN_CH0_MASK << TIME_SHARE_EN_CH0_OFFS |
+		       TIME_SHARE_RD_REQ_CH0_MASK << TIME_SHARE_RD_REQ_CH0_OFFS);
+	/* printf("MC6_MC_WR_BUF_CTRL_REG addr 0x%x, data 0x%x\n", MC6_MC_WR_BUF_CTRL_REG,
+		  reg_read(MC6_MC_WR_BUF_CTRL_REG)); */
+
+	/* configure read data latency */
+	reg_bit_clrset(MC6_RD_DPATH_CTRL_REG,
+#ifndef CONFIG_MC6P
+		       MB_RD_DATA_LATENCY_CH1_VAL << MB_RD_DATA_LATENCY_CH1_OFFS |
+#endif
+		       MB_RD_DATA_LATENCY_CH0_VAL << MB_RD_DATA_LATENCY_CH0_OFFS,
+#ifndef CONFIG_MC6P
+		       MB_RD_DATA_LATENCY_CH1_MASK << MB_RD_DATA_LATENCY_CH1_OFFS |
+#endif
+		       MB_RD_DATA_LATENCY_CH0_MASK << MB_RD_DATA_LATENCY_CH0_OFFS);
+	/* printf("MC6_RD_DPATH_CTRL_REG addr 0x%x, data 0x%x\n", MC6_RD_DPATH_CTRL_REG,
+		  reg_read(MC6_RD_DPATH_CTRL_REG)); */
+
+	/* configure phy mask, retry mode and acs exit delay */
+	reg_bit_clrset(MC6_CH0_MC_CTRL1_REG,
+		       PHY_MASK_VAL << PHY_MASK_OFFS |
+#ifdef CONFIG_MC6P
+		       RETRY_MODE_VAL << RETRY_MODE_OFFS |
+#endif
+		       ACS_EXIT_DLY_VAL << ACS_EXIT_DLY_OFFS,
+		       PHY_MASK_MASK << PHY_MASK_OFFS |
+#ifdef CONFIG_MC6P
+		       RETRY_MODE_MASK << RETRY_MODE_OFFS |
+#endif
+		       ACS_EXIT_DLY_MASK << ACS_EXIT_DLY_OFFS);
+	/* printf("MC6_CH0_MC_CTRL1_REG addr 0x%x, data 0x%x\n", MC6_CH0_MC_CTRL1_REG,
+		  reg_read(MC6_CH0_MC_CTRL1_REG)); */
+
+	/* configure phy output and input interface timing control */
+	reg_bit_clrset(MC6_CH0_MC_CTRL3_REG,
+		       PHY_OUT_FF_BYPASS_VAL << PHY_OUT_FF_BYPASS_OFFS |
+		       PHY_IN_FF_BYPASS_VAL << PHY_IN_FF_BYPASS_OFFS,
+		       PHY_OUT_FF_BYPASS_MASK << PHY_OUT_FF_BYPASS_OFFS |
+		       PHY_IN_FF_BYPASS_MASK << PHY_IN_FF_BYPASS_OFFS);
+	/* printf("MC6_CH0_MC_CTRL3_REG addr 0x%x, data 0x%x\n", MC6_CH0_MC_CTRL3_REG,
+		  reg_read(MC6_CH0_MC_CTRL3_REG)); */
+
+	/*
+	 * configure dm according to topology
+	 * TODO: get dm configuration from topology
+	 */
+	reg_bit_clrset(MC6_CH0_DRAM_CFG2_REG,
+#ifndef CONFIG_MC6P
+		       DM_DIS << DRAM_CFG2_DM_OFFS,
+#else
+		       DM_EN << DRAM_CFG2_DM_OFFS,
+#endif
+		       DRAM_CFG2_DM_MASK << DRAM_CFG2_DM_OFFS);
+	/* printf("MC6_CH0_DRAM_CFG2_REG addr 0x%x, data 0x%x\n", MC6_CH0_DRAM_CFG2_REG,
+		  reg_read(MC6_CH0_DRAM_CFG2_REG)); */
+
+	/* configure dll reset when sending mr commands to memory */
+	reg_bit_clrset(MC6_CH0_DRAM_CFG3_REG,
+		       DLL_RESET_VAL << DLL_RESET_OFFS,
+		       DLL_RESET_MASK << DLL_RESET_OFFS);
+	/* printf("MC6_CH0_DRAM_CFG3_REG addr 0x%x, data 0x%x\n", MC6_CH0_DRAM_CFG3_REG,
+		  reg_read(MC6_CH0_DRAM_CFG3_REG)); */
+
+	/*
+	 * configure dram type, mirror enable, 2t mode  rdimm support
+	 * TODO: get mirror configuration from topology; currently set to cs1 always mirrored
+	 * TODO: add proper configuration while working with rdimm
+	 */
+	reg_bit_clrset(MC6_CH0_MC_CTRL2_REG,
+		       MODE_2T_VAL << MODE_2T_OFFS |
+		       CS1_MIRROR << ADDR_MIRROR_EN_OFFS |
+		       DDR4_TYPE << SDRAM_TYPE_OFFS,
+		       MODE_2T_MASK << SDRAM_TYPE_OFFS |
+		       ADDR_MIRROR_EN_MASK << ADDR_MIRROR_EN_OFFS |
+		       SDRAM_TYPE_MASK << SDRAM_TYPE_OFFS);
+	/* printf("MC6_CH0_MC_CTRL2_REG addr 0x%x, data 0x%x\n", MC6_CH0_MC_CTRL2_REG,
+		  reg_read(MC6_CH0_MC_CTRL2_REG)); */
+
+	/* configure rpp starvation parameters */
+	reg_bit_clrset(MC6_RPP_STARVATION_CTRL_REG,
+		       BW_ALLOC_MODE_SEL_VAL << BW_ALLOC_MODE_SEL_OFFS |
+		       RPP_STARVATION_EN_VAL << RPP_STARVATION_EN_OFFS |
+		       RPP_STARV_TIMER_INIT_VAL << RPP_STARV_TIMER_INIT_OFFS,
+		       BW_ALLOC_MODE_SEL_MASK << BW_ALLOC_MODE_SEL_OFFS |
+		       RPP_STARVATION_EN_MASK << RPP_STARVATION_EN_OFFS |
+		       RPP_STARV_TIMER_INIT_MASK << RPP_STARV_TIMER_INIT_OFFS);
+	/* printf("MC6_RPP_STARVATION_CTRL_REG addr 0x%x, data 0x%x\n", MC6_RPP_STARVATION_CTRL_REG,
+		  reg_read(MC6_RPP_STARVATION_CTRL_REG)); */
+
+	/* configure delays to and from power saving mode */
+	reg_bit_clrset(MC6_MC_PWR_CTRL_REG,
+		       AC_ON_DLY_VAL << AC_ON_DLY_OFFS |
+		       AC_OFF_DLY_VAL << AC_OFF_DLY_OFFS,
+		       AC_ON_DLY_MASK << AC_ON_DLY_OFFS |
+		       AC_OFF_DLY_MASK << AC_OFF_DLY_OFFS);
+	/* printf("MC6_MC_PWR_CTRL_REG addr 0x%x, data 0x%x\n", MC6_MC_PWR_CTRL_REG,
+		  reg_read(MC6_MC_PWR_CTRL_REG)); */
+
+	/*
+	 * configure dq vref value
+	 * TODO: set vref configuration to training value
+	 * currently set to constant value in case mrs commands are sent to memory
+	 * TODO: double-check this write with design
+	 */
+	reg_bit_clrset(MC6_CH0_DRAM_CFG4_REG,
+		       VREF_TRAINING_VALUE_DQ_VAL << VREF_TRAINING_VALUE_DQ_OFFS,
+		       VREF_TRAINING_VALUE_DQ_MASK << VREF_TRAINING_VALUE_DQ_OFFS);
+	/* printf("MC6_CH0_DRAM_CFG4_REG addr 0x%x, data 0x%x\n", MC6_CH0_DRAM_CFG4_REG,
+		  reg_read(MC6_CH0_DRAM_CFG4_REG)); */
+}
+
+#ifdef CONFIG_MC6P
+/* configure dfi interface to handle the handshake b/w mc6 and phy */
+static void mv_ddr_mc6_dfi_config(void)
+{
+	u32 reg, i;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	/*
+	 * TODO: configure per given formula
+	 * currently set to support 2400T speedbin at 800MHz
+	 */
+	reg_bit_clrset(MC6_DFI_PHY_CTRL_1_REG,
+		       TRDDATA_EN_VAL << TRDDATA_EN_OFFS |
+		       TPHY_RDLAT_VAL << TPHY_RDLAT_OFFS |
+		       TPHY_WRLAT_VAL << TPHY_WRLAT_OFFS |
+		       TPHY_WRDATA_VAL << TPHY_WRDATA_OFFS,
+		       TRDDATA_EN_MASK << TRDDATA_EN_OFFS |
+		       TPHY_RDLAT_MASK << TPHY_RDLAT_OFFS |
+		       TPHY_WRLAT_MASK << TPHY_WRLAT_OFFS |
+		       TPHY_WRDATA_MASK << TPHY_WRDATA_OFFS);
+	/* printf("MC6_DFI_PHY_CTRL_1_REG addr 0x%x, data 0x%x\n", MC6_DFI_PHY_CTRL_1_REG,
+		  reg_read(MC6_DFI_PHY_CTRL_1_REG)); */
+
+	/*
+	 * TODO: configure per given formula
+	 * currently set to support 2400T speedbin at 800MHz
+	 */
+	reg_bit_clrset(MC6_DFI_PHY_CTRL_0_REG,
+		       TPHY_RDCSLAT_VAL << TPHY_RDCSLAT_OFFS |
+		       TPHY_WRCSLAT_VAL << TPHY_WRCSLAT_OFFS |
+		       DFI_DRAM_CLK_DIS << DFI_DRAM_CLK_DIS_OFFS,
+		       TPHY_RDCSLAT_MASK << TPHY_RDCSLAT_OFFS |
+		       TPHY_WRCSLAT_MASK << TPHY_WRCSLAT_OFFS |
+		       DFI_DRAM_CLK_DIS_MASK << DFI_DRAM_CLK_DIS_OFFS);
+	/* printf("MC6_DFI_PHY_CTRL_0_REG addr 0x%x, data 0x%x\n", MC6_DFI_PHY_CTRL_0_REG,
+		  reg_read(MC6_DFI_PHY_CTRL_0_REG)); */
+
+	/* configure channel 0 and init dfi phy per cs */
+	reg_bit_clrset(MC6_DFI_PHY_USER_CMD_0_REG,
+		       DFI_USER_CMD_0_CH0_VAL << DFI_USER_CMD_0_CH_OFFS |
+		       tm->interface_params[0].as_bus_params[0].cs_bitmask << DFI_USER_CMD_0_CS_OFFS |
+		       DFI_PHY_INIT_DDR_DONE_REQ_VAL << DFI_PHY_INIT_DDR_DONE_REQ_OFFS |
+		       DFI_PHY_INIT_REQ_VAL << DFI_PHY_INIT_REQ_OFFS,
+		       DFI_USER_CMD_0_CH_MASK << DFI_USER_CMD_0_CH_OFFS |
+		       DFI_USER_CMD_0_CS_MASK << DFI_USER_CMD_0_CS_OFFS |
+		       DFI_PHY_INIT_DDR_DONE_REQ_MASK << DFI_USER_CMD_0_CS_OFFS |
+		       DFI_PHY_INIT_REQ_MASK << DFI_PHY_INIT_REQ_OFFS);
+
+#define MV_DDR_DFI_POLL_COUNT	5
+	/* poll on dfi init bit for done for max (MV_DDR_DFI_POLL_COUNT * 10ms) */
+	for (i = 0; i < MV_DDR_DFI_POLL_COUNT; i++) {
+		reg = reg_read(DFI_PHY_LEVELING_STATUS_REG);
+		if (((reg >> DFI_PHY_INIT_DONE_OFFS) & DFI_PHY_INIT_DONE_MASK) == DFI_PHY_INIT_DONE_VAL)
+			break;
+		else
+			mdelay(10);
+	}
+
+	if (i >= MV_DDR_DFI_POLL_COUNT)
+		printf("error: %s: dfi initialization failed\n", __func__);
+
+	/*
+	 * TODO: configure per given formula
+	 * currently set to support 2400T speedbin at 800MHz
+	 */
+	reg_bit_clrset(MC6_DFI_PHY_CTRL_0_REG,
+		       TPHY_RDCSLAT_VAL << TPHY_RDCSLAT_OFFS |
+		       TPHY_WRCSLAT_VAL << TPHY_WRCSLAT_OFFS |
+		       DFI_DRAM_CLK_EN << DFI_DRAM_CLK_DIS_OFFS,
+		       TPHY_RDCSLAT_MASK << TPHY_RDCSLAT_OFFS |
+		       TPHY_WRCSLAT_MASK << TPHY_WRCSLAT_OFFS |
+		       DFI_DRAM_CLK_DIS_MASK << DFI_DRAM_CLK_DIS_OFFS);
+	/* printf("MC6_DFI_PHY_CTRL_0_REG addr 0x%x, data 0x%x\n", MC6_DFI_PHY_CTRL_0_REG,
+		  reg_read(MC6_DFI_PHY_CTRL_0_REG)); */
+}
+#endif
+
+/*
+ * initialize mc6 memory controller
+ * mc6: init per appropriate cs
+ * mc6p: configure dfi and then init
+ */
+void mv_ddr_mc6_init(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+
+	/* configure dfi */
+#ifdef CONFIG_MC6P
+	mv_ddr_mc6_dfi_config();
+#endif
+	/*
+	 * mc6: init appropriate cs
+	 * mc6p: exit self-refresh
+	 */
+	reg_bit_clrset(MC6_USER_CMD0_REG,
+		       USER_CMD0_CH0_VAL << USER_CMD0_CH0_OFFS |
+		       tm->interface_params[0].as_bus_params[0].cs_bitmask << USER_CMD0_CS_OFFS |
+#ifdef CONFIG_MC6P
+		       EXIT_SR_MODE << SR_REQ_OFFS,
+#else
+		       SDRAM_INIT_REQ_VAL << SDRAM_INIT_REQ_OFFS,
+#endif
+		       USER_CMD0_CH0_MASK << USER_CMD0_CH0_OFFS |
+		       USER_CMD0_CS_MASK << USER_CMD0_CS_OFFS |
+#ifdef CONFIG_MC6P
+		       SR_REQ_MASK << SR_REQ_OFFS
+#else
+		       SDRAM_INIT_REQ_MASK << SDRAM_INIT_REQ_OFFS
+#endif
+		       );
+
+	mdelay(10);
+
+	/* write buffer drain for appropriate cs */
+#ifdef CONFIG_MC6P
+	reg_bit_clrset(MC6_USER_CMD0_REG,
+		       USER_CMD0_CH0_VAL << USER_CMD0_CH0_OFFS |
+		       tm->interface_params[0].as_bus_params[0].cs_bitmask << USER_CMD0_CS_OFFS |
+		       WCP_DRAIN_REQ_VAL << WCP_DRAIN_REQ_OFFS,
+		       USER_CMD0_CH0_MASK << USER_CMD0_CH0_OFFS |
+		       USER_CMD0_CS_MASK << USER_CMD0_CS_OFFS |
+		       WCP_DRAIN_REQ_MASK << WCP_DRAIN_REQ_OFFS);
+#endif
+
+	/*
+	 * FIXME: mc6p init flow workaround
+	 * wa replaces exit from self-refresh with mc6p init command
+	 */
+#ifdef CONFIG_MC6P
+	reg_bit_clrset(MC6_USER_CMD0_REG,
+		       USER_CMD0_CH0_VAL << USER_CMD0_CH0_OFFS |
+		       tm->interface_params[0].as_bus_params[0].cs_bitmask << USER_CMD0_CS_OFFS |
+		       SDRAM_INIT_REQ_VAL << SDRAM_INIT_REQ_OFFS,
+		       USER_CMD0_CH0_MASK << USER_CMD0_CH0_OFFS |
+		       USER_CMD0_CS_MASK << USER_CMD0_CS_OFFS |
+		       SDRAM_INIT_REQ_MASK << USER_CMD0_CS_OFFS);
+#endif
+}
 
 struct mv_ddr_addr_table {
 	unsigned int num_of_bank_groups;
@@ -1030,7 +1321,7 @@ void mv_ddr_mc6_sizes_cfg(void)
 {
 	unsigned int cs_idx;
 	unsigned int cs_num;
-#ifndef CONFIG_A3700
+#if !defined(CONFIG_A3700) || !defined(CONFIG_MC6P)
 	unsigned int reserved_mem_idx;
 #endif
 	unsigned long long area_length_bits;
@@ -1113,7 +1404,7 @@ void mv_ddr_mc6_sizes_cfg(void)
 			       MV_DDR_BANK_MAP_MASK << MV_DDR_BANK_MAP_OFFS);
 	}
 
-#ifndef CONFIG_A3700
+#if !defined(CONFIG_A3700) || !defined(CONFIG_MC6P)
 	/* configure here the channel 1 reg_map_low and reg_map_high to unused memory area due to mc6 bug */
 	for (cs_idx = 0, reserved_mem_idx = cs_num; cs_idx < cs_num; cs_idx++, reserved_mem_idx++) {
 		start_addr_bytes = area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * reserved_mem_idx;
@@ -1148,20 +1439,6 @@ void mv_ddr_mc6_ecc_enable(void)
 		       ECC_EN_MASK << ECC_EN_OFFS);
 }
 
-void mv_ddr_mc6_init(void)
-{
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-
-	/* enable mc6 - the init is per cs in mc6 and not referenced */
-	reg_write(MC6_USER_CMD0_REG, 0x10000001 |
-		  ((tm->interface_params[0].as_bus_params[0].cs_bitmask <<
-		    USER_CMD0_CS_OFFS) &
-		   (USER_CMD0_CS_MASK << USER_CMD0_CS_OFFS)));
-
-	/* FIXME: change the delay to polling on bit '0' */
-	mdelay(10);
-}
-
 /* FIXME: revise hard-coded values and remove platform dependent flags */
 int mv_ddr_mc6_config(int ecc_is_ena)
 {
@@ -1172,6 +1449,28 @@ int mv_ddr_mc6_config(int ecc_is_ena)
 	if (ecc_is_ena)
 		mv_ddr_mc6_ecc_enable();
 
+#ifdef CONFIG_MC6P
+	/*
+	 * TODO: check the static configuration below
+	 * insert all into the driver
+	 * remove all mc6 functions into mc6 driver
+	 * call only init function to be the interface
+	 * for mc6 driver and it will expand the other
+	 * functions above
+	 */
+	mv_ddr_mc6_cfg_set();
+
+	/* TODO: move the following four writes to electrical parameters settings */
+	/* ODT_Control_1: ODT_write_en, ODT0_read_en */
+	reg_write(MC6_CH0_ODT_CTRL1_REG, MC6_CH0_ODT_CTRL1_VAL);
+	/* ODT_Control_2: force_odt - always 'on' for cs0 and cs1*/
+	reg_write(MC6_CH0_ODT_CTRL2_REG, MC6_CH0_ODT_CTRL2_VAL);
+	/* DRAM_Config_5 CS0: RTT_Park, RTT_WR */
+	reg_write(MC6_CH0_DRAM_CFG5_REG(0/* cs 0 */), MC6_CH0_DRAM_CFG5_VAL);
+	/* DRAM_Config_5 CS1: RTT_Park, RTT_WR  */
+	reg_write(MC6_CH0_DRAM_CFG5_REG(1/* cs 1 */), MC6_CH0_DRAM_CFG5_VAL);
+#else
+	/* TODO: remove hard-coded values and platform related flags */
 	reg_write(0x20064, 0x606);	/* MC "readReady"+ MC2PHYlatency */
 	reg_write(0x21180, 0x500);	/* PHY_RL_Control for CS0:phy_rl_cycle_dly and phy_rl_tap_dly*/
 	reg_write(0x21000, 0x60);	/* phy_rfifo_rptr_dly_val */
@@ -1202,6 +1501,6 @@ int mv_ddr_mc6_config(int ecc_is_ena)
 	reg_write(0x20050, 0xff);	/* Spool_Control default */
 	reg_write(0x20054, 0x4c0);	/* MC_pwr_ctl - default */
 	reg_write(0x2030c, 0x90000);	/* DRAM_Config_4: vref training value, odt? - config */
-
+#endif	/* #ifdef CONFIG_MC6P */
 	return 0;
 }
