@@ -98,8 +98,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _DDR3_TOPOLOGY_DEF_H
 #define _DDR3_TOPOLOGY_DEF_H
 
-#define DEV_NUM_0	0
-
 /* TOPOLOGY */
 #if defined(CONFIG_DDR4)
 enum hws_speed_bin {

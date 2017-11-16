@@ -39,8 +39,6 @@
 
 #define INTER_REGS_BASE	0xC0000000
 
-#define IF_ID_0				0
-
 #define MAX_INTERFACE_NUM		1
 #define MAX_BUS_NUM			9
 

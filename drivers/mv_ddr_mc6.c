@@ -106,13 +106,13 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	struct page_element *page_param = mv_ddr_page_tbl_get();
 
 	/* get the spped bin index */
-	enum hws_speed_bin speed_bin_index = tm->interface_params[IF_ID_0].speed_bin_index;
+	enum hws_speed_bin speed_bin_index = tm->interface_params[0].speed_bin_index;
 
 	/* calculate memory size */
-	enum mv_ddr_die_capacity memory_size = tm->interface_params[IF_ID_0].memory_size;
+	enum mv_ddr_die_capacity memory_size = tm->interface_params[0].memory_size;
 
 	/* calculate page size */
-	page_size = tm->interface_params[IF_ID_0].bus_width == MV_DDR_DEV_WIDTH_8BIT ?
+	page_size = tm->interface_params[0].bus_width == MV_DDR_DEV_WIDTH_8BIT ?
 		page_param[memory_size].page_size_8bit : page_param[memory_size].page_size_16bit;
 	/* printf("page_size = %d\n", page_size); */
 
@@ -121,7 +121,7 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_ckclk = %d\n", mc6_timing.t_ckclk); */
 
 	/* calculate t_refi  */
-	mc6_timing.t_refi = (tm->interface_params[IF_ID_0].interface_temp == MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
+	mc6_timing.t_refi = (tm->interface_params[0].interface_temp == MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
 
 	/* the t_refi is in nsec */
 	mc6_timing.t_refi = mc6_timing.t_refi / (MEGA / FCLK_KHZ);
@@ -366,8 +366,8 @@ void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.t_ccd_ccs_ext_dly = TIMING_T_CCD_CCS_EXT_DLY;
 	/* printf("t_ccd_ccs_ext_dly = %d\n", mc6_timing.t_ccd_ccs_ext_dly); */
 
-	mc6_timing.cl = tm->interface_params[IF_ID_0].cas_l;
-	mc6_timing.cwl = tm->interface_params[IF_ID_0].cas_wl;
+	mc6_timing.cl = tm->interface_params[0].cas_l;
+	mc6_timing.cwl = tm->interface_params[0].cas_wl;
 
 #ifndef CONFIG_A3700
 	/* configure the timing registers */
@@ -582,7 +582,7 @@ void mv_ddr_mc6_and_dram_timing_set(void)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/* get the frequency form the topology */
-	freq_mhz = freq_val[tm->interface_params[IF_ID_0].memory_freq];
+	freq_mhz = freq_val[tm->interface_params[0].memory_freq];
 
 	mv_ddr_mc6_timing_regs_cfg(freq_mhz);
 }
@@ -994,7 +994,7 @@ void mv_ddr_mc6_sizes_cfg(void)
 
 	struct mv_ddr_addr_table addr_tbl = {0};
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	calc_cs_num(DEV_NUM_0, IF_ID_0, &cs_num);
+	calc_cs_num(0, 0, &cs_num);
 
 	area_length_bits = mv_ddr_get_memory_size_per_cs_in_bits();
 	are_length_mega_bytes = area_length_bits / (MV_DDR_MEGA_BITS * MV_DDR_NUM_BITS_IN_BYTE);
@@ -1037,7 +1037,7 @@ void mv_ddr_mc6_sizes_cfg(void)
 			       RA_NUM_OFFS |
 			       mv_ddr_stack_addr_num_convert(SINGLE_STACK) <<
 			       SA_NUM_OFFS |
-			       mv_ddr_device_type_convert(tm->interface_params[IF_ID_0].bus_width) <<
+			       mv_ddr_device_type_convert(tm->interface_params[0].bus_width) <<
 			       DEVICE_TYPE_OFFS |
 			       mv_ddr_bank_map_convert(BANK_MAP_4KB) <<
 			       BANK_MAP_OFFS,

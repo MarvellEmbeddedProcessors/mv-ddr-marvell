@@ -156,7 +156,7 @@ uint64_t mv_ddr_get_memory_size_per_cs_in_bits(void)
 
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
-	u32 octets_per_if_num = ddr3_tip_dev_attr_get(DEV_NUM_0, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 
 #if 0
 	/* count the number of active bus */

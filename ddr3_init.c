@@ -243,7 +243,7 @@ uint64_t mv_ddr_get_memory_size_per_cs_in_bits(void)
 
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
-	u32 octets_per_if_num = ddr3_tip_dev_attr_get(DEV_NUM_0, MV_ATTR_OCTET_PER_INTERFACE);
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 
 	/* count the number of active bus */
 	for (bus_cnt = 0; bus_cnt < octets_per_if_num - 1/* ignore ecc octet */; bus_cnt++) {
@@ -270,7 +270,7 @@ uint64_t mv_ddr_get_total_memory_size_in_bits(void)
 	uint64_t memory_size_per_cs = 0;
 
 	/* get the number of cs */
-	u32 max_cs = ddr3_tip_max_cs_get(DEV_NUM_0);
+	u32 max_cs = ddr3_tip_max_cs_get(0);
 
 	memory_size_per_cs = mv_ddr_get_memory_size_per_cs_in_bits();
 	total_memory_size = (uint64_t)max_cs * memory_size_per_cs;
