@@ -99,7 +99,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _DDR_TOPOLOGY_DEF_H
 
 #include "ddr3_training_ip_def.h"
-#include "ddr3_topology_def.h"
 
 #if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
 #include "a38x/mv_ddr_plat.h"

@@ -99,7 +99,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MV_DDR_MC6_DRV_H
 
 /* includes */
-#include "ddr3_topology_def.h"
 #include "mv_ddr_topology.h"
 #include "mv_ddr_common.h"
 

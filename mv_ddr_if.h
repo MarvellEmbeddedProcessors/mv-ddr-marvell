@@ -102,6 +102,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_atf_wrapper.h"
 #include "apn806/mv_ddr_plat.h"
 #include "ddr_topology_def.h"
-#include "ddr3_topology_def.h"
 
 #endif /* _MV_DDR_IF_H */
