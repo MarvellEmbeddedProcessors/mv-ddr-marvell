@@ -111,6 +111,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_DDR_CS_BITMASK_1CS		0x1
 #define MV_DDR_CS_BITMASK_2CS		0x3
 
+#define MV_DDR_ONE_SPHY_PER_DUNIT	1
+#define MV_DDR_TWO_SPHY_PER_DUNIT	2
+
 /* source of ddr configuration data */
 enum mv_ddr_cfg_src {
 	MV_DDR_CFG_DEFAULT,	/* based on data in mv_ddr_topology_map structure */
@@ -118,11 +121,6 @@ enum mv_ddr_cfg_src {
 	MV_DDR_CFG_USER,	/* based on data from user */
 	MV_DDR_CFG_STATIC,	/* based on data from user in register-value format */
 	MV_DDR_CFG_LAST
-};
-
-enum mv_ddr_num_of_sub_phys_per_ddr_unit {
-	SINGLE_SUB_PHY = 1,
-	TWO_SUB_PHYS = 2
 };
 
 enum mv_ddr_temperature {

@@ -253,9 +253,9 @@ uint64_t mv_ddr_get_memory_size_per_cs_in_bits(void)
 
 	/* calculate number of sub-phys per ddr unit */
 	if (tm->interface_params[0].bus_width/* supports only single interface */ == MV_DDR_DEV_WIDTH_16BIT)
-		num_of_sub_phys_per_ddr_unit = TWO_SUB_PHYS;
+		num_of_sub_phys_per_ddr_unit = MV_DDR_TWO_SPHY_PER_DUNIT;
 	if (tm->interface_params[0].bus_width/* supports only single interface */ == MV_DDR_DEV_WIDTH_8BIT)
-		num_of_sub_phys_per_ddr_unit = SINGLE_SUB_PHY;
+		num_of_sub_phys_per_ddr_unit = MV_DDR_ONE_SPHY_PER_DUNIT;
 
 	/* calculate dram size per cs */
 	memory_size_per_cs = (uint64_t)mem_size[tm->interface_params[0].memory_size] * (uint64_t)num_of_active_bus
