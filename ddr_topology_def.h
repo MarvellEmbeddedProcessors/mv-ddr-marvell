@@ -184,6 +184,45 @@ struct mv_ddr_topology_map {
 	unsigned int timing_data[MV_DDR_TDATA_LAST];
 };
 
+enum mv_ddr_iface_state {
+	MV_DDR_IFACE_NRDY,	/* not ready */
+	MV_DDR_IFACE_INIT,	/* init'd */
+	MV_DDR_IFACE_RDY,	/* ready */
+	MV_DDR_IFACE_DNE	/* does not exist */
+};
+
+struct mv_ddr_iface_ops {
+	void *init_params;
+	int (*init)(void *);
+	int (*tune)(void *);
+};
+
+struct mv_ddr_iface {
+	/* base addr of ap ddr interface belongs to */
+	unsigned long long ap_base;
+
+	/* ddr interface id */
+	unsigned int id;
+
+	/* ddr interface state */
+	enum mv_ddr_iface_state state;
+
+	/* ddr interface operations */
+	struct mv_ddr_iface_ops ops;
+
+	/* ddr interface topology map */
+	struct mv_ddr_topology_map tm;
+};
+
+struct mv_ddr_system {
+	unsigned int iface_num;
+	struct mv_ddr_iface *iface;
+};
+
+struct mv_ddr_system *mv_ddr_system_get(void);
+int mv_ddr_iface_set(struct mv_ddr_iface *iface);
+struct mv_ddr_iface *mv_ddr_iface_get(void);
+
 /* DDR3 training global configuration parameters */
 struct tune_train_params {
 	u32 ck_delay;
