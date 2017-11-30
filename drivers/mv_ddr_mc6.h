@@ -207,38 +207,6 @@ enum {
 };
 #define DEVICE_TYPE_OFFS			16
 #define DEVICE_TYPE_MASK			0x3
-#define BANK_MAP_OFFS				24
-#define BANK_MAP_MASK				0x1f
-enum mv_ddr_mc6_bank_boundary {
-	BANK_MAP_512B,
-	BANK_MAP_1KB,
-	BANK_MAP_2KB,
-	BANK_MAP_4KB,
-	BANK_MAP_8KB,
-	BANK_MAP_16KB,
-	BANK_MAP_32KB,
-	BANK_MAP_64KB,
-	BANK_MAP_128KB,
-	BANK_MAP_256KB,
-	BANK_MAP_512KB,
-	BANK_MAP_1MB,
-	BANK_MAP_2MB,
-	BANK_MAP_4MB,
-	BANK_MAP_8MB,
-	BANK_MAP_16MB,
-	BANK_MAP_32MB,
-	BANK_MAP_64MB,
-	BANK_MAP_128MB,
-	BANK_MAP_256MB,
-	BANK_MAP_512MB,
-	BANK_MAP_1GB,
-	BANK_MAP_2GB,
-	BANK_MAP_4GB,
-	BANK_MAP_8GB,
-	BANK_MAP_16GB,
-	BANK_MAP_32GB,
-	BANK_MAP_64GB
-};
 
 #define MC6_CH0_MC_CTRL1_REG			(MC6_BASE + 0x2c0)
 #define MC6_CH0_MC_CTRL2_REG			(MC6_BASE + 0x2c4)
@@ -476,7 +444,6 @@ unsigned int mv_ddr_column_num_convert(unsigned int column_addr);
 unsigned int mv_ddr_row_num_convert(unsigned int row_addr);
 unsigned int mv_ddr_stack_addr_num_convert(unsigned int stack_addr);
 unsigned int mv_ddr_device_type_convert(enum mv_ddr_dev_width bus_width);
-unsigned int mv_ddr_bank_map_convert(enum mv_ddr_mc6_bank_boundary mc6_bank_boundary);
 unsigned int mv_ddr_area_length_convert(unsigned int area_length);
 void mv_ddr_mc6_sizes_cfg(void);
 void  mv_ddr_mc6_ecc_enable(void);

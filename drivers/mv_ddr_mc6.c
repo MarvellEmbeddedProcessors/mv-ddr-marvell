@@ -98,6 +98,41 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_mc6.h"
 #include "ddr3_init.h"
 
+/* bank address switch boundary */
+#define MV_DDR_BANK_MAP_OFFS	24
+#define MV_DDR_BANK_MAP_MASK	0x1f
+enum mv_ddr_bank_map {
+	MV_DDR_BANK_MAP_512B,
+	MV_DDR_BANK_MAP_1KB,
+	MV_DDR_BANK_MAP_2KB,
+	MV_DDR_BANK_MAP_4KB,
+	MV_DDR_BANK_MAP_8KB,
+	MV_DDR_BANK_MAP_16KB,
+	MV_DDR_BANK_MAP_32KB,
+	MV_DDR_BANK_MAP_64KB,
+	MV_DDR_BANK_MAP_128KB,
+	MV_DDR_BANK_MAP_256KB,
+	MV_DDR_BANK_MAP_512KB,
+	MV_DDR_BANK_MAP_1MB,
+	MV_DDR_BANK_MAP_2MB,
+	MV_DDR_BANK_MAP_4MB,
+	MV_DDR_BANK_MAP_8MB,
+	MV_DDR_BANK_MAP_16MB,
+	MV_DDR_BANK_MAP_32MB,
+	MV_DDR_BANK_MAP_64MB,
+	MV_DDR_BANK_MAP_128MB,
+	MV_DDR_BANK_MAP_256MB,
+	MV_DDR_BANK_MAP_512MB,
+	MV_DDR_BANK_MAP_1GB,
+	MV_DDR_BANK_MAP_2GB,
+	MV_DDR_BANK_MAP_4GB,
+	MV_DDR_BANK_MAP_8GB,
+	MV_DDR_BANK_MAP_16GB,
+	MV_DDR_BANK_MAP_32GB,
+	MV_DDR_BANK_MAP_64GB,
+	MV_DDR_BANK_MAP_LAST
+};
+
 void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 {
 	struct mv_ddr_mc6_timing mc6_timing;
@@ -884,100 +919,100 @@ unsigned int mv_ddr_device_type_convert(enum mv_ddr_dev_width bus_width)
 	return device_type_map;
 }
 
-unsigned int mv_ddr_bank_map_convert(enum mv_ddr_mc6_bank_boundary mc6_bank_boundary)
+static unsigned int mv_ddr_bank_map_cfg_get(enum mv_ddr_bank_map bank_map)
 {
-	unsigned int mv_ddr_mc6_bank_boundary_map = 0xff;
+	unsigned int bank_map_cfg = 0xff;
 
-	switch (mc6_bank_boundary) {
-	case BANK_MAP_512B:
-		mv_ddr_mc6_bank_boundary_map = 0x2;
+	switch (bank_map) {
+	case MV_DDR_BANK_MAP_512B:
+		bank_map_cfg = 0x2;
 		break;
-	case BANK_MAP_1KB:
-		mv_ddr_mc6_bank_boundary_map = 0x3;
+	case MV_DDR_BANK_MAP_1KB:
+		bank_map_cfg = 0x3;
 		break;
-	case BANK_MAP_2KB:
-		mv_ddr_mc6_bank_boundary_map = 0x4;
+	case MV_DDR_BANK_MAP_2KB:
+		bank_map_cfg = 0x4;
 		break;
-	case BANK_MAP_4KB:
-		mv_ddr_mc6_bank_boundary_map = 0x5;
+	case MV_DDR_BANK_MAP_4KB:
+		bank_map_cfg = 0x5;
 		break;
-	case BANK_MAP_8KB:
-		mv_ddr_mc6_bank_boundary_map = 0x6;
+	case MV_DDR_BANK_MAP_8KB:
+		bank_map_cfg = 0x6;
 		break;
-	case BANK_MAP_16KB:
-		mv_ddr_mc6_bank_boundary_map = 0x7;
+	case MV_DDR_BANK_MAP_16KB:
+		bank_map_cfg = 0x7;
 		break;
-	case BANK_MAP_32KB:
-		mv_ddr_mc6_bank_boundary_map = 0x8;
+	case MV_DDR_BANK_MAP_32KB:
+		bank_map_cfg = 0x8;
 		break;
-	case BANK_MAP_64KB:
-		mv_ddr_mc6_bank_boundary_map = 0x9;
+	case MV_DDR_BANK_MAP_64KB:
+		bank_map_cfg = 0x9;
 		break;
-	case BANK_MAP_128KB:
-		mv_ddr_mc6_bank_boundary_map = 0xa;
+	case MV_DDR_BANK_MAP_128KB:
+		bank_map_cfg = 0xa;
 		break;
-	case BANK_MAP_256KB:
-		mv_ddr_mc6_bank_boundary_map = 0xb;
+	case MV_DDR_BANK_MAP_256KB:
+		bank_map_cfg = 0xb;
 		break;
-	case BANK_MAP_512KB:
-		mv_ddr_mc6_bank_boundary_map = 0xc;
+	case MV_DDR_BANK_MAP_512KB:
+		bank_map_cfg = 0xc;
 		break;
-	case BANK_MAP_1MB:
-		mv_ddr_mc6_bank_boundary_map = 0xd;
+	case MV_DDR_BANK_MAP_1MB:
+		bank_map_cfg = 0xd;
 		break;
-	case BANK_MAP_2MB:
-		mv_ddr_mc6_bank_boundary_map = 0xe;
+	case MV_DDR_BANK_MAP_2MB:
+		bank_map_cfg = 0xe;
 		break;
-	case BANK_MAP_4MB:
-		mv_ddr_mc6_bank_boundary_map = 0xf;
+	case MV_DDR_BANK_MAP_4MB:
+		bank_map_cfg = 0xf;
 		break;
-	case BANK_MAP_8MB:
-		mv_ddr_mc6_bank_boundary_map = 0x10;
+	case MV_DDR_BANK_MAP_8MB:
+		bank_map_cfg = 0x10;
 		break;
-	case BANK_MAP_16MB:
-		mv_ddr_mc6_bank_boundary_map = 0x11;
+	case MV_DDR_BANK_MAP_16MB:
+		bank_map_cfg = 0x11;
 		break;
-	case BANK_MAP_32MB:
-		mv_ddr_mc6_bank_boundary_map = 0x12;
+	case MV_DDR_BANK_MAP_32MB:
+		bank_map_cfg = 0x12;
 		break;
-	case BANK_MAP_64MB:
-		mv_ddr_mc6_bank_boundary_map = 0x13;
+	case MV_DDR_BANK_MAP_64MB:
+		bank_map_cfg = 0x13;
 		break;
-	case BANK_MAP_128MB:
-		mv_ddr_mc6_bank_boundary_map = 0x14;
+	case MV_DDR_BANK_MAP_128MB:
+		bank_map_cfg = 0x14;
 		break;
-	case BANK_MAP_256MB:
-		mv_ddr_mc6_bank_boundary_map = 0x15;
+	case MV_DDR_BANK_MAP_256MB:
+		bank_map_cfg = 0x15;
 		break;
-	case BANK_MAP_512MB:
-		mv_ddr_mc6_bank_boundary_map = 0x16;
+	case MV_DDR_BANK_MAP_512MB:
+		bank_map_cfg = 0x16;
 		break;
-	case BANK_MAP_1GB:
-		mv_ddr_mc6_bank_boundary_map = 0x17;
+	case MV_DDR_BANK_MAP_1GB:
+		bank_map_cfg = 0x17;
 		break;
-	case BANK_MAP_2GB:
-		mv_ddr_mc6_bank_boundary_map = 0x18;
+	case MV_DDR_BANK_MAP_2GB:
+		bank_map_cfg = 0x18;
 		break;
-	case BANK_MAP_4GB:
-		mv_ddr_mc6_bank_boundary_map = 0x19;
+	case MV_DDR_BANK_MAP_4GB:
+		bank_map_cfg = 0x19;
 		break;
-	case BANK_MAP_8GB:
-		mv_ddr_mc6_bank_boundary_map = 0x1a;
+	case MV_DDR_BANK_MAP_8GB:
+		bank_map_cfg = 0x1a;
 		break;
-	case BANK_MAP_16GB:
-		mv_ddr_mc6_bank_boundary_map = 0x1b;
+	case MV_DDR_BANK_MAP_16GB:
+		bank_map_cfg = 0x1b;
 		break;
-	case BANK_MAP_32GB:
-		mv_ddr_mc6_bank_boundary_map = 0x1c;
+	case MV_DDR_BANK_MAP_32GB:
+		bank_map_cfg = 0x1c;
 		break;
-	case BANK_MAP_64GB:
-		mv_ddr_mc6_bank_boundary_map = 0x1d;
+	case MV_DDR_BANK_MAP_64GB:
+		bank_map_cfg = 0x1d;
 		break;
 	default:
-		printf("%s: bank_boundary is not supported\n", __func__);
+		printf("%s: unsupported bank address switch boundary found\n", __func__);
 	}
 
-	return mv_ddr_mc6_bank_boundary_map;
+	return bank_map_cfg;
 }
 
 void mv_ddr_mc6_sizes_cfg(void)
@@ -1039,15 +1074,15 @@ void mv_ddr_mc6_sizes_cfg(void)
 			       SA_NUM_OFFS |
 			       mv_ddr_device_type_convert(tm->interface_params[0].bus_width) <<
 			       DEVICE_TYPE_OFFS |
-			       mv_ddr_bank_map_convert(BANK_MAP_4KB) <<
-			       BANK_MAP_OFFS,
+			       mv_ddr_bank_map_cfg_get(MV_DDR_BANK_MAP_4KB) <<
+			       MV_DDR_BANK_MAP_OFFS,
 			       BA_NUM_MASK << BA_NUM_OFFS |
 			       BG_NUM_MASK << BG_NUM_OFFS |
 			       CA_NUM_MASK << CA_NUM_OFFS |
 			       RA_NUM_MASK << RA_NUM_OFFS |
 			       SA_NUM_MASK << SA_NUM_OFFS |
 			       DEVICE_TYPE_MASK << DEVICE_TYPE_OFFS |
-			       BANK_MAP_MASK << BANK_MAP_OFFS);
+			       MV_DDR_BANK_MAP_MASK << MV_DDR_BANK_MAP_OFFS);
 	}
 
 #ifndef CONFIG_A3700
