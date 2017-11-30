@@ -1026,6 +1026,7 @@ void mv_ddr_mc6_sizes_cfg(void)
 	unsigned int are_length_mega_bytes;
 	unsigned long long start_addr_bytes;
 	unsigned int start_addr_low, start_addr_high;
+	enum mv_ddr_bank_map bm = MV_DDR_BANK_MAP_LAST;
 
 	struct mv_ddr_addr_table addr_tbl = {0};
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
@@ -1037,6 +1038,22 @@ void mv_ddr_mc6_sizes_cfg(void)
 	mv_ddr_addr_table_set(&addr_tbl,
 			      tm->interface_params[0].memory_size,
 			      tm->interface_params[0].bus_width);
+
+	/*
+	 * calculate bank address assignment boundary
+	 * if ddr3 page size is N, ddr4 page size is 2 * N
+	 * if x16 mode page size is M, x32 mode page size is 2 * M
+	 */
+#ifdef CONFIG_DDR4
+	bm = MV_DDR_BANK_MAP_4KB;
+	if (tm->bus_act_mask == BUS_MASK_32BIT)
+		bm = MV_DDR_BANK_MAP_8KB;
+#else /* CONFIG_DDR3 */
+	bm = MV_DDR_BANK_MAP_2KB;
+	if (tm->bus_act_mask == BUS_MASK_32BIT)
+		bm = MV_DDR_BANK_MAP_4KB;
+#endif
+
 	/* configure all length per cs here and activate the cs */
 	for (cs_idx = 0; cs_idx < cs_num; cs_idx++) {
 		start_addr_bytes = area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * cs_idx;
@@ -1074,7 +1091,7 @@ void mv_ddr_mc6_sizes_cfg(void)
 			       SA_NUM_OFFS |
 			       mv_ddr_device_type_convert(tm->interface_params[0].bus_width) <<
 			       DEVICE_TYPE_OFFS |
-			       mv_ddr_bank_map_cfg_get(MV_DDR_BANK_MAP_4KB) <<
+			       mv_ddr_bank_map_cfg_get(bm) <<
 			       MV_DDR_BANK_MAP_OFFS,
 			       BA_NUM_MASK << BA_NUM_OFFS |
 			       BG_NUM_MASK << BG_NUM_OFFS |
