@@ -149,7 +149,7 @@ Porting procedure
 				- SPEED_BIN_DDR_2133R
 				- SPEED_BIN_DDR_2400P
 				- SPEED_BIN_DDR_2400R
-				- SPEED_BIN_DDR_2400S
+				- SPEED_BIN_DDR_2400T
 				- SPEED_BIN_DDR_2400U
 			.. note::
 				No need to configure these parameters, if MV_DDR_CFG_SPD is set as source configuration.
@@ -195,7 +195,7 @@ Porting procedure
 			      {0x1, 0x0, 0, 0},
 			      {0x1, 0x0, 0, 0},
 			      {0x1, 0x0, 0, 0} },
-			   SPEED_BIN_DDR_2400S,		/* speed_bin */
+			   SPEED_BIN_DDR_2400T,		/* speed_bin */
 			   MV_DDR_DEV_WIDTH_8BIT,	/* sdram device width */
 			   MV_DDR_DIE_CAP_8GBIT,	/* die capacity */
 			   MV_DDR_FREQ_800,		/* frequency */
