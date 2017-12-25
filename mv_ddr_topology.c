@@ -108,7 +108,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct dram_config *mv_ddr_dram_config_update(void)
 {
 	struct dram_config *dc = mv_ddr_dram_config_get();
-	uint64_t size = mv_ddr_get_total_memory_size_in_bits();
+	unsigned long long size = mv_ddr_tot_mem_sz_in_bits_get();
 
 	/* convert total memory size from bits to megabytes */
 	size /= (8 * 1024 * 1024);
@@ -337,56 +337,56 @@ int mv_ddr_is_ecc_ena(void)
 		return 0;
 }
 
-/*
- * Translates topology map definitions to real memory size in bits
-  * (per values in ddr3_training_ip_def.h)
- */
-u32 mem_size[] = {
+/* translate topology map definition to real memory size in bits */
+static unsigned int mem_size[] = {
 	ADDR_SIZE_512MB,
 	ADDR_SIZE_1GB,
 	ADDR_SIZE_2GB,
 	ADDR_SIZE_4GB,
 	ADDR_SIZE_8GB
+	/* TODO: add capacity up to 256GB */
 };
 
-uint64_t mv_ddr_get_memory_size_per_cs_in_bits(void)
+unsigned long long mv_ddr_mem_sz_per_cs_in_bits_get(void)
 {
-	uint64_t memory_size_per_cs;
-
-	u32 bus_cnt, num_of_active_bus = 0;
-	u32 num_of_sub_phys_per_ddr_unit = 0;
-
+	unsigned long long mem_sz_per_cs;
+	unsigned int i, sphys, sphys_per_dunit;
+	unsigned int sphy_max = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
-	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
-
-	/* count the number of active bus */
-	for (bus_cnt = 0; bus_cnt < octets_per_if_num - 1/* ignore ecc octet */; bus_cnt++) {
-		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
-		num_of_active_bus++;
+	/* calc number of active subphys excl. ecc one */
+	for (i = 0, sphys = 0; i < sphy_max - 1; i++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, i);
+		sphys++;
 	}
 
-	/* calculate number of sub-phys per ddr unit */
-	if (tm->interface_params[0].bus_width/* supports only single interface */ == MV_DDR_DEV_WIDTH_16BIT)
-		num_of_sub_phys_per_ddr_unit = MV_DDR_TWO_SPHY_PER_DUNIT;
-	if (tm->interface_params[0].bus_width/* supports only single interface */ == MV_DDR_DEV_WIDTH_8BIT)
-		num_of_sub_phys_per_ddr_unit = MV_DDR_ONE_SPHY_PER_DUNIT;
+	/* calc number of subphys per ddr unit */
+	if (tm->interface_params[0].bus_width == MV_DDR_DEV_WIDTH_8BIT)
+		sphys_per_dunit = MV_DDR_ONE_SPHY_PER_DUNIT;
+	else if (tm->interface_params[0].bus_width == MV_DDR_DEV_WIDTH_16BIT)
+		sphys_per_dunit = MV_DDR_TWO_SPHY_PER_DUNIT;
+	else {
+		printf("mv_ddr: unsupported bus width type found\n");
+		return 0;
+	}
 
-	/* calculate dram size per cs */
-	memory_size_per_cs = (uint64_t)mem_size[tm->interface_params[0].memory_size] * (uint64_t)num_of_active_bus
-		/ (uint64_t)num_of_sub_phys_per_ddr_unit * (uint64_t)MV_DDR_NUM_BITS_IN_BYTE;
+	/* calc dram size per cs */
+	mem_sz_per_cs = (unsigned long long)mem_size[tm->interface_params[0].memory_size] *
+			(unsigned long long)sphys /
+			(unsigned long long)sphys_per_dunit *
+			(unsigned long long)MV_DDR_NUM_BITS_IN_BYTE;
 
-	return memory_size_per_cs;
+	return mem_sz_per_cs;
 }
 
-uint64_t mv_ddr_get_total_memory_size_in_bits(void)
+unsigned long long mv_ddr_tot_mem_sz_in_bits_get(void)
 {
-	uint64_t total_memory_size = 0;
-	uint64_t memory_size_per_cs = 0;
-	uint64_t max_cs = mv_ddr_cs_max_get();
+	unsigned long long tot_mem_sz = 0;
+	unsigned long long mem_sz_per_cs = 0;
+	unsigned long long max_cs = mv_ddr_cs_max_get();
 
-	memory_size_per_cs = mv_ddr_get_memory_size_per_cs_in_bits();
-	total_memory_size = max_cs * memory_size_per_cs;
+	mem_sz_per_cs = mv_ddr_mem_sz_per_cs_in_bits_get();
+	tot_mem_sz = max_cs * mem_sz_per_cs;
 
-	return total_memory_size;
+	return tot_mem_sz;
 }

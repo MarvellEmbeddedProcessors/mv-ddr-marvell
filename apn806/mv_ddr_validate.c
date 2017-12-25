@@ -207,7 +207,7 @@ static int dma_offs_config(uint64_t dma_src[][DBG_DMA_ENG_NUM],
 {
 	u32 dma_id;
 	uint64_t dma_gap;
-	uint64_t mem_size = mv_ddr_get_memory_size_per_cs_in_bits();
+	uint64_t mem_size = mv_ddr_mem_sz_per_cs_in_bits_get();
 
 	/* convert memory size in bits to bytes */
 	mem_size /= 8;

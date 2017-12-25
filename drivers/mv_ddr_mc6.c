@@ -1032,7 +1032,7 @@ void mv_ddr_mc6_sizes_cfg(void)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	calc_cs_num(0, 0, &cs_num);
 
-	area_length_bits = mv_ddr_get_memory_size_per_cs_in_bits();
+	area_length_bits = mv_ddr_mem_sz_per_cs_in_bits_get();
 	are_length_mega_bytes = area_length_bits / (MV_DDR_MEGA_BITS * MV_DDR_NUM_BITS_IN_BYTE);
 
 	mv_ddr_addr_table_set(&addr_tbl,

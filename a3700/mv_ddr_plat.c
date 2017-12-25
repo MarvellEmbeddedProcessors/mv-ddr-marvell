@@ -147,7 +147,7 @@ u32 mem_size[] = {
 	ADDR_SIZE_8GB
 };
 
-uint64_t mv_ddr_get_memory_size_per_cs_in_bits(void)
+uint64_t mv_ddr_mem_sz_per_cs_in_bits_get(void)
 {
 	uint64_t memory_size_per_cs;
 
