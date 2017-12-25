@@ -2103,26 +2103,6 @@ int hws_ddr3_tip_mode_read(u32 dev_num, struct mode_info *mode_info)
 }
 
 /*
- * Get first active IF
- */
-int ddr3_tip_get_first_active_if(u8 dev_num, u32 interface_mask,
-				 u32 *interface_id)
-{
-	u32 if_id;
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-
-	for (if_id = 0; if_id <= MAX_INTERFACE_NUM - 1; if_id++) {
-		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		if (interface_mask & (1 << if_id)) {
-			*interface_id = if_id;
-			break;
-		}
-	}
-
-	return MV_OK;
-}
-
-/*
  * Write CS Result
  */
 int ddr3_tip_write_cs_result(u32 dev_num, u32 offset)

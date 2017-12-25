@@ -287,15 +287,9 @@ static int mv_ddr_training_params_set(u8 dev_num)
 {
 	struct tune_train_params params;
 	int status;
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	u32 if_id;
 	u32 cs_num;
 
-	CHECK_STATUS(ddr3_tip_get_first_active_if
-		     (dev_num, tm->if_act_mask,
-		      &if_id));
-
-	CHECK_STATUS(calc_cs_num(dev_num, if_id, &cs_num));
+	CHECK_STATUS(calc_cs_num(dev_num, 0, &cs_num));
 
 	/* NOTE: do not remove any field initilization */
 	params.ck_delay = TUNE_TRAINING_PARAMS_CK_DELAY;

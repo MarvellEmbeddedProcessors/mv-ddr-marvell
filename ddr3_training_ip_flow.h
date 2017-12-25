@@ -274,7 +274,6 @@ int ddr3_tip_configure_odpg(u32 dev_num, enum hws_access_type access_type,
 int ddr3_tip_set_atr(u32 dev_num, u32 flag_id, u32 value);
 int ddr3_tip_write_mrs_cmd(u32 dev_num, u32 *cs_mask_arr, enum mr_number mr_num, u32 data, u32 mask);
 int ddr3_tip_write_cs_result(u32 dev_num, u32 offset);
-int ddr3_tip_get_first_active_if(u8 dev_num, u32 interface_mask, u32 *if_id);
 int ddr3_tip_reset_fifo_ptr(u32 dev_num);
 int ddr3_tip_read_pup_value(u32 dev_num,
 			    u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
