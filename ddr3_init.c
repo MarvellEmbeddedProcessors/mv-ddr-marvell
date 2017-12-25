@@ -221,7 +221,7 @@ int ddr3_init(void)
 	mv_ddr_post_training_fixup();
 
 	octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
-	if (ddr3_if_ecc_enabled()) {
+	if (mv_ddr_is_ecc_ena()) {
 		if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask) ||
 		    MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(tm->bus_act_mask, octets_per_if_num))
 			mv_ddr_mem_scrubbing();

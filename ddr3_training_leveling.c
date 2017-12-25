@@ -1782,7 +1782,7 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 	uintptr_t test_addr = TEST_ADDR;
 
 	/* initialization */
-	if (ddr3_if_ecc_enabled()) {
+	if (mv_ddr_is_ecc_ena()) {
 		ddr3_tip_if_read(dev_num, ACCESS_TYPE_UNICAST, if_id, TRAINING_SW_2_REG,
 				 &reg_val, MASK_ALL_BITS);
 		reg_mask = (TRAINING_ECC_MUX_MASK << TRAINING_ECC_MUX_OFFS) |

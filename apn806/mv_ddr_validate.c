@@ -603,7 +603,7 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 		sphy_access = ACCESS_TYPE_UNICAST;
 	}
 
-	if ((ddr3_if_ecc_enabled() == 1) && (start_sphy != 8))
+	if (mv_ddr_is_ecc_ena() && (start_sphy != 8))
 		reg_bit_clrset(MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
 	/* choose cs for tip controller */
@@ -703,7 +703,7 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 	/* rewrite adll and voltage nominal values */
 	ddr3_tip_bus_write(0, ACCESS_TYPE_MULTICAST, 0, sphy_access, end_sphy - 1, DDR_PHY_DATA,
 			   reg + effective_cs * 0x4, adll_reg_val);
-	if ((ddr3_if_ecc_enabled() == 1) && (start_sphy != 8))
+	if (mv_ddr_is_ecc_ena() && (start_sphy != 8))
 		reg_bit_clrset(MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
 	ddr3_tip_reset_fifo_ptr(0);
@@ -1091,7 +1091,7 @@ static int rx_adjust(u8 *valid_crx_matrix)
 		printf("%s: going to v-h first level search\n", __func__);
 #endif
 		for (byte = start_byte; byte < end_byte; byte++) {
-			if ((ddr3_if_ecc_enabled() == 1) && (byte != 8))
+			if (mv_ddr_is_ecc_ena() && (byte != 8))
 				reg_bit_clrset(MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
 			search = VERTICAL;
@@ -1180,7 +1180,7 @@ static int rx_adjust(u8 *valid_crx_matrix)
 					break;
 				} /* end of switch */
 			} /* end of alg loop */
-			if ((ddr3_if_ecc_enabled() == 1) && (byte != 8))
+			if (mv_ddr_is_ecc_ena() && (byte != 8))
 				reg_bit_clrset(MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 		} /* end of byte_num loop */
 	}
@@ -1190,7 +1190,7 @@ static int rx_adjust(u8 *valid_crx_matrix)
 
 	for (byte = start_byte; byte < end_byte; byte++) {
 
-		if ((ddr3_if_ecc_enabled() == 1) && (byte != 8))
+		if (mv_ddr_is_ecc_ena() && (byte != 8))
 			reg_bit_clrset(MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
 		reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
@@ -1210,7 +1210,7 @@ static int rx_adjust(u8 *valid_crx_matrix)
 			       __func__, effective_cs, byte);
 #endif
 		}
-		if ((ddr3_if_ecc_enabled() == 1) && (byte != 8))
+		if (mv_ddr_is_ecc_ena() && (byte != 8))
 			reg_bit_clrset(MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 	}
 
@@ -1220,14 +1220,14 @@ static int rx_adjust(u8 *valid_crx_matrix)
 #endif
 	for (byte = start_byte; byte < end_byte; byte++) {
 
-		if ((ddr3_if_ecc_enabled() == 1) && (byte != 8))
+		if (mv_ddr_is_ecc_ena() && (byte != 8))
 			reg_bit_clrset(MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
 		reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
 		diagonal_adjust(ena_mask, byte);
 
-		if ((ddr3_if_ecc_enabled() == 1) && (byte != 8))
+		if (mv_ddr_is_ecc_ena() && (byte != 8))
 			reg_bit_clrset(MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 	}
 

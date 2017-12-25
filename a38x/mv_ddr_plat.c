@@ -927,7 +927,7 @@ static int mv_ddr_training_mask_set(void)
 	}
 
 	/* Supplementary not supported for ECC modes */
-	if (1 == ddr3_if_ecc_enabled()) {
+	if (mv_ddr_is_ecc_ena()) {
 		mask_tune_func &= ~WRITE_LEVELING_SUPP_TF_MASK_BIT;
 		mask_tune_func &= ~WRITE_LEVELING_SUPP_MASK_BIT;
 		mask_tune_func &= ~PBS_TX_MASK_BIT;

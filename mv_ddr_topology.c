@@ -325,7 +325,7 @@ unsigned int mv_ddr_cs_max_get(void)
 	return cs_max;
 }
 
-int ddr3_if_ecc_enabled(void)
+int mv_ddr_is_ecc_ena(void)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
