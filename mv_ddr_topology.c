@@ -303,29 +303,24 @@ unsigned int mv_ddr_if_bus_width_get(void)
 	return bus_width;
 }
 
-u32 ddr3_tip_max_cs_get(u32 dev_num)
+unsigned int mv_ddr_cs_max_get(void)
 {
-	u32 c_cs, if_id, bus_id;
-	static u32 max_cs;
+	static unsigned int cs_max;
+	unsigned int cs, sphy;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	unsigned int sphy_max = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 
-	if (!max_cs) {
-		CHECK_STATUS(ddr3_tip_get_first_active_if((u8)dev_num,
-							  tm->if_act_mask,
-							  &if_id));
-		for (bus_id = 0; bus_id < octets_per_if_num; bus_id++) {
-			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
+	if (cs_max == 0) {
+		for (sphy = 0; sphy < sphy_max; sphy++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
 			break;
 		}
 
-		for (c_cs = 0; c_cs < NUM_OF_CS; c_cs++) {
-			VALIDATE_ACTIVE(tm->
-					interface_params[if_id].as_bus_params[bus_id].
-					cs_bitmask, c_cs);
-			max_cs++;
+		for (cs = 0; cs < NUM_OF_CS; cs++) {
+			VALIDATE_ACTIVE(tm->interface_params[0].as_bus_params[sphy].cs_bitmask, cs);
+			cs_max++;
 		}
 	}
 
-	return max_cs;
+	return cs_max;
 }

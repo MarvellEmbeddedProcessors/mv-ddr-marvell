@@ -1013,7 +1013,7 @@ int ddr3_tip_pbs_tx(u32 uidev_num)
 int ddr3_tip_print_all_pbs_result(u32 dev_num)
 {
 	u32 curr_cs;
-	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
+	unsigned int max_cs = mv_ddr_cs_max_get();
 
 	for (curr_cs = 0; curr_cs < max_cs; curr_cs++) {
 		ddr3_tip_print_pbs_result(dev_num, curr_cs, PBS_RX_MODE);

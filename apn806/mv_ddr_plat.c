@@ -1013,7 +1013,7 @@ static void mv_ddr_convert_read_params_from_tip2mc6(void)
 	u32	if_id, cs, cl_val, cwl_val, phy_rl_cycle_dly_mc6, rd_smp_dly_tip, phy_rfifo_rptr_dly_val;
 	u32	mb_read_data_latency;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	u32 max_cs = ddr3_tip_max_cs_get(0);
+	unsigned int max_cs = mv_ddr_cs_max_get();
 
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);

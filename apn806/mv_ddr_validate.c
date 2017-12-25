@@ -1350,7 +1350,7 @@ int mv_ddr_validate(void)
 	uint64_t val;
 	int i, j;
 	u32 cs, sphy;
-	u32 max_cs = ddr3_tip_max_cs_get(0);
+	unsigned int max_cs = mv_ddr_cs_max_get();
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct tsen_config *tsen = marvell_thermal_config_get();

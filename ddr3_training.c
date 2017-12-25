@@ -2373,7 +2373,7 @@ static int ddr3_tip_ddr3_training_main_flow(u32 dev_num)
 	int ret = MV_OK;
 	int adll_bypass_flag = 0;
 	u32 if_id;
-	u32 max_cs = ddr3_tip_max_cs_get(dev_num);
+	unsigned int max_cs = mv_ddr_cs_max_get();
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
 

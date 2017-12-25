@@ -268,12 +268,10 @@ uint64_t mv_ddr_get_total_memory_size_in_bits(void)
 {
 	uint64_t total_memory_size = 0;
 	uint64_t memory_size_per_cs = 0;
-
-	/* get the number of cs */
-	u32 max_cs = ddr3_tip_max_cs_get(0);
+	uint64_t max_cs = mv_ddr_cs_max_get();
 
 	memory_size_per_cs = mv_ddr_get_memory_size_per_cs_in_bits();
-	total_memory_size = (uint64_t)max_cs * memory_size_per_cs;
+	total_memory_size = max_cs * memory_size_per_cs;
 
 	return total_memory_size;
 }
