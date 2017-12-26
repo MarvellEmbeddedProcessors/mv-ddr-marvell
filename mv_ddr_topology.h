@@ -331,6 +331,57 @@ enum mv_ddr_die_count {
 	MV_DDR_DIE_CNT_LAST
 };
 
+#define IS_ACTIVE(mask, id) \
+	((mask) & (1 << (id)))
+
+#define VALIDATE_ACTIVE(mask, id)		\
+	{					\
+	if (IS_ACTIVE(mask, id) == 0)		\
+		continue;			\
+	}
+
+#define IS_IF_ACTIVE(if_mask, if_id) \
+	((if_mask) & (1 << (if_id)))
+
+#define VALIDATE_IF_ACTIVE(mask, id)		\
+	{					\
+	if (IS_IF_ACTIVE(mask, id) == 0)	\
+		continue;			\
+	}
+
+#define IS_BUS_ACTIVE(if_mask , if_id) \
+	(((if_mask) >> (if_id)) & 1)
+
+#define VALIDATE_BUS_ACTIVE(mask, id)		\
+	{					\
+	if (IS_BUS_ACTIVE(mask, id) == 0)	\
+		continue;			\
+	}
+
+#define DDR3_IS_ECC_PUP3_MODE(if_mask) \
+	(((if_mask) == BUS_MASK_16BIT_ECC_PUP3) ? 1 : 0)
+
+#define DDR3_IS_ECC_PUP4_MODE(if_mask) \
+	((if_mask == BUS_MASK_32BIT_ECC || if_mask == BUS_MASK_16BIT_ECC) ? 1 : 0)
+
+#define DDR3_IS_16BIT_DRAM_MODE(mask) \
+	((mask == BUS_MASK_16BIT || mask == BUS_MASK_16BIT_ECC || mask == BUS_MASK_16BIT_ECC_PUP3) ? 1 : 0)
+
+#define DDR3_IS_ECC_PUP8_MODE(if_mask) \
+	((if_mask == MV_DDR_32BIT_ECC_PUP8_BUS_MASK || if_mask == MV_DDR_64BIT_ECC_PUP8_BUS_MASK) ? 1 : 0)
+
+#define MV_DDR_IS_64BIT_DRAM_MODE(mask) \
+	((((mask) & MV_DDR_64BIT_BUS_MASK) == MV_DDR_64BIT_BUS_MASK) || \
+	(((mask) & MV_DDR_64BIT_ECC_PUP8_BUS_MASK) == MV_DDR_64BIT_ECC_PUP8_BUS_MASK) ? 1 : 0)
+
+#define MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(mask, octets_per_if_num/* FIXME: get from ATF */) \
+	((octets_per_if_num == 9/* FIXME: get from ATF */) && \
+	((mask == BUS_MASK_32BIT) || \
+	(mask == MV_DDR_32BIT_ECC_PUP8_BUS_MASK)) ? 1 : 0)
+
+#define MV_DDR_IS_HALF_BUS_DRAM_MODE(mask, octets_per_if_num/* FIXME: get from ATF */) \
+	(MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(mask, octets_per_if_num) || DDR3_IS_16BIT_DRAM_MODE(mask))
+
 unsigned int mv_ddr_cl_calc(unsigned int taa_min, unsigned int tclk);
 unsigned int mv_ddr_cwl_calc(unsigned int tclk);
 struct mv_ddr_topology_map *mv_ddr_topology_map_update(void);
