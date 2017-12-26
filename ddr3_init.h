@@ -263,13 +263,11 @@ int mv_ddr_early_init(void);
 int mv_ddr_early_init2(void);
 int ddr3_silicon_post_init(void);
 int ddr3_post_run_alg(void);
-int ddr3_if_ecc_enabled(void);
 void ddr3_new_tip_ecc_scrub(void);
 
 void mv_ddr_ver_print(void);
 struct mv_ddr_topology_map *mv_ddr_topology_map_get(void);
 
-int ddr3_if_ecc_enabled(void);
 int ddr3_tip_reg_write(u32 dev_num, u32 reg_addr, u32 data);
 int ddr3_tip_reg_read(u32 dev_num, u32 reg_addr, u32 *data, u32 reg_mask);
 int ddr3_silicon_get_ddr_target_freq(u32 *ddr_freq);

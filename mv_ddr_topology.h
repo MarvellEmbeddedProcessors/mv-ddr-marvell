@@ -338,5 +338,6 @@ struct dram_config *mv_ddr_dram_config_update(void);
 unsigned short mv_ddr_bus_bit_mask_get(void);
 unsigned int mv_ddr_if_bus_width_get(void);
 unsigned int mv_ddr_cs_max_get(void);
+int ddr3_if_ecc_enabled(void);
 
 #endif /* _MV_DDR_TOPOLOGY_H */
