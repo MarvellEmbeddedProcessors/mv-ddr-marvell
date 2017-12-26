@@ -244,7 +244,6 @@ extern u16 mask_results_dq_reg_map[];
 
 extern u32 target_freq;
 extern u32 dfs_low_freq;
-extern u32 mem_size[];
 
 extern u32 nominal_avs;
 extern u32 extension_avs;

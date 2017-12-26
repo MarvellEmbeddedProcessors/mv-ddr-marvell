@@ -339,5 +339,7 @@ unsigned short mv_ddr_bus_bit_mask_get(void);
 unsigned int mv_ddr_if_bus_width_get(void);
 unsigned int mv_ddr_cs_max_get(void);
 int mv_ddr_is_ecc_ena(void);
+uint64_t mv_ddr_get_memory_size_per_cs_in_bits(void);
+uint64_t mv_ddr_get_total_memory_size_in_bits(void);
 
 #endif /* _MV_DDR_TOPOLOGY_H */
