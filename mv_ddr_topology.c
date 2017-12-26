@@ -302,3 +302,30 @@ unsigned int mv_ddr_if_bus_width_get(void)
 
 	return bus_width;
 }
+
+u32 ddr3_tip_max_cs_get(u32 dev_num)
+{
+	u32 c_cs, if_id, bus_id;
+	static u32 max_cs;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+
+	if (!max_cs) {
+		CHECK_STATUS(ddr3_tip_get_first_active_if((u8)dev_num,
+							  tm->if_act_mask,
+							  &if_id));
+		for (bus_id = 0; bus_id < octets_per_if_num; bus_id++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_id);
+			break;
+		}
+
+		for (c_cs = 0; c_cs < NUM_OF_CS; c_cs++) {
+			VALIDATE_ACTIVE(tm->
+					interface_params[if_id].as_bus_params[bus_id].
+					cs_bitmask, c_cs);
+			max_cs++;
+		}
+	}
+
+	return max_cs;
+}

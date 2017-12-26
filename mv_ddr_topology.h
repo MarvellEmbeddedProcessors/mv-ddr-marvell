@@ -337,5 +337,6 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void);
 struct dram_config *mv_ddr_dram_config_update(void);
 unsigned short mv_ddr_bus_bit_mask_get(void);
 unsigned int mv_ddr_if_bus_width_get(void);
+u32 ddr3_tip_max_cs_get(u32 dev_num);
 
 #endif /* _MV_DDR_TOPOLOGY_H */
