@@ -102,7 +102,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr_topology_def.h"
 #include "ddr_training_ip_db.h"
 
-#define MAX_CS_NUM		4
 #define MAX_TOTAL_BUS_NUM	(MAX_INTERFACE_NUM * MAX_BUS_NUM)
 #define TIP_ENG_LOCK	0x02000000
 #define TIP_TX_DLL_RANGE_MAX	64
