@@ -396,7 +396,6 @@ MV_DDR_CSRC += ddr3_training_centralization.c
 MV_DDR_CSRC += mv_ddr4_training_calibration.c
 MV_DDR_CSRC += mv_ddr4_training_db.c
 MV_DDR_CSRC += ddr3_training_hw_algo.c
-MV_DDR_CSRC += xor.c
 MV_DDR_CSRC += mv_ddr4_training.c
 MV_DDR_CSRC += mv_ddr4_mpr_pda_if.c
 MV_DDR_CSRC += ddr3_training_pbs.c

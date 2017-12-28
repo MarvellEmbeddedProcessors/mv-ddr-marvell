@@ -121,8 +121,6 @@ static int mv_ddr_training_params_set(u8 dev_num);
  */
 int ddr3_init(void)
 {
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	u32 octets_per_if_num;
 	int status;
 	int is_manual_cal_done;
 
@@ -208,14 +206,8 @@ int ddr3_init(void)
 
 	mv_ddr_post_training_fixup();
 
-	octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
-	if (mv_ddr_is_ecc_ena()) {
-		if (MV_DDR_IS_64BIT_DRAM_MODE(tm->bus_act_mask) ||
-		    MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(tm->bus_act_mask, octets_per_if_num))
-			mv_ddr_mem_scrubbing();
-		else
-			ddr3_new_tip_ecc_scrub();
-	}
+	if (mv_ddr_is_ecc_ena())
+		mv_ddr_mem_scrubbing();
 
 	printf("mv_ddr: completed successfully\n");
 

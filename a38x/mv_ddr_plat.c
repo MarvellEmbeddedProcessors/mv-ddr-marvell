@@ -350,6 +350,7 @@ static u32 dq_bit_map_2_phy_pin[] = {
 
 void mv_ddr_mem_scrubbing(void)
 {
+	ddr3_new_tip_ecc_scrub();
 }
 
 static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
