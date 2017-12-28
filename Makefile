@@ -183,7 +183,32 @@ INCLUDE += -I$(BH_PATH)/inc/common
 MV_DDR_LIBNAME = $(MV_DDR_ROOT)/$(DDRTYPE)_training_$(LIBNAME).lib
 MV_DDR_LIB = $(OBJ_DIR)/$(MV_DDR_LIBNAME)
 
-MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_SRCPATH),$(wildcard $(DIR)/*.c))
+MV_DDR_CSRC += ddr3_debug.c
+MV_DDR_CSRC += ddr3_training_bist.c
+MV_DDR_CSRC += mv_ddr_build_message.c
+MV_DDR_CSRC += ddr3_training_leveling.c
+MV_DDR_CSRC += ddr3_training_db.c
+MV_DDR_CSRC += mv_ddr4_training_leveling.c
+MV_DDR_CSRC += mv_ddr_common.c
+MV_DDR_CSRC += ddr3_init.c
+MV_DDR_CSRC += ddr3_training.c
+MV_DDR_CSRC += mv_ddr_spd.c
+MV_DDR_CSRC += ddr_init.c
+MV_DDR_CSRC += mv_ddr_topology.c
+MV_DDR_CSRC += ddr3_training_ip_engine.c
+MV_DDR_CSRC += ddr3_training_centralization.c
+MV_DDR_CSRC += mv_ddr4_training_calibration.c
+MV_DDR_CSRC += mv_ddr4_training_db.c
+MV_DDR_CSRC += ddr3_training_hw_algo.c
+MV_DDR_CSRC += xor.c
+MV_DDR_CSRC += mv_ddr4_training.c
+MV_DDR_CSRC += ddr3_training_pbs.c
+MV_DDR_CSRC += mv_ddr4_mpr_pda_if.c
+MV_DDR_CSRC += a38x/mv_ddr_brd.c
+MV_DDR_CSRC += a38x/mv_ddr_static.c
+MV_DDR_CSRC += a38x/mv_ddr_plat.c
+MV_DDR_CSRC += a38x/mv_ddr_sys_env_lib.c
+
 MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
 # add mv_ddr build message and version string object
 MV_DDR_VER_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_VER_CSRC))
@@ -348,7 +373,30 @@ endif
 
 LDFLAGS = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
-MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_SRCPATH),$(wildcard $(DIR)/*.c))
+MV_DDR_CSRC += ddr3_training_bist.c
+MV_DDR_CSRC += ddr3_debug.c
+MV_DDR_CSRC += mv_ddr_build_message.c
+MV_DDR_CSRC += ddr3_training_leveling.c
+MV_DDR_CSRC += mv_ddr4_training_leveling.c
+MV_DDR_CSRC += ddr3_training_db.c
+MV_DDR_CSRC += mv_ddr_common.c
+MV_DDR_CSRC += ddr3_init.c
+MV_DDR_CSRC += ddr3_training.c
+MV_DDR_CSRC += mv_ddr_spd.c
+MV_DDR_CSRC += ddr_init.c
+MV_DDR_CSRC += mv_ddr_topology.c
+MV_DDR_CSRC += ddr3_training_ip_engine.c
+MV_DDR_CSRC += ddr3_training_centralization.c
+MV_DDR_CSRC += mv_ddr4_training_calibration.c
+MV_DDR_CSRC += mv_ddr4_training_db.c
+MV_DDR_CSRC += ddr3_training_hw_algo.c
+MV_DDR_CSRC += xor.c
+MV_DDR_CSRC += mv_ddr4_training.c
+MV_DDR_CSRC += mv_ddr4_mpr_pda_if.c
+MV_DDR_CSRC += ddr3_training_pbs.c
+MV_DDR_CSRC += apn806/mv_ddr_validate.c
+MV_DDR_CSRC += apn806/mv_ddr_static.c
+MV_DDR_CSRC += apn806/mv_ddr_plat.c
 MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_mc6.c
 MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_xor_v2.c
 
