@@ -477,9 +477,7 @@ u32 speed_bin_table(u8 index, enum speed_bin_table_elements element)
 		}
 		break;
 	default:
-		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
-				  ("speed_bin_table: error, element id not valid (%d)\n",
-				   (int)element));
+		printf("error: %s: invalid element [%d] found\n", __func__, (int)element);
 		break;
 	}
 

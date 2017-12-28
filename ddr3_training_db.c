@@ -184,7 +184,7 @@ static inline u32 pattern_table_get_killer_word_4(u8 dqs, u8 index)
 	u8 byte;
 
 	if (index >= (KILLER_PATTERN_LENGTH * 2)) {
-		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("Error: %s: wrong index [%u]\n", __func__, index));
+		printf("error: %s: invalid index [%u] found\n", __func__, index);
 		return 0;
 	}
 
@@ -1039,8 +1039,8 @@ u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 			break;
 #endif /* CONFIG_DDR4 */
 		default:
-			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("Error: %s: pattern type [%d] not supported\n",
-							      __func__, (int)type));
+			printf("error: %s: unsupported pattern type [%d] found\n",
+			       __func__, (int)type);
 			pattern = 0;
 			break;
 		}
@@ -1179,8 +1179,8 @@ u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 			break;
 #endif /* CONFIG_DDR4 */
 		default:
-			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("Error: %s: pattern type [%d] not supported\n",
-							      __func__, (int)type));
+			printf("error: %s: unsupported pattern type [%d] found\n",
+			       __func__, (int)type);
 			pattern = 0;
 			break;
 		}
