@@ -332,10 +332,15 @@ ECHO     = @echo
 OBJ_DIR ?= $(MV_DDR_ROOT)
 MV_DDR4 = y
 
-MV_DDR_SRCPATH = $(MV_DDR_ROOT) $(MV_DDR_ROOT)/apn806
+ifneq ($(filter a80x0% a70x0% a7040% a3900%,$(PLATFORM)),)
+MV_DDR_PLAT = apn806
+endif
+
+MV_DDR_SRCPATH = $(MV_DDR_ROOT)
+MV_DDR_PLATPATH = $(MV_DDR_ROOT)/$(MV_DDR_PLAT)
 MV_DDR_DRVPATH = $(MV_DDR_ROOT)/drivers
 
-INCPATH = $(MV_DDR_SRCPATH) $(MV_DDR_DRVPATH)
+INCPATH = $(MV_DDR_SRCPATH) $(MV_DDR_PLATPATH) $(MV_DDR_DRVPATH)
 INCLUDE = $(addprefix -I,$(INCPATH))
 # PLAT_INCLUDES set in ble/ble.mk
 INCLUDE += $(PLAT_INCLUDES)
@@ -373,6 +378,7 @@ endif
 
 LDFLAGS = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
+MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_PLATPATH),$(wildcard $(DIR)/*.c))
 MV_DDR_CSRC += ddr3_training_bist.c
 MV_DDR_CSRC += ddr3_debug.c
 MV_DDR_CSRC += mv_ddr_build_message.c
@@ -394,9 +400,6 @@ MV_DDR_CSRC += xor.c
 MV_DDR_CSRC += mv_ddr4_training.c
 MV_DDR_CSRC += mv_ddr4_mpr_pda_if.c
 MV_DDR_CSRC += ddr3_training_pbs.c
-MV_DDR_CSRC += apn806/mv_ddr_validate.c
-MV_DDR_CSRC += apn806/mv_ddr_static.c
-MV_DDR_CSRC += apn806/mv_ddr_plat.c
 MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_mc6.c
 MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_xor_v2.c
 
@@ -424,7 +427,7 @@ $(MV_DDR_VER_COBJ):
 
 create_dir:
 	$(MKDIR) $(OBJ_DIR)/drivers
-	$(MKDIR) $(OBJ_DIR)/apn806
+	$(MKDIR) $(OBJ_DIR)/$(MV_DDR_PLAT)
 
 header:
 	$(ECHO) "\nBuilding DRAM driver"
