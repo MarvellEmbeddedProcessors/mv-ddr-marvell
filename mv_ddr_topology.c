@@ -303,14 +303,14 @@ unsigned int mv_ddr_if_bus_width_get(void)
 	return bus_width;
 }
 
-unsigned int mv_ddr_cs_max_get(void)
+unsigned int mv_ddr_cs_num_get(void)
 {
-	static unsigned int cs_max;
+	static unsigned int cs_num;
 	unsigned int cs, sphy;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	unsigned int sphy_max = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 
-	if (cs_max == 0) {
+	if (cs_num == 0) {
 		for (sphy = 0; sphy < sphy_max; sphy++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
 			break;
@@ -318,11 +318,11 @@ unsigned int mv_ddr_cs_max_get(void)
 
 		for (cs = 0; cs < MAX_CS_NUM; cs++) {
 			VALIDATE_ACTIVE(tm->interface_params[0].as_bus_params[sphy].cs_bitmask, cs);
-			cs_max++;
+			cs_num++;
 		}
 	}
 
-	return cs_max;
+	return cs_num;
 }
 
 int mv_ddr_is_ecc_ena(void)
@@ -383,7 +383,7 @@ unsigned long long mv_ddr_tot_mem_sz_in_bits_get(void)
 {
 	unsigned long long tot_mem_sz = 0;
 	unsigned long long mem_sz_per_cs = 0;
-	unsigned long long max_cs = mv_ddr_cs_max_get();
+	unsigned long long max_cs = mv_ddr_cs_num_get();
 
 	mem_sz_per_cs = mv_ddr_mem_sz_per_cs_in_bits_get();
 	tot_mem_sz = max_cs * mem_sz_per_cs;

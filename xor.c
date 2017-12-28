@@ -434,7 +434,7 @@ void ddr3_new_tip_ecc_scrub(void)
 	uint64_t total_mem_size, cs_mem_size = 0;
 
 	printf("DDR Training Sequence - Start scrubbing\n");
-	max_cs = mv_ddr_cs_max_get();
+	max_cs = mv_ddr_cs_num_get();
 	for (cs_c = 0; cs_c < max_cs; cs_c++)
 		cs_ena |= 1 << cs_c;
 

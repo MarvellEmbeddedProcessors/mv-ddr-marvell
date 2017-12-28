@@ -690,7 +690,7 @@ int ddr3_tip_print_stability_log(u32 dev_num)
 	u32 reg_data1;
 #endif /* CONFIG_DDR4 */
 	u32 read_data[MAX_INTERFACE_NUM];
-	unsigned int max_cs = mv_ddr_cs_max_get();
+	unsigned int max_cs = mv_ddr_cs_num_get();
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/* Title print */
@@ -1539,7 +1539,7 @@ int ddr3_tip_run_sweep_test(int dev_num, u32 repeat_num, u32 direction,
 	u32 reg;
 	enum hws_access_type pup_access;
 	u32 cs;
-	unsigned int max_cs = mv_ddr_cs_max_get();
+	unsigned int max_cs = mv_ddr_cs_num_get();
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
@@ -1686,7 +1686,7 @@ int ddr3_tip_run_leveling_sweep_test(int dev_num, u32 repeat_num,
 	u32 reg;
 	enum hws_access_type pup_access;
 	u32 cs;
-	unsigned int max_cs = mv_ddr_cs_max_get();
+	unsigned int max_cs = mv_ddr_cs_num_get();
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 

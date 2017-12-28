@@ -126,7 +126,7 @@ Dynamic read leveling
 int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 {
 	u32 data, mask;
-	unsigned int max_cs = mv_ddr_cs_max_get();
+	unsigned int max_cs = mv_ddr_cs_num_get();
 	u32 bus_num, if_id, cl_val;
 	enum hws_speed_bin speed_bin_index;
 	/* save current CS value */
@@ -405,7 +405,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 int ddr3_tip_legacy_dynamic_write_leveling(u32 dev_num)
 {
 	u32 c_cs, if_id, cs_mask = 0;
-	unsigned int max_cs = mv_ddr_cs_max_get();
+	unsigned int max_cs = mv_ddr_cs_num_get();
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/*
@@ -446,7 +446,7 @@ int ddr3_tip_legacy_dynamic_write_leveling(u32 dev_num)
 int ddr3_tip_legacy_dynamic_read_leveling(u32 dev_num)
 {
 	u32 c_cs, if_id, cs_mask = 0;
-	unsigned int max_cs = mv_ddr_cs_max_get();
+	unsigned int max_cs = mv_ddr_cs_num_get();
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	/*
@@ -907,7 +907,7 @@ int ddr3_tip_dynamic_write_leveling(u32 dev_num, int phase_remove)
 	u8 wl_values[MAX_CS_NUM][MAX_BUS_NUM][MAX_INTERFACE_NUM];
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u32 cs_mask0[MAX_INTERFACE_NUM] = { 0 };
-	unsigned int max_cs = mv_ddr_cs_max_get();
+	unsigned int max_cs = mv_ddr_cs_num_get();
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
@@ -1772,7 +1772,7 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 	int init_pass_lock_num;
 	int phase_delta;
 	int min_phase, max_phase;
-	unsigned int max_cs = mv_ddr_cs_max_get();
+	unsigned int max_cs = mv_ddr_cs_num_get();
 	u32 rl_values[MAX_CS_NUM][MAX_BUS_NUM][MAX_INTERFACE_NUM] = { { {0} } };
 	u32 rl_min_values[MAX_CS_NUM][MAX_BUS_NUM][MAX_INTERFACE_NUM] = { { {0} } };
 	u32 rl_max_values[MAX_CS_NUM][MAX_BUS_NUM][MAX_INTERFACE_NUM] = { { {0} } };

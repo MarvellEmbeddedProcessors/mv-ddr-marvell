@@ -1742,7 +1742,7 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 	u32  dqs_pbs_jira56[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 	u8 delta = 0;
 #endif
-	unsigned int max_cs = mv_ddr_cs_max_get();
+	unsigned int max_cs = mv_ddr_cs_num_get();
 	u32 ctr_x[4], pbs_temp[4];
 	u16 cs_index = 0, pbs_rx_avg, lambda_avg;
 	int status;
