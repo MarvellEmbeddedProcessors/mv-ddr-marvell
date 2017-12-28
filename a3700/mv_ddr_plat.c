@@ -66,44 +66,27 @@ void mmio_write2_32(u32 val, u32 addr)
 {
 }
 
-/*
- * Calculate number of CS
- */
-int calc_cs_num(u32 dev_num, u32 if_id, u32 *cs_num)
+unsigned int mv_ddr_cs_num_get(void)
 {
-	u32 cs;
-	u32 bus_cnt;
-	u32 cs_count;
-	u32 cs_bitmask;
-	u32 curr_cs_num = 0;
-	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
+	static unsigned int cs_num;
+	unsigned int cs, sphy;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int sphy_max = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 
-	for (bus_cnt = 0; bus_cnt < octets_per_if_num; bus_cnt++) {
-		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
-		cs_count = 0;
-		cs_bitmask = tm->interface_params[if_id].
-			as_bus_params[bus_cnt].cs_bitmask;
-		for (cs = 0; cs < MAX_CS_NUM; cs++) {
-			if ((cs_bitmask >> cs) & 1)
-				cs_count++;
+	if (cs_num == 0) {
+		for (sphy = 0; sphy < sphy_max; sphy++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
+			break;
 		}
 
-		if (curr_cs_num == 0) {
-			curr_cs_num = cs_count;
-		} else if (cs_count != curr_cs_num) {
-			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
-					  ("CS number is different per bus (IF %d BUS %d cs_num %d curr_cs_num %d)\n",
-					   if_id, bus_cnt, cs_count,
-					   curr_cs_num));
-			return MV_NOT_SUPPORTED;
+		for (cs = 0; cs < MAX_CS_NUM; cs++) {
+			VALIDATE_ACTIVE(tm->interface_params[0].as_bus_params[sphy].cs_bitmask, cs);
+			cs_num++;
 		}
 	}
-	*cs_num = curr_cs_num;
 
-	return MV_OK;
+	return cs_num;
 }
-
 /*
  * Translates topology map definitions to real memory size in bits
   * (per values in ddr3_training_ip_def.h)

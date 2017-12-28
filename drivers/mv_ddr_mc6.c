@@ -96,6 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "mv_ddr_mc6.h"
+#include "mv_ddr_topology.h"
 #include "ddr3_init.h"
 
 /* bank address switch boundary */
@@ -1030,7 +1031,7 @@ void mv_ddr_mc6_sizes_cfg(void)
 
 	struct mv_ddr_addr_table addr_tbl = {0};
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	calc_cs_num(0, 0, &cs_num);
+	cs_num = mv_ddr_cs_num_get();
 
 	area_length_bits = mv_ddr_mem_sz_per_cs_in_bits_get();
 	are_length_mega_bytes = area_length_bits / (MV_DDR_MEGA_BITS * MV_DDR_NUM_BITS_IN_BYTE);

@@ -235,7 +235,7 @@ static int mv_ddr_training_params_set(u8 dev_num)
 	int status;
 	u32 cs_num;
 
-	CHECK_STATUS(calc_cs_num(dev_num, 0, &cs_num));
+	cs_num = mv_ddr_cs_num_get();
 
 	/* NOTE: do not remove any field initilization */
 	params.ck_delay = TUNE_TRAINING_PARAMS_CK_DELAY;

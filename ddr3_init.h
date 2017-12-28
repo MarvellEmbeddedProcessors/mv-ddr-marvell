@@ -298,7 +298,6 @@ void get_target_freq(u32 freq_mode, u32 *ddr_freq, u32 *hclk_ps);
 void ddr3_fast_path_static_cs_size_config(u32 cs_ena);
 u32 mv_board_id_index_get(u32 board_id);
 void ddr3_set_log_level(u32 n_log_level);
-int calc_cs_num(u32 dev_num, u32 if_id, u32 *cs_num);
 
 int hws_ddr3_cs_base_adr_calc(u32 if_id, u32 cs, u32 *cs_base_addr);
 

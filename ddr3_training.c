@@ -466,44 +466,6 @@ int ddr3_tip_configure_cs(u32 dev_num, u32 if_id, u32 cs_num, u32 enable)
 }
 
 /*
- * Calculate number of CS
- */
-int calc_cs_num(u32 dev_num, u32 if_id, u32 *cs_num)
-{
-	u32 cs;
-	u32 bus_cnt;
-	u32 cs_count;
-	u32 cs_bitmask;
-	u32 curr_cs_num = 0;
-	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-
-	for (bus_cnt = 0; bus_cnt < octets_per_if_num; bus_cnt++) {
-		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, bus_cnt);
-		cs_count = 0;
-		cs_bitmask = tm->interface_params[if_id].
-			as_bus_params[bus_cnt].cs_bitmask;
-		for (cs = 0; cs < MAX_CS_NUM; cs++) {
-			if ((cs_bitmask >> cs) & 1)
-				cs_count++;
-		}
-
-		if (curr_cs_num == 0) {
-			curr_cs_num = cs_count;
-		} else if (cs_count != curr_cs_num) {
-			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR,
-					  ("CS number is different per bus (IF %d BUS %d cs_num %d curr_cs_num %d)\n",
-					   if_id, bus_cnt, cs_count,
-					   curr_cs_num));
-			return MV_NOT_SUPPORTED;
-		}
-	}
-	*cs_num = curr_cs_num;
-
-	return MV_OK;
-}
-
-/*
  * Init Controller Flow
  */
 int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_prm)
@@ -764,8 +726,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 				t2t = mode_2t;
 			} else {
 				/* calculate number of CS (per interface) */
-				CHECK_STATUS(calc_cs_num
-					     (dev_num, if_id, &cs_num));
+				cs_num = mv_ddr_cs_num_get();
 				t2t = (cs_num == 1) ? 0 : 1;
 			}
 
@@ -1546,7 +1507,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 			t2t = mode_2t;
 		} else {
 			/* Calculate number of CS per interface */
-			CHECK_STATUS(calc_cs_num(dev_num, if_id, &cs_num));
+			cs_num = mv_ddr_cs_num_get();
 			t2t = (cs_num == 1) ? 0 : 1;
 		}
 

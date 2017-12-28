@@ -1381,8 +1381,8 @@ int ddr3_tip_configure_phy(u32 dev_num)
 	/* set the phy register core_tx_data_samp_edge to posedge */
 	ddr3_tip_bus_write(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ACCESS_TYPE_MULTICAST,
 			   PARAM_NOT_CARE, DDR_PHY_DATA, PHY_CTRL_PHY_REG, 0x6002);
-	calc_cs_num(0, 0, &cs_num);
 
+	cs_num = mv_ddr_cs_num_get();
 #if defined(A70X0)
 	vref = 0x423;
 #else /* A80X0 */
