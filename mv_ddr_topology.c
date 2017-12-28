@@ -316,7 +316,7 @@ unsigned int mv_ddr_cs_max_get(void)
 			break;
 		}
 
-		for (cs = 0; cs < NUM_OF_CS; cs++) {
+		for (cs = 0; cs < MAX_CS_NUM; cs++) {
 			VALIDATE_ACTIVE(tm->interface_params[0].as_bus_params[sphy].cs_bitmask, cs);
 			cs_max++;
 		}

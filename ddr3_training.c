@@ -664,7 +664,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 			 * configure them both:  The Bust_width it\92s the
 			 * Memory Bus width \96 x8 or x16
 			 */
-			for (cs_cnt = 0; cs_cnt < NUM_OF_CS; cs_cnt++) {
+			for (cs_cnt = 0; cs_cnt < MAX_CS_NUM; cs_cnt++) {
 				ddr3_tip_configure_cs(dev_num, if_id, cs_cnt,
 						      ((cs_mask & (1 << cs_cnt)) ? 1
 						       : 0));
