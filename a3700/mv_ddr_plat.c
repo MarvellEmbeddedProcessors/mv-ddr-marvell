@@ -37,37 +37,6 @@
 
 #define DDR_INTERFACE_OCTETS_NUM	9
 
-static struct page_element page_tbl[] = {
-	/*
-	 * 8bits	16 bits
-	 * page-size(K)	page-size(K)	mask
-	 */
-	{ 1,		2,		2},
-	/* 512M */
-	{ 1,		2,		3},
-	/* 1G */
-	{ 1,		2,		0},
-	/* 2G */
-	{ 1,		2,		4},
-	/* 4G */
-#if defined(CONFIG_DDR4)
-	{ 1,		2,		5},
-#else
-	{ 2,		2,		5},
-#endif
-	/* 8G */
-	{0, 0, 0}, /* TODO: placeholder for 16-Mbit die capacity */
-	{0, 0, 0}, /* TODO: placeholder for 32-Mbit die capacity */
-	{0, 0, 0}, /* TODO: placeholder for 12-Mbit die capacity */
-	{0, 0, 0}  /* TODO: placeholder for 24-Mbit die capacity */
-
-};
-
-struct page_element *mv_ddr_page_tbl_get(void)
-{
-	return &page_tbl[0];
-}
-
 /*
  * Accessor functions for the registers
  */
