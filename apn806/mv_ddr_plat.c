@@ -1325,21 +1325,13 @@ void mv_ddr_set_calib_controller(void)
 /* enable dunit and mc6 controllers in all relevant cs */
 int mv_ddr_mc_init(void)
 {
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-
 	ddr3_tip_apn806_select_ddr_controller(0, TUNING_ACTIVE_SEL_TIP);
 
 	/* enable dunit - the init is per cs and reference to 15e0 'DDR3_RANK_CTRL_REG' */
 	ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, SDRAM_INIT_CTRL_REG, 0x1, 0x1);
 
-	/* enable mc6 - the init is per cs in mc6 and not referenced */
-	reg_write(MC6_USER_CMD0_REG, 0x10000001 |
-		  ((tm->interface_params[0].as_bus_params[0].cs_bitmask <<
-		    USER_CMD0_CS_OFFS) &
-		   (USER_CMD0_CS_MASK << USER_CMD0_CS_OFFS)));
-
-	/* FIXME: change the delay to polling on bit '0' */
-	mdelay(10);
+	/* init mc6 controller */
+	mv_ddr_mc6_init();
 
 	return 0;
 }

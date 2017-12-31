@@ -1132,10 +1132,23 @@ void mv_ddr_mc6_sizes_cfg(void)
 #endif
 }
 
-void  mv_ddr_mc6_ecc_enable(void)
+void mv_ddr_mc6_ecc_enable(void)
 {
 	reg_bit_clrset(MC6_RAS_CTRL_REG,
 		       ECC_EN_ENA << ECC_EN_OFFS,
 		       ECC_EN_MASK << ECC_EN_OFFS);
 }
 
+void mv_ddr_mc6_init(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+
+	/* enable mc6 - the init is per cs in mc6 and not referenced */
+	reg_write(MC6_USER_CMD0_REG, 0x10000001 |
+		  ((tm->interface_params[0].as_bus_params[0].cs_bitmask <<
+		    USER_CMD0_CS_OFFS) &
+		   (USER_CMD0_CS_MASK << USER_CMD0_CS_OFFS)));
+
+	/* FIXME: change the delay to polling on bit '0' */
+	mdelay(10);
+}

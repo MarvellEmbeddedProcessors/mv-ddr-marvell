@@ -98,6 +98,7 @@ typedef uint64_t uintptr_t;
 
 void mdelay(unsigned int msec);
 void reg_bit_clrset(u32 addr, u32 val, u32 mask);
+void reg_write(u32 addr, u32 val);
 
 /* printf function */
 #include <stdio.h>

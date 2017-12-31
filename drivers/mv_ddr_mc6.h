@@ -438,6 +438,7 @@ struct mv_ddr_mc6_timing {
 /* function definitions */
 void mv_ddr_mc6_and_dram_timing_set(void);
 void mv_ddr_mc6_sizes_cfg(void);
-void  mv_ddr_mc6_ecc_enable(void);
+void mv_ddr_mc6_ecc_enable(void);
+void mv_ddr_mc6_init(void);
 
 #endif	/* _MV_DDR_MC6_DRV_H */
