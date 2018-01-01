@@ -96,6 +96,7 @@ typedef uint64_t uintptr_t;
 #define MV_8		char
 #define MV_32		int
 
+void mdelay(unsigned int msec);
 void reg_bit_clrset(u32 addr, u32 val, u32 mask);
 
 /* printf function */

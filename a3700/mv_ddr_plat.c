@@ -40,6 +40,10 @@
 /*
  * Accessor functions for the registers
  */
+void mdelay(unsigned int msec)
+{
+}
+
 void reg_write(u32 addr, u32 val)
 {
 }
