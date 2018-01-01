@@ -105,6 +105,9 @@ extern const char mv_ddr_version_string[];
 #define MV_DDR_MEGA_BITS	(1024 * 1024)
 #define MV_DDR_32_BITS_MASK	0xffffffff
 
+#define GET_MAX_VALUE(x, y) \
+	(((x) > (y)) ? (x) : (y))
+
 unsigned int ceil_div(unsigned int x, unsigned int y);
 unsigned int time_to_nclk(unsigned int t, unsigned int tclk);
 int round_div(unsigned int dividend, unsigned int divisor, unsigned int *quotient);

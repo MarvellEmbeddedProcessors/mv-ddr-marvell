@@ -97,6 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mv_ddr_mc6.h"
 #include "mv_ddr_topology.h"
+#include "mv_ddr_common.h"
 #include "ddr3_init.h"
 
 /* bank address switch boundary */

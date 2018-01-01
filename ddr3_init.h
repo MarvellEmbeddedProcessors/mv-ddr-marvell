@@ -137,9 +137,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			return status;	\
 	}
 
-#define GET_MAX_VALUE(x, y)			\
-	((x) > (y)) ? (x) : (y)
-
 #define SUB_VERSION	0
 
 /* max number of devices supported by driver */
