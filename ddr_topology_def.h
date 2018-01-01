@@ -99,18 +99,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _DDR_TOPOLOGY_DEF_H
 
 #include "ddr3_training_ip_def.h"
-
-#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
-#include "a38x/mv_ddr_plat.h"
-#elif defined(CONFIG_APN806)
-#include "apn806/mv_ddr_plat.h"
-#elif defined(CONFIG_A3700)
-#include "a3700/mv_ddr_plat.h"
-#endif
-
 #include "mv_ddr_topology.h"
 #include "mv_ddr_spd.h"
 #include "ddr3_logging_def.h"
+
+#define MV_DDR_MAX_BUS_NUM	9
+#define MV_DDR_MAX_IFACE_NUM	1
 
 struct bus_params {
 	/* Chip Select (CS) bitmask (bits 0-CS0, bit 1- CS1 ...) */
@@ -131,7 +125,7 @@ struct bus_params {
 
 struct if_params {
 	/* bus configuration */
-	struct bus_params as_bus_params[MAX_BUS_NUM];
+	struct bus_params as_bus_params[MV_DDR_MAX_BUS_NUM];
 
 	/* Speed Bin Table */
 	enum hws_speed_bin speed_bin_index;
@@ -169,7 +163,7 @@ struct mv_ddr_topology_map {
 	u8 if_act_mask;
 
 	/* Controller configuration per interface */
-	struct if_params interface_params[MAX_INTERFACE_NUM];
+	struct if_params interface_params[MV_DDR_MAX_IFACE_NUM];
 
 	/* Bit mask for active buses */
 	u16 bus_act_mask;
