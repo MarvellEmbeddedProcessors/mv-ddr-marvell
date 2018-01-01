@@ -389,6 +389,7 @@ enum mv_ddr_die_count {
 	(MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(mask, sphys) ||	\
 	 DDR3_IS_16BIT_DRAM_MODE(mask))
 
+struct mv_ddr_topology_map *mv_ddr_topology_map_get(void);
 unsigned int mv_ddr_cl_calc(unsigned int taa_min, unsigned int tclk);
 unsigned int mv_ddr_cwl_calc(unsigned int tclk);
 struct mv_ddr_topology_map *mv_ddr_topology_map_update(void);

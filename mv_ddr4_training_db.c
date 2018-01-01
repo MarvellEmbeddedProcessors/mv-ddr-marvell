@@ -100,6 +100,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* DDR4 Training Database */
 
 #include "ddr3_init.h"
+#include "mv_ddr_topology.h"
 
 /* list of allowed frequencies listed in order of enum mv_ddr_freq */
 u32 freq_val[MV_DDR_FREQ_LAST] = {
