@@ -39,6 +39,7 @@
 
 #include "ddr3_init.h"
 #include "mv_ddr_tim.h"
+#include "mv_ddr_topology.h"
 
 #define DEBUG(...)
 #define INFO printf

@@ -98,10 +98,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_MC6_DRV_H
 #define _MV_DDR_MC6_DRV_H
 
-/* includes */
-#include "mv_ddr_topology.h"
-#include "mv_ddr_common.h"
-
 /* fclk definition is used for trefi */
 #ifdef CONFIG_A3700
 #define FCLK_KHZ				125000

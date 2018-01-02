@@ -34,6 +34,7 @@
 
 #include <stdio.h>
 #include "ddr3_init.h"
+#include "mv_ddr_common.h"
 
 #define DDR_INTERFACE_OCTETS_NUM	9
 

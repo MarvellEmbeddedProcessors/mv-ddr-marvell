@@ -36,6 +36,7 @@
 #define _MV_DDR_PLAT_H
 
 #include "mv_ddr_mc6.h"
+#include "mv_ddr_topology.h"
 
 #define INTER_REGS_BASE	0xC0000000
 
