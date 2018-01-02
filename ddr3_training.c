@@ -1991,48 +1991,6 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 #endif /* CONFIG_DDR4 */
 
 /*
- * Mode Read
- */
-int hws_ddr3_tip_mode_read(u32 dev_num, struct mode_info *mode_info)
-{
-	u32 ret;
-
-	ret = ddr3_tip_if_read(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			       MR0_REG, mode_info->reg_mr0, MASK_ALL_BITS);
-	if (ret != MV_OK)
-		return ret;
-
-	ret = ddr3_tip_if_read(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			       MR1_REG, mode_info->reg_mr1, MASK_ALL_BITS);
-	if (ret != MV_OK)
-		return ret;
-
-	ret = ddr3_tip_if_read(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			       MR2_REG, mode_info->reg_mr2, MASK_ALL_BITS);
-	if (ret != MV_OK)
-		return ret;
-
-	ret = ddr3_tip_if_read(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			       MR3_REG, mode_info->reg_mr2, MASK_ALL_BITS);
-	if (ret != MV_OK)
-		return ret;
-
-	ret = ddr3_tip_if_read(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			       RD_DATA_SMPL_DLYS_REG, mode_info->read_data_sample,
-			       MASK_ALL_BITS);
-	if (ret != MV_OK)
-		return ret;
-
-	ret = ddr3_tip_if_read(dev_num, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
-			       RD_DATA_RDY_DLYS_REG, mode_info->read_data_ready,
-			       MASK_ALL_BITS);
-	if (ret != MV_OK)
-		return ret;
-
-	return MV_OK;
-}
-
-/*
  * Write CS Result
  */
 int ddr3_tip_write_cs_result(u32 dev_num, u32 offset)

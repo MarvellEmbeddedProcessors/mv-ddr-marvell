@@ -230,30 +230,6 @@ struct cs_element {
 	u8 num_of_cs;
 };
 
-struct mode_info {
-	/* 32 bits representing MRS bits */
-	u32 reg_mr0[MAX_INTERFACE_NUM];
-	u32 reg_mr1[MAX_INTERFACE_NUM];
-	u32 reg_mr2[MAX_INTERFACE_NUM];
-	u32 reg_m_r3[MAX_INTERFACE_NUM];
-	/*
-	 * Each element in array represent read_data_sample register delay for
-	 * a specific interface.
-	 * Each register, 4 bits[0+CS*8 to 4+CS*8] represent Number of DDR
-	 * cycles from read command until data is ready to be fetched from
-	 * the PHY, when accessing CS.
-	 */
-	u32 read_data_sample[MAX_INTERFACE_NUM];
-	/*
-	 * Each element in array represent read_data_sample register delay for
-	 * a specific interface.
-	 * Each register, 4 bits[0+CS*8 to 4+CS*8] represent the total delay
-	 * from read command until opening the read mask, when accessing CS.
-	 * This field defines the delay in DDR cycles granularity.
-	 */
-	u32 read_data_ready[MAX_INTERFACE_NUM];
-};
-
 struct hws_tip_freq_config_info {
 	u8 is_supported;
 	u8 bw_per_freq;
@@ -281,7 +257,6 @@ int hws_ddr3_tip_init_controller(u32 dev_num,
 int hws_ddr3_tip_load_topology_map(u32 dev_num,
 				   struct mv_ddr_topology_map *topology);
 int hws_ddr3_tip_run_alg(u32 dev_num, enum hws_algo_type algo_type);
-int hws_ddr3_tip_mode_read(u32 dev_num, struct mode_info *mode_info);
 int ddr3_tip_is_pup_lock(u32 *pup_buf, enum hws_training_result read_mode);
 u8 ddr3_tip_get_buf_min(u8 *buf_ptr);
 u8 ddr3_tip_get_buf_max(u8 *buf_ptr);
