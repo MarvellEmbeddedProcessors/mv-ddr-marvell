@@ -100,6 +100,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mv_ddr_static.h"
 
+#define MAX_DEVICE_NUM			1
 #define MAX_INTERFACE_NUM		1
 #define MAX_BUS_NUM			5
 #define DDR_IF_CTRL_SUBPHYS_NUM		3

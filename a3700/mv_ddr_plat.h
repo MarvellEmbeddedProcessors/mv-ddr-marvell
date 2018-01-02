@@ -39,8 +39,9 @@
 
 #define INTER_REGS_BASE	0xC0000000
 
-#define MAX_INTERFACE_NUM		1
-#define MAX_BUS_NUM			9
+#define MAX_DEVICE_NUM		1
+#define MAX_INTERFACE_NUM	1
+#define MAX_BUS_NUM		9
 
 void ddr_controller_init(struct mv_ddr_topology_map *map);
 int ddr_reg_write(u32 reg, u32 value);
