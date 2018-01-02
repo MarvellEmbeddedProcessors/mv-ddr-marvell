@@ -441,14 +441,7 @@ struct mv_ddr_mc6_timing {
 
 /* function definitions */
 void mv_ddr_mc6_and_dram_timing_set(void);
-void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz);
-unsigned int mv_ddr_bank_addr_convert(unsigned int num_of_bank_addr_in_bank_group);
-unsigned int mv_ddr_bank_groups_convert(unsigned int num_of_bank_groups);
-unsigned int mv_ddr_column_num_convert(unsigned int column_addr);
-unsigned int mv_ddr_row_num_convert(unsigned int row_addr);
-unsigned int mv_ddr_stack_addr_num_convert(unsigned int stack_addr);
-unsigned int mv_ddr_device_type_convert(enum mv_ddr_dev_width bus_width);
-unsigned int mv_ddr_area_length_convert(unsigned int area_length);
 void mv_ddr_mc6_sizes_cfg(void);
 void  mv_ddr_mc6_ecc_enable(void);
+
 #endif	/* _MV_DDR_MC6_DRV_H */

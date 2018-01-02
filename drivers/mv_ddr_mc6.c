@@ -135,7 +135,7 @@ enum mv_ddr_bank_map {
 	MV_DDR_BANK_MAP_LAST
 };
 
-void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
+static void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 {
 	struct mv_ddr_mc6_timing mc6_timing;
 	unsigned int page_size;
@@ -711,7 +711,7 @@ static int mv_ddr_addr_table_set(struct mv_ddr_addr_table *addr_table,
 	return 0;
 }
 
-unsigned int mv_ddr_area_length_convert(unsigned int area_length)
+static unsigned int mv_ddr_area_length_convert(unsigned int area_length)
 {
 	unsigned int area_length_map = 0xffffffff;
 
@@ -775,7 +775,7 @@ unsigned int mv_ddr_area_length_convert(unsigned int area_length)
 	return area_length_map;
 }
 
-unsigned int mv_ddr_bank_addr_convert(unsigned int num_of_bank_addr_in_bank_group)
+static unsigned int mv_ddr_bank_addr_convert(unsigned int num_of_bank_addr_in_bank_group)
 {
 	unsigned int num_of_bank_addr_in_bank_group_map = 0xff;
 
@@ -797,7 +797,7 @@ unsigned int mv_ddr_bank_addr_convert(unsigned int num_of_bank_addr_in_bank_grou
 	return num_of_bank_addr_in_bank_group_map;
 }
 
-unsigned int mv_ddr_bank_groups_convert(unsigned int num_of_bank_groups)
+static unsigned int mv_ddr_bank_groups_convert(unsigned int num_of_bank_groups)
 {
 	unsigned int num_of_bank_groups_map = 0xff;
 
@@ -819,7 +819,7 @@ unsigned int mv_ddr_bank_groups_convert(unsigned int num_of_bank_groups)
 	return num_of_bank_groups_map;
 }
 
-unsigned int mv_ddr_column_num_convert(unsigned int column_addr)
+static unsigned int mv_ddr_column_num_convert(unsigned int column_addr)
 {
 	unsigned int column_addr_map = 0xff;
 
@@ -847,7 +847,7 @@ unsigned int mv_ddr_column_num_convert(unsigned int column_addr)
 	return column_addr_map;
 }
 
-unsigned int mv_ddr_row_num_convert(unsigned int row_addr)
+static unsigned int mv_ddr_row_num_convert(unsigned int row_addr)
 {
 	unsigned int row_addr_map = 0xff;
 
@@ -878,7 +878,7 @@ unsigned int mv_ddr_row_num_convert(unsigned int row_addr)
 	return row_addr_map;
 }
 
-unsigned int mv_ddr_stack_addr_num_convert(unsigned int stack_addr)
+static unsigned int mv_ddr_stack_addr_num_convert(unsigned int stack_addr)
 {
 	unsigned int stack_addr_map = 0xff;
 
@@ -903,7 +903,7 @@ unsigned int mv_ddr_stack_addr_num_convert(unsigned int stack_addr)
 	return stack_addr_map;
 }
 
-unsigned int mv_ddr_device_type_convert(enum mv_ddr_dev_width bus_width)
+static unsigned int mv_ddr_device_type_convert(enum mv_ddr_dev_width bus_width)
 {
 	unsigned int device_type_map = 0xff;
 
