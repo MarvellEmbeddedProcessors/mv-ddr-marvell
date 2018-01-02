@@ -58,7 +58,6 @@ static char ddr3_1cs_tim_pre[] = {
 	"WRITE: 0xC0000050 0x000001FF\n"
 	"WRITE: 0xC000004c 0x00000000\n"
 	"WRITE: 0xC0000054 0x00000480\n"
-	"WRITE: 0xC0000300 0x0000080B\n"
 };
 
 static char ddr3_1cs_tim_post[] = {
@@ -187,7 +186,6 @@ static char ddr3_2cs_tim_pre[] = {
 	"WRITE: 0xC0000050 0x000001FF\n"
 	"WRITE: 0xC000004c 0x00000000\n"
 	"WRITE: 0xC0000054 0x00000480\n"
-	"WRITE: 0xC0000300 0x0000080B\n"
 };
 
 static char ddr3_2cs_tim_post[] = {
@@ -341,7 +339,6 @@ static char ddr4_1cs_tim_pre[] = {
 	"WRITE: 0xC0000050 0x000001FF\n"
 	"WRITE: 0xC000004C 0x00000000\n"
 	"WRITE: 0xC0000054 0x00000480\n"
-	"WRITE: 0xC0000300 0x00000B0C\n"
 };
 
 static char ddr4_1cs_tim_post[] = {
@@ -515,7 +512,6 @@ static char ddr4_2cs_tim_pre[] = {
 	"WRITE: 0xC0000050 0x000001FF\n"
 	"WRITE: 0xC000004C 0x00000000\n"
 	"WRITE: 0xC0000054 0x00000480\n"
-	"WRITE: 0xC0000300 0x00000B0C\n"
 };
 
 static char ddr4_2cs_tim_post[] = {

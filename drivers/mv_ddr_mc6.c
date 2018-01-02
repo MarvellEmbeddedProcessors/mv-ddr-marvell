@@ -414,14 +414,12 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	mc6_timing.cl = tm->interface_params[0].cas_l;
 	mc6_timing.cwl = tm->interface_params[0].cas_wl;
 
-#ifndef CONFIG_A3700
 	/* configure the timing registers */
-		reg_bit_clrset(MC6_CH0_DRAM_CFG1_REG,
-			       mc6_timing.cwl << CWL_OFFS | mc6_timing.cl << CL_OFFS,
-			       CWL_MASK << CWL_OFFS | CL_MASK << CL_OFFS);
+	reg_bit_clrset(MC6_CH0_DRAM_CFG1_REG,
+		       mc6_timing.cwl << CWL_OFFS | mc6_timing.cl << CL_OFFS,
+		       CWL_MASK << CWL_OFFS | CL_MASK << CL_OFFS);
 	/* printf("MC6_CH0_DRAM_CFG1_REG addr 0x%x, data 0x%x\n", MC6_CH0_DRAM_CFG1_REG,
 	       reg_read(MC6_CH0_DRAM_CFG1_REG)); */
-#endif
 
 	reg_bit_clrset(MC6_CH0_DDR_INIT_TIMING_CTRL0_REG,
 		       mc6_timing.t_restcke << INIT_COUNT_NOP_OFFS,

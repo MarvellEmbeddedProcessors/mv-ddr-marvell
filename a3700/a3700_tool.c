@@ -71,7 +71,9 @@ enum ddr_config_index {
 	DDR_BUS_WIDTH_INDEX,
 	DDR_MEM_SIZE_INDEX,
 	DDR_MEM_FREQ_INDEX,
-	DDR_BUS_ACT_MASK
+	DDR_BUS_ACT_MASK,
+	DDR_CL,
+	DDR_CWL
 };
 
 struct config_item {
@@ -96,6 +98,14 @@ struct output_item {
 #define MAX_TIM_REG_LEN 11
 #define MAX_TIM_VALUE_LEN 11
 
+#ifdef CONFIG_DDR4
+#define DDR_DFT_CL	12 /* DDR4-2400R with 800Mhz clk */
+#define DDR_DFT_CWL	11
+#else /* CONFIG_DDR3 */
+#define DDR_DFT_CL	11 /* DDR3-1600K on 800Mhz clk */
+#define DDR_DFT_CWL	8
+#endif
+
 static struct output_item outputlist[MAX_TIM_ITEMS];
 static struct output_item replacelist[MAX_TIM_ITEMS];
 
@@ -108,7 +118,9 @@ static struct config_item cfg_list[] = {
 	{DDR_BUS_WIDTH_INDEX,	"ddr_bus_width_index",	{} },
 	{DDR_MEM_SIZE_INDEX,	"ddr_mem_size_index",	{} },
 	{DDR_MEM_FREQ_INDEX,	"ddr_mem_freq_index",	{} },
-	{DDR_BUS_ACT_MASK,	"ddr_bus_act_mask",	{} }
+	{DDR_BUS_ACT_MASK,	"ddr_bus_act_mask",	{} },
+	{DDR_CL,		"ddr_cas_latency",	{} },
+	{DDR_CWL,		"ddr_cas_write_latency",	{} }
 };
 
 static int strkv(char *src, char *key, char *value)
@@ -336,6 +348,17 @@ static int ddr_cfg_parse(struct config_item *clist, struct ddr_porting_cfg *cfg)
 	cfg->map.interface_params[0].memory_freq = MV_DDR_FREQ_800;
 
 	cfg->map.bus_act_mask = BUS_MASK_16BIT;
+
+	/* Parse CL/CWL settings from cfg items */
+	if (clist[DDR_CL].value[0] && clist[DDR_CWL].value[0]) {
+		cfg->map.interface_params[0].cas_l = strtol(clist[DDR_CL].value, (char **)NULL, 0);
+		cfg->map.interface_params[0].cas_wl = strtol(clist[DDR_CWL].value, (char **)NULL, 0);
+	}
+	/* Set to default value if items not found */
+	if (!(cfg->map.interface_params[0].cas_l && cfg->map.interface_params[0].cas_wl)) {
+		cfg->map.interface_params[0].cas_l = DDR_DFT_CL;
+		cfg->map.interface_params[0].cas_wl = DDR_DFT_CWL;
+	}
 
 	if ((cfg->type != DDR3 && cfg->type != DDR4) ||
 		(cfg->map.interface_params[0].as_bus_params[0].cs_bitmask != MV_DDR_CS_BITMASK_1CS
