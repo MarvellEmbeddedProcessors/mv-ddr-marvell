@@ -98,6 +98,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_TRAINING_DB_H
 #define _MV_DDR_TRAINING_DB_H
 
+#include "mv_ddr_topology.h"
+
 /* in ns */
 #define TREFI_LOW	7800
 #define TREFI_HIGH	3900
@@ -117,5 +119,6 @@ struct mv_ddr_page_element {
 unsigned int *mv_ddr_rfc_tbl_get(void);
 unsigned int *mv_ddr_freq_tbl_get(void);
 struct mv_ddr_page_element *mv_ddr_page_tbl_get(void);
+unsigned int speed_bin_table(enum hws_speed_bin index, enum speed_bin_table_elements element);
 
 #endif /* _MV_DDR_TRAINING_DB_H */
