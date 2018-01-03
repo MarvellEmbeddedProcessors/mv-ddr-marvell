@@ -101,6 +101,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_init.h"
 #include "mv_ddr4_mpr_pda_if.h"
 #include "mv_ddr4_training.h"
+#include "mv_ddr_training_db.h"
 
 static u8 dram_to_mc_dq_map[MAX_BUS_NUM][BUS_WIDTH_IN_BITS];
 static int dq_map_enable;
@@ -140,6 +141,7 @@ int mv_ddr4_mode_regs_init(u8 dev_num)
 	u32 vref = ((ron + rodt / 2) * 10000) / (ron + rodt);
 	u32 range = (vref >= 6000) ? 0 : 1; /* if vref is >= 60%, use upper range */
 	u32 tap;
+	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 
 	if (range == 0)
 		tap = (vref - 6000) / 65;
@@ -150,7 +152,7 @@ int mv_ddr4_mode_regs_init(u8 dev_num)
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		cl = tm->interface_params[if_id].cas_l;
 		cwl = tm->interface_params[if_id].cas_wl;
-		t_ckclk = MEGA / freq_val[tm->interface_params[if_id].memory_freq];
+		t_ckclk = MEGA / freq_tbl[tm->interface_params[if_id].memory_freq];
 		t_wr = time_to_nclk(speed_bin_table(tm->interface_params[if_id].speed_bin_index,
 					    SPEED_BIN_TWR), t_ckclk) - 1;
 

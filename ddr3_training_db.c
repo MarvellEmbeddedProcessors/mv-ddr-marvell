@@ -207,7 +207,7 @@ static inline u32 pattern_table_get_killer_word_4(u8 dqs, u8 index)
 }
 #else /* !CONFIG_DDR4 */
 /* List of allowed frequency listed in order of enum mv_ddr_freq */
-u32 freq_val[MV_DDR_FREQ_LAST] = {
+static unsigned int freq_val[MV_DDR_FREQ_LAST] = {
 	0,			/*MV_DDR_FREQ_LOW_FREQ */
 	400,			/*MV_DDR_FREQ_400, */
 	533,			/*MV_DDR_FREQ_533, */
@@ -225,6 +225,11 @@ u32 freq_val[MV_DDR_FREQ_LAST] = {
 	360,			/*MV_DDR_FREQ_360 */
 	1000			/*MV_DDR_FREQ_1000 */
 };
+
+unsigned int *mv_ddr_freq_tbl_get(void)
+{
+	return &freq_val[0];
+}
 
 /* Table for CL values per frequency for each speed bin index */
 struct cl_val_per_freq cas_latency_table[] = {

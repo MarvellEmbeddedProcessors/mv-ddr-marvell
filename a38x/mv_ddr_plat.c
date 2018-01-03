@@ -96,7 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "../ddr3_init.h"
-
+#include "../mv_ddr_training_db.h"
 #include "mv_ddr_sys_env_lib.h"
 
 #define DDR_INTERFACES_NUM		1
@@ -551,7 +551,9 @@ static int ddr3_tip_a38x_select_ddr_controller(u8 dev_num, int enable)
 
 static u8 ddr3_tip_clock_mode(u32 frequency)
 {
-	if ((frequency == MV_DDR_FREQ_LOW_FREQ) || (freq_val[frequency] <= 400))
+	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
+
+	if ((frequency == MV_DDR_FREQ_LOW_FREQ) || (freq_tbl[frequency] <= 400))
 		return 1;
 
 	return 2;
@@ -956,6 +958,7 @@ static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 	u32 divider = 0;
 	u32 sar_val, ref_clk_satr;
 	u32 async_val;
+	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 
 	if (if_id != 0) {
 		DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
@@ -972,11 +975,11 @@ static int ddr3_tip_a38x_set_divider(u8 dev_num, u32 if_id,
 	ref_clk_satr = reg_read(DEVICE_SAMPLE_AT_RESET2_REG);
 	if (((ref_clk_satr >> DEVICE_SAMPLE_AT_RESET2_REG_REFCLK_OFFSET) & 0x1) ==
 	    DEVICE_SAMPLE_AT_RESET2_REG_REFCLK_25MHZ)
-		divider = a38x_vco_freq_per_sar_ref_clk_25_mhz[sar_val] / freq_val[frequency];
+		divider = a38x_vco_freq_per_sar_ref_clk_25_mhz[sar_val] / freq_tbl[frequency];
 	else
-		divider = a38x_vco_freq_per_sar_ref_clk_40_mhz[sar_val] / freq_val[frequency];
+		divider = a38x_vco_freq_per_sar_ref_clk_40_mhz[sar_val] / freq_tbl[frequency];
 
-	if ((async_mode_at_tf == 1) && (freq_val[frequency] > 400)) {
+	if ((async_mode_at_tf == 1) && (freq_tbl[frequency] > 400)) {
 		/* Set async mode */
 		dunit_write(0x20220, 0x1000, 0x1000);
 		dunit_write(0xe42f4, 0x200, 0x200);

@@ -102,6 +102,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr_topology_def.h"
 #include "ddr3_training_ip_db.h"
 #include "ddr3_training_ip.h"
+#include "mv_ddr_training_db.h"
 
 #ifdef MV_DDR_ATF
 #include "dram_if.h"
@@ -158,6 +159,7 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 	unsigned int tclk;
 	unsigned char val = 0;
 	int i;
+	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 
 	if (tm->interface_params[0].memory_freq == MV_DDR_FREQ_SAR)
 		tm->interface_params[0].memory_freq = mv_ddr_init_freq_get();
@@ -210,7 +212,7 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 		for (i = 0; i < octets_per_if_num; i++)
 			tm->interface_params[0].as_bus_params[i].mirror_enable_bitmask = val << 1;
 
-		tclk = 1000000 / freq_val[tm->interface_params[0].memory_freq];
+		tclk = 1000000 / freq_tbl[tm->interface_params[0].memory_freq];
 		/* update cas write latency (cwl) */
 		val = mv_ddr_cwl_calc(tclk);
 		if (val == 0) {

@@ -99,5 +99,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MV_DDR_TRAINING_DB_H
 
 unsigned int *mv_ddr_rfc_tbl_get(void);
+unsigned int *mv_ddr_freq_tbl_get(void);
 
 #endif /* _MV_DDR_TRAINING_DB_H */

@@ -152,7 +152,6 @@ extern u8 debug_training, debug_calibration, debug_ddr4_centralization,
 extern u8 is_reg_dump;
 extern u8 generic_init_controller;
 /* list of allowed frequency listed in order of enum mv_ddr_freq */
-extern u32 freq_val[MV_DDR_FREQ_LAST];
 extern u32 is_pll_old;
 extern struct cl_val_per_freq cas_latency_table[];
 extern struct pattern_info pattern_table[];

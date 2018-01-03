@@ -96,6 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ddr3_init.h"
+#include "mv_ddr_training_db.h"
 #include "mv_ddr_mc6.h"
 #include "mv_ddr_xor_v2.h"
 #include "mv_ddr_validate.h"
@@ -346,7 +347,9 @@ void mv_ddr_mem_scrubbing(void)
 
 static u8 mv_ddr_tip_clk_ratio_get(u32 freq)
 {
-	if ((freq == MV_DDR_FREQ_LOW_FREQ) || (freq_val[freq] <= 400))
+	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
+
+	if ((freq == MV_DDR_FREQ_LOW_FREQ) || (freq_tbl[freq] <= 400))
 		return 1;
 
 	return 2;
@@ -573,6 +576,7 @@ static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum mv_ddr_freq targe
 	static int mv_ddr_first_time_setting = 1;
 	u32 reg;
 	enum mv_ddr_freq init_ddr_freq;
+	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 
 	if (if_id != 0) {
 		DEBUG_TRAINING_ACCESS(DEBUG_LEVEL_ERROR,
@@ -585,7 +589,7 @@ static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum mv_ddr_freq targe
 		/* get ddr init freq */
 		init_ddr_freq = mv_ddr_init_freq_get();
 
-		init_ddr_freq_val = freq_val[init_ddr_freq];
+		init_ddr_freq_val = freq_tbl[init_ddr_freq];
 
 		/* get mc & ddr clk dividers values */
 		reg = reg_read(DEV_GEN_CTRL1_REG_ADDR);
@@ -594,7 +598,7 @@ static int mv_ddr_clk_dividers_set(u8 dev_num, u32 if_id, enum mv_ddr_freq targe
 		mv_ddr_first_time_setting = 0;
 	}
 
-	target_ddr_freq_val = freq_val[target_ddr_freq];
+	target_ddr_freq_val = freq_tbl[target_ddr_freq];
 
 	/* calc mc & ddr target clk divider value */
 	ddr_target_div = mv_ddr_target_div_calc(ddr_div, init_ddr_freq_val, target_ddr_freq_val);

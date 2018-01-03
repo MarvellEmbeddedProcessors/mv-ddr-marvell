@@ -96,6 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ddr3_init.h"
+#include "mv_ddr_training_db.h"
 
 u8 is_reg_dump = 0;
 u8 debug_pbs = DEBUG_LEVEL_ERROR;
@@ -1100,6 +1101,7 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 {
 	u32 tmp_val = 0, if_id = 0, pup_id = 0;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 
 	dev_num = dev_num;
 	*ptr = NULL;
@@ -1184,7 +1186,7 @@ static int ddr3_tip_access_atr(u32 dev_num, u32 flag_id, u32 value, u32 **ptr)
 		break;
 
 	case 0x36:
-		*ptr = (u32 *)&(freq_val[MV_DDR_FREQ_LOW_FREQ]);
+		*ptr = (u32 *)&(freq_tbl[MV_DDR_FREQ_LOW_FREQ]);
 		break;
 
 	case 0x37:

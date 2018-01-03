@@ -104,7 +104,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_training_db.h"
 
 /* list of allowed frequencies listed in order of enum mv_ddr_freq */
-u32 freq_val[MV_DDR_FREQ_LAST] = {
+static unsigned int freq_val[MV_DDR_FREQ_LAST] = {
 	130,	/* MV_DDR_FREQ_LOW_FREQ */
 	650,	/* MV_DDR_FREQ_650 */
 	666,	/* MV_DDR_FREQ_667 */
@@ -116,6 +116,11 @@ u32 freq_val[MV_DDR_FREQ_LAST] = {
 	1050,	/* MV_DDR_FREQ_1050 */
 	1200	/* MV_DDR_FREQ_1200 */
 };
+
+unsigned int *mv_ddr_freq_tbl_get(void)
+{
+	return &freq_val[0];
+}
 
 /* non-dbi mode - table for cl values per frequency for each speed bin index */
 struct cl_val_per_freq cas_latency_table[] = {

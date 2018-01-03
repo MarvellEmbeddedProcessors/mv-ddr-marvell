@@ -96,6 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ddr3_init.h"
+#include "mv_ddr_training_db.h"
 
 #define TYPICAL_PBS_VALUE	12
 
@@ -125,7 +126,8 @@ static u8 pup_state[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 int ddr3_tip_pbs(u32 dev_num, enum pbs_dir pbs_mode)
 {
 	u32 res0[MAX_INTERFACE_NUM];
-	int adll_tap = MEGA / freq_val[medium_freq] / 64;
+	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
+	int adll_tap = MEGA / freq_tbl[medium_freq] / 64;
 	int pad_num = 0;
 	enum hws_search_dir search_dir =
 		(pbs_mode == PBS_RX_MODE) ? HWS_HIGH2LOW : HWS_LOW2HIGH;
