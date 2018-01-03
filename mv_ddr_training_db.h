@@ -98,7 +98,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_TRAINING_DB_H
 #define _MV_DDR_TRAINING_DB_H
 
+enum hws_page_size {
+	PAGE_SIZE_1K,
+	PAGE_SIZE_2K
+};
+
+struct page_element {
+	enum hws_page_size page_size_8bit;
+	/* page size in 8 bits bus width */
+	enum hws_page_size page_size_16bit;
+	/* page size in 16 bits bus width */
+	u32 ui_page_mask;
+	/* Mask used in register */
+};
+
 unsigned int *mv_ddr_rfc_tbl_get(void);
 unsigned int *mv_ddr_freq_tbl_get(void);
+struct page_element *mv_ddr_page_tbl_get(void);
 
 #endif /* _MV_DDR_TRAINING_DB_H */

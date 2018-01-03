@@ -159,15 +159,6 @@ struct write_supp_result {
 	int is_pup_fail;
 };
 
-struct page_element {
-	enum hws_page_size page_size_8bit;
-	/* page size in 8 bits bus width */
-	enum hws_page_size page_size_16bit;
-	/* page size in 16 bits bus width */
-	u32 ui_page_mask;
-	/* Mask used in register */
-};
-
 int ddr3_tip_write_leveling_static_config(u32 dev_num, u32 if_id,
 					  enum mv_ddr_freq frequency,
 					  u32 *round_trip_delay_arr);
@@ -234,6 +225,5 @@ int ddr3_tip_write_adll_value(u32 dev_num,
 			      u32 reg_addr);
 int ddr3_tip_tune_training_params(u32 dev_num,
 				  struct tune_train_params *params);
-struct page_element *mv_ddr_page_tbl_get(void);
 
 #endif /* _DDR3_TRAINING_IP_FLOW_H_ */

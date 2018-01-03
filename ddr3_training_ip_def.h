@@ -218,11 +218,6 @@ enum hws_search_dir {
 	HWS_SEARCH_DIR_LIMIT
 };
 
-enum hws_page_size {
-	PAGE_SIZE_1K,
-	PAGE_SIZE_2K
-};
-
 enum hws_operation {
 	OPERATION_READ = 0,
 	OPERATION_WRITE = 1
