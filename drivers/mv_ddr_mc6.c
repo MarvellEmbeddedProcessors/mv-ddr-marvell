@@ -99,6 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_topology.h"
 #include "mv_ddr_common.h"
 #include "ddr3_init.h"
+#include "mv_ddr_training_db.h"
 
 /* bank address switch boundary */
 #define MV_DDR_BANK_MAP_OFFS	24
@@ -141,6 +142,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	unsigned int page_size;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct page_element *page_param = mv_ddr_page_tbl_get();
+	unsigned int *rfc_tbl = mv_ddr_rfc_tbl_get();
 
 	/* get the spped bin index */
 	enum hws_speed_bin speed_bin_index = tm->interface_params[0].speed_bin_index;
@@ -296,7 +298,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	/* printf("t_rp = %d\n", mc6_timing.t_rp); */
 
 	/*calculate t_rfc */
-	mc6_timing.t_rfc = time_to_nclk(rfc_table[memory_size] * 1000, mc6_timing.t_ckclk);
+	mc6_timing.t_rfc = time_to_nclk(rfc_tbl[memory_size] * 1000, mc6_timing.t_ckclk);
 	/* printf("t_rfc = %d\n", mc6_timing.t_rfc); */
 
 	/* calculate t_xs */

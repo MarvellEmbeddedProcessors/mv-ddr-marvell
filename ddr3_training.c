@@ -97,6 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 #include "mv_ddr_common.h"
+#include "mv_ddr_training_db.h"
 
 #define GET_CS_FROM_MASK(mask)	(cs_mask2_num[mask])
 #define CS_CBE_VALUE(cs_num)	(cs_cbe_reg[cs_num])
@@ -1792,6 +1793,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	enum mv_ddr_die_capacity memory_size = MV_DDR_DIE_CAP_2GBIT;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct page_element *page_param = mv_ddr_page_tbl_get();
+	unsigned int *rfc_tbl = mv_ddr_rfc_tbl_get();
 
 	speed_bin_index = tm->interface_params[if_id].speed_bin_index;
 	memory_size = tm->interface_params[if_id].memory_size;
@@ -1852,7 +1854,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	t_wtr = time_to_nclk(t_wtr, t_ckclk);
 	t_rrd = time_to_nclk(t_rrd, t_ckclk);
 	t_rtp = time_to_nclk(t_rtp, t_ckclk);
-	t_rfc = time_to_nclk(rfc_table[memory_size] * 1000, t_ckclk);
+	t_rfc = time_to_nclk(rfc_tbl[memory_size] * 1000, t_ckclk);
 	t_mod = time_to_nclk(t_mod, t_ckclk);
 
 	/* SDRAM Timing Low */

@@ -163,7 +163,6 @@ extern struct hws_tip_config_func_db config_func_info[];
 extern u8 twr_mask_table[];
 extern u8 cl_mask_table[];
 extern u8 cwl_mask_table[];
-extern u16 rfc_table[];
 extern u32 speed_bin_table_t_rc[];
 extern u32 speed_bin_table_t_rcd_t_rp[];
 

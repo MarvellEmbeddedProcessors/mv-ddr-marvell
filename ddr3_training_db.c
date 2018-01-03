@@ -97,6 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 #include "mv_ddr_topology.h"
+#include "mv_ddr_training_db.h"
 
 /* Device attributes structures */
 enum mv_ddr_dev_attribute ddr_dev_attributes[MAX_DEVICE_NUM][MV_ATTR_LAST];
@@ -398,17 +399,22 @@ u8 cwl_mask_table[] = {
 };
 
 /* RFC values (in ns) */
-u16 rfc_table[] = {
-	90,			/* 512M */
-	110,			/* 1G */
-	160,			/* 2G */
-	260,			/* 4G */
-	350,			/* 8G */
-	0,			/* TODO: placeholder for 16-Mbit dev width */
-	0,			/* TODO: placeholder for 32-Mbit dev width */
-	0,			/* TODO: placeholder for 12-Mbit dev width */
-	0			/* TODO: placeholder for 24-Mbit dev width */
+static unsigned int rfc_table[] = {
+	90,	/* 512M */
+	110,	/* 1G */
+	160,	/* 2G */
+	260,	/* 4G */
+	350,	/* 8G */
+	0,	/* TODO: placeholder for 16-Mbit dev width */
+	0,	/* TODO: placeholder for 32-Mbit dev width */
+	0,	/* TODO: placeholder for 12-Mbit dev width */
+	0	/* TODO: placeholder for 24-Mbit dev width */
 };
+
+unsigned int *mv_ddr_rfc_tbl_get(void)
+{
+	return &rfc_table[0];
+}
 
 u32 speed_bin_table_t_rc[] = {
 	50000,

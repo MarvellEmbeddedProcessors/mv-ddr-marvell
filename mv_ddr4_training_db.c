@@ -101,6 +101,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 #include "mv_ddr_topology.h"
+#include "mv_ddr_training_db.h"
 
 /* list of allowed frequencies listed in order of enum mv_ddr_freq */
 u32 freq_val[MV_DDR_FREQ_LAST] = {
@@ -175,7 +176,7 @@ struct cl_val_per_freq cas_write_latency_table[] = {
  * rfc values, ns
  * note: values per JEDEC speed bin 1866; TODO: check it
  */
-u16 rfc_table[] = {
+static unsigned int rfc_table[] = {
 	0,	/* placholder */
 	0,	/* placholder */
 	160,	/* 2G */
@@ -186,6 +187,11 @@ u16 rfc_table[] = {
 	0,	/* TODO: placeholder for 12-Mbit die capacity */
 	0	/* TODO: placeholder for 24-Mbit die capacity */
 };
+
+unsigned int *mv_ddr_rfc_tbl_get(void)
+{
+	return &rfc_table[0];
+}
 
 u16 rtt_table[] = {
 	0xffff,
