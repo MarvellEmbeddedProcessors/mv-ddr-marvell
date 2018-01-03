@@ -141,7 +141,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int freq_mhz)
 	struct mv_ddr_mc6_timing mc6_timing;
 	unsigned int page_size;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	struct page_element *page_param = mv_ddr_page_tbl_get();
+	struct mv_ddr_page_element *page_param = mv_ddr_page_tbl_get();
 	unsigned int *rfc_tbl = mv_ddr_rfc_tbl_get();
 
 	/* get the spped bin index */

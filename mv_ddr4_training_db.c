@@ -319,28 +319,20 @@ u32 speed_bin_table_t_rc[] = {
 	47000
 };
 
-static struct page_element page_tbl[] = {
-	/*
-	 * 8bits	16 bits
-	 * page-size(K)	page-size(K)	mask
-	 */
-	{ 1,		2,		2},
-	/* 512M */
-	{ 1,		2,		3},
-	/* 1G */
-	{ 1,		2,		0},
-	/* 2G */
-	{ 1,		2,		4},
-	/* 4G */
-	{ 1,		2,		5},
-	/* 8G */
-	{0, 0, 0}, /* TODO: placeholder for 16-Mbit die capacity */
-	{0, 0, 0}, /* TODO: placeholder for 32-Mbit die capacity */
-	{0, 0, 0}, /* TODO: placeholder for 12-Mbit die capacity */
-	{0, 0, 0}  /* TODO: placeholder for 24-Mbit die capacity */
+static struct mv_ddr_page_element page_tbl[] = {
+	/* 8-bit, 16-bit page size */
+	{MV_DDR_PAGE_SIZE_1K, MV_DDR_PAGE_SIZE_2K}, /* 512M */
+	{MV_DDR_PAGE_SIZE_1K, MV_DDR_PAGE_SIZE_2K}, /* 1G */
+	{MV_DDR_PAGE_SIZE_1K, MV_DDR_PAGE_SIZE_2K}, /* 2G */
+	{MV_DDR_PAGE_SIZE_1K, MV_DDR_PAGE_SIZE_2K}, /* 4G */
+	{MV_DDR_PAGE_SIZE_1K, MV_DDR_PAGE_SIZE_2K}, /* 8G */
+	{0, 0}, /* TODO: placeholder for 16-Mbit die capacity */
+	{0, 0}, /* TODO: placeholder for 32-Mbit die capacity */
+	{0, 0}, /* TODO: placeholder for 12-Mbit die capacity */
+	{0, 0}  /* TODO: placeholder for 24-Mbit die capacity */
 };
 
-struct page_element *mv_ddr_page_tbl_get(void)
+struct mv_ddr_page_element *mv_ddr_page_tbl_get(void)
 {
 	return &page_tbl[0];
 }

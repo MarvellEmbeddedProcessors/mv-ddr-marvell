@@ -1795,7 +1795,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	enum hws_speed_bin speed_bin_index;
 	enum mv_ddr_die_capacity memory_size = MV_DDR_DIE_CAP_2GBIT;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	struct page_element *page_param = mv_ddr_page_tbl_get();
+	struct mv_ddr_page_element *page_param = mv_ddr_page_tbl_get();
 	unsigned int *rfc_tbl = mv_ddr_rfc_tbl_get();
 	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 
@@ -1946,7 +1946,7 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	enum hws_speed_bin speed_bin_index;
 	enum mv_ddr_die_capacity memory_size;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	struct page_element *page_param = mv_ddr_page_tbl_get();
+	struct mv_ddr_page_element *page_param = mv_ddr_page_tbl_get();
 	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 
 	speed_bin_index = tm->interface_params[if_id].speed_bin_index;
