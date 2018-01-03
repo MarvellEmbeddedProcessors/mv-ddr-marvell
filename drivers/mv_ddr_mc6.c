@@ -95,11 +95,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
+#if defined(MV_DDR_ATF) /* MARVELL ATF */
+#include "mv_ddr_atf_wrapper.h"
+#elif defined(CONFIG_A3700)
+#include "mv_ddr_a3700_wrapper.h"
+#endif
+
 #include "mv_ddr_mc6.h"
 #include "mv_ddr_topology.h"
 #include "mv_ddr_common.h"
-#include "ddr3_init.h"
 #include "mv_ddr_training_db.h"
+#include "ddr_topology_def.h"
 
 /* bank address switch boundary */
 #define MV_DDR_BANK_MAP_OFFS	24
