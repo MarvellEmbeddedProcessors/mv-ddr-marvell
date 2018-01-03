@@ -131,8 +131,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /* nsec */
-#define  TREFI_LOW				7800
-#define  TREFI_HIGH				3900
 #define AUTO_ZQC_TIMING				15384
 
 enum mr_number {
