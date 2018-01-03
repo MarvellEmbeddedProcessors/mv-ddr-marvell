@@ -116,9 +116,16 @@ struct mv_ddr_page_element {
 	enum mv_ddr_page_size page_size_16bit;
 };
 
+/* cas latency value per frequency */
+struct mv_ddr_cl_val_per_freq {
+	unsigned int cl_val[MV_DDR_FREQ_LAST];
+};
+
 unsigned int *mv_ddr_rfc_tbl_get(void);
 unsigned int *mv_ddr_freq_tbl_get(void);
 struct mv_ddr_page_element *mv_ddr_page_tbl_get(void);
 unsigned int speed_bin_table(enum hws_speed_bin index, enum speed_bin_table_elements element);
+struct mv_ddr_cl_val_per_freq *mv_ddr_cl_tbl_get(void);
+struct mv_ddr_cl_val_per_freq *mv_ddr_cwl_tbl_get(void);
 
 #endif /* _MV_DDR_TRAINING_DB_H */

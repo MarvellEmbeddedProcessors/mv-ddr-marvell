@@ -153,9 +153,7 @@ extern u8 is_reg_dump;
 extern u8 generic_init_controller;
 /* list of allowed frequency listed in order of enum mv_ddr_freq */
 extern u32 is_pll_old;
-extern struct cl_val_per_freq cas_latency_table[];
 extern struct pattern_info pattern_table[];
-extern struct cl_val_per_freq cas_write_latency_table[];
 extern u8 debug_centralization, debug_training_ip, debug_training_bist,
 	debug_pbs, debug_training_static, debug_leveling;
 extern struct hws_tip_config_func_db config_func_info[];

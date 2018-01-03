@@ -219,11 +219,6 @@ struct pattern_info {
 	u8 pattern_len;
 };
 
-/* CL value for each frequency */
-struct cl_val_per_freq {
-	u8 cl_val[MV_DDR_FREQ_LAST];
-};
-
 struct cs_element {
 	u8 cs_num;
 	u8 num_of_cs;

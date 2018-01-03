@@ -123,7 +123,7 @@ unsigned int *mv_ddr_freq_tbl_get(void)
 }
 
 /* non-dbi mode - table for cl values per frequency for each speed bin index */
-struct cl_val_per_freq cas_latency_table[] = {
+static struct mv_ddr_cl_val_per_freq cl_table[] = {
 	/* TODO: review 1600 and 1866 speed grades */
 	/* 130M	650M	667M	800M	933M	1067M	900	1000	1050	1200 */
 	{ {10,	10,	10,	0,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600J */
@@ -141,8 +141,13 @@ struct cl_val_per_freq cas_latency_table[] = {
 	{ {10,	10,	10,	12,	14,	16,	14,	16,	16,	18} }	/* SPEED_BIN_DDR_2400U */
 };
 
+struct mv_ddr_cl_val_per_freq *mv_ddr_cl_tbl_get(void)
+{
+	return &cl_table[0];
+}
+
 /* dbi mode - table for cl values per frequency for each speed bin index */
-struct cl_val_per_freq cas_latency_table_dbi[] = {
+struct mv_ddr_cl_val_per_freq cas_latency_table_dbi[] = {
 	/* 130M	650M	667M	800M	933M	1067M	900	1000 */
 	{ {0,	12,	12,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600J */
 	{ {0,	13,	13,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600K */
@@ -160,7 +165,7 @@ struct cl_val_per_freq cas_latency_table_dbi[] = {
 };
 
 /* table for cwl values per speed bin index */
-struct cl_val_per_freq cas_write_latency_table[] = {
+static struct mv_ddr_cl_val_per_freq cwl_table[] = {
 	/* 130M	650M	667M	800M	933M	1067M	900	1000	1050	1200 */
 	{ {9,	9,	9,	0,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600J */
 	{ {9,	9,	9,	0,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600K */
@@ -176,6 +181,11 @@ struct cl_val_per_freq cas_write_latency_table[] = {
 	{ {9,	9,	9,	9,	10,	11,	10,	11,	10,	12} },	/* SPEED_BIN_DDR_2400T */
 	{ {9,	9,	9,	9,	10,	11,	10,	11,	10,	12} }	/* SPEED_BIN_DDR_2400U */
 };
+
+struct mv_ddr_cl_val_per_freq *mv_ddr_cwl_tbl_get(void)
+{
+	return &cwl_table[0];
+}
 
 /*
  * rfc values, ns

@@ -160,6 +160,8 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 	unsigned char val = 0;
 	int i;
 	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
+	struct mv_ddr_cl_val_per_freq *cl_tbl = mv_ddr_cl_tbl_get();
+	struct mv_ddr_cl_val_per_freq *cwl_tbl = mv_ddr_cwl_tbl_get();
 
 	if (tm->interface_params[0].memory_freq == MV_DDR_FREQ_SAR)
 		tm->interface_params[0].memory_freq = mv_ddr_init_freq_get();
@@ -236,11 +238,11 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 
 		if (tm->interface_params[0].cas_l == 0)
 			tm->interface_params[0].cas_l =
-				cas_latency_table[speed_bin_index].cl_val[freq];
+				cl_tbl[speed_bin_index].cl_val[freq];
 
 		if (tm->interface_params[0].cas_wl == 0)
 			tm->interface_params[0].cas_wl =
-				cas_write_latency_table[speed_bin_index].cl_val[freq];
+				cwl_tbl[speed_bin_index].cl_val[freq];
 	}
 
 	return tm;

@@ -231,8 +231,8 @@ unsigned int *mv_ddr_freq_tbl_get(void)
 	return &freq_val[0];
 }
 
-/* Table for CL values per frequency for each speed bin index */
-struct cl_val_per_freq cas_latency_table[] = {
+/* cas latency values per frequency for each speed bin index */
+static struct mv_ddr_cl_val_per_freq cl_table[] = {
 	/*
 	 * 400M   667M     933M   311M     467M  600M    360
 	 * 100M    533M    800M    1066M   333M    850M      900
@@ -288,8 +288,13 @@ struct cl_val_per_freq cas_latency_table[] = {
 	{ {6, 6, 7, 9, 11, 13, 0, 6, 6, 7, 13, 9, 6, 13, 6, 13} },
 };
 
-/* Table for CWL values per speedbin index */
-struct cl_val_per_freq cas_write_latency_table[] = {
+struct mv_ddr_cl_val_per_freq *mv_ddr_cl_tbl_get(void)
+{
+	return &cl_table[0];
+}
+
+/* cas write latency values per frequency for each speed bin index */
+static struct mv_ddr_cl_val_per_freq cwl_table[] = {
 	/*
 	 * 400M   667M     933M   311M     467M  600M    360
 	 * 100M    533M    800M    1066M   333M    850M      900
@@ -344,6 +349,11 @@ struct cl_val_per_freq cas_write_latency_table[] = {
 	/* DDR3-1866M-ext  */
 	{ {5, 5, 6, 7, 8, 9, 0, 5, 5, 6, 9, 7, 5, 9, 5, 9} },
 };
+
+struct mv_ddr_cl_val_per_freq *mv_ddr_cwl_tbl_get(void)
+{
+	return &cwl_table[0];
+}
 
 u8 twr_mask_table[] = {
 	10,
