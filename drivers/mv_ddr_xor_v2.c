@@ -95,7 +95,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include "ddr3_init.h"
+#if defined(MV_DDR_ATF) /* MARVELL ATF */
+#include "mv_ddr_atf_wrapper.h"
+#endif
+
 #include "mv_ddr_xor_v2.h"
 
 /* dma engine registers */
