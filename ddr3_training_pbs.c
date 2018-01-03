@@ -97,6 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 #include "mv_ddr_training_db.h"
+#include "mv_ddr_common.h"
 
 #define TYPICAL_PBS_VALUE	12
 
