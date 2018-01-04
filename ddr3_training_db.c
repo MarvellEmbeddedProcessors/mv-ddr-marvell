@@ -95,13 +95,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include "ddr3_init.h"
+#if defined(MV_DDR) /* U-BOOT MARVELL 2013.01 */
+#include "ddr_mv_wrapper.h"
+#elif defined(MV_DDR_ATF) /* MARVELL ATF */
+#include "mv_ddr_atf_wrapper.h"
+#elif defined(CONFIG_A3700)
+#include "mv_ddr_a3700_wrapper.h"
+#else /* U-BOOT SPL */
+#include "ddr_ml_wrapper.h"
+#endif
+
+#include "ddr3_training_ip_flow.h"
 #include "mv_ddr_topology.h"
 #include "mv_ddr_training_db.h"
+#include "ddr3_training_ip_db.h"
 
 /* Device attributes structures */
-enum mv_ddr_dev_attribute ddr_dev_attributes[MAX_DEVICE_NUM][MV_ATTR_LAST];
-int ddr_dev_attr_init_done[MAX_DEVICE_NUM] = { 0 };
+enum mv_ddr_dev_attribute ddr_dev_attributes[1][MV_ATTR_LAST];
+int ddr_dev_attr_init_done[1] = { 0 };
 
 static inline u32 pattern_table_get_killer_word16(u8 dqs, u8 index);
 static inline u32 pattern_table_get_sso_word(u8 sso, u8 index);
