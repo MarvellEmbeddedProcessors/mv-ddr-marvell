@@ -95,10 +95,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
+#if defined(MV_DDR) /* U-BOOT MARVELL 2013.01 */
+#include "ddr_mv_wrapper.h"
+#elif defined(MV_DDR_ATF) /* MARVELL ATF */
+#include "mv_ddr_atf_wrapper.h"
+#elif defined(CONFIG_A3700)
+#include "mv_ddr_a3700_wrapper.h"
+#else /* U-BOOT SPL */
+#include "ddr_ml_wrapper.h"
+#endif
+
+#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
+#include "a38x/mv_ddr_plat.h"
+#elif defined(CONFIG_APN806)
+#include "apn806/mv_ddr_plat.h"
+#elif defined(CONFIG_A3700)
+#include "a3700/mv_ddr_plat.h"
+#endif
+
 #include "mv_ddr_topology.h"
 #include "mv_ddr_common.h"
 #include "mv_ddr_spd.h"
-#include "ddr3_init.h"
 #include "ddr_topology_def.h"
 #include "ddr3_training_ip_db.h"
 #include "ddr3_training_ip.h"
