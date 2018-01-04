@@ -330,7 +330,7 @@ extern u16 odt_intercept[];
 int mv_ddr_pre_training_soc_config(const char *ddr_type);
 int mv_ddr_post_training_soc_config(const char *ddr_type);
 void mv_ddr_mem_scrubbing(void);
-
+u32 mv_ddr_init_freq_get(void);
 void mv_ddr_odpg_enable(void);
 void mv_ddr_odpg_disable(void);
 void mv_ddr_odpg_done_clr(void);

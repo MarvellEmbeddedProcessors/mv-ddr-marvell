@@ -383,6 +383,7 @@ int mv_ddr_mc6_init_controller(void);	/* FIXME: remove to mc6 driver when implem
 #define MV_DDR_DQ_MAPPING_DETECT_VERBOSE 0
 int mv_ddr_dq_mapping_detect(u32 dev_num);
 #endif
+u32 mv_ddr_init_freq_get(void);
 void mv_ddr_mem_scrubbing(void);
 void mv_ddr_odpg_enable(void);
 void mv_ddr_odpg_disable(void);
