@@ -96,6 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ddr3_init.h"
+#include "mv_ddr_regs.h"
 
 #define VALIDATE_WIN_LENGTH(e1, e2, maxsize)		\
 	(((e2) + 1 > (e1) + (u8)MIN_WINDOW_SIZE) &&	\

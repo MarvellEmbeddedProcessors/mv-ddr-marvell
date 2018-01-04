@@ -101,6 +101,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_xor_v2.h"
 #include "mv_ddr_validate.h"
 #include "mv_ddr_common.h"
+#include "mv_ddr_regs.h"
 
 #define DDR_INTERFACES_NUM		1
 #define DDR_INTERFACE_OCTETS_NUM	9

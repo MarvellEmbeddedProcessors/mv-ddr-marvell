@@ -103,6 +103,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr4_training.h"
 #include "mv_ddr_training_db.h"
 #include "mv_ddr_common.h"
+#include "mv_ddr_regs.h"
 
 static u8 dram_to_mc_dq_map[MAX_BUS_NUM][BUS_WIDTH_IN_BITS];
 static int dq_map_enable;

@@ -96,6 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ddr3_init.h"
+#include "mv_ddr_regs.h"
 
 #define VREF_INITIAL_STEP		3
 #define VREF_SECOND_STEP		1

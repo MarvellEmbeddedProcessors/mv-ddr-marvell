@@ -98,6 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined(CONFIG_DDR4)
 
 #include "ddr3_init.h"
+#include "mv_ddr_regs.h"
 
 static int mv_ddr4_dynamic_pb_wl_supp(u32 dev_num, enum mv_wl_supp_mode ecc_mode);
 

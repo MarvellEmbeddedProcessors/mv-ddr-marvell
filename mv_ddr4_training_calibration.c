@@ -104,6 +104,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr4_training.h"
 #include "mv_ddr4_mpr_pda_if.h"
 #include "mv_ddr_training_db.h"
+#include "mv_ddr_regs.h"
 
 #define RX_DIR			0
 #define TX_DIR			1

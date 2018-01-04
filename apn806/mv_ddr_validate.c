@@ -100,6 +100,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_validate.h"
 #include "mv_ddr_mc6.h"
 #include "mv_ddr_xor_v2.h"
+#include "mv_ddr_regs.h"
 #include "../../drivers/marvell/thermal.h"
 
 /* temperature correction steps */

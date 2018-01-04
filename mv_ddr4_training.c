@@ -104,6 +104,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr4_mpr_pda_if.h"
 #include "mv_ddr4_training_leveling.h"
 #include "mv_ddr4_training_calibration.h"
+#include "mv_ddr_regs.h"
 
 /* 1 for wa and sstl and pod to get the same vref value */
 u8 vref_calibration_wa = 1;
