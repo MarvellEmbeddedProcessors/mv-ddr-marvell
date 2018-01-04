@@ -98,9 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _DDR3_TRAINING_IP_H_
 #define _DDR3_TRAINING_IP_H_
 
-#include "ddr3_training_ip_def.h"
 #include "ddr_topology_def.h"
-#include "ddr_training_ip_db.h"
 
 #define TIP_ENG_LOCK	0x02000000
 #define TIP_TX_DLL_RANGE_MAX	64

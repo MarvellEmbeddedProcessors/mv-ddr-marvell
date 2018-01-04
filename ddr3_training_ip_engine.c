@@ -97,6 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr3_init.h"
 #include "mv_ddr_regs.h"
+#include "ddr_training_ip_db.h"
 
 #define PATTERN_1	0x55555555
 #define PATTERN_2	0xaaaaaaaa
