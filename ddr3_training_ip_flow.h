@@ -99,8 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _DDR3_TRAINING_IP_FLOW_H_
 
 #include "ddr3_training_ip.h"
-#include "ddr3_training_ip_pbs.h"
-#include "mv_ddr_regs.h"
+#include "ddr3_training_ip_db.h"
 
 #define KILLER_PATTERN_LENGTH		32
 #define EXT_ACCESS_BURST_LENGTH		8
@@ -211,16 +210,9 @@ int ddr3_tip_set_atr(u32 dev_num, u32 flag_id, u32 value);
 int ddr3_tip_write_mrs_cmd(u32 dev_num, u32 *cs_mask_arr, enum mr_number mr_num, u32 data, u32 mask);
 int ddr3_tip_write_cs_result(u32 dev_num, u32 offset);
 int ddr3_tip_reset_fifo_ptr(u32 dev_num);
-int ddr3_tip_read_pup_value(u32 dev_num,
-			    u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
-			    int reg_addr, u32 mask);
-int ddr3_tip_read_adll_value(u32 dev_num,
-			     u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
-			     u32 reg_addr, u32 mask);
-int ddr3_tip_write_adll_value(u32 dev_num,
-			      u32 pup_values[MAX_INTERFACE_NUM * MAX_BUS_NUM],
-			      u32 reg_addr);
-int ddr3_tip_tune_training_params(u32 dev_num,
-				  struct tune_train_params *params);
+int ddr3_tip_read_pup_value(u32 dev_num, u32 pup_values[], int reg_addr, u32 mask);
+int ddr3_tip_read_adll_value(u32 dev_num, u32 pup_values[], u32 reg_addr, u32 mask);
+int ddr3_tip_write_adll_value(u32 dev_num, u32 pup_values[], u32 reg_addr);
+int ddr3_tip_tune_training_params(u32 dev_num, struct tune_train_params *params);
 
 #endif /* _DDR3_TRAINING_IP_FLOW_H_ */
