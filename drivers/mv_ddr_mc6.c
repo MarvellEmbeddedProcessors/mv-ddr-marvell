@@ -1161,3 +1161,47 @@ void mv_ddr_mc6_init(void)
 	/* FIXME: change the delay to polling on bit '0' */
 	mdelay(10);
 }
+
+/* FIXME: revise hard-coded values and remove platform dependent flags */
+int mv_ddr_mc6_config(int ecc_is_ena)
+{
+	mv_ddr_mc6_and_dram_timing_set();
+
+	mv_ddr_mc6_sizes_cfg();
+
+	if (ecc_is_ena)
+		mv_ddr_mc6_ecc_enable();
+
+	reg_write(0x20064, 0x606);	/* MC "readReady"+ MC2PHYlatency */
+	reg_write(0x21180, 0x500);	/* PHY_RL_Control for CS0:phy_rl_cycle_dly and phy_rl_tap_dly*/
+	reg_write(0x21000, 0x60);	/* phy_rfifo_rptr_dly_val */
+	reg_write(0x210c0, 0x81000001);	/* PHY_WL_RL_Control: bit 31 phy_rdq_sel_u_en for pod '1' phy_rl_enable = '1' */
+	reg_write(0x202c8, 0xfefe);	/* MC_Control_3: phy_in_ff_bypass, phy_out_ff_bypass */
+	reg_write(0x20340, 0x0);	/* ODT_Control_1: ODT_write_en, ODT0_read_en */
+	reg_write(0x20344, 0x30000000);	/* ODT_Control_2: force_odt - always 'on' for cs0 and cs1*/
+	reg_write(0x20310, 0x21000000);	/* DRAM_Config_5 CS0: RTT_Park, RTT_WR */
+	reg_write(0x20318, 0x0);	/* DRAM_Config_5 CS2: RTT_Park, RTT_WR */
+	reg_write(0x2031c, 0x0);	/* DRAM_Config_5 CS3: RTT_Park, RTT_WR */
+	reg_write(0x20304, 0x400);	/* DRAM_Config_2 */
+	reg_write(0x20308, 0x1);	/* DRAM_Config_3 DLL_reset */
+#if defined(A80X0)
+	reg_write(0x20314, 0x0);	/* DRAM_Config_5 CS1: RTT_Park, RTT_WR - Diff1 */
+#if defined(CONFIG_64BIT)
+	reg_write(0x20044, 0x30400);	/* MC_Control_0 - bust length, data width need to configure - diff4 - config */
+#else
+	reg_write(0x20044, 0x30300);	/* MC_Control_0 - bust length, data width need to configure - diff4 - config */
+#endif	/* (CONFIG_64BIT) */
+#endif	/* #if defined(A80X0) */
+#if defined(A70X0)
+	reg_write(0x20314, 0x21010000);
+	reg_write(0x20044, 0x30300);
+#endif	/* #if defined(A70X0) */
+	reg_write(0x202c0, 0x6000);	/* MC_Control_1 - tw2r_dis? , acs_exit_dly timing???, config?? */
+	reg_write(0x202c4, 0x120030);	/* MC_Control_2 - sdram typ, mode 2t, mirror en, rdimm mode - config */
+	reg_write(0x20180, 0x30200);	/* RPP_Starvation_Control - default */
+	reg_write(0x20050, 0xff);	/* Spool_Control default */
+	reg_write(0x20054, 0x4c0);	/* MC_pwr_ctl - default */
+	reg_write(0x2030c, 0x90000);	/* DRAM_Config_4: vref training value, odt? - config */
+
+	return 0;
+}

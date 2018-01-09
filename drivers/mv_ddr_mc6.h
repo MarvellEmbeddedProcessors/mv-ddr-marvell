@@ -435,7 +435,8 @@ struct mv_ddr_mc6_timing {
 	unsigned int t_mrd_pda;
 };
 
-/* function definitions */
+/* functions declaration */
+int mv_ddr_mc6_config(int ecc_is_ena);
 void mv_ddr_mc6_and_dram_timing_set(void);
 void mv_ddr_mc6_sizes_cfg(void);
 void mv_ddr_mc6_ecc_enable(void);
