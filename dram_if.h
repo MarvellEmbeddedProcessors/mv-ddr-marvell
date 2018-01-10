@@ -59,7 +59,8 @@ struct dram_config {
 	struct dram_iface_cfg iface[MAX_DRAM_IFACE];
 };
 
-int dram_init(struct dram_config *cfg);
+/* TODO: update atf to this new prototype */
+int dram_init(void *cfg);
 struct dram_config *mv_ddr_dram_config_get(void);
 
 #endif /* _DRAM_IF_H_ */
