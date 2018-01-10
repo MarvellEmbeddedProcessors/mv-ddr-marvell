@@ -332,7 +332,7 @@ static int ddr3_tip_pad_inv(void)
 						       DDR_PHY_CONTROL,
 						       PHY_CTRL_PHY_REG,
 						       data, data);
-#elif defined(CONFIG_APN806)
+#elif defined(A70X0) || defined(A80X0) || defined(A3900)
 			/* clock swap for ck0 (cs0) */
 			data = (INVERT_PAD << INV_PAD4_OFFS |
 				INVERT_PAD << INV_PAD5_OFFS);
@@ -355,7 +355,7 @@ static int ddr3_tip_pad_inv(void)
 						       DDR_PHY_CONTROL,
 						       PHY_CTRL_PHY_REG,
 						       data, data);
-#else /* !CONFIG_ARMADA_38X && !CONFIG_ARMADA_39X && !CONFIG_APN806 */
+#else /* !CONFIG_ARMADA_38X && !CONFIG_ARMADA_39X && !A70X0 && !A80X0 && !A3900 */
 #pragma message "unknown platform to configure ddr clock swap"
 #endif
 		}

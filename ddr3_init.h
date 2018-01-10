@@ -108,14 +108,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr_ml_wrapper.h"
 #endif
 
-#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
-#include "a38x/mv_ddr_plat.h"
-#elif defined(CONFIG_APN806)
-#include "apn806/mv_ddr_plat.h"
-#elif defined(CONFIG_A3700)
-#include "a3700/mv_ddr_plat.h"
-#endif
-
+#include "mv_ddr_plat.h"
 #include "seq_exec.h"
 #include "ddr3_logging_def.h"
 #include "ddr3_training_hw_algo.h"
