@@ -254,7 +254,6 @@ int ddr3_silicon_post_init(void);
 int ddr3_post_run_alg(void);
 void ddr3_new_tip_ecc_scrub(void);
 
-void mv_ddr_ver_print(void);
 int ddr3_tip_reg_write(u32 dev_num, u32 reg_addr, u32 data);
 int ddr3_tip_reg_read(u32 dev_num, u32 reg_addr, u32 *data, u32 reg_mask);
 int ddr3_silicon_get_ddr_target_freq(u32 *ddr_freq);
