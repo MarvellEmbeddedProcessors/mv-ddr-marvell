@@ -330,11 +330,40 @@ ECHO     = @echo
 
 # OBJ_DIR set in ble/ble.mk
 OBJ_DIR ?= $(MV_DDR_ROOT)
-MV_DDR4 = y
 
-ifneq ($(filter a80x0% a70x0% a7040% a3900%,$(PLATFORM)),)
+CFLAGS = -DMV_DDR_ATF -DCONFIG_DDR4
+CFLAGS += -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2 -nostdinc
+CFLAGS += -march=armv8-a -fpie
+
+# PLATFORM is set in ble/ble.mk
+ifneq ($(findstring a80x0,$(PLATFORM)),)
+CFLAGS += -DA80X0 -DCONFIG_64BIT -DCONFIG_APN806
 MV_DDR_PLAT = apn806
 endif
+ifneq ($(findstring a70x0,$(PLATFORM)),)
+CFLAGS += -DA70X0 -DCONFIG_APN806
+MV_DDR_PLAT = apn806
+endif
+ifneq ($(findstring a7040,$(PLATFORM)),)
+CFLAGS += -DA70X0 -DCONFIG_APN806
+MV_DDR_PLAT = apn806
+endif
+ifneq ($(findstring a3900,$(PLATFORM)),)
+CFLAGS += -DA70X0 -DA3900 -DCONFIG_APN806
+MV_DDR_PLAT = apn806
+endif
+# a placeholder for a8xx platform
+ifneq ($(findstring a8xx,$(PLATFORM)),)
+CFLAGS += -DA80X0 -DCONFIG_64BIT -DCONFIG_APN806
+MV_DDR_PLAT = apn806
+endif
+
+ifneq ($(ARCH),)
+CFLAGS += -D$(ARCH)
+endif
+
+MV_DDR_LIBNAME = mv_ddr_lib.a
+MV_DDR_LIB = $(OBJ_DIR)/$(MV_DDR_LIBNAME)
 
 MV_DDR_SRCPATH = $(MV_DDR_ROOT)
 MV_DDR_PLATPATH = $(MV_DDR_ROOT)/$(MV_DDR_PLAT)
@@ -345,36 +374,11 @@ INCLUDE = $(addprefix -I,$(INCPATH))
 # PLAT_INCLUDES set in ble/ble.mk
 INCLUDE += $(PLAT_INCLUDES)
 
-MV_DDR_LIBNAME = mv_ddr_lib.a
-MV_DDR_LIB = $(OBJ_DIR)/$(MV_DDR_LIBNAME)
-
-CFLAGS = -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2 -nostdinc
-# PLATFORM is set in ble/ble.mk
-CFLAGS += -march=armv8-a -fpie $(INCLUDE)
-CFLAGS += -DMV_DDR_ATF -DCONFIG_APN806
+CFLAGS += $(INCLUDE)
 #CFLAGS += -DCONFIG_MC_STATIC
 #CFLAGS += -DCONFIG_MC_STATIC_PRINT
 #CFLAGS += -DCONFIG_PHY_STATIC
 #CFLAGS += -DCONFIG_PHY_STATIC_PRINT
-ifeq ($(MV_DDR4),y)
-CFLAGS += -DCONFIG_DDR4
-endif
-ifneq ($(findstring a80x0,$(PLATFORM)),)
-CFLAGS += -DCONFIG_64BIT
-CFLAGS += -DA80X0
-endif
-ifneq ($(findstring a70x0,$(PLATFORM)),)
-CFLAGS += -DA70X0
-endif
-ifneq ($(findstring a7040,$(PLATFORM)),)
-CFLAGS += -DA70X0
-endif
-ifneq ($(findstring a3900,$(PLATFORM)),)
-CFLAGS += -DA70X0 -DA3900
-endif
-ifneq ($(ARCH),)
-CFLAGS += -D$(ARCH)
-endif
 
 LDFLAGS = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
