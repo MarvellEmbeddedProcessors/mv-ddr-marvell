@@ -339,23 +339,28 @@ CFLAGS += -march=armv8-a -fpie
 ifneq ($(findstring a80x0,$(PLATFORM)),)
 CFLAGS += -DA80X0 -DCONFIG_64BIT
 MV_DDR_PLAT = apn806
+MV_DDR_TIP = y
 endif
 ifneq ($(findstring a70x0,$(PLATFORM)),)
 CFLAGS += -DA70X0
 MV_DDR_PLAT = apn806
+MV_DDR_TIP = y
 endif
 ifneq ($(findstring a7040,$(PLATFORM)),)
 CFLAGS += -DA70X0
 MV_DDR_PLAT = apn806
+MV_DDR_TIP = y
 endif
 ifneq ($(findstring a3900,$(PLATFORM)),)
 CFLAGS += -DA70X0 -DA3900
 MV_DDR_PLAT = apn806
+MV_DDR_TIP = y
 endif
 # a placeholder for a8xx platform
 ifneq ($(findstring a8xx,$(PLATFORM)),)
 CFLAGS += -DA80X0 -DCONFIG_64BIT
 MV_DDR_PLAT = apn806
+MV_DDR_TIP = y
 endif
 
 ifneq ($(ARCH),)
@@ -383,28 +388,30 @@ CFLAGS += $(INCLUDE)
 LDFLAGS = -Xlinker --discard-all -Wl,--build-id=none -static -nostartfiles
 
 MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_PLATPATH),$(wildcard $(DIR)/*.c))
-MV_DDR_CSRC += ddr3_training_bist.c
-MV_DDR_CSRC += ddr3_debug.c
-MV_DDR_CSRC += mv_ddr_build_message.c
-MV_DDR_CSRC += ddr3_training_leveling.c
-MV_DDR_CSRC += mv_ddr4_training_leveling.c
-MV_DDR_CSRC += ddr3_training_db.c
-MV_DDR_CSRC += mv_ddr_common.c
-MV_DDR_CSRC += ddr3_init.c
-MV_DDR_CSRC += ddr3_training.c
-MV_DDR_CSRC += mv_ddr_spd.c
 MV_DDR_CSRC += ddr_init.c
+MV_DDR_CSRC += ddr3_init.c
+MV_DDR_CSRC += ddr3_training_db.c
+MV_DDR_CSRC += mv_ddr_build_message.c
+MV_DDR_CSRC += mv_ddr_common.c
+MV_DDR_CSRC += mv_ddr_spd.c
 MV_DDR_CSRC += mv_ddr_topology.c
-MV_DDR_CSRC += ddr3_training_ip_engine.c
-MV_DDR_CSRC += ddr3_training_centralization.c
-MV_DDR_CSRC += mv_ddr4_training_calibration.c
 MV_DDR_CSRC += mv_ddr4_training_db.c
-MV_DDR_CSRC += ddr3_training_hw_algo.c
-MV_DDR_CSRC += mv_ddr4_training.c
-MV_DDR_CSRC += mv_ddr4_mpr_pda_if.c
-MV_DDR_CSRC += ddr3_training_pbs.c
 MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_mc6.c
 MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_xor_v2.c
+ifeq ($(MV_DDR_TIP),y)
+MV_DDR_CSRC += ddr3_debug.c
+MV_DDR_CSRC += ddr3_training.c
+MV_DDR_CSRC += ddr3_training_bist.c
+MV_DDR_CSRC += ddr3_training_centralization.c
+MV_DDR_CSRC += ddr3_training_hw_algo.c
+MV_DDR_CSRC += ddr3_training_ip_engine.c
+MV_DDR_CSRC += ddr3_training_leveling.c
+MV_DDR_CSRC += ddr3_training_pbs.c
+MV_DDR_CSRC += mv_ddr4_mpr_pda_if.c
+MV_DDR_CSRC += mv_ddr4_training.c
+MV_DDR_CSRC += mv_ddr4_training_calibration.c
+MV_DDR_CSRC += mv_ddr4_training_leveling.c
+endif
 
 MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
 # add mv_ddr build message and version string object
