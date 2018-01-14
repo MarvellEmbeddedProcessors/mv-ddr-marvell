@@ -360,12 +360,11 @@ MV_DDR_PLAT = apn806
 MV_DDR_TIP = y
 MV_DDR_FLOW = y
 endif
-# a placeholder for a8xx platform
 ifneq ($(findstring a8xx,$(PLATFORM)),)
-CFLAGS += -DA80X0 -DCONFIG_64BIT
-MV_DDR_PLAT = apn806
-MV_DDR_TIP = y
-MV_DDR_FLOW = y
+CFLAGS += -DCONFIG_64BIT -DCONFIG_MC6P
+MV_DDR_PLAT = apn810
+MV_DDR_SNPS = y
+MV_DDR_FLOW_V2 = y
 endif
 
 ifneq ($(ARCH),)
@@ -380,6 +379,10 @@ MV_DDR_PLATPATH = $(MV_DDR_ROOT)/$(MV_DDR_PLAT)
 MV_DDR_DRVPATH = $(MV_DDR_ROOT)/drivers
 
 INCPATH = $(MV_DDR_SRCPATH) $(MV_DDR_PLATPATH) $(MV_DDR_DRVPATH)
+ifeq ($(MV_DDR_SNPS),y)
+MV_DDR_SNPSPATH = $(MV_DDR_DRVPATH)/snps
+INCPATH += $(MV_DDR_SNPSPATH)
+endif
 INCLUDE = $(addprefix -I,$(INCPATH))
 # PLAT_INCLUDES set in ble/ble.mk
 INCLUDE += $(PLAT_INCLUDES)
@@ -396,6 +399,9 @@ MV_DDR_CSRC = $(foreach DIR,$(MV_DDR_PLATPATH),$(wildcard $(DIR)/*.c))
 ifeq ($(MV_DDR_FLOW),y)
 MV_DDR_CSRC += ddr_init.c
 MV_DDR_CSRC += ddr3_init.c
+else ifeq ($(MV_DDR_FLOW_V2),y)
+MV_DDR_CSRC += mv_ddr_init.c
+MV_DDR_CSRC += dram_if.c
 endif
 MV_DDR_CSRC += ddr3_training_db.c
 MV_DDR_CSRC += mv_ddr_build_message.c
@@ -405,6 +411,9 @@ MV_DDR_CSRC += mv_ddr_topology.c
 MV_DDR_CSRC += mv_ddr4_training_db.c
 MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_mc6.c
 MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_xor_v2.c
+ifeq ($(MV_DDR_SNPS),y)
+MV_DDR_CSRC += $(foreach DIR,$(MV_DDR_SNPSPATH),$(wildcard $(DIR)/*.c))
+endif
 ifeq ($(MV_DDR_TIP),y)
 MV_DDR_CSRC += ddr3_debug.c
 MV_DDR_CSRC += ddr3_training.c
@@ -445,6 +454,9 @@ $(MV_DDR_VER_COBJ):
 create_dir:
 	$(MKDIR) $(OBJ_DIR)/drivers
 	$(MKDIR) $(OBJ_DIR)/$(MV_DDR_PLAT)
+ifeq ($(MV_DDR_SNPS),y)
+	$(MKDIR) $(OBJ_DIR)/drivers/snps
+endif
 
 header:
 	$(ECHO) "\nBuilding DRAM driver"
