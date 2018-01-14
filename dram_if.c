@@ -95,9 +95,47 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
+#if defined(MV_DDR) /* U-BOOT MARVELL 2013.01 */
+#include "ddr_mv_wrapper.h"
+#elif defined(MV_DDR_ATF) /* MARVELL ATF */
+#include "mv_ddr_atf_wrapper.h"
+#elif defined(CONFIG_A3700)
+#include "mv_ddr_a3700_wrapper.h"
+#else /* U-BOOT SPL */
+#include "ddr_ml_wrapper.h"
+#endif
+
 #include "mv_ddr_init.h"
 
 int dram_init(void *cfg)
 {
 	return mv_ddr_init();
+}
+
+uint64_t ap_dram_iface_info_get(int ap_id, int iface_id)
+{
+/* TODO: call per platform function */
+#if defined(CONFIG_APN810)
+	/*
+	 * TODO: return dram size per ap and dram interface
+	 * currently, supports only ap #0, iface #0, 8GB configuration
+	 */
+	if ((ap_id == 0) && (iface_id == 0))
+		return (uint64_t)8 << 30;
+#endif
+	return 0;
+}
+
+void dram_scrubbing(uint8_t ap_id, uint64_t start_addr, uint64_t dram_size)
+{
+	/* TODO: implement new api for dram scrubbing */
+}
+
+void dram_mmap_config(uint8_t ap_id, uint8_t iface_mode,
+		      uint64_t start_addr, uint64_t ap_dram_size)
+{
+	/*
+	 * TODO: set mmap configuration per ap and iface mode
+	 * currently, configures mc6 to dram size started at base address 0
+	 */
 }
