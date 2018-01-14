@@ -100,15 +100,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(MV_DDR) /* U-BOOT MARVELL 2013.01 */
 #include "ddr_mv_wrapper.h"
+#include "mv_ddr_plat.h"
 #elif defined(MV_DDR_ATF) /* MARVELL ATF */
 #include "mv_ddr_atf_wrapper.h"
+#include "mv_ddr_plat.h"
 #elif defined(CONFIG_A3700)
 #include "mv_ddr_a3700_wrapper.h"
+#include "mv_ddr_plat.h"
 #else /* U-BOOT SPL */
 #include "ddr_ml_wrapper.h"
+#include "a38x/mv_ddr_plat.h"
 #endif
 
-#include "mv_ddr_plat.h"
 #include "seq_exec.h"
 #include "ddr3_logging_def.h"
 #include "ddr3_training_hw_algo.h"
