@@ -694,7 +694,16 @@ void mv_ddr_mc6_cfg_set(void)
 
 	/* configure phy mask, retry mode and acs exit delay */
 	reg_bit_clrset(MC6_CH0_MC_CTRL1_REG,
-		       PHY_MASK_VAL << PHY_MASK_OFFS |
+#ifdef CONFIG_MC6P
+		      /*
+		       * workaround to prevent mrs commands
+		       * from being sent to memory during mc6p initialization;
+		       * it is done by masking out clk enable and reset signals
+		       */
+		       PHY_MASK_ENA << PHY_MASK_OFFS |
+#else
+		       PHY_MASK_DIS << PHY_MASK_OFFS |
+#endif
 #ifdef CONFIG_MC6P
 		       RETRY_MODE_VAL << RETRY_MODE_OFFS |
 #endif
@@ -896,9 +905,17 @@ void mv_ddr_mc6_init(void)
 		       );
 
 	mdelay(10);
+#ifdef CONFIG_MC6P
+	/*
+	 * restore the configuration changed by the workaround preventing
+	 * mrs commands from being sent to memory during mc6p initialization (see above)
+	 */
+	reg_bit_clrset(MC6_CH0_MC_CTRL1_REG,
+		       PHY_MASK_DIS << PHY_MASK_OFFS,
+		       PHY_MASK_MASK << PHY_MASK_OFFS);
+	udelay(100);
 
 	/* write buffer drain for appropriate cs */
-#ifdef CONFIG_MC6P
 	reg_bit_clrset(MC6_USER_CMD0_REG,
 		       USER_CMD0_CH0_VAL << USER_CMD0_CH0_OFFS |
 		       tm->interface_params[0].as_bus_params[0].cs_bitmask << USER_CMD0_CS_OFFS |
@@ -906,20 +923,6 @@ void mv_ddr_mc6_init(void)
 		       USER_CMD0_CH0_MASK << USER_CMD0_CH0_OFFS |
 		       USER_CMD0_CS_MASK << USER_CMD0_CS_OFFS |
 		       WCP_DRAIN_REQ_MASK << WCP_DRAIN_REQ_OFFS);
-#endif
-
-	/*
-	 * FIXME: mc6p init flow workaround
-	 * wa replaces exit from self-refresh with mc6p init command
-	 */
-#ifdef CONFIG_MC6P
-	reg_bit_clrset(MC6_USER_CMD0_REG,
-		       USER_CMD0_CH0_VAL << USER_CMD0_CH0_OFFS |
-		       tm->interface_params[0].as_bus_params[0].cs_bitmask << USER_CMD0_CS_OFFS |
-		       SDRAM_INIT_REQ_VAL << SDRAM_INIT_REQ_OFFS,
-		       USER_CMD0_CH0_MASK << USER_CMD0_CH0_OFFS |
-		       USER_CMD0_CS_MASK << USER_CMD0_CS_OFFS |
-		       SDRAM_INIT_REQ_MASK << USER_CMD0_CS_OFFS);
 #endif
 }
 
