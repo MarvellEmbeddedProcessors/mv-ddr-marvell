@@ -66,7 +66,7 @@ enum dram_iface_mode {
 };
 
 /* TODO: update atf to this new prototype */
-int dram_init(void *cfg);
+int dram_init(void);
 struct dram_config *mv_ddr_dram_config_get(void);
 void dram_mmap_config(uint8_t ap_id, uint8_t iface_mode,
 		      uint64_t start_addr, uint64_t dram_size);

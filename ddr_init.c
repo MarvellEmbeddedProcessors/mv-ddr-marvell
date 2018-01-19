@@ -114,7 +114,7 @@ MV_U32 ddr_init(void)
 }
 /* MARVELL ATF SUPPORT */
 #elif defined(MV_DDR_ATF)
-int dram_init(void *cfg)
+int dram_init(void)
 {
 	ddr3_init();
 	return 0;

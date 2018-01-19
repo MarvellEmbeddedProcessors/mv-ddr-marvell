@@ -107,7 +107,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mv_ddr_init.h"
 
-int dram_init(void *cfg)
+int dram_init(void)
 {
 	return mv_ddr_init();
 }
