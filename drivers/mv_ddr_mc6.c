@@ -789,35 +789,31 @@ void mv_ddr_mc6_cfg_set(void)
 /* configure dfi interface to handle the handshake b/w mc6 and phy */
 static void mv_ddr_mc6_dfi_config(void)
 {
-	u32 reg, i;
+	u32 val, mask, i, cl, cwl;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	/*
-	 * TODO: configure per given formula
-	 * currently set to support 2400T speedbin at 800MHz
-	 */
-	reg_bit_clrset(MC6_DFI_PHY_CTRL_1_REG,
-		       TRDDATA_EN_VAL << TRDDATA_EN_OFFS |
-		       TPHY_RDLAT_VAL << TPHY_RDLAT_OFFS |
-		       TPHY_WRLAT_VAL << TPHY_WRLAT_OFFS |
-		       TPHY_WRDATA_VAL << TPHY_WRDATA_OFFS,
-		       TRDDATA_EN_MASK << TRDDATA_EN_OFFS |
-		       TPHY_RDLAT_MASK << TPHY_RDLAT_OFFS |
-		       TPHY_WRLAT_MASK << TPHY_WRLAT_OFFS |
-		       TPHY_WRDATA_MASK << TPHY_WRDATA_OFFS);
+
+	cl = tm->interface_params[0].cas_l;
+	cwl = tm->interface_params[0].cas_wl;
+
+	val = TRDDATA_EN(cl) << TRDDATA_EN_OFFS |
+	      TPHY_RDLAT_VAL << TPHY_RDLAT_OFFS |
+	      TPHY_WRLAT(cwl) << TPHY_WRLAT_OFFS |
+	      TPHY_WRDATA_VAL << TPHY_WRDATA_OFFS;
+	mask = TRDDATA_EN_MASK << TRDDATA_EN_OFFS |
+	       TPHY_RDLAT_MASK << TPHY_RDLAT_OFFS |
+	       TPHY_WRLAT_MASK << TPHY_WRLAT_OFFS |
+	       TPHY_WRDATA_MASK << TPHY_WRDATA_OFFS;
+	reg_bit_clrset(MC6_DFI_PHY_CTRL_1_REG, val, mask);
 	/* printf("MC6_DFI_PHY_CTRL_1_REG addr 0x%x, data 0x%x\n", MC6_DFI_PHY_CTRL_1_REG,
 		  reg_read(MC6_DFI_PHY_CTRL_1_REG)); */
 
-	/*
-	 * TODO: configure per given formula
-	 * currently set to support 2400T speedbin at 800MHz
-	 */
-	reg_bit_clrset(MC6_DFI_PHY_CTRL_0_REG,
-		       TPHY_RDCSLAT_VAL << TPHY_RDCSLAT_OFFS |
-		       TPHY_WRCSLAT_VAL << TPHY_WRCSLAT_OFFS |
-		       DFI_DRAM_CLK_DIS << DFI_DRAM_CLK_DIS_OFFS,
-		       TPHY_RDCSLAT_MASK << TPHY_RDCSLAT_OFFS |
-		       TPHY_WRCSLAT_MASK << TPHY_WRCSLAT_OFFS |
-		       DFI_DRAM_CLK_DIS_MASK << DFI_DRAM_CLK_DIS_OFFS);
+	val = TPHY_RDCSLAT(cl) << TPHY_RDCSLAT_OFFS |
+	      TPHY_WRCSLAT(cwl) << TPHY_WRCSLAT_OFFS |
+	      DFI_DRAM_CLK_DIS << DFI_DRAM_CLK_DIS_OFFS;
+	mask = TPHY_RDCSLAT_MASK << TPHY_RDCSLAT_OFFS |
+	       TPHY_WRCSLAT_MASK << TPHY_WRCSLAT_OFFS |
+	       DFI_DRAM_CLK_DIS_MASK << DFI_DRAM_CLK_DIS_OFFS;
+	reg_bit_clrset(MC6_DFI_PHY_CTRL_0_REG, val, mask);
 	/* printf("MC6_DFI_PHY_CTRL_0_REG addr 0x%x, data 0x%x\n", MC6_DFI_PHY_CTRL_0_REG,
 		  reg_read(MC6_DFI_PHY_CTRL_0_REG)); */
 
@@ -835,8 +831,8 @@ static void mv_ddr_mc6_dfi_config(void)
 #define MV_DDR_DFI_POLL_COUNT	5
 	/* poll on dfi init bit for done for max (MV_DDR_DFI_POLL_COUNT * 10ms) */
 	for (i = 0; i < MV_DDR_DFI_POLL_COUNT; i++) {
-		reg = reg_read(DFI_PHY_LEVELING_STATUS_REG);
-		if (((reg >> DFI_PHY_INIT_DONE_OFFS) & DFI_PHY_INIT_DONE_MASK) == DFI_PHY_INIT_DONE_VAL)
+		val = reg_read(DFI_PHY_LEVELING_STATUS_REG);
+		if (((val >> DFI_PHY_INIT_DONE_OFFS) & DFI_PHY_INIT_DONE_MASK) == DFI_PHY_INIT_DONE_VAL)
 			break;
 		else
 			mdelay(10);
@@ -845,17 +841,9 @@ static void mv_ddr_mc6_dfi_config(void)
 	if (i >= MV_DDR_DFI_POLL_COUNT)
 		printf("error: %s: dfi initialization failed\n", __func__);
 
-	/*
-	 * TODO: configure per given formula
-	 * currently set to support 2400T speedbin at 800MHz
-	 */
-	reg_bit_clrset(MC6_DFI_PHY_CTRL_0_REG,
-		       TPHY_RDCSLAT_VAL << TPHY_RDCSLAT_OFFS |
-		       TPHY_WRCSLAT_VAL << TPHY_WRCSLAT_OFFS |
-		       DFI_DRAM_CLK_EN << DFI_DRAM_CLK_DIS_OFFS,
-		       TPHY_RDCSLAT_MASK << TPHY_RDCSLAT_OFFS |
-		       TPHY_WRCSLAT_MASK << TPHY_WRCSLAT_OFFS |
-		       DFI_DRAM_CLK_DIS_MASK << DFI_DRAM_CLK_DIS_OFFS);
+	val = DFI_DRAM_CLK_EN << DFI_DRAM_CLK_DIS_OFFS;
+	mask = DFI_DRAM_CLK_DIS_MASK << DFI_DRAM_CLK_DIS_OFFS;
+	reg_bit_clrset(MC6_DFI_PHY_CTRL_0_REG, val, mask);
 	/* printf("MC6_DFI_PHY_CTRL_0_REG addr 0x%x, data 0x%x\n", MC6_DFI_PHY_CTRL_0_REG,
 		  reg_read(MC6_DFI_PHY_CTRL_0_REG)); */
 }

@@ -549,33 +549,37 @@ enum mv_ddr_mc6_dfi_cs {
 #define DFI_PHY_INIT_REQ_MASK			0x1
 #define DFI_PHY_INIT_REQ_VAL			0x1
 
-#define MC6_DFI_PHY_CTRL_0_REG			(MC6_BASE + 0x13e0)
-#define TPHY_RDCSLAT_OFFS			24
-#define TPHY_RDCSLAT_MASK			0xff
-#define TPHY_RDCSLAT_VAL			0x6
-#define TPHY_WRCSLAT_OFFS			16
-#define TPHY_WRCSLAT_MASK			0xff
-#define TPHY_WRCSLAT_VAL			0x6
-#define DFI_DRAM_CLK_DIS_OFFS			0
-#define DFI_DRAM_CLK_DIS_MASK			0x1
+#define DWC_DDRPHY_PIPE_DFI_MISC	2
+#define DWC_DDRPHY_PIPE_DFI_WR		1
+#define DWC_DDRPHY_PIPE_DFI_RD		2
+
+#define MC6_DFI_PHY_CTRL_0_REG		(MC6_BASE + 0x13e0)
+#define TPHY_RDCSLAT_OFFS		24
+#define TPHY_RDCSLAT_MASK		0xff
+#define TPHY_RDCSLAT(dly)		((dly) - 5 + 2 * (DWC_DDRPHY_PIPE_DFI_MISC - DWC_DDRPHY_PIPE_DFI_RD))
+#define TPHY_WRCSLAT_OFFS		16
+#define TPHY_WRCSLAT_MASK		0xff
+#define TPHY_WRCSLAT(dly)		((dly) - 5 + 2 * (DWC_DDRPHY_PIPE_DFI_MISC - DWC_DDRPHY_PIPE_DFI_WR))
+#define DFI_DRAM_CLK_DIS_OFFS		0
+#define DFI_DRAM_CLK_DIS_MASK		0x1
 enum mv_ddr_mc6_dfi_dram_clk {
 	DFI_DRAM_CLK_EN,
 	DFI_DRAM_CLK_DIS
 };
 
-#define MC6_DFI_PHY_CTRL_1_REG			(MC6_BASE + 0x13e4)
-#define TRDDATA_EN_OFFS				24
-#define TRDDATA_EN_VAL				0x6
-#define TRDDATA_EN_MASK				0xff
-#define TPHY_RDLAT_OFFS				16
-#define TPHY_RDLAT_VAL				0x12
-#define TPHY_RDLAT_MASK				0xff
-#define TPHY_WRLAT_OFFS				8
-#define TPHY_WRLAT_VAL				0x6
-#define TPHY_WRLAT_MASK				0xff
-#define TPHY_WRDATA_OFFS			0
-#define TPHY_WRDATA_VAL				0x2
-#define TPHY_WRDATA_MASK			0xff
+#define MC6_DFI_PHY_CTRL_1_REG		(MC6_BASE + 0x13e4)
+#define TRDDATA_EN_OFFS			24
+#define TRDDATA_EN_MASK			0xff
+#define TRDDATA_EN(dly)			((dly) - 5 + 2 * (DWC_DDRPHY_PIPE_DFI_MISC - DWC_DDRPHY_PIPE_DFI_RD))
+#define TPHY_RDLAT_OFFS			16
+#define TPHY_RDLAT_MASK			0xff
+#define TPHY_RDLAT_VAL			0x12
+#define TPHY_WRLAT_OFFS			8
+#define TPHY_WRLAT_MASK			0xff
+#define TPHY_WRLAT(dly)			((dly) - 5 + 2 * (DWC_DDRPHY_PIPE_DFI_MISC - DWC_DDRPHY_PIPE_DFI_WR))
+#define TPHY_WRDATA_OFFS		0
+#define TPHY_WRDATA_MASK		0xff
+#define TPHY_WRDATA_VAL			0x2
 
 #define DFI_PHY_LEVELING_STATUS_REG		(MC6_BASE + 0x13fc)
 #define DFI_PHY_INIT_DONE_OFFS			31

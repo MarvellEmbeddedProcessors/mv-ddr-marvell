@@ -97,6 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "snps.h"
 #include "snps_regs.h"
+#include "ddr_topology_def.h"
 
 /* example of an update routine that returns runtime depndant value */
 #if 0 /* the routine below is just an example - not to be used */
@@ -195,7 +196,16 @@ u16 init_phy_pllctrl2_get(void)
 {
 	debug_enter();
 
-	u16 ret_val = PLL_FREQ_SEL_VAL;
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+
+	if (freq == MV_DDR_FREQ_800)
+		ret_val = PLL_FREQ_SEL_800MHZ;
+	else if (freq == MV_DDR_FREQ_1200)
+		ret_val = PLL_FREQ_SEL_1200MHZ;
+	else
+		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
 	return ret_val;
@@ -205,7 +215,16 @@ u16 init_phy_ardptrinitval_get(void)
 {
 	debug_enter();
 
-	u16 ret_val = ARD_PTR_INIT_VAL;
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+
+	if (freq == MV_DDR_FREQ_800)
+		ret_val = ARD_PTR_INIT_800MHZ;
+	else if (freq == MV_DDR_FREQ_1200)
+		ret_val = ARD_PTR_INIT_1200MHZ;
+	else
+		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
 	return ret_val;
@@ -215,7 +234,16 @@ u16 init_phy_procodttimectl_get(void)
 {
 	debug_enter();
 
-	u16 ret_val = PROCODTTIMECTL_VAL;
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+
+	if (freq == MV_DDR_FREQ_800)
+		ret_val = PROCODTTIMECTL_800MHZ;
+	else if (freq == MV_DDR_FREQ_1200)
+		ret_val = PROCODTTIMECTL_1200MHZ;
+	else
+		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
 	return ret_val;
@@ -225,7 +253,16 @@ u16 init_phy_caluclkinfo_get(void)
 {
 	debug_enter();
 
-	u16 ret_val = ATXDLY_VAL;
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+
+	if (freq == MV_DDR_FREQ_800)
+		ret_val = ATXDLY_800MHZ;
+	else if (freq == MV_DDR_FREQ_1200)
+		ret_val = ATXDLY_1200MHZ;
+	else
+		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
 	return ret_val;
@@ -235,7 +272,16 @@ u16 init_phy_seq0bdly0_get(void)
 {
 	debug_enter();
 
-	u16 ret_val = 0x32;
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+
+	if (freq == MV_DDR_FREQ_800)
+		ret_val = SEQ0BDLY0_800MHZ;
+	else if (freq == MV_DDR_FREQ_1200)
+		ret_val = SEQ0BDLY0_1200MHZ;
+	else
+		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
 	return ret_val;
@@ -245,7 +291,16 @@ u16 init_phy_seq0bdly1_get(void)
 {
 	debug_enter();
 
-	u16 ret_val = SEQ0BDLY1_VAL;
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+
+	if (freq == MV_DDR_FREQ_800)
+		ret_val = SEQ0BDLY1_800MHZ;
+	else if (freq == MV_DDR_FREQ_1200)
+		ret_val = SEQ0BDLY1_1200MHZ;
+	else
+		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
 	return ret_val;
@@ -255,7 +310,16 @@ u16 init_phy_seq0bdly2_get(void)
 {
 	debug_enter();
 
-	u16 ret_val = SEQ0BDLY2_VAL;
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+
+	if (freq == MV_DDR_FREQ_800)
+		ret_val = SEQ0BDLY2_800MHZ;
+	else if (freq == MV_DDR_FREQ_1200)
+		ret_val = SEQ0BDLY2_1200MHZ;
+	else
+		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
 	return ret_val;
@@ -265,7 +329,16 @@ u16 dmem_1d_2d_dram_freq_get(void)
 {
 	debug_enter();
 
-	u16 ret_val = DATA_RATE_1600_MT_S_VAL;
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+
+	if (freq == MV_DDR_FREQ_800)
+		ret_val = DATA_RATE_1600_MT_S_800MHZ;
+	else if (freq == MV_DDR_FREQ_1200)
+		ret_val = DATA_RATE_1600_MT_S_1200MHZ;
+	else
+		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
 	return ret_val;
@@ -275,7 +348,16 @@ u16 dmem_1d_2d_mr0_get(void)
 {
 	debug_enter();
 
-	u16 ret_val = MR0_VAL;
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+
+	if (freq == MV_DDR_FREQ_800)
+		ret_val = MR0_800MHZ;
+	else if (freq == MV_DDR_FREQ_1200)
+		ret_val = MR0_1200MHZ;
+	else
+		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
 	return ret_val;
@@ -285,7 +367,16 @@ u16 dmem_1d_2d_mr2_get(void)
 {
 	debug_enter();
 
-	u16 ret_val = 0x0;
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+
+	if (freq == MV_DDR_FREQ_800)
+		ret_val = MR2_800MHZ;
+	else if (freq == MV_DDR_FREQ_1200)
+		ret_val = MR2_1200MHZ;
+	else
+		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
 	return ret_val;
@@ -295,7 +386,16 @@ u16 dmem_1d_2d_mr6_get(void)
 {
 	debug_enter();
 
-	u16 ret_val = 0x409;
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+
+	if (freq == MV_DDR_FREQ_800)
+		ret_val = MR6_800MHZ;
+	else if (freq == MV_DDR_FREQ_1200)
+		ret_val = MR6_1200MHZ;
+	else
+		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
 	return ret_val;
