@@ -207,6 +207,8 @@ u16 init_phy_pllctrl2_get(void)
 		ret_val = PLL_FREQ_SEL_800MHZ;
 	else if (freq == MV_DDR_FREQ_1200)
 		ret_val = PLL_FREQ_SEL_1200MHZ;
+	else if (freq == MV_DDR_FREQ_1333)
+		ret_val = PLL_FREQ_SEL_1333MHZ;
 	else
 		printf("error: %s: unsupported frequency found\n", __func__);
 
@@ -226,6 +228,8 @@ u16 init_phy_ardptrinitval_get(void)
 		ret_val = ARD_PTR_INIT_800MHZ;
 	else if (freq == MV_DDR_FREQ_1200)
 		ret_val = ARD_PTR_INIT_1200MHZ;
+	else if (freq == MV_DDR_FREQ_1333)
+		ret_val = ARD_PTR_INIT_1333MHZ;
 	else
 		printf("error: %s: unsupported frequency found\n", __func__);
 
@@ -245,6 +249,8 @@ u16 init_phy_procodttimectl_get(void)
 		ret_val = PROCODTTIMECTL_800MHZ;
 	else if (freq == MV_DDR_FREQ_1200)
 		ret_val = PROCODTTIMECTL_1200MHZ;
+	else if (freq == MV_DDR_FREQ_1333)
+		ret_val = PROCODTTIMECTL_1333MHZ;
 	else
 		printf("error: %s: unsupported frequency found\n", __func__);
 
@@ -264,6 +270,8 @@ u16 init_phy_caluclkinfo_get(void)
 		ret_val = ATXDLY_800MHZ;
 	else if (freq == MV_DDR_FREQ_1200)
 		ret_val = ATXDLY_1200MHZ;
+	else if (freq == MV_DDR_FREQ_1333)
+		ret_val = ATXDLY_1333MHZ;
 	else
 		printf("error: %s: unsupported frequency found\n", __func__);
 
@@ -283,6 +291,8 @@ u16 init_phy_seq0bdly0_get(void)
 		ret_val = SEQ0BDLY0_800MHZ;
 	else if (freq == MV_DDR_FREQ_1200)
 		ret_val = SEQ0BDLY0_1200MHZ;
+	else if (freq == MV_DDR_FREQ_1333)
+		ret_val = SEQ0BDLY0_1333MHZ;
 	else
 		printf("error: %s: unsupported frequency found\n", __func__);
 
@@ -302,6 +312,8 @@ u16 init_phy_seq0bdly1_get(void)
 		ret_val = SEQ0BDLY1_800MHZ;
 	else if (freq == MV_DDR_FREQ_1200)
 		ret_val = SEQ0BDLY1_1200MHZ;
+	else if (freq == MV_DDR_FREQ_1333)
+		ret_val = SEQ0BDLY1_1333MHZ;
 	else
 		printf("error: %s: unsupported frequency found\n", __func__);
 
@@ -321,6 +333,8 @@ u16 init_phy_seq0bdly2_get(void)
 		ret_val = SEQ0BDLY2_800MHZ;
 	else if (freq == MV_DDR_FREQ_1200)
 		ret_val = SEQ0BDLY2_1200MHZ;
+	else if (freq == MV_DDR_FREQ_1333)
+		ret_val = SEQ0BDLY2_1333MHZ;
 	else
 		printf("error: %s: unsupported frequency found\n", __func__);
 
@@ -359,6 +373,8 @@ u16 dmem_1d_2d_dram_freq_get(void)
 		ret_val = DATA_RATE_1600_MT_S_800MHZ;
 	else if (freq == MV_DDR_FREQ_1200)
 		ret_val = DATA_RATE_1600_MT_S_1200MHZ;
+	else if (freq == MV_DDR_FREQ_1333)
+		ret_val = DATA_RATE_1600_MT_S_1333MHZ;
 	else
 		printf("error: %s: unsupported frequency found\n", __func__);
 

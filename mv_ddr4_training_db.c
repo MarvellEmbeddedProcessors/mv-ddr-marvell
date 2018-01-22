@@ -124,7 +124,8 @@ static unsigned int freq_val[MV_DDR_FREQ_LAST] = {
 	900,	/* MV_DDR_FREQ_900 */
 	1000,	/* MV_DDR_FREQ_1000 */
 	1050,	/* MV_DDR_FREQ_1050 */
-	1200	/* MV_DDR_FREQ_1200 */
+	1200,	/* MV_DDR_FREQ_1200 */
+	1333	/* MV_DDR_FREQ_1333 */
 };
 
 unsigned int *mv_ddr_freq_tbl_get(void)
@@ -362,7 +363,7 @@ struct mv_ddr_page_element *mv_ddr_page_tbl_get(void)
 #define MV_DDR_TDLLK_DDR4_1866	597
 #define MV_DDR_TDLLK_DDR4_2133	768
 #define MV_DDR_TDLLK_DDR4_2400	768
-#define MV_DDR_TDLLK_DDR4_2666	854	/* TODO: unsupported yet */
+#define MV_DDR_TDLLK_DDR4_2666	854
 #define MV_DDR_TDLLK_DDR4_2933	940	/* TODO: unsupported yet */
 #define MV_DDR_TDLLK_DDR4_3200	1024	/* TODO: unsupported yet */
 static int mv_ddr_tdllk_get(unsigned int freq, unsigned int *tdllk)
@@ -379,6 +380,9 @@ static int mv_ddr_tdllk_get(unsigned int freq, unsigned int *tdllk)
 		break;
 	case 1200:
 		*tdllk = MV_DDR_TDLLK_DDR4_2400;
+		break;
+	case 1333:
+		*tdllk = MV_DDR_TDLLK_DDR4_2666;
 		break;
 	default:
 		printf("error: %s: unsupported data rate found\n", __func__);

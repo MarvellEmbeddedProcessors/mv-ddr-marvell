@@ -137,6 +137,8 @@ unsigned int mv_ddr_cwl_calc(unsigned int tclk)
 		cwl = 11;
 	else if (tclk >= 833)
 		cwl = 12;
+	else if (tclk >= 750)
+		cwl = 14;
 	else
 		cwl = 0;
 
