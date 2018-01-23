@@ -292,8 +292,7 @@ enum {
 
 #define MC6_CH0_MC_CTRL1_REG			(MC6_BASE + 0x2c0)
 #define PHY_MASK_OFFS				3
-#define PHY_MASK_DIS				0x0
-#define PHY_MASK_ENA				0x1
+#define PHY_MASK_VAL				0x0
 #define PHY_MASK_MASK				0x1
 #ifdef CONFIG_MC6P
 #define RETRY_MODE_OFFS				10
