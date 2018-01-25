@@ -155,7 +155,7 @@ int mv_ddr4_mode_regs_init(u8 dev_num)
 		cl = tm->interface_params[if_id].cas_l;
 		cwl = tm->interface_params[if_id].cas_wl;
 		t_ckclk = MEGA / freq_tbl[tm->interface_params[if_id].memory_freq];
-		t_wr = time_to_nclk(speed_bin_table(tm->interface_params[if_id].speed_bin_index,
+		t_wr = time_to_nclk(mv_ddr_speed_bin_timing_get(tm->interface_params[if_id].speed_bin_index,
 					    SPEED_BIN_TWR), t_ckclk) - 1;
 
 		/* TODO: replace hard-coded values with appropriate defines */

@@ -171,14 +171,14 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	/* the t_refi is in nsec */
 	mc6_timing.t_refi = mc6_timing.t_refi / (MEGA / FCLK_KHZ);
 	/* printf("t_refi = %d\n", mc6_timing.t_refi); */
-	mc6_timing.t_wr = speed_bin_table(speed_bin_index, SPEED_BIN_TWR);
+	mc6_timing.t_wr = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TWR);
 	/* printf("t_wr = %d\n", mc6_timing.t_wr); */
 	mc6_timing.t_wr = time_to_nclk(mc6_timing.t_wr, mc6_timing.t_ckclk);
 	/* printf("t_wr = %d\n", mc6_timing.t_wr); */
 
 	/* calculate t_rrd */
-	mc6_timing.t_rrd = (page_size == 1) ? speed_bin_table(speed_bin_index, SPEED_BIN_TRRD1K) :
-		speed_bin_table(speed_bin_index, SPEED_BIN_TRRD2K);
+	mc6_timing.t_rrd = (page_size == 1) ? mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRRD1K) :
+		mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRRD2K);
 	/* printf("t_rrd = %d\n", mc6_timing.t_rrd); */
 	mc6_timing.t_rrd = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_rrd);
 	/* printf("t_rrd = %d\n", mc6_timing.t_rrd); */
@@ -187,13 +187,13 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 
 	/* calculate t_faw */
 	if (page_size == 1) {
-		mc6_timing.t_faw = speed_bin_table(speed_bin_index, SPEED_BIN_TFAW1K);
+		mc6_timing.t_faw = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TFAW1K);
 		/* printf("t_faw = %d\n", mc6_timing.t_faw); */
 		mc6_timing.t_faw = GET_MAX_VALUE(mc6_timing.t_ckclk * 20, mc6_timing.t_faw);
 		mc6_timing.t_faw = time_to_nclk(mc6_timing.t_faw, mc6_timing.t_ckclk);
 		/* printf("t_faw = %d\n", mc6_timing.t_faw); */
 	} else {	/* page size =2, we do not support page size 0.5k */
-		mc6_timing.t_faw = speed_bin_table(speed_bin_index, SPEED_BIN_TFAW2K);
+		mc6_timing.t_faw = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TFAW2K);
 		/* printf("t_faw = %d\n", mc6_timing.t_faw); */
 		mc6_timing.t_faw = GET_MAX_VALUE(mc6_timing.t_ckclk * 28, mc6_timing.t_faw);
 		mc6_timing.t_faw = time_to_nclk(mc6_timing.t_faw, mc6_timing.t_ckclk);
@@ -201,7 +201,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	}
 
 	/* calculate t_rtp */
-	mc6_timing.t_rtp = speed_bin_table(speed_bin_index, SPEED_BIN_TRTP);
+	mc6_timing.t_rtp = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRTP);
 	/* printf("t_rtp = %d\n", mc6_timing.t_rtp); */
 	mc6_timing.t_rtp = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_rtp);
 	/* printf("t_rtp = %d\n", mc6_timing.t_rtp); */
@@ -209,7 +209,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	/* printf("t_rtp = %d\n", mc6_timing.t_rtp); */
 
 	/* calculate t_mode */
-	mc6_timing.t_mod = speed_bin_table(speed_bin_index, SPEED_BIN_TMOD);
+	mc6_timing.t_mod = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TMOD);
 	/* printf("t_mod = %d\n", mc6_timing.t_mod); */
 #ifdef CONFIG_DDR4
 	mc6_timing.t_mod = GET_MAX_VALUE(mc6_timing.t_ckclk * 24, mc6_timing.t_mod);
@@ -221,7 +221,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	/* printf("t_mod = %d\n",mc6_timing. t_mod); */
 
 	/* calculate t_wtr */
-	mc6_timing.t_wtr = speed_bin_table(speed_bin_index, SPEED_BIN_TWTR);
+	mc6_timing.t_wtr = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TWTR);
 	/* printf("t_wtr = %d\n", mc6_timing.t_wtr); */
 	mc6_timing.t_wtr = GET_MAX_VALUE(mc6_timing.t_ckclk * 2, mc6_timing.t_wtr);
 	/* printf("t_wtr = %d\n", mc6_timing.t_wtr); */
@@ -230,7 +230,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 
 #ifdef CONFIG_DDR4
 	/* calculate t_wtr_l */
-	mc6_timing.t_wtr_l = speed_bin_table(speed_bin_index, SPEED_BIN_TWTRL);
+	mc6_timing.t_wtr_l = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TWTRL);
 	/* printf("t_wtr_l = %d\n", mc6_timing.t_wtr_l); */
 	mc6_timing.t_wtr_l = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_wtr_l);
 	/* printf("t_wtr_l = %d\n", mc6_timing.t_wtr_l); */
@@ -248,7 +248,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 
 #ifndef CONFIG_DDR4 /* CONFIG_DDR3 */
 	/* calculate t_xpdll */
-	mc6_timing.t_xpdll = speed_bin_table(speed_bin_index, SPEED_BIN_TXPDLL);
+	mc6_timing.t_xpdll = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TXPDLL);
 	mc6_timing.t_xpdll = GET_MAX_VALUE(mc6_timing.t_ckclk * 10, mc6_timing.t_xpdll);
 	mc6_timing.t_xpdll = time_to_nclk(mc6_timing.t_xpdll, mc6_timing.t_ckclk);
 #endif
@@ -286,19 +286,19 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	/* printf("t_cksre = %d\n", mc6_timing.t_cksre); */
 
 	/* calculate t_ras */
-	mc6_timing.t_ras = speed_bin_table(speed_bin_index, SPEED_BIN_TRAS);
+	mc6_timing.t_ras = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRAS);
 	/* printf("t_ras = %d\n", mc6_timing.t_ras); */
 	mc6_timing.t_ras = time_to_nclk(mc6_timing.t_ras, mc6_timing.t_ckclk);
 	/* printf("t_ras = %d\n", mc6_timing.t_ras); */
 
 	/* calculate t_rcd */
-	mc6_timing.t_rcd = speed_bin_table(speed_bin_index, SPEED_BIN_TRCD);
+	mc6_timing.t_rcd = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRCD);
 	/* printf("t_rcd = %d\n", mc6_timing.t_rcd); */
 	mc6_timing.t_rcd = time_to_nclk(mc6_timing.t_rcd, mc6_timing.t_ckclk);
 	/* printf("t_rcd = %d\n", mc6_timing.t_rcd); */
 
 	/* calculate t_rp */
-	mc6_timing.t_rp = speed_bin_table(speed_bin_index, SPEED_BIN_TRP);
+	mc6_timing.t_rp = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRP);
 	/* printf("t_rp = %d\n", mc6_timing.t_rp); */
 	mc6_timing.t_rp = time_to_nclk(mc6_timing.t_rp, mc6_timing.t_ckclk);
 	/* printf("t_rp = %d\n", mc6_timing.t_rp); */
@@ -313,8 +313,8 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 
 #ifdef CONFIG_DDR4
 	/* calculate t_rrd_l */
-	mc6_timing.t_rrd_l = (page_size == 1) ? speed_bin_table(speed_bin_index, SPEED_BIN_TRRDL1K) :
-						speed_bin_table(speed_bin_index, SPEED_BIN_TRRDL2K);
+	mc6_timing.t_rrd_l = (page_size == 1) ? mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRRDL1K) :
+						mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRRDL2K);
 	/* printf("t_rrd_l = %d\n", mc6_timing.t_rrd_l); */
 	mc6_timing.t_rrd_l = GET_MAX_VALUE(mc6_timing.t_ckclk * 4, mc6_timing.t_rrd_l);
 	/* printf("t_rrd_l = %d\n", mc6_timing. t_rrd_l); */
@@ -322,14 +322,14 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	/* printf("t_rrd_l = %d\n", mc6_timing.t_rrd_l); */
 
 	/* calculate t_ccd_l */
-	mc6_timing.t_ccd_l = speed_bin_table(speed_bin_index, SPEED_BIN_TCCDL);
+	mc6_timing.t_ccd_l = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TCCDL);
 	mc6_timing.t_ccd_l = GET_MAX_VALUE(mc6_timing.t_ckclk * 5, mc6_timing.t_ccd_l);
 	mc6_timing.t_ccd_l = time_to_nclk(mc6_timing.t_ccd_l, mc6_timing.t_ckclk);
 	/* printf("t_ccd_l = %d\n", mc6_timing.t_ccd_l); */
 #endif
 
 	/* calculate t_rc */
-	mc6_timing.t_rc = speed_bin_table(speed_bin_index, SPEED_BIN_TRC);
+	mc6_timing.t_rc = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRC);
 	/* printf("t_rc = %d\n", mc6_timing.t_rc); */
 	mc6_timing.t_rc = time_to_nclk(mc6_timing.t_rc, mc6_timing.t_ckclk);
 	/* printf("t_rc = %d\n", mc6_timing.t_rc); */
@@ -396,7 +396,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	mc6_timing.t_mrd_pda = time_to_nclk(mc6_timing.t_mrd_pda, mc6_timing.t_ckclk);
 	/* printf("t_mrd_pda = %d\n", mc6_timing. t_mrd_pda); */
 
-	mc6_timing.t_xsdll = speed_bin_table(speed_bin_index, SPEED_BIN_TXSDLL);
+	mc6_timing.t_xsdll = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TXSDLL);
 	/* printf("t_xsdll = %d\n", mc6_timing.t_xsdll); */
 
 	mc6_timing.t_rwd_ext_dly = TIMING_T_RWD_EXT_DLY;

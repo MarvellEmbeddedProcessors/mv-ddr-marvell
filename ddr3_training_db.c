@@ -596,7 +596,7 @@ struct mv_ddr_page_element *mv_ddr_page_tbl_get(void)
 }
 
 /* Return speed Bin value for selected index and t* element */
-unsigned int speed_bin_table(enum mv_ddr_speed_bin index, enum mv_ddr_speed_bin_timing element)
+unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_ddr_speed_bin_timing element)
 {
 	u32 result = 0;
 

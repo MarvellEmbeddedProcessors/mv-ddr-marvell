@@ -655,7 +655,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 						  ("cl_value 0x%x cwl_val 0x%x\n",
 						   cl_value, cwl_val));
 
-				t_wr = time_to_nclk(speed_bin_table
+				t_wr = time_to_nclk(mv_ddr_speed_bin_timing_get
 							   (speed_bin_index,
 							    SPEED_BIN_TWR), t_ckclk);
 
@@ -1550,7 +1550,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 			      (cwl_mask_table[cwl_value] << 12), 0x7000));
 
 		t_ckclk = (MEGA / freq_tbl[frequency]);
-		t_wr = time_to_nclk(speed_bin_table
+		t_wr = time_to_nclk(mv_ddr_speed_bin_timing_get
 					   (speed_bin_index,
 					    SPEED_BIN_TWR), t_ckclk);
 
@@ -1817,45 +1817,45 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	refresh_interval_cnt = t_refi / t_hclk;	/* no units */
 
 	if (page_size == 1) {
-		t_faw = speed_bin_table(speed_bin_index, SPEED_BIN_TFAW1K);
+		t_faw = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TFAW1K);
 		t_faw = time_to_nclk(t_faw, t_ckclk);
 		t_faw = GET_MAX_VALUE(20, t_faw);
 	} else {	/* page size =2, we do not support page size 0.5k */
-		t_faw = speed_bin_table(speed_bin_index, SPEED_BIN_TFAW2K);
+		t_faw = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TFAW2K);
 		t_faw = time_to_nclk(t_faw, t_ckclk);
 		t_faw = GET_MAX_VALUE(28, t_faw);
 	}
 
-	t_pd = GET_MAX_VALUE(t_ckclk * 3, speed_bin_table(speed_bin_index, SPEED_BIN_TPD));
+	t_pd = GET_MAX_VALUE(t_ckclk * 3, mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TPD));
 	t_pd = time_to_nclk(t_pd, t_ckclk);
 
-	t_xpdll = GET_MAX_VALUE(t_ckclk * 10, speed_bin_table(speed_bin_index, SPEED_BIN_TXPDLL));
+	t_xpdll = GET_MAX_VALUE(t_ckclk * 10, mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TXPDLL));
 	t_xpdll = time_to_nclk(t_xpdll, t_ckclk);
 
-	t_rrd =	(page_size == 1) ? speed_bin_table(speed_bin_index,
+	t_rrd =	(page_size == 1) ? mv_ddr_speed_bin_timing_get(speed_bin_index,
 						   SPEED_BIN_TRRD1K) :
-		speed_bin_table(speed_bin_index, SPEED_BIN_TRRD2K);
+		mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRRD2K);
 	t_rrd = GET_MAX_VALUE(t_ckclk * 4, t_rrd);
-	t_rtp =	GET_MAX_VALUE(t_ckclk * 4, speed_bin_table(speed_bin_index,
+	t_rtp =	GET_MAX_VALUE(t_ckclk * 4, mv_ddr_speed_bin_timing_get(speed_bin_index,
 							   SPEED_BIN_TRTP));
 	t_mod = GET_MAX_VALUE(t_ckclk * 12, 15000);
 #if defined(CONFIG_DDR4)
-	t_wtr = GET_MAX_VALUE(t_ckclk * 2, speed_bin_table(speed_bin_index,
+	t_wtr = GET_MAX_VALUE(t_ckclk * 2, mv_ddr_speed_bin_timing_get(speed_bin_index,
 							   SPEED_BIN_TWTR));
 #else /* CONFIG_DDR4 */
-	t_wtr = GET_MAX_VALUE(t_ckclk * 4, speed_bin_table(speed_bin_index,
+	t_wtr = GET_MAX_VALUE(t_ckclk * 4, mv_ddr_speed_bin_timing_get(speed_bin_index,
 							   SPEED_BIN_TWTR));
 #endif /* CONFIG_DDR4 */
-	t_ras = time_to_nclk(speed_bin_table(speed_bin_index,
+	t_ras = time_to_nclk(mv_ddr_speed_bin_timing_get(speed_bin_index,
 						    SPEED_BIN_TRAS),
 				    t_ckclk);
-	t_rcd = time_to_nclk(speed_bin_table(speed_bin_index,
+	t_rcd = time_to_nclk(mv_ddr_speed_bin_timing_get(speed_bin_index,
 						    SPEED_BIN_TRCD),
 				    t_ckclk);
-	t_rp = time_to_nclk(speed_bin_table(speed_bin_index,
+	t_rp = time_to_nclk(mv_ddr_speed_bin_timing_get(speed_bin_index,
 						   SPEED_BIN_TRP),
 				   t_ckclk);
-	t_wr = time_to_nclk(speed_bin_table(speed_bin_index,
+	t_wr = time_to_nclk(mv_ddr_speed_bin_timing_get(speed_bin_index,
 						   SPEED_BIN_TWR),
 				   t_ckclk);
 	t_wtr = time_to_nclk(t_wtr, t_ckclk);
@@ -1960,11 +1960,11 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 
 	t_ckclk = (MEGA / freq_tbl[frequency]);
 
-	t_rrd_l = (page_size == 1) ? speed_bin_table(speed_bin_index, SPEED_BIN_TRRDL1K) :
-			speed_bin_table(speed_bin_index, SPEED_BIN_TRRDL2K);
+	t_rrd_l = (page_size == 1) ? mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRRDL1K) :
+			mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TRRDL2K);
 	t_rrd_l = GET_MAX_VALUE(t_ckclk * 4, t_rrd_l);
 
-	t_wtr_l = speed_bin_table(speed_bin_index, SPEED_BIN_TWTRL);
+	t_wtr_l = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TWTRL);
 	t_wtr_l = GET_MAX_VALUE(t_ckclk * 4, t_wtr_l);
 
 	t_rrd_l = time_to_nclk(t_rrd_l, t_ckclk);
@@ -1979,7 +1979,7 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 
 	val = 0;
 	mask = 0;
-	t_mod = speed_bin_table(speed_bin_index, SPEED_BIN_TMOD);
+	t_mod = mv_ddr_speed_bin_timing_get(speed_bin_index, SPEED_BIN_TMOD);
 	t_mod = GET_MAX_VALUE(t_ckclk * 24, t_mod);
 	t_mod = time_to_nclk(t_mod, t_ckclk);
 
