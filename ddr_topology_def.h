@@ -176,6 +176,9 @@ struct mv_ddr_topology_map {
 
 	/* timing parameters */
 	unsigned int timing_data[MV_DDR_TDATA_LAST];
+
+	/* electrical parameters */
+	unsigned int electrical_data[MV_DDR_EDATA_LAST];
 };
 
 enum mv_ddr_iface_mode {

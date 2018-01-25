@@ -273,6 +273,25 @@ enum mv_ddr_timing_data {
 	MV_DDR_TDATA_LAST
 };
 
+enum mv_ddr_electrical_data {
+	MV_DDR_CK_DLY,
+	MV_DDR_PHY_REG3,
+	MV_DDR_ZPRI_DATA,
+	MV_DDR_ZNRI_DATA,
+	MV_DDR_ZPRI_CTRL,
+	MV_DDR_ZNRI_CTRL,
+	MV_DDR_ZPODT_DATA,
+	MV_DDR_ZNODT_DATA,
+	MV_DDR_ZPODT_CTRL,
+	MV_DDR_ZNODT_CTRL,
+	MV_DDR_DIC,
+	MV_DDR_ODT_CFG,
+	MV_DDR_RTT_NOM,
+	MV_DDR_RTT_WR,
+	MV_DDR_RTT_PARK,
+	MV_DDR_EDATA_LAST
+};
+
 enum mv_ddr_dev_width { /* sdram device width */
 	MV_DDR_DEV_WIDTH_4BIT,
 	MV_DDR_DEV_WIDTH_8BIT,
