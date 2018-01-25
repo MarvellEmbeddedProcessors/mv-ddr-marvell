@@ -132,7 +132,7 @@ enum mv_ddr_freq {
 	MV_DDR_FREQ_SAR
 };
 
-enum speed_bin_table_elements {
+enum mv_ddr_speed_bin_timing {
 	SPEED_BIN_TRCD,
 	SPEED_BIN_TRP,
 	SPEED_BIN_TRAS,
@@ -206,7 +206,7 @@ enum mv_ddr_freq {
 	MV_DDR_FREQ_SAR
 };
 
-enum speed_bin_table_elements {
+enum mv_ddr_speed_bin_timing {
 	SPEED_BIN_TRCD,
 	SPEED_BIN_TRP,
 	SPEED_BIN_TRAS,

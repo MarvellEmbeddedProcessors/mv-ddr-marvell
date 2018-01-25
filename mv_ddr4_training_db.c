@@ -358,7 +358,7 @@ struct mv_ddr_page_element *mv_ddr_page_tbl_get(void)
 }
 
 /* return speed bin value for selected index and element */
-unsigned int speed_bin_table(enum mv_ddr_speed_bin index, enum speed_bin_table_elements element)
+unsigned int speed_bin_table(enum mv_ddr_speed_bin index, enum mv_ddr_speed_bin_timing element)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 result = 0;
