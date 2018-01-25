@@ -95,8 +95,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#ifndef _MV_DDR_AP806_H
-#define _MV_DDR_AP806_H
+#ifndef _MV_DDR_PLAT_H
+#define _MV_DDR_PLAT_H
 
 #include "mv_ddr_static.h"
 
@@ -398,4 +398,4 @@ int mv_ddr_post_training_fixup(void);
 int mv_ddr_manual_cal_do(void);
 int mv_ddr_electrical_data_set(unsigned int edata[], unsigned int cs_num);
 
-#endif /* _MV_DDR_AP806_H */
+#endif /* _MV_DDR_PLAT_H */
