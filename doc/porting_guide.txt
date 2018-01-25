@@ -57,7 +57,7 @@ Porting procedure
 			struct if_params {
 				struct bus_params as_bus_params[MAX_BUS_NUM]; /* bus configuration */
 
-				enum hws_speed_bin speed_bin_index; /* speed bin table */
+				enum mv_ddr_speed_bin speed_bin_index; /* speed bin table */
 
 				enum mv_ddr_dev_width bus_width; /* sdram device width */
 
@@ -134,7 +134,7 @@ Porting procedure
 			The DDR code will configure the system per specified speed bin index, when MV_DDR_CFG_DEFAULT is set as source configuration (refer to section 2.4).
 
 			See sub-section 2.4.1 to properly choose such an index for a specific DDR module.
-			This parameter is of enum hws_speed_bin type.
+			This parameter is of enum mv_ddr_speed_bin type.
 
 			A list of the supported speed bin index values:
 

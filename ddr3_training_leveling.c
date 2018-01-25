@@ -131,7 +131,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 	u32 data, mask;
 	unsigned int max_cs = mv_ddr_cs_num_get();
 	u32 bus_num, if_id, cl_val;
-	enum hws_speed_bin speed_bin_index;
+	enum mv_ddr_speed_bin speed_bin_index;
 	/* save current CS value */
 	u32 cs_enable_reg_val[MAX_INTERFACE_NUM] = { 0 };
 	int is_any_pup_fail = 0;
@@ -495,7 +495,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 	u32 curr_numb, curr_min_delay;
 	int adll_array[3] = { 0, -0xa, 0x14 };
 	u32 phyreg3_arr[MAX_INTERFACE_NUM][MAX_BUS_NUM];
-	enum hws_speed_bin speed_bin_index;
+	enum mv_ddr_speed_bin speed_bin_index;
 	int is_any_pup_fail = 0;
 	int break_loop = 0;
 	u32 cs_enable_reg_val[MAX_INTERFACE_NUM]; /* save current CS value */

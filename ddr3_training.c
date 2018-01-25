@@ -477,7 +477,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 	u32 t_ckclk = 0, t_wr = 0, t2t = 0;
 	u32 data_value = 0, cs_cnt = 0,
 		mem_mask = 0, bus_index = 0;
-	enum hws_speed_bin speed_bin_index = SPEED_BIN_DDR_2133N;
+	enum mv_ddr_speed_bin speed_bin_index = SPEED_BIN_DDR_2133N;
 	u32 cs_mask = 0;
 	u32 cl_value = 0, cwl_val = 0;
 	u32 bus_cnt = 0, adll_tap = 0;
@@ -1342,7 +1342,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 	u32 end_if, start_if;
 	u32 bus_index = 0;
 	int is_dll_off = 0;
-	enum hws_speed_bin speed_bin_index = 0;
+	enum mv_ddr_speed_bin speed_bin_index = 0;
 	struct hws_tip_freq_config_info freq_config_info;
 	enum hws_result *flow_result = training_result[training_stage];
 	u32 adll_tap = 0;
@@ -1795,7 +1795,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 		t_r2w_w2r = 0x3, t_r2w_w2r_high = 0x1, t_w2w = 0x3;
 	u32 refresh_interval_cnt, t_hclk, t_refi, t_faw, t_pd, t_xpdll;
 	u32 val = 0, page_size = 0, mask = 0;
-	enum hws_speed_bin speed_bin_index;
+	enum mv_ddr_speed_bin speed_bin_index;
 	enum mv_ddr_die_capacity memory_size = MV_DDR_DIE_CAP_2GBIT;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct mv_ddr_page_element *page_param = mv_ddr_page_tbl_get();
@@ -1946,7 +1946,7 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 {
 	u32 t_rrd_l = 0, t_wtr_l = 0, t_ckclk = 0, t_mod = 0, t_ccd = 0;
 	u32 page_size = 0, val = 0, mask = 0;
-	enum hws_speed_bin speed_bin_index;
+	enum mv_ddr_speed_bin speed_bin_index;
 	enum mv_ddr_die_capacity memory_size;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct mv_ddr_page_element *page_param = mv_ddr_page_tbl_get();

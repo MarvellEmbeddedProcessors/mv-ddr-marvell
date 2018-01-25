@@ -128,7 +128,7 @@ struct if_params {
 	struct bus_params as_bus_params[MV_DDR_MAX_BUS_NUM];
 
 	/* Speed Bin Table */
-	enum hws_speed_bin speed_bin_index;
+	enum mv_ddr_speed_bin speed_bin_index;
 
 	/* sdram device width */
 	enum mv_ddr_dev_width bus_width;

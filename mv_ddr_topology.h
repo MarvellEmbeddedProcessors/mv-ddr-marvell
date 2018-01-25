@@ -101,7 +101,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAX_CS_NUM	4
 
 #if defined(CONFIG_DDR4)
-enum hws_speed_bin {
+enum mv_ddr_speed_bin {
 	SPEED_BIN_DDR_1600J,
 	SPEED_BIN_DDR_1600K,
 	SPEED_BIN_DDR_1600L,
@@ -157,7 +157,7 @@ enum speed_bin_table_elements {
 	SPEED_BIN_TCCDL
 };
 #else /* CONFIG_DDR3 */
-enum hws_speed_bin {
+enum mv_ddr_speed_bin {
 	SPEED_BIN_DDR_800D,
 	SPEED_BIN_DDR_800E,
 	SPEED_BIN_DDR_1066E,

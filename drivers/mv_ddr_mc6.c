@@ -151,7 +151,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	unsigned int *rfc_tbl = mv_ddr_rfc_tbl_get();
 
 	/* get the spped bin index */
-	enum hws_speed_bin speed_bin_index = tm->interface_params[0].speed_bin_index;
+	enum mv_ddr_speed_bin speed_bin_index = tm->interface_params[0].speed_bin_index;
 
 	/* calculate memory size */
 	enum mv_ddr_die_capacity memory_size = tm->interface_params[0].memory_size;
