@@ -1787,3 +1787,8 @@ int mv_ddr_manual_cal_do(void)
 {
 	return 0;
 }
+
+int mv_ddr_electrical_data_set(unsigned int edata[], unsigned int cs_num)
+{
+	return 0;
+}

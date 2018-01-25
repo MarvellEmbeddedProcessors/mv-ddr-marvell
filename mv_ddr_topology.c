@@ -238,6 +238,12 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 				cwl_tbl[speed_bin_index].cl_val[freq];
 	}
 
+	val = mv_ddr_cs_num_get();
+	if (mv_ddr_electrical_data_set(tm->electrical_data, val)) {
+		printf("error: %s: failed to update electrical data\n", __func__);
+		return NULL;
+	}
+
 	return tm;
 }
 

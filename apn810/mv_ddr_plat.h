@@ -154,5 +154,6 @@ int mv_ddr_mc_config(void);
 int mv_ddr_mc_ena(void);
 int mv_ddr_phy_config(void);
 unsigned int mv_ddr_init_freq_get(void);
+int mv_ddr_electrical_data_set(unsigned int edata[], unsigned int cs_num);
 
 #endif /* _MV_DDR_PLAT_H */

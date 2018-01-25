@@ -234,3 +234,34 @@ int mv_ddr_phy_config(void)
 {
 	return snps_init(ap_regs_base + SNPS_PHY_OFFSET);
 }
+
+int mv_ddr_electrical_data_set(unsigned int edata[], unsigned int cs_num)
+{
+	edata[MV_DDR_CK_DLY] = MV_DDR_PLAT_CK_DLY;
+	edata[MV_DDR_PHY_REG3] = MV_DDR_PLAT_PHY_REG3;
+	edata[MV_DDR_ZPRI_DATA] = MV_DDR_PLAT_ZPRI_DATA;
+	edata[MV_DDR_ZNRI_DATA] = MV_DDR_PLAT_ZNRI_DATA;
+	edata[MV_DDR_ZPRI_CTRL] = MV_DDR_PLAT_ZPRI_CTRL;
+	edata[MV_DDR_ZNRI_CTRL] = MV_DDR_PLAT_ZNRI_CTRL;
+	edata[MV_DDR_ZPODT_DATA] = MV_DDR_PLAT_ZPODT_DATA;
+	edata[MV_DDR_ZNODT_DATA] = MV_DDR_PLAT_ZNODT_DATA;
+	edata[MV_DDR_ZPODT_CTRL] = MV_DDR_PLAT_ZPODT_CTRL;
+	edata[MV_DDR_ZNODT_CTRL] = MV_DDR_PLAT_ZNODT_CTRL;
+	edata[MV_DDR_DIC] = MV_DDR_PLAT_DIC;
+	edata[MV_DDR_RTT_NOM] = MV_DDR_PLAT_RTT_NOM;
+
+	if (cs_num == 1) {
+		edata[MV_DDR_ODT_CFG] = MV_DDR_PLAT_ODT_CFG_1CS;
+		edata[MV_DDR_RTT_WR] = MV_DDR_PLAT_RTT_WR_1CS;
+		edata[MV_DDR_RTT_PARK] = MV_DDR_PLAT_RTT_PARK_1CS;
+	} else if (cs_num == 2) {
+		edata[MV_DDR_ODT_CFG] = MV_DDR_PLAT_ODT_CFG_2CS;
+		edata[MV_DDR_RTT_WR] = MV_DDR_PLAT_RTT_WR_2CS;
+		edata[MV_DDR_RTT_PARK] = MV_DDR_PLAT_RTT_PARK_2CS;
+	} else {
+		printf("error: %s: unsupported cs number found\n", __func__);
+		return -1;
+	}
+
+	return 0;
+}

@@ -396,4 +396,6 @@ u32 mv_ddr_dm_pad_get(void);
 int mv_ddr_pre_training_fixup(void);
 int mv_ddr_post_training_fixup(void);
 int mv_ddr_manual_cal_do(void);
+int mv_ddr_electrical_data_set(unsigned int edata[], unsigned int cs_num);
+
 #endif /* _MV_DDR_AP806_H */
