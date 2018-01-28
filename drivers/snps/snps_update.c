@@ -363,6 +363,29 @@ u16 dmem_1d_2d_dram_freq_get(void)
 	return ret_val;
 }
 
+u16 dmem_1d_2d_cs_present_get(void)
+{
+	debug_enter();
+
+	u16 ret_val = 0;
+	u32 cs_num = mv_ddr_cs_num_get();
+
+	if (cs_num == 1)
+		ret_val = (REG_54008_1D_2D_CS0_PRESENT << REG_54008_1D_2D_CS0_OFFS) |
+			  (REG_54008_1D_2D_CS0_D0_PRESENT << REG_54008_1D_2D_CS0_D0_OFFS);
+	else if (cs_num == 2)
+		ret_val = (REG_54008_1D_2D_CS0_PRESENT << REG_54008_1D_2D_CS0_OFFS) |
+			  (REG_54008_1D_2D_CS1_PRESENT << REG_54008_1D_2D_CS1_OFFS) |
+			  (REG_54008_1D_2D_CS0_D0_PRESENT << REG_54008_1D_2D_CS0_D0_OFFS) |
+			  (REG_54008_1D_2D_CS1_D0_PRESENT << REG_54008_1D_2D_CS1_D0_OFFS);
+	else
+		printf("error: %s: unsupported cs number found\n", __func__);
+
+	debug_exit();
+
+	return ret_val;
+}
+
 u16 dmem_1d_2d_mr0_get(void)
 {
 	debug_enter();
