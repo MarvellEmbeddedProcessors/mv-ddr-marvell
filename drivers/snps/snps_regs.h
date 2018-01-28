@@ -258,6 +258,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DATA_RATE_1600_MT_S_800MHZ	0x640
 #define DATA_RATE_1600_MT_S_1200MHZ	0x960
 
+#define REG_54005_1D_2D_DRV_IMP_PHY_ODT_IMP	0x54005 /* TODO -set in dynamic as electrical parameters */
+#define DRV_IMP_VAL			0x1e
+#define ODT_IMP_OHMS_60			0x3c
+#define ODT_IMP_OHMS_120		0x78
+
 #define REG_54008_1D_2D_CS_PRESENT	0x54008
 #define REG_54008_1D_2D_CS0_OFFS	0
 #define REG_54008_1D_2D_CS0_MASK	0x1
@@ -283,10 +288,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define REG_54035_1D_2D_MR6		0x54035
 #define MR6_800MHZ			0x409
 #define MR6_1200MHZ			0x809
-
-#define REG_54005_1D_2D_DRV_IMP_PHY_ODT_IMP	0x54005 /* TODO -set in dynamic as electrical parameters */
-#define DRV_IMP_VAL			0x1e
-#define ODT_IMP_VAL			0x3C
 
 #define REG_54006_1D_2D_DRAM_TYPE_PHY_VREF	0x54006 /* TODO -set in dynamic as electrical parameters */
 #define MODULE_TYPE_OFFS	0
