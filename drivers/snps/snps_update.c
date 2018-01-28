@@ -405,6 +405,21 @@ u16 dmem_1d_2d_cs_present_get(void)
 	return ret_val;
 }
 
+u16 dmem_1d_2d_addr_mirror_get(void)
+{
+	debug_enter();
+
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+
+	ret_val = tm->interface_params[0].as_bus_params[0].mirror_enable_bitmask <<
+		  BYTE_OFFSET;
+
+	debug_exit();
+
+	return ret_val;
+}
+
 u16 dmem_1d_2d_mr0_get(void)
 {
 	debug_enter();

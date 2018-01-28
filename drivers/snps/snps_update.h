@@ -112,6 +112,7 @@ u16 init_odt_ctrl_get(void);
 u16 dmem_1d_2d_dram_freq_get(void);
 u16 dmem_1d_2d_drv_imp_phy_odt_imp_get(void);
 u16 dmem_1d_2d_cs_present_get(void);
+u16 dmem_1d_2d_addr_mirror_get(void);
 u16 dmem_1d_2d_mr0_get(void);	/* TODO get the mrs from data base */
 u16 dmem_1d_2d_mr2_get(void);	/* TODO get the mrs from data base */
 u16 dmem_1d_2d_mr6_get(void);	/* TODO get the mrs from data base */
@@ -203,6 +204,7 @@ struct snps_address_dynamic_update one_d_dmem_dynamic_update[] = {
 	{REG_54003_1D_2D_DRAM_FREQ, dmem_1d_2d_dram_freq_get},
 	{REG_54005_1D_2D_DRV_IMP_PHY_ODT_IMP, dmem_1d_2d_drv_imp_phy_odt_imp_get},
 	{REG_54008_1D_2D_CS_PRESENT, dmem_1d_2d_cs_present_get},
+	{REG_54009_1D_2D_ADDR_MIRROR, dmem_1d_2d_addr_mirror_get},
 	{REG_5402F_1D_2D_MR0, dmem_1d_2d_mr0_get},
 	{REG_54031_1D_2D_MR2, dmem_1d_2d_mr2_get},
 	{REG_54035_1D_2D_MR6, dmem_1d_2d_mr6_get},
@@ -244,6 +246,7 @@ struct snps_address_dynamic_update two_d_dmem_dynamic_update[] = {
 	{REG_54003_1D_2D_DRAM_FREQ, dmem_1d_2d_dram_freq_get},
 	{REG_54005_1D_2D_DRV_IMP_PHY_ODT_IMP, dmem_1d_2d_drv_imp_phy_odt_imp_get},
 	{REG_54008_1D_2D_CS_PRESENT, dmem_1d_2d_cs_present_get},
+	{REG_54009_1D_2D_ADDR_MIRROR, dmem_1d_2d_addr_mirror_get},
 	{REG_5402F_1D_2D_MR0, dmem_1d_2d_mr0_get},
 	{REG_54031_1D_2D_MR2, dmem_1d_2d_mr2_get},
 	{REG_54035_1D_2D_MR6, dmem_1d_2d_mr6_get},
