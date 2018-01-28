@@ -325,6 +325,25 @@ u16 init_phy_seq0bdly2_get(void)
 	return ret_val;
 }
 
+u16 init_odt_ctrl_get(void)
+{
+	debug_enter();
+
+	u16 ret_val = 0;
+	u32 cs_num = mv_ddr_cs_num_get();
+
+	if (cs_num == 1)
+		ret_val = ODT_DRV_STREN_ONE_CS;
+	else if (cs_num == 2)
+		ret_val = ODT_DRV_STREN_TWO_CS;
+	else
+		printf("error: %s: unsupported cs number found\n", __func__);
+
+	debug_exit();
+
+	return ret_val;
+}
+
 u16 dmem_1d_2d_dram_freq_get(void)
 {
 	debug_enter();
