@@ -445,15 +445,11 @@ u16 dmem_1d_2d_mr2_get(void)
 	debug_enter();
 
 	u16 ret_val = 0;
+	u32 mr2_cwl;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
 
-	if (freq == MV_DDR_FREQ_800)
-		ret_val = MR2_800MHZ;
-	else if (freq == MV_DDR_FREQ_1200)
-		ret_val = MR2_1200MHZ;
-	else
-		printf("error: %s: unsupported frequency found\n", __func__);
+	if (!mv_ddr_mr2_cwl_get(tm->interface_params[0].cas_wl, &mr2_cwl))
+		ret_val = mr2_cwl | tm->electrical_data[MV_DDR_RTT_WR];
 
 	debug_exit();
 	return ret_val;
