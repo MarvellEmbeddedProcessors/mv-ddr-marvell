@@ -98,6 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "snps.h"
 #include "snps_regs.h"
 #include "ddr_topology_def.h"
+#include "mv_ddr_mrs.h"
 
 /* example of an update routine that returns runtime depndant value */
 #if 0 /* the routine below is just an example - not to be used */
@@ -487,5 +488,27 @@ u16 dmem_1d_2d_mr6_get(void)
 		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
+	return ret_val;
+}
+
+u16 dmem_1d_2d_rtt_nom_wr_park_get(void)
+{
+	debug_enter();
+
+	u16 ret_val;
+	u16 rtt_park, rtt_nom, rtt_wr;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+
+	rtt_nom = (tm->electrical_data[MV_DDR_RTT_NOM] >> MV_DDR_MR1_RTT_NOM_OFFS) & MV_DDR_MR1_RTT_NOM_MASK;
+	rtt_park = (tm->electrical_data[MV_DDR_RTT_PARK] >> MV_DDR_MR5_RTT_PARK_OFFS) & MV_DDR_MR5_RTT_PARK_MASK;
+	rtt_wr = (tm->electrical_data[MV_DDR_RTT_WR] >> MV_DDR_MR2_RTT_WR_OFFS) & MV_DDR_MR2_RTT_WR_MASK;
+
+	ret_val = (rtt_nom & RTT_NOM_WR_PARK0_RTT_NOM_MR1_MASK) << RTT_NOM_WR_PARK0_RTT_NOM_MR1_OFFS;
+	ret_val |= (rtt_park & RTT_NOM_WR_PARK0_RTT_PARK_MR5_MASK) << RTT_NOM_WR_PARK0_RTT_PARK_MR5_OFFS;
+	ret_val |= (rtt_wr & RTT_NOM_WR_PARK0_RTT_WR_MR2_MASK) << RTT_NOM_WR_PARK0_RTT_WR_MR2_OFFS;
+	ret_val |= RTT_NOM_WR_PARK0_EN_VAL;
+
+	debug_exit();
+
 	return ret_val;
 }

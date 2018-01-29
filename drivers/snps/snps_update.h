@@ -117,6 +117,7 @@ u16 dmem_1d_2d_mr0_get(void);	/* TODO get the mrs from data base */
 u16 dmem_1d_2d_mr2_get(void);	/* TODO get the mrs from data base */
 u16 dmem_1d_2d_mr5_get(void);	/* TODO get the mrs from data base */
 u16 dmem_1d_2d_mr6_get(void);	/* TODO get the mrs from data base */
+u16 dmem_1d_2d_rtt_nom_wr_park_get(void);
 
 struct snps_address_data init_phy_static_update[] = {
 	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_MASTER, INST_NUM_0, REG_88_PHY_CAL_RATE),
@@ -188,14 +189,6 @@ struct snps_address_data one_d_dmem_static_update[] = {
 	{REG_5400A_1D_2D_PHY_CFG_CSTEST_FAIL, PHY_CFG_REG_VAL << BYTE_OFFSET},
 	{REG_5400C_1D_2D_RESV19_HDT_CTRL, HDT_CTRL_REG_VAL},
 	{REG_54036_1D_2D_CS_SETUP_GDDEC_X16_PRESENT, (CS_SETUP_GDDEC_REG_VAL << BYTE_OFFSET) | X16_PRESENT_REG_VAL},
-	{REG_54037_1D_2D_RTT_NOM_WR_PARK0, RTT_NOM_WR_PARK0_REG_VAL},
-	{REG_54038_1D_2D_RTT_NOM_WR_PARK1, RTT_NOM_WR_PARK1_REG_VAL},
-	{REG_54039_1D_2D_RTT_NOM_WR_PARK2, RTT_NOM_WR_PARK2_REG_VAL},
-	{REG_5403A_1D_2D_RTT_NOM_WR_PARK3, RTT_NOM_WR_PARK3_REG_VAL},
-	{REG_5403B_1D_2D_RTT_NOM_WR_PARK4, RTT_NOM_WR_PARK4_REG_VAL},
-	{REG_5403C_1D_2D_RTT_NOM_WR_PARK5, RTT_NOM_WR_PARK5_REG_VAL},
-	{REG_5403D_1D_2D_RTT_NOM_WR_PARK6, RTT_NOM_WR_PARK6_REG_VAL},
-	{REG_5403E_1D_2D_RTT_NOM_WR_PARK7, RTT_NOM_WR_PARK7_REG_VAL},
 	{ -1	, -1 }
 };
 
@@ -209,6 +202,8 @@ struct snps_address_dynamic_update one_d_dmem_dynamic_update[] = {
 	{REG_54031_1D_2D_MR2, dmem_1d_2d_mr2_get},
 	{REG_54034_1D_2D_MR5, dmem_1d_2d_mr5_get},
 	{REG_54035_1D_2D_MR6, dmem_1d_2d_mr6_get},
+	{REG_54037_1D_2D_RTT_NOM_WR_PARK0, dmem_1d_2d_rtt_nom_wr_park_get},
+	{REG_54038_1D_2D_RTT_NOM_WR_PARK1, dmem_1d_2d_rtt_nom_wr_park_get},
 	{-1, NULL}
 };
 
@@ -230,14 +225,6 @@ struct snps_address_data two_d_dmem_static_update[] = {
 	{REG_5400C_1D_2D_RESV19_HDT_CTRL, HDT_CTRL_REG_VAL},
 	{REG_5400D_1D_2D_RSRV1B_RSRV1A, (RSRV1A_VAL << BYTE_OFFSET) | RSRV1B_VAL},
 	{REG_54036_1D_2D_CS_SETUP_GDDEC_X16_PRESENT, (CS_SETUP_GDDEC_REG_VAL << BYTE_OFFSET) | X16_PRESENT_REG_VAL},
-	{REG_54037_1D_2D_RTT_NOM_WR_PARK0, RTT_NOM_WR_PARK0_REG_VAL},
-	{REG_54038_1D_2D_RTT_NOM_WR_PARK1, RTT_NOM_WR_PARK1_REG_VAL},
-	{REG_54039_1D_2D_RTT_NOM_WR_PARK2, RTT_NOM_WR_PARK2_REG_VAL},
-	{REG_5403A_1D_2D_RTT_NOM_WR_PARK3, RTT_NOM_WR_PARK3_REG_VAL},
-	{REG_5403B_1D_2D_RTT_NOM_WR_PARK4, RTT_NOM_WR_PARK4_REG_VAL},
-	{REG_5403C_1D_2D_RTT_NOM_WR_PARK5, RTT_NOM_WR_PARK5_REG_VAL},
-	{REG_5403D_1D_2D_RTT_NOM_WR_PARK6, RTT_NOM_WR_PARK6_REG_VAL},
-	{REG_5403E_1D_2D_RTT_NOM_WR_PARK7, RTT_NOM_WR_PARK7_REG_VAL},
 	{ -1	, -1 }
 };
 
@@ -251,6 +238,8 @@ struct snps_address_dynamic_update two_d_dmem_dynamic_update[] = {
 	{REG_54031_1D_2D_MR2, dmem_1d_2d_mr2_get},
 	{REG_54034_1D_2D_MR5, dmem_1d_2d_mr5_get},
 	{REG_54035_1D_2D_MR6, dmem_1d_2d_mr6_get},
+	{REG_54037_1D_2D_RTT_NOM_WR_PARK0, dmem_1d_2d_rtt_nom_wr_park_get},
+	{REG_54038_1D_2D_RTT_NOM_WR_PARK1, dmem_1d_2d_rtt_nom_wr_park_get},
 	{ -1	, NULL }
 };
 
