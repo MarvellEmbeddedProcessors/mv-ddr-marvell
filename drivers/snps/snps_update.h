@@ -115,6 +115,7 @@ u16 dmem_1d_2d_cs_present_get(void);
 u16 dmem_1d_2d_addr_mirror_get(void);
 u16 dmem_1d_2d_mr0_get(void);	/* TODO get the mrs from data base */
 u16 dmem_1d_2d_mr2_get(void);	/* TODO get the mrs from data base */
+u16 dmem_1d_2d_mr5_get(void);	/* TODO get the mrs from data base */
 u16 dmem_1d_2d_mr6_get(void);	/* TODO get the mrs from data base */
 
 struct snps_address_data init_phy_static_update[] = {
@@ -186,7 +187,6 @@ struct snps_address_data one_d_imem_static_update[] = {
 struct snps_address_data one_d_dmem_static_update[] = {
 	{REG_5400A_1D_2D_PHY_CFG_CSTEST_FAIL, PHY_CFG_REG_VAL << BYTE_OFFSET},
 	{REG_5400C_1D_2D_RESV19_HDT_CTRL, HDT_CTRL_REG_VAL},
-	{REG_54034_1D_2D_MR5, MR5_VAL},
 	{REG_54036_1D_2D_CS_SETUP_GDDEC_X16_PRESENT, (CS_SETUP_GDDEC_REG_VAL << BYTE_OFFSET) | X16_PRESENT_REG_VAL},
 	{REG_54037_1D_2D_RTT_NOM_WR_PARK0, RTT_NOM_WR_PARK0_REG_VAL},
 	{REG_54038_1D_2D_RTT_NOM_WR_PARK1, RTT_NOM_WR_PARK1_REG_VAL},
@@ -207,6 +207,7 @@ struct snps_address_dynamic_update one_d_dmem_dynamic_update[] = {
 	{REG_54009_1D_2D_ADDR_MIRROR, dmem_1d_2d_addr_mirror_get},
 	{REG_5402F_1D_2D_MR0, dmem_1d_2d_mr0_get},
 	{REG_54031_1D_2D_MR2, dmem_1d_2d_mr2_get},
+	{REG_54034_1D_2D_MR5, dmem_1d_2d_mr5_get},
 	{REG_54035_1D_2D_MR6, dmem_1d_2d_mr6_get},
 	{-1, NULL}
 };
@@ -228,7 +229,6 @@ struct snps_address_data two_d_dmem_static_update[] = {
 	{REG_5400A_1D_2D_PHY_CFG_CSTEST_FAIL, PHY_CFG_REG_VAL << BYTE_OFFSET},
 	{REG_5400C_1D_2D_RESV19_HDT_CTRL, HDT_CTRL_REG_VAL},
 	{REG_5400D_1D_2D_RSRV1B_RSRV1A, (RSRV1A_VAL << BYTE_OFFSET) | RSRV1B_VAL},
-	{REG_54034_1D_2D_MR5, MR5_VAL},
 	{REG_54036_1D_2D_CS_SETUP_GDDEC_X16_PRESENT, (CS_SETUP_GDDEC_REG_VAL << BYTE_OFFSET) | X16_PRESENT_REG_VAL},
 	{REG_54037_1D_2D_RTT_NOM_WR_PARK0, RTT_NOM_WR_PARK0_REG_VAL},
 	{REG_54038_1D_2D_RTT_NOM_WR_PARK1, RTT_NOM_WR_PARK1_REG_VAL},
@@ -249,6 +249,7 @@ struct snps_address_dynamic_update two_d_dmem_dynamic_update[] = {
 	{REG_54009_1D_2D_ADDR_MIRROR, dmem_1d_2d_addr_mirror_get},
 	{REG_5402F_1D_2D_MR0, dmem_1d_2d_mr0_get},
 	{REG_54031_1D_2D_MR2, dmem_1d_2d_mr2_get},
+	{REG_54034_1D_2D_MR5, dmem_1d_2d_mr5_get},
 	{REG_54035_1D_2D_MR6, dmem_1d_2d_mr6_get},
 	{ -1	, NULL }
 };
