@@ -148,13 +148,6 @@ void mmio_write2_32(u32 val, u32 addr)
 	mmio_write_32(addr, val);
 }
 
-/* remap overlapping dram region */
-static int mv_ddr_mc_remap(void)
-{
-	/* TODO: implement this function for multi-ap; use ccu driver in atf */
-	return 0;
-}
-
 static void mv_ddr_mem_scrubbing(void)
 {
 	uint64_t val = 0;
@@ -186,10 +179,6 @@ int mv_ddr_pre_config(void)
 		printf("mv_ddr: failed to update topology\n");
 		return -1;
 	}
-
-	/* remap overlapping dram region to the top */
-	if (mv_ddr_mc_remap() != 0)
-		return -1;
 
 	return 0;
 }
