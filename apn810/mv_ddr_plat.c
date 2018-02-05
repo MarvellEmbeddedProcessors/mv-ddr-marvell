@@ -107,33 +107,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define DDR_INTERFACES_NUM		1
 
+static unsigned int ap_regs_base;
+
+void mv_ddr_base_set(unsigned int base)
+{
+	ap_regs_base = base;
+}
+
 /* TODO: relocate to wrapper file */
 /* register accessor functions */
 void reg_write(u32 addr, u32 val)
 {
-	mmio_write_32(INTER_REGS_BASE + addr, val);
+	mmio_write_32(ap_regs_base + addr, val);
 }
 
 u32 reg_read(u32 addr)
 {
-	return mmio_read_32(INTER_REGS_BASE + addr);
+	return mmio_read_32(ap_regs_base + addr);
 }
 
 void reg_bit_set(u32 addr, u32 mask)
 {
-	mmio_write_32(INTER_REGS_BASE + addr,
-		      mmio_read_32(INTER_REGS_BASE + addr) | mask);
+	mmio_write_32(ap_regs_base + addr,
+		      mmio_read_32(ap_regs_base + addr) | mask);
 }
 
 void reg_bit_clr(u32 addr, u32 mask)
 {
-	mmio_write_32(INTER_REGS_BASE + addr,
-		      mmio_read_32(INTER_REGS_BASE + addr) & ~mask);
+	mmio_write_32(ap_regs_base + addr,
+		      mmio_read_32(ap_regs_base + addr) & ~mask);
 }
 
 void reg_bit_clrset(u32 addr, u32 val, u32 mask)
 {
-	mmio_clrsetbits_32(INTER_REGS_BASE + addr, mask, val);
+	mmio_clrsetbits_32(ap_regs_base + addr, mask, val);
 }
 
 void mmio_write2_32(u32 val, u32 addr)
@@ -197,6 +204,9 @@ int mv_ddr_post_config(void)
 
 int mv_ddr_pre_sys_config(void)
 {
+	struct mv_ddr_iface *curr_iface = mv_ddr_iface_get();
+
+	mv_ddr_base_set(curr_iface->ap_base);
 	/*
 	 * TODO: set the register at 0x4090 as follows
 	 * this is the aurora setting for second phy
@@ -273,5 +283,5 @@ int mv_ddr_mc_ena(void)
 
 int mv_ddr_phy_config(void)
 {
-	return snps_init(INTER_REGS_BASE + SNPS_PHY_OFFSET, 0);
+	return snps_init(ap_regs_base + SNPS_PHY_OFFSET, 0);
 }

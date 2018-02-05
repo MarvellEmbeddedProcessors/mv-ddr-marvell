@@ -193,7 +193,7 @@ struct mv_ddr_iface_ops {
 
 struct mv_ddr_iface {
 	/* base addr of ap ddr interface belongs to */
-	unsigned long long ap_base;
+	unsigned int ap_base;
 
 	/* ddr interface id */
 	unsigned int id;

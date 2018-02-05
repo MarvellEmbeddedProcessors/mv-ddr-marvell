@@ -101,7 +101,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAX_DEVICE_NUM			1
 #define DDR_INTERFACE_OCTETS_NUM	9
 
-#define INTER_REGS_BASE			0xe8000000
 #define SNPS_PHY_OFFSET			0x1000000	/* TODO: define as global parameter */
 
 #define MAX_INTERFACE_NUM		1	/* TODO: take from topology */
