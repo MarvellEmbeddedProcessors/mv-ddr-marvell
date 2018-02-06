@@ -171,6 +171,9 @@ static void mv_ddr_mem_scrubbing(void)
 
 int mv_ddr_pre_config(void)
 {
+	struct mv_ddr_iface *curr_iface = mv_ddr_iface_get();
+	mv_ddr_base_set(curr_iface->ap_base);
+
 	/* TODO: remove attribute mechanism */
 	ddr3_tip_dev_attr_init(0);
 	ddr3_tip_dev_attr_set(0, MV_ATTR_OCTET_PER_INTERFACE, DDR_INTERFACE_OCTETS_NUM);
@@ -193,9 +196,6 @@ int mv_ddr_post_config(void)
 
 int mv_ddr_pre_sys_config(void)
 {
-	struct mv_ddr_iface *curr_iface = mv_ddr_iface_get();
-	mv_ddr_base_set(curr_iface->ap_base);
-
 	return 0;
 }
 
