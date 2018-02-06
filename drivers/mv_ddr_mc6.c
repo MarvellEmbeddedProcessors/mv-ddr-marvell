@@ -634,8 +634,9 @@ void mv_ddr_mc6_and_dram_timing_set(unsigned int mc6_base)
 	mv_ddr_mc6_timing_regs_cfg(mc6_base, freq_mhz);
 }
 
+#ifdef CONFIG_MC6P
 /* TODO:  get relevant parameters from topology */
-void mv_ddr_mc6_cfg_set(unsigned int mc6_base)
+static void mv_ddr_mc6_cfg_set(unsigned int mc6_base)
 {
 	/*
 	 * configure data width, mvn and burst length (burst length is default BL8)
@@ -787,6 +788,7 @@ void mv_ddr_mc6_cfg_set(unsigned int mc6_base)
 	/* printf("MC6_CH0_DRAM_CFG4_REG addr 0x%x, data 0x%x\n", mc6_base + MC6_CH0_DRAM_CFG4_REG,
 		  reg_read(mc6_base + MC6_CH0_DRAM_CFG4_REG)); */
 }
+#endif /* CONFIG_MC6P */
 
 #ifdef CONFIG_MC6P
 /* configure dfi interface to handle the handshake b/w mc6 and phy */
@@ -1425,7 +1427,7 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base)
 #endif
 }
 
-void mv_ddr_mc6_ecc_enable(unsigned int mc6_base)
+static void mv_ddr_mc6_ecc_enable(unsigned int mc6_base)
 {
 	reg_bit_clrset(mc6_base + MC6_RAS_CTRL_REG,
 		       ECC_EN_ENA << ECC_EN_OFFS,
