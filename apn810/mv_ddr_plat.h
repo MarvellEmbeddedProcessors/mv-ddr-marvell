@@ -148,12 +148,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* CONFIG_DDR4 */
 
 /* functions declaration */
-int mv_ddr_pre_sys_config(void);
 int mv_ddr_pre_config(void);
 int mv_ddr_post_config(void);
 int mv_ddr_mc_config(void);
 int mv_ddr_mc_ena(void);
-int mv_ddr_post_sys_config(void);
 int mv_ddr_phy_config(void);
 unsigned int mv_ddr_init_freq_get(void);
 

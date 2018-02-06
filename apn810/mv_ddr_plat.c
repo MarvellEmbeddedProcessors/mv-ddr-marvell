@@ -194,16 +194,6 @@ int mv_ddr_post_config(void)
 	return 0;
 }
 
-int mv_ddr_pre_sys_config(void)
-{
-	return 0;
-}
-
-int mv_ddr_post_sys_config(void)
-{
-	return 0;
-}
-
 unsigned int mv_ddr_init_freq_get(void)
 {
 	enum mv_ddr_freq freq;

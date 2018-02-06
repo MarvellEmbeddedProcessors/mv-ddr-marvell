@@ -117,12 +117,6 @@ int mv_ddr_init(void)
 	/* print mv_ddr version */
 	mv_ddr_ver_print();
 
-	/* preliminary system (soc and/or board) configuration */
-	if (mv_ddr_pre_sys_config()) {
-		printf("error: %s failed\n", __func__);
-		return -1;
-	}
-
 	/* preliminary mv_ddr configuration */
 	if (mv_ddr_pre_config()) {
 		printf("error: %s failed\n", __func__);
@@ -179,12 +173,6 @@ int mv_ddr_init(void)
 
 	/* post mv_ddr configuration */
 	if (mv_ddr_post_config()) {
-		printf("error: %s failed\n", __func__);
-		return -1;
-	}
-
-	/* post system (soc and/or board) configuration */
-	if (mv_ddr_post_sys_config()) {
 		printf("error: %s failed\n", __func__);
 		return -1;
 	}
