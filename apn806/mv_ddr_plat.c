@@ -1026,7 +1026,7 @@ static void mv_ddr_convert_read_params_from_tip2mc6(void)
 		cl_val = tm->interface_params[0].cas_l;
 		cwl_val = tm->interface_params[0].cas_wl;
 
-		reg_bit_clrset(MC6_CH0_DRAM_CFG1_REG,
+		reg_bit_clrset(MC6_BASE + MC6_CH0_DRAM_CFG1_REG,
 			cwl_val << CWL_OFFS | cl_val << CL_OFFS,
 			CWL_MASK << CWL_OFFS | CL_MASK << CL_OFFS);
 
@@ -1050,7 +1050,7 @@ static void mv_ddr_convert_read_params_from_tip2mc6(void)
 				phy_rl_cycle_dly_mc6 += 2;
 
 			/* TODO: how to write to mc6 per interface */
-			reg_bit_clrset(MC6_CH0_PHY_RL_CTRL_B0_REG(cs),
+			reg_bit_clrset(MC6_BASE + MC6_CH0_PHY_RL_CTRL_B0_REG(cs),
 				       phy_rl_cycle_dly_mc6 << PHY_RL_CYCLE_DLY_OFFS,
 				       PHY_RL_CYCLE_DLY_MASK << PHY_RL_CYCLE_DLY_OFFS);
 		}
@@ -1058,12 +1058,12 @@ static void mv_ddr_convert_read_params_from_tip2mc6(void)
 
 	/* TODO: change these constant initialization below to functions */
 	phy_rfifo_rptr_dly_val = 9; /* FIXME: this parameter should be between 6 to 12 */
-	reg_bit_clrset(MC6_CH0_PHY_CTRL1_REG,
+	reg_bit_clrset(MC6_BASE + MC6_CH0_PHY_CTRL1_REG,
 		       phy_rfifo_rptr_dly_val << PHY_RFIFO_RPTR_DLY_VAL_OFFS,
 		       PHY_RFIFO_RPTR_DLY_VAL_MASK << PHY_RFIFO_RPTR_DLY_VAL_OFFS);
 
 	mb_read_data_latency = 8; /* FIXME: this parameter should be between 4 to 12 */
-	reg_bit_clrset(MC6_RD_DPATH_CTRL_REG,
+	reg_bit_clrset(MC6_BASE + MC6_RD_DPATH_CTRL_REG,
 		       mb_read_data_latency << MB_RD_DATA_LATENCY_CH0_OFFS,
 		       MB_RD_DATA_LATENCY_CH0_MASK << MB_RD_DATA_LATENCY_CH0_OFFS);
 }
@@ -1157,7 +1157,7 @@ void mv_ddr_mc_config(void)
 		printf("%s: failed: err code 0x%x\n", __func__, status);
 
 	ecc_is_ena = mv_ddr_is_ecc_ena();
-	status = mv_ddr_mc6_config(ecc_is_ena);
+	status = mv_ddr_mc6_config(MC6_BASE, ecc_is_ena);
 	if (status != 0)
 		printf("%s: failed: err code 0x%x\n", __func__, status);
 }
@@ -1294,7 +1294,7 @@ int mv_ddr_mc_init(void)
 	ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, SDRAM_INIT_CTRL_REG, 0x1, 0x1);
 
 	/* init mc6 controller */
-	mv_ddr_mc6_init();
+	mv_ddr_mc6_init(MC6_BASE);
 
 	return 0;
 }

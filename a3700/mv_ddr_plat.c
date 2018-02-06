@@ -168,7 +168,7 @@ void ddr_controller_init(struct mv_ddr_topology_map *map)
 
 	mv_ddr_sw_db_init(0, 0);
 
-	mv_ddr_mc6_and_dram_timing_set();
+	mv_ddr_mc6_and_dram_timing_set(MC6_BASE);
 
-	mv_ddr_mc6_sizes_cfg();
+	mv_ddr_mc6_sizes_cfg(MC6_BASE);
 }

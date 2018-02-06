@@ -253,7 +253,7 @@ int mv_ddr_mc_config(void)
 	int ecc_is_ena;
 
 	ecc_is_ena = mv_ddr_is_ecc_ena();
-	if (mv_ddr_mc6_config(ecc_is_ena)) {
+	if (mv_ddr_mc6_config(MC6_BASE, ecc_is_ena)) {
 		printf("error: %s failed\n", __func__);
 		return -1;
 	}
@@ -265,7 +265,7 @@ int mv_ddr_mc_config(void)
 /* enable memory controllers */
 int mv_ddr_mc_ena(void)
 {
-	mv_ddr_mc6_init();
+	mv_ddr_mc6_init(MC6_BASE);
 
 	return 0;
 }

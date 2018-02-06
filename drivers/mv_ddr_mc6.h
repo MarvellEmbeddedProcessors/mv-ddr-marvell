@@ -137,16 +137,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TIMING_T_CCD_CCS_EXT_DLY		5
 #define	TIMING_READ_GAP_EXTEND			4 /* for dual cs */
 
-/* registers definition */
-#if defined(CONFIG_A3700)
-#define MC6_BASE				0x0
-#elif defined(CONFIG_MC6P)
-#define MC6_BASE				0xfe0000
-#else
-#define MC6_BASE				0x20000
-#endif
-
-#define MC6_USER_CMD0_REG			(MC6_BASE + 0x20)
+#define MC6_USER_CMD0_REG			0x20
 #define USER_CMD0_CH0_OFFS			28
 #define USER_CMD0_CH0_VAL			0x1
 #define USER_CMD0_CH0_MASK			0x1
@@ -165,7 +156,7 @@ enum mv_ddr_mc6_sr_modes {
 #define SDRAM_INIT_REQ_VAL			0x1
 #define SDRAM_INIT_REQ_MASK			0x1
 
-#define MC6_MC_CTRL0_REG			(MC6_BASE + 0x44)
+#define MC6_MC_CTRL0_REG			0x44
 #ifdef CONFIG_MC6P
 #define MVN_EN_OFFS				12
 #define MVN_EN_MASK				0x7
@@ -179,12 +170,12 @@ enum mv_ddr_mc6_sr_modes {
 #define DATA_WIDTH_X32				0x3
 #define DATA_WIDTH_X64				0x4
 
-#define MC6_RAS_CTRL_REG			(MC6_BASE + 0x4c)
+#define MC6_RAS_CTRL_REG			0x4c
 #define ECC_EN_OFFS				1
 #define ECC_EN_MASK				0x1
 #define ECC_EN_ENA				1
 
-#define MC6_SPOOL_CTRL_REG			(MC6_BASE + 0x50)
+#define MC6_SPOOL_CTRL_REG			0x50
 #define STARV_TIMER_INIT_OFFS			0
 #define STARV_TIMER_INIT_MASK			0xff
 #define STARV_TIMER_VAL				0xff
@@ -199,7 +190,7 @@ enum mv_ddr_mc6_sr_modes {
 #define SPOOL_SMART_AUTO_PRECHARGE_DIS		0x0
 #endif
 
-#define MC6_MC_PWR_CTRL_REG			(MC6_BASE + 0x54)
+#define MC6_MC_PWR_CTRL_REG			0x54
 #define AC_ON_DLY_OFFS				8
 #define AC_ON_DLY_VAL				0x4
 #define AC_ON_DLY_MASK				0xf
@@ -207,7 +198,7 @@ enum mv_ddr_mc6_sr_modes {
 #define AC_OFF_DLY_VAL				0xc
 #define AC_OFF_DLY_MASK				0xf
 
-#define MC6_MC_WR_BUF_CTRL_REG			(MC6_BASE + 0x58)
+#define MC6_MC_WR_BUF_CTRL_REG			0x58
 #define TIME_SHARE_EN_CH0_OFFS			5
 #define TIME_SHARE_EN_CH0_MASK			0x1
 #ifdef CONFIG_MC6P
@@ -223,7 +214,7 @@ enum mv_ddr_mc6_sr_modes {
 #define TIME_SHARE_RD_REQ_CH0_VAL		0xff
 #endif
 
-#define MC6_RD_DPATH_CTRL_REG			(MC6_BASE + 0x64)
+#define MC6_RD_DPATH_CTRL_REG			0x64
 #define MB_RD_DATA_LATENCY_CH0_OFFS		0
 #define MB_RD_DATA_LATENCY_CH0_MASK		0x3f
 #ifndef CONFIG_MC6P
@@ -235,7 +226,7 @@ enum mv_ddr_mc6_sr_modes {
 #define MB_RD_DATA_LATENCY_CH0_VAL		0x5
 #endif
 
-#define MC6_RPP_STARVATION_CTRL_REG		(MC6_BASE + 0x180)
+#define MC6_RPP_STARVATION_CTRL_REG		0x180
 #define BW_ALLOC_MODE_SEL_OFFS			17
 #define BW_ALLOC_MODE_SEL_VAL			0x1
 #define BW_ALLOC_MODE_SEL_MASK			0x1
@@ -247,9 +238,9 @@ enum mv_ddr_mc6_sr_modes {
 #define RPP_STARV_TIMER_INIT_MASK		0xffff
 
 /* timing registers */
-#define MC6_CH0_MMAP_LOW_BASE			(MC6_BASE + 0x200)
+#define MC6_CH0_MMAP_LOW_BASE			0x200
 #define MC6_CH0_MMAP_LOW_REG(cs)		(MC6_CH0_MMAP_LOW_BASE + (cs) * 0x8)
-#define MC6_CH1_MMAP_LOW_BASE			(MC6_BASE + 0x400)
+#define MC6_CH1_MMAP_LOW_BASE			0x400
 #define MC6_CH1_MMAP_LOW_REG(cs)		(MC6_CH1_MMAP_LOW_BASE + (cs) * 0x8)
 #define CS_VALID_OFFS				0
 #define CS_VALID_MASK				0x1
@@ -264,15 +255,15 @@ enum mv_ddr_mc6_sr_modes {
 #define START_ADDRESS_L_OFFS			23
 #define START_ADDRESS_L_MASK			0x1ff
 
-#define MC6_CH0_MMAP_HIGH_BASE			(MC6_BASE + 0x204)
+#define MC6_CH0_MMAP_HIGH_BASE			0x204
 #define MC6_CH0_MMAP_HIGH_REG(cs)		(MC6_CH0_MMAP_HIGH_BASE + (cs) * 0x8)
-#define MC6_CH1_MMAP_HIGH_BASE			(MC6_BASE + 0x404)
+#define MC6_CH1_MMAP_HIGH_BASE			0x404
 #define MC6_CH1_MMAP_HIGH_REG(cs)		(MC6_CH1_MMAP_HIGH_BASE + (cs) * 0x8)
 #define START_ADDRESS_H_OFFS			0
 #define START_ADDRESS_H_MASK			0xffffffff
 #define START_ADDR_HTOL_OFFS			32
 
-#define MC6_CH0_MC_CFG_BASE			(MC6_BASE + 0x220)
+#define MC6_CH0_MC_CFG_BASE			0x220
 #define MC6_CH0_MC_CFG_REG(cs)			(MC6_CH0_MC_CFG_BASE + (cs) * 0x4)
 #define BA_NUM_OFFS				0
 #define BA_NUM_MASK				0x3
@@ -290,7 +281,7 @@ enum {
 #define DEVICE_TYPE_OFFS			16
 #define DEVICE_TYPE_MASK			0x3
 
-#define MC6_CH0_MC_CTRL1_REG			(MC6_BASE + 0x2c0)
+#define MC6_CH0_MC_CTRL1_REG			0x2c0
 #define PHY_MASK_OFFS				3
 #define PHY_MASK_VAL				0x0
 #define PHY_MASK_MASK				0x1
@@ -303,7 +294,7 @@ enum {
 #define ACS_EXIT_DLY_VAL			0x6
 #define ACS_EXIT_DLY_MASK			0x7
 
-#define MC6_CH0_MC_CTRL2_REG			(MC6_BASE + 0x2c4)
+#define MC6_CH0_MC_CTRL2_REG			0x2c4
 #define RDIMM_CS_MODE_OFFS			23
 #define RDIMM_CS_MODE_MASK			0x3
 #define RDIMM_MODE_OFFS				22
@@ -328,7 +319,7 @@ enum mv_ddr_mc6_sdram_type {
 };
 #define SDRAM_TYPE_MASK				0xf
 
-#define MC6_CH0_MC_CTRL3_REG			(MC6_BASE + 0x2c8)
+#define MC6_CH0_MC_CTRL3_REG			0x2c8
 #define PHY_OUT_FF_BYPASS_OFFS			8
 #define PHY_OUT_FF_BYPASS_VAL			0xfe
 #define PHY_OUT_FF_BYPASS_MASK			0xff
@@ -337,7 +328,7 @@ enum mv_ddr_mc6_sdram_type {
 #define PHY_IN_FF_BYPASS_MASK			0xff
 
 /* dram timing */
-#define MC6_CH0_DRAM_CFG1_REG			(MC6_BASE + 0x300)
+#define MC6_CH0_DRAM_CFG1_REG			0x300
 #define CAP_LATENCY_OFFS			28
 #define CAP_LATENCY_MASK			0xf
 #define CA_LATENCY_OFFS				24
@@ -349,81 +340,81 @@ enum mv_ddr_mc6_sdram_type {
 #define CL_OFFS					0
 #define CL_MASK					0x3f
 
-#define MC6_CH0_DRAM_CFG2_REG			(MC6_BASE + 0x304)
-#define DRAM_CFG2_DM_OFFS				10
-#define DRAM_CFG2_DM_MASK				0x1
+#define MC6_CH0_DRAM_CFG2_REG			0x304
+#define DRAM_CFG2_DM_OFFS			10
+#define DRAM_CFG2_DM_MASK			0x1
 enum mv_ddr_mc6_dm {
 	DM_DIS,
 	DM_EN
 };
 
-#define MC6_CH0_DRAM_CFG3_REG			(MC6_BASE + 0x308)
+#define MC6_CH0_DRAM_CFG3_REG			0x308
 #define DLL_RESET_OFFS				0
 #define DLL_RESET_VAL				0x1
 #define DLL_RESET_MASK				0x1
 
-#define MC6_CH0_DRAM_CFG4_REG			(MC6_BASE + 0x30c)
+#define MC6_CH0_DRAM_CFG4_REG			0x30c
 #define VREF_TRAINING_VALUE_DQ_OFFS		16
 #define VREF_TRAINING_VALUE_DQ_VAL		0x9
 #define VREF_TRAINING_VALUE_DQ_MASK		0x3f
 
-#define MC6_CH0_DRAM_CFG5_BASE			(MC6_BASE + 0x310)
+#define MC6_CH0_DRAM_CFG5_BASE			0x310
 #define MC6_CH0_DRAM_CFG5_REG(cs)		(MC6_CH0_DRAM_CFG5_BASE + (cs) * 0x4)
 /* TODO: remove this hard-coded define after electrical infrastructure implementation */
 #define MC6_CH0_DRAM_CFG5_VAL			0x21000000
 
-#define MC6_CH0_ODT_CTRL1_REG			(MC6_BASE + 0x340)
+#define MC6_CH0_ODT_CTRL1_REG			0x340
 /* TODO: remove this hard-coded define after electrical infrastructure implementation */
 #define MC6_CH0_ODT_CTRL1_VAL			0x0
 
-#define MC6_CH0_ODT_CTRL2_REG			(MC6_BASE + 0x344)
+#define MC6_CH0_ODT_CTRL2_REG			0x344
 /* TODO: remove this hard-coded define after electrical infrastructure implementation */
 #define MC6_CH0_ODT_CTRL2_VAL			0x30000000
 
-#define MC6_CH0_ECC_1BIT_ERR_COUNTER_REG	(MC6_BASE + 0x364)
+#define MC6_CH0_ECC_1BIT_ERR_COUNTER_REG	0x364
 
 /* mc6 timing */
-#define MC6_CH0_DDR_INIT_TIMING_CTRL0_REG	(MC6_BASE + 0x380)
+#define MC6_CH0_DDR_INIT_TIMING_CTRL0_REG	0x380
 #define INIT_COUNT_NOP_OFFS			0
 #define INIT_COUNT_NOP_MASK			0x3ffffff
 
-#define MC6_CH0_DDR_INIT_TIMING_CTRL1_REG	(MC6_BASE + 0x384)
+#define MC6_CH0_DDR_INIT_TIMING_CTRL1_REG	0x384
 #define INIT_COUNT_OFFS				0
 #define INIT_COUNT_MASK				0x7ffff
 
-#define MC6_CH0_DDR_INIT_TIMING_CTRL2_REG	(MC6_BASE + 0x388)
+#define MC6_CH0_DDR_INIT_TIMING_CTRL2_REG	0x388
 #define RESET_COUNT_OFFS			0
 #define RESET_COUNT_MASK			0x3fff
 
-#define MC6_CH0_ZQC_TIMING0_REG			(MC6_BASE + 0x38c)
+#define MC6_CH0_ZQC_TIMING0_REG			0x38c
 #define TZQINIT_OFFS				0
 #define TZQINIT_MASK				0x7ff
 
-#define MC6_CH0_ZQC_TIMING1_REG			(MC6_BASE + 0x390)
+#define MC6_CH0_ZQC_TIMING1_REG			0x390
 #define TZQCL_OFFS				0
 #define TZQCL_MASK				0x3ff
 #define TZQCS_OFFS				16
 #define TZQCS_MASK				0xfff
 
-#define MC6_CH0_REFRESH_TIMING_REG		(MC6_BASE + 0x394)
+#define MC6_CH0_REFRESH_TIMING_REG		0x394
 #define TREFI_OFFS				0
 #define TREFI_MASK				0x3fff
 #define TRFC_OFFS				16
 #define TRFC_MASK				0x7ff
 
-#define MC6_CH0_SELFREFRESH_TIMING0_REG		(MC6_BASE + 0x398)
+#define MC6_CH0_SELFREFRESH_TIMING0_REG		0x398
 #define TXSRD_OFFS				0
 #define TXSRD_MASK				0x7ff
 #define TXSNR_OFFS				16
 #define TXSNR_MASK				0x7ff
 
-#define MC6_CH0_SELFREFRESH_TIMING1_REG		(MC6_BASE + 0x39c)
+#define MC6_CH0_SELFREFRESH_TIMING1_REG		0x39c
 #define TCKSRX_OFFS				0
 #define TCKSRX_MASK				0x1f
 #define TCKSRE_OFFS				8
 #define TCKSRE_MASK				0x1f
 
-#define MC6_CH0_PWRDOWN_TIMING0_REG		(MC6_BASE + 0x3a0)
+#define MC6_CH0_PWRDOWN_TIMING0_REG		0x3a0
 #define TXARDS_OFFS				0
 #define TXARDS_MASK				0x1f
 #define TXARDS_VAL				0
@@ -434,17 +425,17 @@ enum mv_ddr_mc6_dm {
 #define TCPDED_OFFS				24
 #define TCPDED_MASK				0x1f
 
-#define MC6_CH0_PWRDOWN_TIMING1_REG		(MC6_BASE + 0x3a4)
+#define MC6_CH0_PWRDOWN_TIMING1_REG		0x3a4
 #define TPDEN_OFFS				0
 #define TPDEN_MASK				0x7
 
-#define MC6_CH0_MRS_TIMING_REG			(MC6_BASE + 0x3a8)
+#define MC6_CH0_MRS_TIMING_REG			0x3a8
 #define TMRD_OFFS				0
 #define TMRD_MASK				0x1f
 #define TMOD_OFFS				8
 #define TMOD_MASK				0x1f
 
-#define MC6_CH0_ACT_TIMING_REG			(MC6_BASE + 0x3ac)
+#define MC6_CH0_ACT_TIMING_REG			0x3ac
 #define TRAS_OFFS				0
 #define TRAS_MASK				0x7f
 #define TRCD_OFFS				8
@@ -454,7 +445,7 @@ enum mv_ddr_mc6_dm {
 #define TFAW_OFFS				24
 #define TFAW_MASK				0x3f
 
-#define MC6_CH0_PRECHARGE_TIMING_REG		(MC6_BASE + 0x3b0)
+#define MC6_CH0_PRECHARGE_TIMING_REG		0x3b0
 #define TRP_OFFS				0
 #define TRP_MASK				0x3f
 #define TRTP_OFFS				8
@@ -464,7 +455,7 @@ enum mv_ddr_mc6_dm {
 #define TRPA_OFFS				24
 #define TRPA_MASK				0x3f
 
-#define MC6_CH0_CAS_RAS_TIMING0_REG		(MC6_BASE + 0x3b4)
+#define MC6_CH0_CAS_RAS_TIMING0_REG		0x3b4
 #define TWTR_S_OFFS				0
 #define TWTR_S_MASK				0xf
 #define TWTR_OFFS				8
@@ -474,7 +465,7 @@ enum mv_ddr_mc6_dm {
 #define TCCD_OFFS				24
 #define TCCD_MASK				0xf
 
-#define MC6_CH0_CAS_RAS_TIMING1_REG		(MC6_BASE + 0x3b8)
+#define MC6_CH0_CAS_RAS_TIMING1_REG		0x3b8
 #define TRRD_S_OFFS				0
 #define TRRD_S_MASK				0xf
 #define TRRD_OFFS				8
@@ -483,7 +474,7 @@ enum mv_ddr_mc6_dm {
 #define TDQS2DQ_MASK				0x3
 #define TDQS2DQ_VAL				0
 
-#define MC6_CH0_OFF_SPEC_TIMING0_REG		(MC6_BASE + 0x3bc)
+#define MC6_CH0_OFF_SPEC_TIMING0_REG		0x3bc
 #define TCCD_CCS_EXT_DLY_OFFS			0
 #define TCCD_CCS_EXT_DLY_MASK			0xf
 #define TCCD_CCS_WR_EXT_DLY_OFFS		8
@@ -493,7 +484,7 @@ enum mv_ddr_mc6_dm {
 #define TWL_EARLY_OFFS				24
 #define TWL_EARLY_MASK				0x3
 
-#define MC6_CH0_OFF_SPEC_TIMING1_REG		(MC6_BASE + 0x3c0)
+#define MC6_CH0_OFF_SPEC_TIMING1_REG		0x3c0
 #define READ_GAP_EXTEND_OFFS			0
 #define READ_GAP_EXTEND_MASK			0x7
 #define TCCD_CCS_EXT_DLY_MIN_OFFS		8
@@ -501,12 +492,12 @@ enum mv_ddr_mc6_dm {
 #define TCCD_CCS_WR_EXT_DLY_MIN_OFFS		16
 #define TCCD_CCS_WR_EXT_DLY_MIN_MASK		0x7
 
-#define MC6_CH0_DRAM_READ_TIMING_REG		(MC6_BASE + 0x3c4)
+#define MC6_CH0_DRAM_READ_TIMING_REG		0x3c4
 #define TDQSCK_OFFS				0
 #define TDQSCK_MASK				0xf
 #define TDQSCK_VAL				0
 
-#define MC6_CH0_DRAM_MPD_TIMING_REG		(MC6_BASE + 0x3cc)
+#define MC6_CH0_DRAM_MPD_TIMING_REG		0x3cc
 #define TXMP_OFFS				0
 #define TXMP_MASK				0x7ff
 #define TMPX_S_OFFS				16
@@ -514,23 +505,23 @@ enum mv_ddr_mc6_dm {
 #define TMPX_LH_OFFS				24
 #define TMPX_LH_MASK				0xf
 
-#define MC6_CH0_DRAM_PDA_TIMING_REG		(MC6_BASE + 0x3d0)
+#define MC6_CH0_DRAM_PDA_TIMING_REG		0x3d0
 #define TMRD_PDA_OFFS				0
 #define TMRD_PDA_MASK				0x1f
 
-#define MC6_CH0_PHY_CTRL1_REG			(MC6_BASE + 0x1000)
+#define MC6_CH0_PHY_CTRL1_REG			0x1000
 #define PHY_RFIFO_RPTR_DLY_VAL_OFFS		4
 #define PHY_RFIFO_RPTR_DLY_VAL_MASK		0xf
 
-#define MC6_CH0_PHY_WL_RL_CTRL_REG		(MC6_BASE + 0x10c0)
+#define MC6_CH0_PHY_WL_RL_CTRL_REG		0x10c0
 
-#define MC6_CH0_PHY_RL_CTRL_B0_BASE		(MC6_BASE + 0x1180)
+#define MC6_CH0_PHY_RL_CTRL_B0_BASE		0x1180
 #define MC6_CH0_PHY_RL_CTRL_B0_REG(cs)		(MC6_CH0_PHY_RL_CTRL_B0_BASE + (cs) * 0x24)
 #define PHY_RL_CYCLE_DLY_OFFS			8
 #define PHY_RL_CYCLE_DLY_MASK			0xf
 
 #ifdef CONFIG_MC6P
-#define MC6_DFI_PHY_USER_CMD_0_REG		(MC6_BASE + 0x13d0)
+#define MC6_DFI_PHY_USER_CMD_0_REG		0x13d0
 #define DFI_USER_CMD_0_CH_OFFS			28
 #define DFI_USER_CMD_0_CH_MASK			0xf
 #define DFI_USER_CMD_0_CH0_VAL			0x1
@@ -553,7 +544,7 @@ enum mv_ddr_mc6_dfi_cs {
 #define DWC_DDRPHY_PIPE_DFI_WR		1
 #define DWC_DDRPHY_PIPE_DFI_RD		2
 
-#define MC6_DFI_PHY_CTRL_0_REG		(MC6_BASE + 0x13e0)
+#define MC6_DFI_PHY_CTRL_0_REG		0x13e0
 #define TPHY_RDCSLAT_OFFS		24
 #define TPHY_RDCSLAT_MASK		0xff
 #define TPHY_RDCSLAT(dly)		((dly) - 5 + 2 * (DWC_DDRPHY_PIPE_DFI_MISC - DWC_DDRPHY_PIPE_DFI_RD))
@@ -567,7 +558,7 @@ enum mv_ddr_mc6_dfi_dram_clk {
 	DFI_DRAM_CLK_DIS
 };
 
-#define MC6_DFI_PHY_CTRL_1_REG		(MC6_BASE + 0x13e4)
+#define MC6_DFI_PHY_CTRL_1_REG		0x13e4
 #define TRDDATA_EN_OFFS			24
 #define TRDDATA_EN_MASK			0xff
 #define TRDDATA_EN(dly)			((dly) - 5 + 2 * (DWC_DDRPHY_PIPE_DFI_MISC - DWC_DDRPHY_PIPE_DFI_RD))
@@ -581,7 +572,7 @@ enum mv_ddr_mc6_dfi_dram_clk {
 #define TPHY_WRDATA_MASK		0xff
 #define TPHY_WRDATA_VAL			0x2
 
-#define DFI_PHY_LEVELING_STATUS_REG		(MC6_BASE + 0x13fc)
+#define DFI_PHY_LEVELING_STATUS_REG		0x13fc
 #define DFI_PHY_INIT_DONE_OFFS			31
 #define DFI_PHY_INIT_DONE_MASK			0x1
 #define DFI_PHY_INIT_DONE_VAL			0x1
@@ -639,11 +630,11 @@ struct mv_ddr_mc6_timing {
 };
 
 /* functions declaration */
-int mv_ddr_mc6_config(int ecc_is_ena);
-void mv_ddr_mc6_and_dram_timing_set(void);
-void mv_ddr_mc6_cfg_set(void);
-void mv_ddr_mc6_sizes_cfg(void);
-void mv_ddr_mc6_ecc_enable(void);
-void mv_ddr_mc6_init(void);
+int mv_ddr_mc6_config(unsigned int mc6_base, int ecc_is_ena);
+void mv_ddr_mc6_and_dram_timing_set(unsigned int mc6_base);
+void mv_ddr_mc6_cfg_set(unsigned int mc6_base);
+void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base);
+void mv_ddr_mc6_ecc_enable(unsigned int mc6_base);
+void mv_ddr_mc6_init(unsigned int mc6_base);
 
 #endif	/* _MV_DDR_MC6_DRV_H */

@@ -237,7 +237,7 @@ static int mc_regs_print(void)
 	}
 
 	for (i = 0; i < MC6_REGS_NUM; i++) {
-		addr = mc6_regs_list[i];
+		addr = MC6_BASE + mc6_regs_list[i];
 		data = reg_read(addr);
 
 		if (i < (MC6_REGS_NUM - 1))

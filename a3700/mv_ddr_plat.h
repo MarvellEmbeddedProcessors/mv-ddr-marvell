@@ -38,7 +38,9 @@
 #include "mv_ddr_mc6.h"
 #include "mv_ddr_topology.h"
 
-#define INTER_REGS_BASE	0xC0000000
+#define INTER_REGS_BASE		0xC0000000
+
+#define MC6_BASE		0x0
 
 #define MAX_DEVICE_NUM		1
 #define MAX_INTERFACE_NUM	1

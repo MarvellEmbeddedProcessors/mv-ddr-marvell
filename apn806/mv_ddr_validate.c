@@ -274,12 +274,12 @@ static int xor_search_1d_1e(enum hws_edge_compare edge, enum hws_search_dir sear
 			ddr3_tip_reset_fifo_ptr(0);
 
 			if (byte_num == 8)
-				reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
+				reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
 			result = dma_test(dma_src, dma_dst, effective_cs);
 
 			if (byte_num == 8)
-				result = reg_read(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
+				result = reg_read(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
 
 			/*
 			 * continue to search for the leftmost fail if pass found in pass-to-fail case or
@@ -319,12 +319,12 @@ static int xor_search_1d_1e(enum hws_edge_compare edge, enum hws_search_dir sear
 			ddr3_tip_reset_fifo_ptr(0);
 
 			if (byte_num == 8)
-				reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
+				reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
 			result = dma_test(dma_src, dma_dst, effective_cs);
 
 			if (byte_num == 8)
-				result = reg_read(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
+				result = reg_read(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
 
 			/*
 			 * continue to search for the leftmost fail if pass found in pass-to-fail case or
@@ -483,12 +483,12 @@ static int xor_search_2d_1e(enum hws_edge_compare edge,
 		ddr3_tip_reset_fifo_ptr(0);
 
 		if (byte_num == 8)
-			reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
+			reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
 		result = dma_test(dma_src, dma_dst, effective_cs);
 
 		if (byte_num == 8)
-			result = reg_read(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
+			result = reg_read(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
 
 #ifdef DBG_PRINT
 		printf("%s: param1 %d, param2 %d -> %d\n", __func__, param1, param2, result);
@@ -605,7 +605,7 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 	}
 
 	if (mv_ddr_is_ecc_ena() && (start_sphy != 8))
-		reg_bit_clrset(MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
+		reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
 	/* choose cs for tip controller */
 	ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CTRL_REG,
@@ -656,12 +656,12 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 						   reg + effective_cs * 0x4, adll_value);
 
 				if (sphy == 8)
-					reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
+					reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
 				res = dma_test(dma_src, dma_dst, effective_cs);
 
 				if (sphy == 8)
-					res = reg_read(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
+					res = reg_read(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
 
 				if (dir == 0) {
 					if (((dq_vref_vec[sphy] <= duty_cycle) &&
@@ -705,7 +705,7 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 	ddr3_tip_bus_write(0, ACCESS_TYPE_MULTICAST, 0, sphy_access, end_sphy - 1, DDR_PHY_DATA,
 			   reg + effective_cs * 0x4, adll_reg_val);
 	if (mv_ddr_is_ecc_ena() && (start_sphy != 8))
-		reg_bit_clrset(MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
+		reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
 	ddr3_tip_reset_fifo_ptr(0);
 
@@ -763,12 +763,12 @@ static int vertical_adjust(int ena_mask, u8 byte_num)
 		}
 
 		if (byte_num == 8)
-			reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
+			reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
 		result = dma_test(dma_src, dma_dst, effective_cs);
 
 		if (byte_num == 8)
-			result = reg_read(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
+			result = reg_read(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
 
 		if (result == 0) {
 			fpf = xor_search_1d_2e(EDGE_PF, step, rx_eye_lo_lvl[sphy], rx_eye_hi_lvl[sphy],
@@ -865,12 +865,12 @@ static int horizontal_adjust(int ena_mask, u8 byte_num, u8 *valid_crx_matrix)
 		}
 
 		if (sphy == 8)
-			reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
+			reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
 		result = dma_test(dma_src, dma_dst, effective_cs);
 
 		if (sphy == 8)
-				result = reg_read(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
+			result = reg_read(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
 
 		if (result == 0) {
 			fpf = xor_search_1d_2e(EDGE_PF, step, 0, 31, sphy, CRX, vw);
@@ -1093,7 +1093,8 @@ static int rx_adjust(u8 *valid_crx_matrix)
 #endif
 		for (byte = start_byte; byte < end_byte; byte++) {
 			if (mv_ddr_is_ecc_ena() && (byte != 8))
-				reg_bit_clrset(MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
+				reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG,
+						0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
 			search = VERTICAL;
 			ena_mask = start_mask;
@@ -1182,7 +1183,8 @@ static int rx_adjust(u8 *valid_crx_matrix)
 				} /* end of switch */
 			} /* end of alg loop */
 			if (mv_ddr_is_ecc_ena() && (byte != 8))
-				reg_bit_clrset(MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
+				reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG,
+						0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 		} /* end of byte_num loop */
 	}
 #ifdef DBG_PRINT
@@ -1192,9 +1194,9 @@ static int rx_adjust(u8 *valid_crx_matrix)
 	for (byte = start_byte; byte < end_byte; byte++) {
 
 		if (mv_ddr_is_ecc_ena() && (byte != 8))
-			reg_bit_clrset(MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
+			reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
-		reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
+		reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
 		ena_mask = PER_IF;
 		result = horizontal_adjust(ena_mask, byte, valid_crx_matrix);
@@ -1212,7 +1214,7 @@ static int rx_adjust(u8 *valid_crx_matrix)
 #endif
 		}
 		if (mv_ddr_is_ecc_ena() && (byte != 8))
-			reg_bit_clrset(MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
+			reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 	}
 
 	ena_mask = PER_IF;
@@ -1222,14 +1224,14 @@ static int rx_adjust(u8 *valid_crx_matrix)
 	for (byte = start_byte; byte < end_byte; byte++) {
 
 		if (mv_ddr_is_ecc_ena() && (byte != 8))
-			reg_bit_clrset(MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
+			reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
-		reg_write(MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
+		reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
 		diagonal_adjust(ena_mask, byte);
 
 		if (mv_ddr_is_ecc_ena() && (byte != 8))
-			reg_bit_clrset(MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
+			reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 	}
 
 	return 0;
