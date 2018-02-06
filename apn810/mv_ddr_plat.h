@@ -114,7 +114,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NON_DRAM_MEM_RGN_START_ADDR	0xc0000000ULL
 #define NON_DRAM_MEM_RGN_END_ADDR	0x100000000ULL
 
-#define DSS_SCR_REG(n)			(0x6f0000 + 0x208 + ((n) * 0x4))
 #define SDRAM_CS_SIZE			0x7fffffffUL	/* TODO: implement function for cs size per platform */
 
 /* electrical parameters */

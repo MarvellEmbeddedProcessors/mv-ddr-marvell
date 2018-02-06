@@ -194,42 +194,7 @@ int mv_ddr_post_config(void)
 int mv_ddr_pre_sys_config(void)
 {
 	struct mv_ddr_iface *curr_iface = mv_ddr_iface_get();
-
 	mv_ddr_base_set(curr_iface->ap_base);
-	/*
-	 * TODO: set the register at 0x4090 as follows
-	 * this is the aurora setting for second phy
-	 * 31:19 RFG win address high : 0x1fff
-	 * 18:6  RFG win address low : 0x1000
-	 * 5:2   RFG win unit ID 8 - phy 1, 1 - phy 0
-	 * 1:1   RFG 32 MB high : LOW_32M
-	 * 0: 0  RFG win en : 0x1
-	 */
-
-	/* TODO: configure #0 memory controller */
-	/* reg_write(0x4090 , 0xfffc001d); */
-
-	/* TODO: configure #1 memory controller */
-	/* reg_write(0x4090 , 0xfffc0021); */
-
-	/* set dss secured access for both memory controllers */
-	reg_write(DSS_SCR_REG(0), 0x10);
-	reg_write(DSS_SCR_REG(1), 0x10);
-
-	/*
-	 * TODO: set the following registers per data from design
-	 * mmio_write_32(0xe86f0208, 0x10);
-	 * mmio_write_32(0xe86f020c, 0x10);
-	 */
-
-	/* disable mvn on connected aps to enable dram access */
-	/*
-	 * TODO: check to remove this write
-	 * per design, the configuration is for palladium only
-	 * dss is not actually enabled here
-	 * TODO: add define for register
-	 */
-	mmio_write_32(0xe8001710, 0);
 
 	return 0;
 }
