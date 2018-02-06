@@ -98,6 +98,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _SNPS_IF_H_
 #define _SNPS_IF_H_
 
-int snps_init(int base_address, int phy_number);
+int snps_init(unsigned int base_address);
 
 #endif	/* _SNPS_IF_H_ */

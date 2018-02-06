@@ -513,20 +513,20 @@ fail:
 }
 
 /* initialize global settings */
-static void snps_global_settings_init(unsigned long base_address, int phy_number)
+static void snps_global_settings_init(unsigned long base_address)
 {
 	gd.current_run_num = 0;
 	gd.base_address =  base_address;
 }
 
 
-int snps_init(unsigned long base_address, int phy_number)
+int snps_init(unsigned int base_address)
 {
 	int ret;
 	debug_enter();
 
 	/* initialize global settings */
-	snps_global_settings_init(base_address, phy_number);
+	snps_global_settings_init(base_address);
 
 	/* --- Step 1: load static PHY initialization --- */
 	/* load PHY config static section, with no static update */

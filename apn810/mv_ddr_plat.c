@@ -272,5 +272,5 @@ int mv_ddr_mc_ena(void)
 
 int mv_ddr_phy_config(void)
 {
-	return snps_init(ap_regs_base + SNPS_PHY_OFFSET, 0);
+	return snps_init(ap_regs_base + SNPS_PHY_OFFSET);
 }
