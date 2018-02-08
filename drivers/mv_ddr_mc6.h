@@ -630,9 +630,9 @@ struct mv_ddr_mc6_timing {
 };
 
 /* functions declaration */
-int mv_ddr_mc6_config(unsigned int mc6_base, int ecc_is_ena);
+int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int ecc_is_ena);
 void mv_ddr_mc6_and_dram_timing_set(unsigned int mc6_base);
-void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base);
+void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr);
 void mv_ddr_mc6_init(unsigned int mc6_base);
 
 #endif	/* _MV_DDR_MC6_DRV_H */

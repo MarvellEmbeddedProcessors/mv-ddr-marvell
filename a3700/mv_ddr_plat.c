@@ -164,11 +164,12 @@ static void mv_ddr_topology_map_set(struct mv_ddr_topology_map *map)
 
 void ddr_controller_init(struct mv_ddr_topology_map *map)
 {
+	unsigned long iface_base_addr = 0x0;
 	mv_ddr_topology_map_set(map);
 
 	mv_ddr_sw_db_init(0, 0);
 
 	mv_ddr_mc6_and_dram_timing_set(MC6_BASE);
 
-	mv_ddr_mc6_sizes_cfg(MC6_BASE);
+	mv_ddr_mc6_sizes_cfg(MC6_BASE, iface_base_addr);
 }

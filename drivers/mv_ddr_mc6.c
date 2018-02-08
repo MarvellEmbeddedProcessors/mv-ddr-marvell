@@ -1308,7 +1308,7 @@ static unsigned int mv_ddr_bank_map_cfg_get(enum mv_ddr_bank_map bank_map)
 	return bank_map_cfg;
 }
 
-void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base)
+void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr)
 {
 	unsigned int cs_idx;
 	unsigned int cs_num;
@@ -1349,7 +1349,7 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base)
 
 	/* configure all length per cs here and activate the cs */
 	for (cs_idx = 0; cs_idx < cs_num; cs_idx++) {
-		start_addr_bytes = area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * cs_idx;
+		start_addr_bytes = iface_base_addr + area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * cs_idx;
 		start_addr_low = start_addr_bytes & MV_DDR_32_BITS_MASK;
 		start_addr_high = (start_addr_bytes >> START_ADDR_HTOL_OFFS) & MV_DDR_32_BITS_MASK;
 
@@ -1435,11 +1435,11 @@ static void mv_ddr_mc6_ecc_enable(unsigned int mc6_base)
 }
 
 /* FIXME: revise hard-coded values and remove platform dependent flags */
-int mv_ddr_mc6_config(unsigned int mc6_base, int ecc_is_ena)
+int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int ecc_is_ena)
 {
 	mv_ddr_mc6_and_dram_timing_set(mc6_base);
 
-	mv_ddr_mc6_sizes_cfg(mc6_base);
+	mv_ddr_mc6_sizes_cfg(mc6_base, iface_base_addr);
 
 	if (ecc_is_ena)
 		mv_ddr_mc6_ecc_enable(mc6_base);

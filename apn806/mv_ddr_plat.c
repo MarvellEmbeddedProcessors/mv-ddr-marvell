@@ -1144,6 +1144,7 @@ void mv_ddr_mc_config(void)
 {
 	/* memory controller initializations */
 	struct init_cntr_param init_param;
+	unsigned long iface_base_addr = 0x0;
 	int status;
 	int ecc_is_ena;
 
@@ -1157,7 +1158,7 @@ void mv_ddr_mc_config(void)
 		printf("%s: failed: err code 0x%x\n", __func__, status);
 
 	ecc_is_ena = mv_ddr_is_ecc_ena();
-	status = mv_ddr_mc6_config(MC6_BASE, ecc_is_ena);
+	status = mv_ddr_mc6_config(MC6_BASE, iface_base_addr, ecc_is_ena);
 	if (status != 0)
 		printf("%s: failed: err code 0x%x\n", __func__, status);
 }
