@@ -117,26 +117,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_training_ip.h"
 #include "mv_ddr_training_db.h"
 
-#ifdef MV_DDR_ATF
-#include "dram_if.h"
-struct dram_config *mv_ddr_dram_config_update(void)
-{
-	struct dram_config *dc = mv_ddr_dram_config_get();
-	unsigned long long size = mv_ddr_tot_mem_sz_in_bits_get();
-
-	/* convert total memory size from bits to megabytes */
-	size /= (8 * 1024 * 1024);
-
-	/* set total memory size in megabytes in dram configuration */
-	dc->iface[0].size_mbytes = size;
-
-	/* set bus width in dram configuration */
-	dc->iface[0].bus_width = mv_ddr_if_bus_width_get();
-
-	return dc;
-}
-#endif /* MV_DDR_ATF */
-
 unsigned int mv_ddr_cl_calc(unsigned int taa_min, unsigned int tclk)
 {
 	unsigned int cl = ceil_div(taa_min, tclk);
