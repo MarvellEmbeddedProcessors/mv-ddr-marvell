@@ -103,7 +103,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define SNPS_PHY_OFFSET			0x1000000	/* TODO: define as global parameter */
 
-#define MC6_BASE			0xfe0000
+#define MC6_BASE(iface)			(0xfe0000 + ((iface) * MC6_OFFS))
+#define MC6_OFFS			0x10000
 
 #define MAX_INTERFACE_NUM		1	/* TODO: take from topology */
 #define MAX_BUS_NUM			9	/* TODO: take from topology */

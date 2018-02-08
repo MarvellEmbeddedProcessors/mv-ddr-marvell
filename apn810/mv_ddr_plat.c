@@ -250,10 +250,11 @@ unsigned int mv_ddr_init_freq_get(void)
 
 int mv_ddr_mc_config(void)
 {
+	struct mv_ddr_iface *iface = mv_ddr_iface_get();
 	int ecc_is_ena;
 
 	ecc_is_ena = mv_ddr_is_ecc_ena();
-	if (mv_ddr_mc6_config(MC6_BASE, ecc_is_ena)) {
+	if (mv_ddr_mc6_config(MC6_BASE(iface->id), ecc_is_ena)) {
 		printf("error: %s failed\n", __func__);
 		return -1;
 	}
@@ -265,7 +266,8 @@ int mv_ddr_mc_config(void)
 /* enable memory controllers */
 int mv_ddr_mc_ena(void)
 {
-	mv_ddr_mc6_init(MC6_BASE);
+	struct mv_ddr_iface *iface = mv_ddr_iface_get();
+	mv_ddr_mc6_init(MC6_BASE(iface->id));
 
 	return 0;
 }
