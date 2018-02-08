@@ -59,12 +59,6 @@ struct dram_config {
 	struct dram_iface_cfg iface[MAX_DRAM_IFACE];
 };
 
-enum dram_iface_mode {
-	SINGLE_DRAM_0 = 0x1,
-	SINGLE_DRAM_1 = 0x2,
-	DUAL_DRAM = 0x3
-};
-
 /* TODO: update atf to this new prototype */
 int dram_init(void);
 struct dram_config *mv_ddr_dram_config_get(void);

@@ -178,6 +178,11 @@ struct mv_ddr_topology_map {
 	unsigned int timing_data[MV_DDR_TDATA_LAST];
 };
 
+enum mv_ddr_iface_mode {
+	MV_DDR_RAR_ENA,
+	MV_DDR_RAR_DIS,
+};
+
 enum mv_ddr_iface_state {
 	MV_DDR_IFACE_NRDY,	/* not ready */
 	MV_DDR_IFACE_INIT,	/* init'd */
@@ -200,6 +205,12 @@ struct mv_ddr_iface {
 
 	/* ddr interface state */
 	enum mv_ddr_iface_state state;
+
+	/* ddr interface mode (rar enabled/disabled) */
+	enum mv_ddr_iface_mode iface_mode;
+
+	/* ddr interface base address */
+	unsigned long long iface_base_addr;
 
 	/* ddr interface operations */
 	struct mv_ddr_iface_ops ops;
