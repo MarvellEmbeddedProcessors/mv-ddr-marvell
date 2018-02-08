@@ -130,12 +130,3 @@ void dram_scrubbing(uint8_t ap_id, uint64_t start_addr, uint64_t dram_size)
 {
 	/* TODO: implement new api for dram scrubbing */
 }
-
-void dram_mmap_config(uint8_t ap_id, uint8_t iface_mode,
-		      uint64_t start_addr, uint64_t ap_dram_size)
-{
-	/*
-	 * TODO: set mmap configuration per ap and iface mode
-	 * currently, configures mc6 to dram size started at base address 0
-	 */
-}
