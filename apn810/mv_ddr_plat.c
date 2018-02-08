@@ -206,11 +206,10 @@ unsigned int mv_ddr_init_freq_get(void)
 int mv_ddr_mc_config(void)
 {
 	struct mv_ddr_iface *iface = mv_ddr_iface_get();
-	unsigned long iface_base_addr = 0x0;
 	int ecc_is_ena;
 
 	ecc_is_ena = mv_ddr_is_ecc_ena();
-	if (mv_ddr_mc6_config(MC6_BASE(iface->id), iface_base_addr, ecc_is_ena)) {
+	if (mv_ddr_mc6_config(MC6_BASE(iface->id), iface->iface_base_addr, ecc_is_ena)) {
 		printf("error: %s failed\n", __func__);
 		return -1;
 	}
