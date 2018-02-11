@@ -188,8 +188,13 @@ int mv_ddr_pre_config(void)
 
 int mv_ddr_post_config(void)
 {
+	struct mv_ddr_iface *iface = mv_ddr_iface_get();
+
 	if (mv_ddr_is_ecc_ena())
 		mv_ddr_mem_scrubbing();
+
+	/* Update the size of the iface in bytes */
+	iface->iface_byte_size = mv_ddr_mem_sz_per_cs_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
 
 	return 0;
 }

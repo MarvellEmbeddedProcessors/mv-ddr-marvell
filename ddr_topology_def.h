@@ -212,6 +212,9 @@ struct mv_ddr_iface {
 	/* ddr interface base address */
 	unsigned long long iface_base_addr;
 
+	/* ddr interface size - ddr flow will update this parameter */
+	unsigned long long iface_byte_size;
+
 	/* ddr interface operations */
 	struct mv_ddr_iface_ops ops;
 
