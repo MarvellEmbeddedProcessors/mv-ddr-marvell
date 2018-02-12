@@ -209,6 +209,12 @@ struct mv_ddr_iface {
 	/* ddr interface size - ddr flow will update this parameter */
 	unsigned long long iface_byte_size;
 
+	/* ddr i2c spd data address */
+	unsigned int spd_data_addr;
+
+	/* ddr i2c spd page 0 select address */
+	unsigned int spd_page_sel_addr;
+
 	/* ddr interface topology map */
 	struct mv_ddr_topology_map tm;
 };
