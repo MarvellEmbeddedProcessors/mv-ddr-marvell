@@ -122,6 +122,8 @@ uint64_t ap_dram_iface_info_get(int ap_id, int iface_id)
 	 */
 	if ((ap_id == 0) && (iface_id == 0))
 		return (uint64_t)8 << 30;
+	if ((ap_id == 1) && (iface_id == 0))
+		return (uint64_t)8 << 30;
 #endif
 	return 0;
 }
