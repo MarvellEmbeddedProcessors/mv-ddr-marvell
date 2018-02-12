@@ -201,11 +201,9 @@ int mv_ddr_post_config(void)
 
 unsigned int mv_ddr_init_freq_get(void)
 {
-	enum mv_ddr_freq freq;
-	/* TODO: call eawg function from atf to get ddr frequency */
-	freq = MV_DDR_FREQ_800;
+	printf("error: %s: unset frequency found\n", __func__);
 
-	return freq;
+	return MV_DDR_FREQ_800;
 }
 
 int mv_ddr_mc_config(void)
