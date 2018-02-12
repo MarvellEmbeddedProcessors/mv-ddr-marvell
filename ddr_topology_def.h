@@ -190,12 +190,6 @@ enum mv_ddr_iface_state {
 	MV_DDR_IFACE_DNE	/* does not exist */
 };
 
-struct mv_ddr_iface_ops {
-	void *init_params;
-	int (*init)(void *);
-	int (*tune)(void *);
-};
-
 struct mv_ddr_iface {
 	/* base addr of ap ddr interface belongs to */
 	unsigned int ap_base;
@@ -215,20 +209,10 @@ struct mv_ddr_iface {
 	/* ddr interface size - ddr flow will update this parameter */
 	unsigned long long iface_byte_size;
 
-	/* ddr interface operations */
-	struct mv_ddr_iface_ops ops;
-
 	/* ddr interface topology map */
 	struct mv_ddr_topology_map tm;
 };
 
-struct mv_ddr_system {
-	unsigned int iface_num;
-	struct mv_ddr_iface *iface;
-};
-
-struct mv_ddr_system *mv_ddr_system_get(void);
-int mv_ddr_iface_set(struct mv_ddr_iface *iface);
 struct mv_ddr_iface *mv_ddr_iface_get(void);
 
 /* DDR3 training global configuration parameters */
