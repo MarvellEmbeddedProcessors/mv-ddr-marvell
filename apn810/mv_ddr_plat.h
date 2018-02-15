@@ -97,7 +97,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef _MV_DDR_PLAT_H
 #define _MV_DDR_PLAT_H
+
+#include "mv_ddr_mrs.h"
 /* #include "mv_ddr_static.h" TODO: add static support */
+
 #define MAX_DEVICE_NUM			1
 #define DDR_INTERFACE_OCTETS_NUM	9
 
@@ -132,11 +135,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_DDR_PLAT_DIC			0x0
 #define MV_DDR_PLAT_ODT_CFG_1CS		0x330012	/* not used when park is on */
 #define MV_DDR_PLAT_ODT_CFG_2CS		0x330012	/* not used when park is on */
-#define MV_DDR_PLAT_RTT_NOM		0x0		/* RZQ/3 = 0x600 */
-#define MV_DDR_PLAT_RTT_WR_1CS		0x0		/* RZQ/1 = 0x400 */
-#define MV_DDR_PLAT_RTT_WR_2CS		0x200		/* RZQ/1 = 0x400 */
-#define MV_DDR_PLAT_RTT_PARK_1CS	0x40		/* rtt park = 0x1 RZQ_div4 */
-#define MV_DDR_PLAT_RTT_PARK_2CS	0x100		/* rtt park = 0x1 RZQ_div4 */
+#define MV_DDR_PLAT_RTT_NOM		MV_DDR_MR1_RTT_NOM_DISABLE
+#define MV_DDR_PLAT_RTT_WR_1CS		MV_DDR_MR2_RTT_WR_DYN_ODT_OFF
+#define MV_DDR_PLAT_RTT_WR_2CS		MV_DDR_MR2_RTT_WR_RZQ_DIV2
+#define MV_DDR_PLAT_RTT_PARK_1CS	MV_DDR_MR5_RTT_PARK_RZQ_DIV4
+#define MV_DDR_PLAT_RTT_PARK_2CS	MV_DDR_MR5_RTT_PARK_RZQ_DIV1
 #else /* CONFIG_DDR3 */
 #define MV_DDR_PLAT_ZPODT_DATA	45
 #define MV_DDR_PLAT_DIC		0x2
