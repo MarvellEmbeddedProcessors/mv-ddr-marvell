@@ -409,6 +409,7 @@ MV_DDR_CSRC += ddr3_training_db.c
 MV_DDR_CSRC += mv_ddr_build_message.c
 MV_DDR_CSRC += mv_ddr_common.c
 MV_DDR_CSRC += mv_ddr_spd.c
+MV_DDR_CSRC += mv_ddr_mrs.c
 MV_DDR_CSRC += mv_ddr_topology.c
 MV_DDR_CSRC += mv_ddr4_training_db.c
 MV_DDR_CSRC += $(MV_DDR_DRVPATH)/mv_ddr_mc6.c
