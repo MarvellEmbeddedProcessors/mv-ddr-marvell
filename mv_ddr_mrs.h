@@ -135,6 +135,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_DDR_MR5_RTT_PARK_RZQ_DIV3	0x180	/* 0b1_1000_0000; 80-Ohm */
 #define MV_DDR_MR5_RTT_PARK_RZQ_DIV7	0x1c0	/* 0b1_1100_0000; 34-Ohm */
 
+int mv_ddr_mr0_wr_get(unsigned int wr, unsigned int *mr0_wr);
+int mv_ddr_mr0_cl_get(unsigned int cl, unsigned int *mr0_cl);
 int mv_ddr_mr2_cwl_get(unsigned int cwl, unsigned int *mr2_cwl);
 
 #endif /* _MV_DDR_MRS_H */
