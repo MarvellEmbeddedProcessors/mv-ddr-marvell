@@ -216,6 +216,13 @@ int mv_ddr_spd_timing_calc(union mv_ddr_spd_data *spd_data, unsigned int timing_
 		return 1;
 	timing_data[MV_DDR_TRRD_L_MIN] = calc_val;
 
+	/* t ccd l min, ps */
+	calc_val = spd_data->byte_fields.byte_40 * MV_DDR_SPD_DATA_MTB +
+		(signed char)spd_data->byte_fields.byte_117 * MV_DDR_SPD_DATA_FTB;
+	if (calc_val < 0)
+		return 1;
+	timing_data[MV_DDR_TCCD_L_MIN] = calc_val;
+
 	/* t faw min, ps */
 	timing_data[MV_DDR_TFAW_MIN] = (spd_data->byte_fields.byte_37 +
 		(spd_data->byte_fields.byte_36.bit_fields.t_faw_min_msn << MV_DDR_SPD_MSB_OFFS)) *

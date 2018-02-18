@@ -490,7 +490,7 @@ unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_dd
 		break;
 	case SPEED_BIN_TCCDL:
 		if (tm->cfg_src == MV_DDR_CFG_SPD)
-			result = 6250;
+			result = tm->timing_data[MV_DDR_TCCD_L_MIN];
 		else {
 			if (index <= SPEED_BIN_DDR_1600L)
 				result = 6250;

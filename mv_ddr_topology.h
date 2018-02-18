@@ -267,6 +267,7 @@ enum mv_ddr_timing_data {
 	MV_DDR_TRAS_MIN, /* min active to precharge delay time (t ras min) */
 	MV_DDR_TRRD_S_MIN, /* min activate to activate delay time (t rrd_s min), diff bank group */
 	MV_DDR_TRRD_L_MIN, /* min activate to activate delay time (t rrd_l min), same bank group */
+	MV_DDR_TCCD_L_MIN, /* min cas to cas delay time (t ccd_l min), same bank group */
 	MV_DDR_TFAW_MIN, /* min four activate window delay time (t faw min) */
 	MV_DDR_TWTR_S_MIN, /* min write to read time (t wtr s min), diff bank group */
 	MV_DDR_TWTR_L_MIN, /* min write to read time (t wtr l min), same bank group */
