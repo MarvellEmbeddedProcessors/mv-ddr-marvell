@@ -99,6 +99,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "snps_regs.h"
 #include "ddr_topology_def.h"
 #include "mv_ddr_mrs.h"
+#include "mv_ddr_training_db.h"
+#include "mv_ddr_common.h"
 
 /* example of an update routine that returns runtime depndant value */
 #if 0 /* the routine below is just an example - not to be used */
@@ -426,15 +428,25 @@ u16 dmem_1d_2d_mr0_get(void)
 	debug_enter();
 
 	u16 ret_val = 0;
+	u32 freq, tclk, wr;
+	u32 mr0_wr, mr0_cl;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
+	enum mv_ddr_speed_bin sb_idx = tm->interface_params[0].speed_bin_index;
 
-	if (freq == MV_DDR_FREQ_800)
-		ret_val = MR0_800MHZ;
-	else if (freq == MV_DDR_FREQ_1200)
-		ret_val = MR0_1200MHZ;
-	else
-		printf("error: %s: unsupported frequency found\n", __func__);
+	/* get frequency in MHz */
+	freq = freq_tbl[tm->interface_params[0].memory_freq];
+
+	/* calculate clock period in ps */
+	tclk = MEGA / freq;
+
+	/* calculate write recovery */
+	wr = mv_ddr_speed_bin_timing_get(sb_idx, SPEED_BIN_TWR);
+	wr = time_to_nclk(wr, tclk);
+
+	if (!mv_ddr_mr0_cl_get(tm->interface_params[0].cas_l, &mr0_cl) &&
+	    !mv_ddr_mr0_wr_get(wr, &mr0_wr))
+		ret_val = mr0_cl | mr0_wr;
 
 	debug_exit();
 	return ret_val;
