@@ -319,7 +319,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RSRV1A_VAL	0x1
 
 #define REG_54034_1D_2D_MR5			0x54034 /* TODO: check if to take from electrical */
-#define MR5_VAL		0x20
 
 #define REG_54036_1D_2D_CS_SETUP_GDDEC_X16_PRESENT	0x54036 /* TODO: take from topology */
 /* X16_device_map_offs, corresponds to CS[3:0] */
