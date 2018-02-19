@@ -456,24 +456,24 @@ unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_dd
 		}
 		break;
 	case SPEED_BIN_TWTR:
-		if (tm->cfg_src == MV_DDR_CFG_SPD)
+		result = 2500;
+		/* FIXME: wa: set twtr_s to a default value, if it's unset on spd */
+		if (tm->cfg_src == MV_DDR_CFG_SPD && tm->timing_data[MV_DDR_TWTR_S_MIN])
 			result = tm->timing_data[MV_DDR_TWTR_S_MIN];
-		else
-			result = 2500;
 		break;
 	case SPEED_BIN_TWTRL:
 	case SPEED_BIN_TRTP:
-		if (tm->cfg_src == MV_DDR_CFG_SPD)
+		result = 7500;
+		/* FIXME: wa: set twtr_l to a default value, if it's unset on spd */
+		if (tm->cfg_src == MV_DDR_CFG_SPD && tm->timing_data[MV_DDR_TWTR_L_MIN])
 			result = tm->timing_data[MV_DDR_TWTR_L_MIN];
-		else
-			result = 7500;
 		break;
 	case SPEED_BIN_TWR:
 	case SPEED_BIN_TMOD:
-		if (tm->cfg_src == MV_DDR_CFG_SPD)
+		result = 15000;
+		/* FIXME: wa: set twr to a default value, if it's unset on spd */
+		if (tm->cfg_src == MV_DDR_CFG_SPD && tm->timing_data[MV_DDR_TWR_MIN])
 			result = tm->timing_data[MV_DDR_TWR_MIN];
-		else
-			result = 15000;
 		break;
 	case SPEED_BIN_TXPDLL:
 		result = 24000;
