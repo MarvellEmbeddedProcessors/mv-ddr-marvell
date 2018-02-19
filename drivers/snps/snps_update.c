@@ -475,6 +475,7 @@ u16 dmem_1d_2d_mr5_get(void)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
 	ret_val = (MV_DDR_MR5_PD_ODT_IBUF_DIS << MV_DDR_MR5_PD_ODT_IBUF_OFFS) |
+		  (MV_DDR_MR5_DM_ENA << MV_DDR_MR5_DM_OFFS) |
 		  tm->electrical_data[MV_DDR_RTT_PARK];
 
 	debug_exit();
