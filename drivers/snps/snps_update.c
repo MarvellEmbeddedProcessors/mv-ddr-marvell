@@ -487,15 +487,28 @@ u16 dmem_1d_2d_mr6_get(void)
 	debug_enter();
 
 	u16 ret_val = 0;
+	u32 freq, tclk;
+	u32 tccdl, mr6_tccdl;
+	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
+	enum mv_ddr_speed_bin sb_idx = tm->interface_params[0].speed_bin_index;
 
-	if (freq == MV_DDR_FREQ_800)
-		ret_val = MR6_800MHZ;
-	else if (freq == MV_DDR_FREQ_1200)
-		ret_val = MR6_1200MHZ;
-	else
-		printf("error: %s: unsupported frequency found\n", __func__);
+	/* get frequency in MHz */
+	freq = freq_tbl[tm->interface_params[0].memory_freq];
+
+	/* calculate clock period in ps */
+	tclk = MEGA / freq;
+
+	/* calculate tccdl */
+	tccdl = mv_ddr_speed_bin_timing_get(sb_idx, SPEED_BIN_TCCDL);
+	tccdl = GET_MAX_VALUE(tclk * 5, tccdl);
+	tccdl = time_to_nclk(tccdl, tclk);
+
+	if (!mv_ddr_mr6_tccdl_get(tccdl, &mr6_tccdl))
+		ret_val = mr6_tccdl |
+			  MV_DDR_MR6_VREFDQ_TRNG_VAL << MV_DDR_MR6_VREFDQ_TRNG_VAL_OFFS |
+			  MV_DDR_MR6_VREFDQ_TRNG_RNG1 << MV_DDR_MR6_VREFDQ_TRNG_RNG_OFFS |
+			  MV_DDR_MR6_VREFDQ_TRNG_DIS << MV_DDR_MR6_VREFDQ_TRNG_ENA_OFFS;
 
 	debug_exit();
 	return ret_val;
