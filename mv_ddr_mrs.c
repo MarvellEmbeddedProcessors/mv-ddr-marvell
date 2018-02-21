@@ -312,3 +312,37 @@ int mv_ddr_mr2_cwl_get(unsigned int cwl, unsigned int *mr2_cwl)
 
 	return 0;
 }
+
+/* MR6 tCCD_L, [12:10] bits */
+#define MV_DDR_MR6_TCCDL_OFFS		10
+#define MV_DDR_MR6_TCCDL_MASK		0x7
+#define MV_DDR_MR6_TCCDL4		0x0
+#define MV_DDR_MR6_TCCDL5		0x1
+#define MV_DDR_MR6_TCCDL6		0x2
+#define MV_DDR_MR6_TCCDL7		0x3
+#define MV_DDR_MR6_TCCDL8		0x4
+int mv_ddr_mr6_tccdl_get(unsigned int tccdl, unsigned int *mr6_tccdl)
+{
+	switch (tccdl) {
+	case 4:
+		*mr6_tccdl = MV_DDR_MR6_TCCDL4 << MV_DDR_MR6_TCCDL_OFFS;
+		break;
+	case 5:
+		*mr6_tccdl = MV_DDR_MR6_TCCDL5 << MV_DDR_MR6_TCCDL_OFFS;
+		break;
+	case 6:
+		*mr6_tccdl = MV_DDR_MR6_TCCDL6 << MV_DDR_MR6_TCCDL_OFFS;
+		break;
+	case 7:
+		*mr6_tccdl = MV_DDR_MR6_TCCDL7 << MV_DDR_MR6_TCCDL_OFFS;
+		break;
+	case 8:
+		*mr6_tccdl = MV_DDR_MR6_TCCDL8 << MV_DDR_MR6_TCCDL_OFFS;
+		break;
+	default:
+		printf("error: %s: unsupported t_ccd_l value found\n", __func__);
+		return -1;
+	}
+
+	return 0;
+}
