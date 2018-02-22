@@ -336,4 +336,5 @@ void snps_mail_box_log_dump(void);
 int snps_poll_calibration_completion(void);
 enum snps_training_state snps_get_state(void);
 void snps_set_state(enum snps_training_state training_state);
+void snps_crx_1d_fix(void);
 #endif	/* _SNPS_H_ */

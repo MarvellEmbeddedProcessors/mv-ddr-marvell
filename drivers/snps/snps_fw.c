@@ -98,6 +98,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "snps.h"
 #include "snps_regs.h"
 #include "snps_mailbox_stream.h"
+#include "ddr_topology_def.h"
+#include "ddr3_training_ip_db.h"
 
 struct mail_box_major_message mb_major_messages[] = {
 /*	ID,					Message string	*/
@@ -673,4 +675,93 @@ void snps_set_state(enum snps_training_state training_state)
 enum snps_training_state snps_get_state(void)
 {
 	return gd.training_state;
+}
+
+#define RX_PB_DLY_SHIFT		0x1d
+#define RX_CLK_DLY_SHIFT	4	/* TODO: check if frequency dependent */
+static void snps_rx_pb_dly_add(u8 rank, u8 sphy, u8 nibble)
+{
+	debug_enter();
+
+	u8 lane, start_lane = 0, end_lane = 4; /* low nibble */
+	u16 rx_dly, val;
+	u32 addr;
+
+	if (nibble == UP_NIBL) { /* upper nibble */
+		start_lane = 4;
+		end_lane = 9; /* dbi signal (lane 8) to be delayed too */
+	}
+
+	/* add rx per-bit delay to all dq signals (lanes) within a given nibble */
+	for (lane = start_lane; lane < end_lane; lane++) {
+		addr = PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_DBYTE, sphy, REG_68_RX_PB_DLY(rank, lane));
+		val = snps_read(addr);
+		rx_dly = (val >> RX_PB_DLY_OFFS) & RX_PB_DLY_MASK;
+		rx_dly += RX_PB_DLY_SHIFT;
+		val &= ~(RX_PB_DLY_MASK << RX_PB_DLY_OFFS);
+		val |= (rx_dly & RX_PB_DLY_MASK) << RX_PB_DLY_OFFS;
+		snps_fw_write(addr, val);
+	}
+
+	/* center corresponding dqs signal (rx clk) */
+	addr = PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_DBYTE, sphy, REG_8C_RX_CLK_DLY(rank, nibble));
+	val = snps_read(addr);
+	val &= ~(RX_CLK_DLY_MASK << RX_CLK_DLY_OFFS);
+	val |= (RX_CLK_DLY_SHIFT & RX_CLK_DLY_MASK) << RX_CLK_DLY_OFFS;
+	snps_fw_write(addr, val);
+
+	debug_exit();
+}
+
+/*
+ * workaround preventing 2d receiver centering failure;
+ * add delay to all dq and dqs signals, if rx clk delay 1d training
+ * result is less than two (corresponds to left-aligned dq signals
+ * with respect to dqs signal)
+ */
+#define RX_CLK_DLY_MIN	2
+void snps_crx_1d_fix(void)
+{
+	debug_enter();
+
+	u8 rank, sphy;
+	u8 cs_num = mv_ddr_cs_num_get();
+	u8 sphy_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
+	u16 val, low_nibble_clk, upper_nibble_clk;
+	u32 addr;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+
+	/* enable access to csr registers */
+	snps_csr_access_set(MICRO_CONT_MUX_SEL_ENABLE);
+
+	for (rank = 0; rank < cs_num; rank++) {
+		for (sphy = 0; sphy < sphy_num; sphy++) {
+			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
+
+			/* read low nibble rx clk dly */
+			addr = PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_DBYTE, sphy,
+						REG_8C_RX_CLK_DLY(rank, LOW_NIBL));
+			val = snps_read(addr);
+			low_nibble_clk = (val >> RX_CLK_DLY_OFFS) & RX_CLK_DLY_MASK;
+
+			/* read upper nibble rx clk dly */
+			addr = PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_DBYTE, sphy,
+						REG_8C_RX_CLK_DLY(rank, UP_NIBL));
+			val = snps_read(addr);
+			upper_nibble_clk = (val >> RX_CLK_DLY_OFFS) & RX_CLK_DLY_MASK;
+
+			/* check the criteria and fix low nibble */
+			if (low_nibble_clk < RX_CLK_DLY_MIN)
+				snps_rx_pb_dly_add(rank, sphy, LOW_NIBL);
+
+			/* check the criteria and fix upper nibble */
+			if (upper_nibble_clk < RX_CLK_DLY_MIN)
+				snps_rx_pb_dly_add(rank, sphy, UP_NIBL);
+		}
+	}
+
+	/* disable access to csr registers*/
+	snps_csr_access_set(MICRO_CONT_MUX_SEL_ISOLATE);
+
+	debug_exit();
 }

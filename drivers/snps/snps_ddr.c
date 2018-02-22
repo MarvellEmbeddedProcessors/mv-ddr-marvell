@@ -550,6 +550,9 @@ int snps_init(unsigned int base_address)
 	if (ret != 0)
 		goto fail;
 
+	/* fix 1d receiver centering training result */
+	snps_crx_1d_fix();
+
 	/* 2D training */
 	snps_set_state(TRAINING_2D);
 

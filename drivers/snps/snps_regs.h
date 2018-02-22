@@ -147,6 +147,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NIBL_MASK	0x1
 #define LOW_NIBL	0x0
 #define UP_NIBL		0x1
+
 /*
  * The 23 bit register address is specified by the concatenation of the following fields: {PState,
  * Block Type, Instance Number, Register}.
@@ -185,6 +186,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ODT_DRV_STREN_TWO_CS	(((OHMS_120 & ODT_STREN_P_MASK) << ODT_STREN_P_OFFS) | \
 				 ((HIGH_IMPEDANCE & ODT_STREN_N_MASK) << ODT_STREN_N_OFFS))
 
+#define LANE_OFFS		8
+#define LANE_MASK		0xf
+#define REG_68_RX_PB_DLY(rank, lane)	(((rank) + 0x68) | (((lane) & LANE_MASK) << LANE_OFFS))
+#define RX_PB_DLY_OFFS		0
+#define RX_PB_DLY_MASK		0x7f
+
 #define REG_88_PHY_CAL_RATE		0x88
 #define CAL_INTERVAL_OFFS		0
 #define CAL_INTERVAL_MASK		0xf
@@ -212,6 +219,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DIS_BACKGND_ZQ_UPDT_VAL	0x1
 #define CAL_RATE_VAL	(((INVAL_20_MSEC & CAL_INTERVAL_MASK) << CAL_INTERVAL_OFFS) | \
 			 ((CAL_RUN_0_TO_1 & CAL_RUN_MASK) << CAL_RUN_OFFS))
+
+#define REG_8C_RX_CLK_DLY(rank, nibble)	(((rank) + 0x8c) | (((nibble) & NIBL_MASK) << NIBL_OFFS))
+#define RX_CLK_DLY_OFFS		0
+#define RX_CLK_DLY_MASK		0x3f
 
 #define REG_B2_VREF_IN_GLOBAL		0xb2
 #define GLOB_VREF_IN_SEL_OFFS		0
