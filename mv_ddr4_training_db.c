@@ -357,11 +357,47 @@ struct mv_ddr_page_element *mv_ddr_page_tbl_get(void)
 	return &page_tbl[0];
 }
 
+/* DLL locking time, tDLLK */
+#define MV_DDR_TDLLK_DDR4_1600	597
+#define MV_DDR_TDLLK_DDR4_1866	597
+#define MV_DDR_TDLLK_DDR4_2133	768
+#define MV_DDR_TDLLK_DDR4_2400	768
+#define MV_DDR_TDLLK_DDR4_2666	854	/* TODO: unsupported yet */
+#define MV_DDR_TDLLK_DDR4_2933	940	/* TODO: unsupported yet */
+#define MV_DDR_TDLLK_DDR4_3200	1024	/* TODO: unsupported yet */
+static int mv_ddr_tdllk_get(unsigned int freq, unsigned int *tdllk)
+{
+	switch (freq) {
+	case 800:
+		*tdllk = MV_DDR_TDLLK_DDR4_1600;
+		break;
+	case 933:
+		*tdllk = MV_DDR_TDLLK_DDR4_1866;
+		break;
+	case 1066:
+		*tdllk = MV_DDR_TDLLK_DDR4_2133;
+		break;
+	case 1200:
+		*tdllk = MV_DDR_TDLLK_DDR4_2400;
+		break;
+	default:
+		printf("error: %s: unsupported data rate found\n", __func__);
+		return -1;
+	}
+
+	return 0;
+}
+
 /* return speed bin value for selected index and element */
 unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_ddr_speed_bin_timing element)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
+	unsigned int freq;
 	u32 result = 0;
+
+	/* get frequency in MHz */
+	freq = freq_tbl[tm->interface_params[0].memory_freq];
 
 	switch (element) {
 	case SPEED_BIN_TRCD:
@@ -479,14 +515,8 @@ unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_dd
 		result = 24000;
 		break;
 	case SPEED_BIN_TXSDLL:
-		if (tm->cfg_src == MV_DDR_CFG_SPD)
-			result = 768;	/* in number of clocks */
-		else {
-			if (index <= SPEED_BIN_DDR_1866N)
-				result = 597;	/* in number of clocks */
-			else
-				result = 768;	/* in number of clocks */
-		}
+		if (mv_ddr_tdllk_get(freq, &result))
+			result = 0;
 		break;
 	case SPEED_BIN_TCCDL:
 		if (tm->cfg_src == MV_DDR_CFG_SPD)
