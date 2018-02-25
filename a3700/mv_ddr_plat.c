@@ -73,21 +73,19 @@ void mmio_write2_32(u32 val, u32 addr)
 
 unsigned int mv_ddr_cs_num_get(void)
 {
-	static unsigned int cs_num;
+	unsigned int cs_num = 0;
 	unsigned int cs, sphy;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	unsigned int sphy_max = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 
-	if (cs_num == 0) {
-		for (sphy = 0; sphy < sphy_max; sphy++) {
-			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
-			break;
-		}
+	for (sphy = 0; sphy < sphy_max; sphy++) {
+		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
+		break;
+	}
 
-		for (cs = 0; cs < MAX_CS_NUM; cs++) {
-			VALIDATE_ACTIVE(tm->interface_params[0].as_bus_params[sphy].cs_bitmask, cs);
-			cs_num++;
-		}
+	for (cs = 0; cs < MAX_CS_NUM; cs++) {
+		VALIDATE_ACTIVE(tm->interface_params[0].as_bus_params[sphy].cs_bitmask, cs);
+		cs_num++;
 	}
 
 	return cs_num;
