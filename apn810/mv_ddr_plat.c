@@ -194,7 +194,7 @@ int mv_ddr_post_config(void)
 		mv_ddr_mem_scrubbing();
 
 	/* Update the size of the iface in bytes */
-	iface->iface_byte_size = mv_ddr_mem_sz_per_cs_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
+	iface->iface_byte_size = mv_ddr_tot_mem_sz_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
 
 	return 0;
 }
