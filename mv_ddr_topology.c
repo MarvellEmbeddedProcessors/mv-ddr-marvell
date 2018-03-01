@@ -358,7 +358,7 @@ static unsigned int mem_size[] = {
 	/* TODO: add capacity up to 256GB */
 };
 
-unsigned long long mv_ddr_mem_sz_per_cs_in_bits_get(void)
+unsigned long long mv_ddr_mem_sz_per_cs_get(void)
 {
 	unsigned long long mem_sz_per_cs;
 	unsigned int i, sphys, sphys_per_dunit;
@@ -384,30 +384,19 @@ unsigned long long mv_ddr_mem_sz_per_cs_in_bits_get(void)
 	/* calc dram size per cs */
 	mem_sz_per_cs = (unsigned long long)mem_size[tm->interface_params[0].memory_size] *
 			(unsigned long long)sphys /
-			(unsigned long long)sphys_per_dunit *
-			(unsigned long long)MV_DDR_NUM_BITS_IN_BYTE;
+			(unsigned long long)sphys_per_dunit;
 
 	return mem_sz_per_cs;
 }
 
-unsigned long long mv_ddr_mem_sz_per_cs_get(void)
-{
-	return mv_ddr_mem_sz_per_cs_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
-}
-
-unsigned long long mv_ddr_tot_mem_sz_in_bits_get(void)
+unsigned long long mv_ddr_mem_sz_get(void)
 {
 	unsigned long long tot_mem_sz = 0;
 	unsigned long long mem_sz_per_cs = 0;
 	unsigned long long max_cs = mv_ddr_cs_num_get();
 
-	mem_sz_per_cs = mv_ddr_mem_sz_per_cs_in_bits_get();
+	mem_sz_per_cs = mv_ddr_mem_sz_per_cs_get();
 	tot_mem_sz = max_cs * mem_sz_per_cs;
 
 	return tot_mem_sz;
-}
-
-unsigned long long mv_ddr_mem_sz_get(void)
-{
-	return mv_ddr_tot_mem_sz_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
 }

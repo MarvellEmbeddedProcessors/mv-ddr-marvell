@@ -102,7 +102,7 @@ u32 mem_size[] = {
 	ADDR_SIZE_8GB
 };
 
-uint64_t mv_ddr_mem_sz_per_cs_in_bits_get(void)
+uint64_t mv_ddr_mem_sz_per_cs_get(void)
 {
 	uint64_t memory_size_per_cs;
 
@@ -134,14 +134,9 @@ uint64_t mv_ddr_mem_sz_per_cs_in_bits_get(void)
 
 	/* calculate dram size per cs */
 	memory_size_per_cs = (uint64_t)mem_size[tm->interface_params[0].memory_size] * (uint64_t)num_of_active_bus
-		/ (uint64_t)num_of_sub_phys_per_ddr_unit * (uint64_t)MV_DDR_NUM_BITS_IN_BYTE;
+		/ (uint64_t)num_of_sub_phys_per_ddr_unit;
 
 	return memory_size_per_cs;
-}
-
-uint64_t mv_ddr_mem_sz_per_cs_get(void)
-{
-	return mv_ddr_mem_sz_per_cs_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
 }
 
 int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)

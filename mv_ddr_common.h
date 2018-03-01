@@ -102,7 +102,6 @@ extern const char mv_ddr_build_message[];
 extern const char mv_ddr_version_string[];
 
 #define MEGA			1000000
-#define MV_DDR_NUM_BITS_IN_BYTE	8
 #define MV_DDR_MEGA_BITS	(1024 * 1024)
 #define MV_DDR_32_BITS_MASK	0xffffffff
 
