@@ -117,10 +117,10 @@ static int mv_ddr_training_params_set(u8 dev_num);
 struct dram_config *mv_ddr_dram_config_update(void)
 {
 	struct dram_config *dc = mv_ddr_dram_config_get();
-	unsigned long long size = mv_ddr_tot_mem_sz_in_bits_get();
+	unsigned long long size = mv_ddr_mem_sz_get();
 
-	/* convert total memory size from bits to megabytes */
-	size /= (8 * 1024 * 1024);
+	/* convert total memory size from bytes to megabytes */
+	size /= (1024 * 1024);
 
 	/* set total memory size in megabytes in dram configuration */
 	dc->iface[0].size_mbytes = size;

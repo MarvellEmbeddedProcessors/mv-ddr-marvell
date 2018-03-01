@@ -139,6 +139,10 @@ uint64_t mv_ddr_mem_sz_per_cs_in_bits_get(void)
 	return memory_size_per_cs;
 }
 
+uint64_t mv_ddr_mem_sz_per_cs_get(void)
+{
+	return mv_ddr_mem_sz_per_cs_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
+}
 
 int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 {

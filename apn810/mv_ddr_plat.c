@@ -153,7 +153,7 @@ static void mv_ddr_mem_scrubbing(void)
 	uint64_t val = 0;
 	uint64_t tot_mem_sz;
 
-	tot_mem_sz = mv_ddr_tot_mem_sz_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
+	tot_mem_sz = mv_ddr_mem_sz_get();
 
 	printf("mv_ddr: scrubbing memory...\n");
 
@@ -194,7 +194,7 @@ int mv_ddr_post_config(void)
 		mv_ddr_mem_scrubbing();
 
 	/* Update the size of the iface in bytes */
-	iface->iface_byte_size = mv_ddr_tot_mem_sz_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
+	iface->iface_byte_size = mv_ddr_mem_sz_get();
 
 	return 0;
 }

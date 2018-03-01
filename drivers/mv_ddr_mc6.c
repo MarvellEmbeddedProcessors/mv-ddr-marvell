@@ -1308,7 +1308,7 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr)
 #if !defined(CONFIG_A3700) || !defined(CONFIG_MC6P)
 	unsigned int reserved_mem_idx;
 #endif
-	unsigned long long area_length_bits;
+	unsigned long long area_length_bytes;
 	unsigned int are_length_mega_bytes;
 	unsigned long long start_addr_bytes;
 	unsigned int start_addr_low, start_addr_high;
@@ -1318,8 +1318,8 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	cs_num = mv_ddr_cs_num_get();
 
-	area_length_bits = mv_ddr_mem_sz_per_cs_in_bits_get();
-	are_length_mega_bytes = area_length_bits / (MV_DDR_MEGA_BITS * MV_DDR_NUM_BITS_IN_BYTE);
+	area_length_bytes = mv_ddr_mem_sz_per_cs_get();
+	are_length_mega_bytes = area_length_bytes / MV_DDR_MEGA_BITS;
 
 	mv_ddr_addr_table_set(&addr_tbl,
 			      tm->interface_params[0].memory_size,
@@ -1342,7 +1342,7 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr)
 
 	/* configure all length per cs here and activate the cs */
 	for (cs_idx = 0; cs_idx < cs_num; cs_idx++) {
-		start_addr_bytes = iface_base_addr + area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * cs_idx;
+		start_addr_bytes = iface_base_addr + area_length_bytes * cs_idx;
 		start_addr_low = start_addr_bytes & MV_DDR_32_BITS_MASK;
 		start_addr_high = (start_addr_bytes >> START_ADDR_HTOL_OFFS) & MV_DDR_32_BITS_MASK;
 
@@ -1393,7 +1393,7 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr)
 #if !defined(CONFIG_A3700) || !defined(CONFIG_MC6P)
 	/* configure here the channel 1 reg_map_low and reg_map_high to unused memory area due to mc6 bug */
 	for (cs_idx = 0, reserved_mem_idx = cs_num; cs_idx < cs_num; cs_idx++, reserved_mem_idx++) {
-		start_addr_bytes = area_length_bits / MV_DDR_NUM_BITS_IN_BYTE * reserved_mem_idx;
+		start_addr_bytes = area_length_bytes * reserved_mem_idx;
 		start_addr_low = start_addr_bytes & MV_DDR_32_BITS_MASK;
 		start_addr_high = (start_addr_bytes >> START_ADDR_HTOL_OFFS) & MV_DDR_32_BITS_MASK;
 

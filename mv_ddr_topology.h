@@ -419,7 +419,7 @@ unsigned short mv_ddr_bus_bit_mask_get(void);
 unsigned int mv_ddr_if_bus_width_get(void);
 unsigned int mv_ddr_cs_num_get(void);
 int mv_ddr_is_ecc_ena(void);
-unsigned long long mv_ddr_mem_sz_per_cs_in_bits_get(void);
-unsigned long long mv_ddr_tot_mem_sz_in_bits_get(void);
+unsigned long long mv_ddr_mem_sz_per_cs_get(void);
+unsigned long long mv_ddr_mem_sz_get(void);
 
 #endif /* _MV_DDR_TOPOLOGY_H */

@@ -280,7 +280,7 @@ void mmio_write2_32(u32 val, u32 addr)
 int mv_ddr_mc_remap(void)
 {
 	uintptr_t remap_target = NON_DRAM_MEM_RGN_START_ADDR;
-	uintptr_t remap_source = mv_ddr_tot_mem_sz_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
+	uintptr_t remap_source = mv_ddr_mem_sz_get();
 	uint64_t remap_size = NON_DRAM_MEM_RGN_END_ADDR - NON_DRAM_MEM_RGN_START_ADDR;
 	u32 val;
 
@@ -330,7 +330,7 @@ void mv_ddr_mem_scrubbing(void)
 	uint64_t val = 0;
 	uint64_t tot_mem_sz;
 
-	tot_mem_sz = mv_ddr_tot_mem_sz_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
+	tot_mem_sz = mv_ddr_mem_sz_get();
 
 	printf("mv_ddr: scrubbing memory...\n");
 

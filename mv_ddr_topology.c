@@ -390,6 +390,11 @@ unsigned long long mv_ddr_mem_sz_per_cs_in_bits_get(void)
 	return mem_sz_per_cs;
 }
 
+unsigned long long mv_ddr_mem_sz_per_cs_get(void)
+{
+	return mv_ddr_mem_sz_per_cs_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
+}
+
 unsigned long long mv_ddr_tot_mem_sz_in_bits_get(void)
 {
 	unsigned long long tot_mem_sz = 0;
@@ -400,4 +405,9 @@ unsigned long long mv_ddr_tot_mem_sz_in_bits_get(void)
 	tot_mem_sz = max_cs * mem_sz_per_cs;
 
 	return tot_mem_sz;
+}
+
+unsigned long long mv_ddr_mem_sz_get(void)
+{
+	return mv_ddr_tot_mem_sz_in_bits_get() / MV_DDR_NUM_BITS_IN_BYTE;
 }
