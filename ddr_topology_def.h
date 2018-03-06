@@ -193,6 +193,13 @@ enum mv_ddr_iface_state {
 	MV_DDR_IFACE_DNE	/* does not exist */
 };
 
+enum mv_ddr_validation {
+	MV_DDR_VAL_DIS,
+	MV_DDR_VAL_RX,
+	MV_DDR_VAL_TX,
+	MV_DDR_VAL_RX_TX
+};
+
 struct mv_ddr_iface {
 	/* base addr of ap ddr interface belongs to */
 	unsigned int ap_base;
@@ -217,6 +224,9 @@ struct mv_ddr_iface {
 
 	/* ddr i2c spd page 0 select address */
 	unsigned int spd_page_sel_addr;
+
+	/* ddr interface validation mode */
+	enum mv_ddr_validation validation;
 
 	/* ddr interface topology map */
 	struct mv_ddr_topology_map tm;
