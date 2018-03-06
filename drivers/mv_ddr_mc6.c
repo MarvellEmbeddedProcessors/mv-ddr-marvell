@@ -1319,7 +1319,7 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr)
 	cs_num = mv_ddr_cs_num_get();
 
 	area_length_bytes = mv_ddr_mem_sz_per_cs_get();
-	are_length_mega_bytes = area_length_bytes / MV_DDR_MEGA_BITS;
+	are_length_mega_bytes = area_length_bytes / MV_DDR_MEGABYTE;
 
 	mv_ddr_addr_table_set(&addr_tbl,
 			      tm->interface_params[0].memory_size,

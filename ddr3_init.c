@@ -120,7 +120,7 @@ struct dram_config *mv_ddr_dram_config_update(void)
 	unsigned long long size = mv_ddr_mem_sz_get();
 
 	/* convert total memory size from bytes to megabytes */
-	size /= MV_DDR_MEGA_BITS;
+	size /= MV_DDR_MEGABYTE;
 
 	/* set total memory size in megabytes in dram configuration */
 	dc->iface[0].size_mbytes = size;
