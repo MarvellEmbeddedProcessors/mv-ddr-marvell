@@ -156,6 +156,17 @@ enum mv_ddr_mc6_sr_modes {
 #define SDRAM_INIT_REQ_VAL			0x1
 #define SDRAM_INIT_REQ_MASK			0x1
 
+#define MC6_USER_CMD2_REG			0x28
+#define CMD2_LMR6_REQ_OFFS			14
+#define CMD2_LMR6_REQ_MASK			0x1
+#define CMD2_LMRG_EN				0x1
+#define CMD2_CS_OFFS				24
+#define CMD2_CS_MASK				0xf
+#define CMD2_CS_EN				0x1
+#define CMD2_CH0_OFFS				28
+#define CMD2_CH0_MASK				0x1
+#define CMD2_CH0_EN				0x1
+
 #define MC6_MC_CTRL0_REG			0x44
 #ifdef CONFIG_MC6P
 #define MVN_EN_OFFS				12
@@ -353,11 +364,19 @@ enum mv_ddr_mc6_dm {
 #define DLL_RESET_OFFS				0
 #define DLL_RESET_VAL				0x1
 #define DLL_RESET_MASK				0x1
+#define VREF_TRAIN_OFFS				4
+#define VREF_TRAIN_MASK				0x1
+#define VREF_TRAIN_DIS				0x1
+#define VREF_TRAIN_EN				0x1
 
 #define MC6_CH0_DRAM_CFG4_REG			0x30c
 #define VREF_TRAINING_VALUE_DQ_OFFS		16
 #define VREF_TRAINING_VALUE_DQ_VAL		0x9
 #define VREF_TRAINING_VALUE_DQ_MASK		0x3f
+#define VREF_TRAINING_RANGE_DQ_OFFS		23
+#define VREF_TRAINING_RANGE_DQ_MASK		0x1
+#define VREF_TRAINING_RANGE_1			0x0
+#define VREF_TRAINING_RANGE_2			0x1
 
 #define MC6_CH0_DRAM_CFG5_BASE			0x310
 #define MC6_CH0_DRAM_CFG5_REG(cs)		(MC6_CH0_DRAM_CFG5_BASE + (cs) * 0x4)
