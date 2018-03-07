@@ -112,12 +112,42 @@ static struct snps_section_name snps_section_names[] = {
 
 static struct snps_section_content snps_sections[] = {
 	/* section ID		, load_static , load_static_update , load_dynamic_update */
-	{SECTION_PHY_CONFIG , init_phy_static, init_phy_static_update, init_phy_dynamic_update},
-	{SECTION_1D_IMEM , one_d_imem_static, NULL, NULL},
-	{SECTION_1D_DMEM , one_d_dmem_static, one_d_dmem_static_update, one_d_dmem_dynamic_update},
-	{SECTION_2D_IMEM , two_d_imem_static, NULL, NULL},
-	{SECTION_2D_DMEM , two_d_dmem_static, two_d_dmem_static_update, two_d_dmem_dynamic_update},
-	{SECTION_PHY_INIT_ENGINE, pie_static, NULL, NULL}
+	{.section_id = SECTION_PHY_CONFIG,
+	 .load_type = LOAD_RANDOM,
+	 .load_static.random = init_phy_static,
+	 .load_static_update = init_phy_static_update,
+	 .load_dynamic_update = init_phy_dynamic_update
+	},
+	{.section_id = SECTION_1D_IMEM,
+	 .load_type = LOAD_SEQUENTIAL,
+	 .load_static.sequential = &one_d_imem_static,
+	 .load_static_update = NULL,
+	 .load_dynamic_update = NULL
+	},
+	{.section_id = SECTION_1D_DMEM,
+	 .load_type = LOAD_SEQUENTIAL,
+	 .load_static.sequential = &one_d_dmem_static,
+	 .load_static_update = one_d_dmem_static_update,
+	 .load_dynamic_update = one_d_dmem_dynamic_update
+	},
+	{.section_id = SECTION_2D_IMEM,
+	 .load_type = LOAD_SEQUENTIAL,
+	 .load_static.sequential = &two_d_imem_static,
+	 .load_static_update = NULL,
+	 .load_dynamic_update = NULL
+	},
+	{.section_id = SECTION_2D_DMEM,
+	 .load_type = LOAD_SEQUENTIAL,
+	 .load_static.sequential = &two_d_dmem_static,
+	 .load_static_update = two_d_dmem_static_update,
+	 .load_dynamic_update = two_d_dmem_dynamic_update
+	},
+	{.section_id = SECTION_PHY_INIT_ENGINE,
+	 .load_type = LOAD_RANDOM,
+	 .load_static.random = pie_static,
+	 .load_static_update = NULL,
+	 .load_dynamic_update = NULL
+	},
 };
 
 /* ======================================================================= */
@@ -233,58 +263,80 @@ finish:
  */
 static int snps_load_static(enum snps_section_id section_id, enum snps_static_update static_update)
 {
-	int stage_count = 1, ret = 0;
-	const struct snps_address_data *section_ptr;
+	int stage_count, ret = -1;
+	int stage, idx;
 	debug_enter();
 
 	if (snps_sections[section_id].section_id != section_id) {
 		printf("Error: %s: invalid section entry for section id %d:'%s'\n", __func__,
 			section_id, snps_section_names[section_id].section_name);
-		ret = -1;
 		goto fail;
 	}
-
-	pr_debug("%s Static init for section:'%s'\n", __func__, snps_section_names[section_id].section_name);
-
-	/* 1st prepare the static section stage (from SNPS) */
-	section_ptr = snps_sections[section_id].load_static;
 
 	/* prepare static update section as 2nd stage, in case needed */
 	if (static_update == STATIC_UPDATE_YES)
 		stage_count = 2;
+	else
+		stage_count = 1;
 
 	/* Enable CSRs access (disable firmware access) */
 	snps_csr_access_set(MICRO_CONT_MUX_SEL_ENABLE);
 
-	for (int j = 0, i = 0; j < stage_count; j++) {
-		/* Verify section */
-		if (!section_ptr) {
-			printf("invalid static %s content for section '%s'\n" ,
-				(j == 1 ? "update" : ""),
+	for (stage = 0; stage < stage_count; stage++) {
+		pr_debug("Load static %s section for %s\n" , (stage == 1 ? "update " : ""),
 				snps_section_names[section_id].section_name);
-			ret = -1;
-			goto isolate_csr;
-		}
-		pr_debug("Load static %s section for %s\n" , (j == 1 ? "update " : ""),
-				snps_section_names[section_id].section_name);
-		/* Go over section and write it's address-data pairs */
 
-		while (section_ptr[i].addr != -1) {
-			if (j == 0) /* 1st static init shouldn't be printed - too long */
-				SNPS_STATIC_WRITE(section_ptr[i].addr, section_ptr[i].data);
-			else {
-				snps_fw_write(section_ptr[i].addr, section_ptr[i].data);
+		if ((stage == 0) &&
+		    (snps_sections[section_id].load_type == LOAD_SEQUENTIAL)) {
+			/* Sequentional load - only possible at stage 0 (init) */
+			const struct snps_seq_data *sequent_ptr =
+						 snps_sections[section_id].load_static.sequential;
+			int address;
+
+			/* Verify section */
+			if (sequent_ptr == NULL)
+				goto static_isolate_csr;
+
+			/* Firstly write all predefined entries */
+			for (idx = 0, address = sequent_ptr->start_addr;
+			     idx < sequent_ptr->data_count; address++, idx++)
+				SNPS_STATIC_WRITE(address, sequent_ptr->data[idx]);
+
+			/* Pad the rest of memory with zeros */
+			for (; address <= sequent_ptr->end_addr; address++)
+				SNPS_STATIC_WRITE(address, 0x0);
+
+		} else {
+			/* Random sequence load */
+			const struct snps_address_data *section_ptr;
+
+			if (stage == 0)
+				section_ptr = snps_sections[section_id].load_static.random;
+			else
+				section_ptr = snps_sections[section_id].load_static_update;
+			/* Verify section */
+			if (section_ptr == NULL)
+				goto static_isolate_csr;
+
+			/* Go over section and write it's address-data pairs */
+			for (idx = 0; section_ptr[idx].addr != -1; idx++) {
+				if (stage == 0) { /* 1st static init shouldn't be printed - too long */
+					SNPS_STATIC_WRITE(section_ptr[idx].addr, section_ptr[idx].data);
+				} else {
+					snps_fw_write(section_ptr[idx].addr, section_ptr[idx].data);
+				}
 			}
-			i++;
-		}
-		pr_debug("\t Static %s for section:'%s': %d writes\n", (j == 0 ? "Init" : "Update"),
-				snps_section_names[section_id].section_name, i);
-		/* prepare static update section for next loop stage, in case required */
-		section_ptr = snps_sections[section_id].load_static_update;
-		i = 0;
-	}
+		} /* End of Random sequence load */
 
-isolate_csr:
+		pr_debug("\t Static %s for section:'%s': %d writes\n", (stage == 0 ? "Init" : "Update"),
+				snps_section_names[section_id].section_name, idx);
+	}
+	ret = 0;
+
+static_isolate_csr:
+	if (ret < 0)
+		printf("invalid static %s content for section '%s'\n" ,
+			   (stage == 1 ? "update" : ""), snps_section_names[section_id].section_name);
 	/* Isolate CSRs - allow firmware unrestricted access */
 	snps_csr_access_set(MICRO_CONT_MUX_SEL_ISOLATE);
 

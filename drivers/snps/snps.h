@@ -99,7 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _SNPS_H_
 
 #include "mv_ddr_atf_wrapper.h"
-/* #define SNPS_DEBUG */
+/*#define SNPS_DEBUG*/
 #if defined(SNPS_DEBUG)
 #define pr_debug(args...)	printf(args)
 #define debug_enter()	printf("----> Enter %s\n", __func__);
@@ -109,6 +109,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define debug_exit()
 #define pr_debug(args...)
 #endif
+
+struct snps_seq_data {
+	int start_addr;
+	int end_addr;
+	int data_count;
+	const u16 *data;
+};
 
 /* Address-Data pair struct:
  * Static initialization sequence is done with these address-data pairs:
@@ -178,6 +185,11 @@ enum snps_training_result {
 	TRAINING_SEQUENCE_FAIL,
 };
 
+enum snps_load_source_type {
+	LOAD_SEQUENTIAL,
+	LOAD_RANDOM,
+};
+
 /* struct to associate section ID and it's name
  * (used for more informative prints to user
  */
@@ -192,7 +204,11 @@ struct snps_section_name {
  */
 struct snps_section_content {
 	enum snps_section_id		section_id;
-	const struct snps_address_data	*load_static;
+	enum snps_load_source_type  load_type;
+	union {
+		const struct snps_address_data	*random;
+		const struct snps_seq_data *sequential;
+	} load_static;
 	const struct snps_address_data	*load_static_update;
 	const struct snps_address_dynamic_update	*load_dynamic_update;
 };
