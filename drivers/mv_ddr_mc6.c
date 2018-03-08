@@ -1311,7 +1311,7 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr)
 {
 	unsigned int cs_idx;
 	unsigned int cs_num;
-#if !defined(CONFIG_A3700) || !defined(CONFIG_MC6P)
+#if !defined(CONFIG_A3700) && !defined(CONFIG_MC6P)
 	unsigned int reserved_mem_idx;
 #endif
 	unsigned long long area_length_bytes;
@@ -1396,7 +1396,7 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr)
 			       MV_DDR_BANK_MAP_MASK << MV_DDR_BANK_MAP_OFFS);
 	}
 
-#if !defined(CONFIG_A3700) || !defined(CONFIG_MC6P)
+#if !defined(CONFIG_A3700) && !defined(CONFIG_MC6P)
 	/* configure here the channel 1 reg_map_low and reg_map_high to unused memory area due to mc6 bug */
 	for (cs_idx = 0, reserved_mem_idx = cs_num; cs_idx < cs_num; cs_idx++, reserved_mem_idx++) {
 		start_addr_bytes = area_length_bytes * reserved_mem_idx;
