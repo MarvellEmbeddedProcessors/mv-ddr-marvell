@@ -106,10 +106,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "mv_ddr_init.h"
+#include "mv_ddr_plat.h"
 
 int dram_init(void)
 {
 	return mv_ddr_init();
+}
+
+void dram_mmap_config(void)
+{
+	mv_ddr_mmap_config();
 }
 
 void dram_scrubbing(uint8_t ap_id, uint64_t start_addr, uint64_t dram_size)

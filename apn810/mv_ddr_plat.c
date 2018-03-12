@@ -265,3 +265,9 @@ int mv_ddr_electrical_data_set(unsigned int edata[], unsigned int cs_num)
 
 	return 0;
 }
+
+void mv_ddr_mmap_config(void)
+{
+	struct mv_ddr_iface *curr_iface = mv_ddr_iface_get();
+	mv_ddr_mc6_sizes_cfg(MC6_BASE(curr_iface->id), curr_iface->iface_base_addr);
+}
