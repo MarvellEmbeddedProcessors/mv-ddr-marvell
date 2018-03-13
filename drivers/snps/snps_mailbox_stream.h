@@ -98,7 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _SNPS_MAILBOX_H_
 #define _SNPS_MAILBOX_H_
 
-#define FULL_MAIL_BOX_1D
+/* #define FULL_MAIL_BOX_1D */
 /* #define FULL_MAIL_BOX_2D */
 
 /* MailBox Dictionary for one_d_messages training stage */
