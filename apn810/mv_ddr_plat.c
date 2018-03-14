@@ -153,19 +153,22 @@ static void mv_ddr_mem_scrubbing(void)
 {
 	uint64_t val = 0;
 	uint64_t tot_mem_sz;
+	struct mv_ddr_iface *curr_iface = mv_ddr_iface_get();
 
 	tot_mem_sz = mv_ddr_mem_sz_get();
 
 	printf("mv_ddr: scrubbing memory...\n");
 
 	/* scrub memory up to non-dram memory region */
-	if (tot_mem_sz < NON_DRAM_MEM_RGN_START_ADDR)
-		mv_ddr_dma_memset(0, tot_mem_sz, val);
+	if ((curr_iface->iface_base_addr + tot_mem_sz < NON_DRAM_MEM_RGN_START_ADDR) ||
+	    (curr_iface->iface_base_addr >= NON_DRAM_MEM_RGN_END_ADDR))
+		mv_ddr_dma_memset(curr_iface->iface_base_addr, tot_mem_sz, val);
 	else
-		mv_ddr_dma_memset(0, NON_DRAM_MEM_RGN_START_ADDR, val);
+		mv_ddr_dma_memset(curr_iface->iface_base_addr, NON_DRAM_MEM_RGN_START_ADDR, val);
 
 	/* scrub memory up to the end */
-	if (tot_mem_sz >= NON_DRAM_MEM_RGN_END_ADDR)
+	if ((tot_mem_sz >= NON_DRAM_MEM_RGN_END_ADDR) &&
+	    (curr_iface->iface_base_addr < NON_DRAM_MEM_RGN_START_ADDR))
 		mv_ddr_dma_memset(NON_DRAM_MEM_RGN_END_ADDR,
 				  tot_mem_sz - NON_DRAM_MEM_RGN_START_ADDR, val);
 }
