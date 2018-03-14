@@ -1492,3 +1492,45 @@ int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int 
 #endif	/* #ifdef CONFIG_MC6P */
 	return 0;
 }
+
+uint64_t mv_ddr_mc6_mem_offs_get(u32 cs, unsigned int mc6_base)
+{
+	uint64_t offset;
+	u32 start_address_l;
+	u32 start_address_h;
+
+	start_address_l = reg_read((mc6_base + MC6_CH0_MMAP_LOW_REG(cs)));
+	start_address_h = reg_read((mc6_base + MC6_CH0_MMAP_HIGH_REG(cs)));
+
+	offset = (start_address_h * _4G) +
+		 (start_address_l & (START_ADDRESS_L_MASK << START_ADDRESS_L_OFFS));
+
+	return offset;
+}
+
+uint64_t mv_ddr_mc6_mem_size_get(unsigned int mc6_base)
+{
+	u32 reg_val = reg_read((mc6_base + MC6_CH0_MMAP_LOW_BASE));
+
+	reg_val = (reg_val >> AREA_LENGTH_OFFS) & AREA_LENGTH_MASK;
+	switch (reg_val) {
+	case 0xe:
+		return _1G;
+	case 0xf:
+		return _2G;
+	case 0x10:
+		return _4G;
+	case 0x11:
+		return _8G;
+	case 0x12:
+		return _16G;
+	case 0x13:
+		return _32G;
+	case 0x14:
+		return _64G;
+	case 0x15:
+		return _128G;
+	default:
+		return 0;
+	}
+}
