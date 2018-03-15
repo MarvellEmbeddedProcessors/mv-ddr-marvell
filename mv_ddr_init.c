@@ -108,7 +108,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mv_ddr_common.h"
 #include "mv_ddr_topology.h"
-#include "apn810/mv_ddr_plat.h"
+#include "mv_ddr_plat.h"
 #include "ddr_topology_def.h"
 #include "dram_if.h"
 
