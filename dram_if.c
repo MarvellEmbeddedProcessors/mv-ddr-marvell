@@ -112,22 +112,6 @@ int dram_init(void)
 	return mv_ddr_init();
 }
 
-uint64_t ap_dram_iface_info_get(int ap_id, int iface_id)
-{
-/* TODO: call per platform function */
-#if defined(CONFIG_APN810)
-	/*
-	 * TODO: return dram size per ap and dram interface
-	 * currently, supports only ap #0, iface #0, 8GB configuration
-	 */
-	if ((ap_id == 0) && (iface_id == 0))
-		return (uint64_t)8 << 30;
-	if ((ap_id == 1) && (iface_id == 0))
-		return (uint64_t)8 << 30;
-#endif
-	return 0;
-}
-
 void dram_scrubbing(uint8_t ap_id, uint64_t start_addr, uint64_t dram_size)
 {
 	/* TODO: implement new api for dram scrubbing */
