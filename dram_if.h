@@ -61,7 +61,6 @@ struct dram_config {
 
 /* TODO: update atf to this new prototype */
 int dram_init(void);
-struct dram_config *mv_ddr_dram_config_get(void);
 void dram_scrubbing(uint8_t ap_id, uint64_t start_addr, uint64_t dram_size);
 
 #endif /* _DRAM_IF_H_ */

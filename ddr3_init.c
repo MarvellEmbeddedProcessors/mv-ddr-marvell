@@ -112,26 +112,6 @@ u8 generic_init_controller = 1;
 
 static int mv_ddr_training_params_set(u8 dev_num);
 
-#ifdef MV_DDR_ATF
-#include "dram_if.h"
-struct dram_config *mv_ddr_dram_config_update(void)
-{
-	struct dram_config *dc = mv_ddr_dram_config_get();
-	unsigned long long size = mv_ddr_mem_sz_get();
-
-	/* convert total memory size from bytes to megabytes */
-	size /= MV_DDR_MEGABYTE;
-
-	/* set total memory size in megabytes in dram configuration */
-	dc->iface[0].size_mbytes = size;
-
-	/* set bus width in dram configuration */
-	dc->iface[0].bus_width = mv_ddr_if_bus_width_get();
-
-	return dc;
-}
-#endif /* MV_DDR_ATF */
-
 /*
  * Name:     ddr3_init - Main DDR3 Init function
  * Desc:     This routine initialize the DDR3 MC and runs HW training.
@@ -169,10 +149,6 @@ int ddr3_init(void)
 	status = mv_ddr_training_params_set(0);
 	if (MV_OK != status)
 		return status;
-
-#if defined(MV_DDR_ATF)
-	mv_ddr_dram_config_update();
-#endif /* MV_DDR_ATF */
 
 #if defined(CONFIG_MC_STATIC)
 	mv_ddr_mc_static_config();
