@@ -35,30 +35,6 @@
 #ifndef _DRAM_IF_H_
 #define _DRAM_IF_H_
 
-#define MAX_DRAM_IFACE		4
-
-typedef void (*udelay_func_t)(int usecs);
-typedef int  (*printf_func_t)(const char * __restrict, ...);
-
-struct dram_iface_cfg {
-	void *mac_base;
-	void *phy_base;
-
-	uint32_t ecc_enabled;
-	uint32_t cs_count;
-	uint32_t freq_mhz;
-
-	uint64_t size_mbytes;
-	uint32_t bus_width;
-};
-
-struct dram_config {
-	udelay_func_t	udelay;
-	printf_func_t	printf;
-	uint32_t	iface_mask;
-	struct dram_iface_cfg iface[MAX_DRAM_IFACE];
-};
-
 /* TODO: update atf to this new prototype */
 int dram_init(void);
 void dram_scrubbing(uint8_t ap_id, uint64_t start_addr, uint64_t dram_size);
