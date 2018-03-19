@@ -910,7 +910,8 @@ static int mv_ddr_training_mask_set(void)
 	rl_mid_freq_wa = 0;
 #else /* CONFIG_DDR4 */
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	enum mv_ddr_freq ddr_freq = tm->interface_params[0].memory_freq;
+	struct if_params *iface_params = &(tm->interface_params[0]);
+	enum mv_ddr_freq ddr_freq = iface_params->memory_freq;
 
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
 			  LOAD_PATTERN_MASK_BIT |
@@ -1019,12 +1020,13 @@ static void mv_ddr_convert_read_params_from_tip2mc6(void)
 	u32	if_id, cs, cl_val, cwl_val, phy_rl_cycle_dly_mc6, rd_smp_dly_tip, phy_rfifo_rptr_dly_val;
 	u32	mb_read_data_latency;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 	unsigned int max_cs = mv_ddr_cs_num_get();
 
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
-		cl_val = tm->interface_params[0].cas_l;
-		cwl_val = tm->interface_params[0].cas_wl;
+		cl_val = iface_params->cas_l;
+		cwl_val = iface_params->cas_wl;
 
 		reg_bit_clrset(MC6_BASE + MC6_CH0_DRAM_CFG1_REG,
 			cwl_val << CWL_OFFS | cl_val << CL_OFFS,
@@ -1072,6 +1074,7 @@ static void mv_ddr_convert_read_params_from_tip2mc6(void)
 static int mv_ddr_dunit_pre_charge(void)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 
 	dunit_write(SDRAM_OP_REG,
 		    (SDRAM_OP_CMD_MASK << SDRAM_OP_CMD_OFFS) |
@@ -1079,7 +1082,7 @@ static int mv_ddr_dunit_pre_charge(void)
 		    (SDRAM_OP_CMD_CS_MASK << SDRAM_OP_CMD_CS_OFFS(1)) |
 		    (SDRAM_OP_CMD_CS_MASK << SDRAM_OP_CMD_CS_OFFS(2)) |
 		    (SDRAM_OP_CMD_CS_MASK << SDRAM_OP_CMD_CS_OFFS(3)),
-		    ((~tm->interface_params[0].as_bus_params[0].cs_bitmask) <<
+		    ((~iface_params->as_bus_params[0].cs_bitmask) <<
 		     SDRAM_OP_CMD_CS_OFFS(0)) |
 		    (CMD_PRECHARGE << SDRAM_OP_CMD_OFFS));
 
