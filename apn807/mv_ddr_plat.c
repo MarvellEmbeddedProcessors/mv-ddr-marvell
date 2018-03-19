@@ -238,7 +238,7 @@ int mv_ddr_pre_config(void)
 	ddr3_tip_dev_attr_init(0);
 	ddr3_tip_dev_attr_set(0, MV_ATTR_OCTET_PER_INTERFACE, DDR_INTERFACE_OCTETS_NUM);
 
-	if (mv_ddr_topology_map_update() == NULL) {
+	if (mv_ddr_topology_map_update()) {
 		printf("mv_ddr: failed to update topology\n");
 		return -1;
 	}

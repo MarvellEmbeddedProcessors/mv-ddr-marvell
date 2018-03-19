@@ -145,7 +145,7 @@ unsigned int mv_ddr_cwl_calc(unsigned int tclk)
 	return cwl;
 }
 
-struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
+int mv_ddr_topology_map_update(void)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct if_params *iface_params = &(tm->interface_params[0]);
@@ -167,13 +167,13 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 		val = mv_ddr_spd_dev_type_get(&tm->spd_data);
 		if (val != MV_DDR_SPD_DEV_TYPE_DDR4) {
 			printf("mv_ddr: unsupported dram device type found\n");
-			return NULL;
+			return -1;
 		}
 
 		/* update topology map with timing data */
 		if (mv_ddr_spd_timing_calc(&tm->spd_data, tm->timing_data) > 0) {
 			printf("mv_ddr: negative timing data found\n");
-			return NULL;
+			return -1;
 		}
 
 		/* update device width in topology map */
@@ -202,7 +202,7 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 			break;
 		default:
 			printf("mv_ddr: unsupported dram module type found\n");
-			return NULL;
+			return -1;
 		}
 
 		/* update mirror bit mask in topology map */
@@ -215,7 +215,7 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 		val = mv_ddr_cwl_calc(tclk);
 		if (val == 0) {
 			printf("mv_ddr: unsupported cas write latency value found\n");
-			return NULL;
+			return -1;
 		}
 		iface_params->cas_wl = val;
 
@@ -224,7 +224,7 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 		val = mv_ddr_cl_calc(tm->timing_data[MV_DDR_TAA_MIN], tclk);
 		if (val == 0) {
 			printf("mv_ddr: unsupported cas latency value found\n");
-			return NULL;
+			return -1;
 		}
 		iface_params->cas_l = val;
 	} else if (tm->cfg_src == MV_DDR_CFG_DEFAULT) {
@@ -244,10 +244,10 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 	val = mv_ddr_cs_num_get();
 	if (mv_ddr_electrical_data_set(tm->electrical_data, val)) {
 		printf("error: %s: failed to update electrical data\n", __func__);
-		return NULL;
+		return -1;
 	}
 
-	return tm;
+	return 0;
 }
 
 unsigned short mv_ddr_bus_bit_mask_get(void)

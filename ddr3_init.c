@@ -137,7 +137,7 @@ int ddr3_init(void)
 
 	mv_ddr_early_init();
 
-	if (mv_ddr_topology_map_update() == NULL) {
+	if (mv_ddr_topology_map_update()) {
 		printf("mv_ddr: failed to update topology\n");
 		return MV_FAIL;
 	}
