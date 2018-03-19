@@ -551,3 +551,33 @@ u16 dmem_1d_2d_rtt_nom_wr_park_get(void)
 
 	return ret_val;
 }
+
+u16 dmem_1d_2d_en_dq_dis_dbyte_get(void)
+{
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
+	u8 tot_dq_bits_en;
+	u8 dis_dbyte = 0;
+	debug_enter();
+
+	tot_dq_bits_en = mv_ddr_if_bus_width_get();
+	if (tot_dq_bits_en == 32)
+		dis_dbyte = NC_DBYTES_32_BITS;
+	else if (tot_dq_bits_en == 64) /* 64 bits */
+		dis_dbyte = NC_DBYTES_64_BITS;
+	else
+		return -1;
+
+	/* get ddr device width in case ecc en */
+	if (mv_ddr_is_ecc_ena())
+		tot_dq_bits_en +=
+			(iface_params->bus_width == MV_DDR_DEV_WIDTH_8BIT) ? 8 : 16;
+
+	ret_val = (tot_dq_bits_en & TOTAL_DQ_BITS_EN_MASK) << TOTAL_DQ_BITS_EN_OFFS;
+	ret_val |= (dis_dbyte & NC_DBYTES_MASK) << NC_DBYTES_OFFS;
+
+	debug_exit();
+
+	return ret_val;
+}

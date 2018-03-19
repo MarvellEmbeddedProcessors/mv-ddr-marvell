@@ -636,8 +636,17 @@ void mv_ddr_mc6_and_dram_timing_set(unsigned int mc6_base)
 
 #ifdef CONFIG_MC6P
 /* TODO:  get relevant parameters from topology */
-static void mv_ddr_mc6_cfg_set(unsigned int mc6_base)
+static int mv_ddr_mc6_cfg_set(unsigned int mc6_base)
 {
+	u32 data_width = 0, bus_width;
+
+	bus_width = mv_ddr_if_bus_width_get();
+	if (bus_width == 32)
+		data_width = DATA_WIDTH_X32;
+	else if (bus_width == 64)
+		data_width = DATA_WIDTH_X64;
+	else
+		return -1;
 	/*
 	 * configure data width, mvn and burst length (burst length is default BL8)
 	 * TODO: get data width from topology
@@ -646,12 +655,7 @@ static void mv_ddr_mc6_cfg_set(unsigned int mc6_base)
 #ifdef CONFIG_MC6P
 		       MVN_ENABLE << MVN_EN_OFFS |
 #endif
-		       /* TODO: get 64bit parameter outside of the driver */
-#ifdef CONFIG_64BIT
-		       DATA_WIDTH_X64 << DATA_WIDTH_OFFS,
-#else
-		       DATA_WIDTH_X32 << DATA_WIDTH_OFFS,
-#endif
+		       data_width << DATA_WIDTH_OFFS,
 #ifdef CONFIG_MC6P
 		       MVN_EN_MASK << MVN_EN_OFFS |
 #endif
@@ -796,6 +800,8 @@ static void mv_ddr_mc6_cfg_set(unsigned int mc6_base)
 		       VREF_TRAINING_VALUE_DQ_MASK << VREF_TRAINING_VALUE_DQ_OFFS);
 	/* printf("MC6_CH0_DRAM_CFG4_REG addr 0x%x, data 0x%x\n", mc6_base + MC6_CH0_DRAM_CFG4_REG,
 		  reg_read(mc6_base + MC6_CH0_DRAM_CFG4_REG)); */
+
+	return 0;
 }
 #endif /* CONFIG_MC6P */
 
@@ -1446,7 +1452,8 @@ int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int 
 	 * for mc6 driver and it will expand the other
 	 * functions above
 	 */
-	mv_ddr_mc6_cfg_set(mc6_base);
+	if (mv_ddr_mc6_cfg_set(mc6_base))
+		return -1;
 
 	/* TODO: move the following four writes to electrical parameters settings */
 	/* ODT_Control_1: ODT_write_en, ODT0_read_en */
