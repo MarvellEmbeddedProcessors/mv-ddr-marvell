@@ -430,9 +430,9 @@ u16 dmem_1d_2d_addr_mirror_get(void)
 
 	u16 ret_val = 0;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 
-	ret_val = tm->interface_params[0].as_bus_params[0].mirror_enable_bitmask <<
-		  BYTE_OFFSET;
+	ret_val = iface_params->as_bus_params[0].mirror_enable_bitmask << BYTE_OFFSET;
 
 	debug_exit();
 
@@ -447,11 +447,12 @@ u16 dmem_1d_2d_mr0_get(void)
 	u32 freq, tclk, wr;
 	u32 mr0_wr, mr0_cl;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
-	enum mv_ddr_speed_bin sb_idx = tm->interface_params[0].speed_bin_index;
+	enum mv_ddr_speed_bin sb_idx = iface_params->speed_bin_index;
 
 	/* get frequency in MHz */
-	freq = freq_tbl[tm->interface_params[0].memory_freq];
+	freq = freq_tbl[iface_params->memory_freq];
 
 	/* calculate clock period in ps */
 	tclk = MEGA / freq;
@@ -460,7 +461,7 @@ u16 dmem_1d_2d_mr0_get(void)
 	wr = mv_ddr_speed_bin_timing_get(sb_idx, SPEED_BIN_TWR);
 	wr = time_to_nclk(wr, tclk);
 
-	if (!mv_ddr_mr0_cl_get(tm->interface_params[0].cas_l, &mr0_cl) &&
+	if (!mv_ddr_mr0_cl_get(iface_params->cas_l, &mr0_cl) &&
 	    !mv_ddr_mr0_wr_get(wr, &mr0_wr))
 		ret_val = mr0_cl | mr0_wr;
 
@@ -475,8 +476,9 @@ u16 dmem_1d_2d_mr2_get(void)
 	u16 ret_val = 0;
 	u32 mr2_cwl;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 
-	if (!mv_ddr_mr2_cwl_get(tm->interface_params[0].cas_wl, &mr2_cwl))
+	if (!mv_ddr_mr2_cwl_get(iface_params->cas_wl, &mr2_cwl))
 		ret_val = mr2_cwl | tm->electrical_data[MV_DDR_RTT_WR];
 
 	debug_exit();
@@ -507,10 +509,11 @@ u16 dmem_1d_2d_mr6_get(void)
 	u32 tccdl, mr6_tccdl;
 	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	enum mv_ddr_speed_bin sb_idx = tm->interface_params[0].speed_bin_index;
+	struct if_params *iface_params = &(tm->interface_params[0]);
+	enum mv_ddr_speed_bin sb_idx = iface_params->speed_bin_index;
 
 	/* get frequency in MHz */
-	freq = freq_tbl[tm->interface_params[0].memory_freq];
+	freq = freq_tbl[iface_params->memory_freq];
 
 	/* calculate clock period in ps */
 	tclk = MEGA / freq;
