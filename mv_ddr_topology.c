@@ -148,6 +148,7 @@ unsigned int mv_ddr_cwl_calc(unsigned int tclk)
 struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 	unsigned int octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 	enum mv_ddr_speed_bin speed_bin_index;
 	enum mv_ddr_freq freq = MV_DDR_FREQ_LAST;
@@ -158,8 +159,8 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 	struct mv_ddr_cl_val_per_freq *cl_tbl = mv_ddr_cl_tbl_get();
 	struct mv_ddr_cl_val_per_freq *cwl_tbl = mv_ddr_cwl_tbl_get();
 
-	if (tm->interface_params[0].memory_freq == MV_DDR_FREQ_SAR)
-		tm->interface_params[0].memory_freq = mv_ddr_init_freq_get();
+	if (iface_params->memory_freq == MV_DDR_FREQ_SAR)
+		iface_params->memory_freq = mv_ddr_init_freq_get();
 
 	if (tm->cfg_src == MV_DDR_CFG_SPD) {
 		/* check dram device type */
@@ -176,10 +177,10 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 		}
 
 		/* update device width in topology map */
-		tm->interface_params[0].bus_width = mv_ddr_spd_dev_width_get(&tm->spd_data);
+		iface_params->bus_width = mv_ddr_spd_dev_width_get(&tm->spd_data);
 
 		/* update die capacity in topology map */
-		tm->interface_params[0].memory_size = mv_ddr_spd_die_capacity_get(&tm->spd_data);
+		iface_params->memory_size = mv_ddr_spd_die_capacity_get(&tm->spd_data);
 
 		/* update bus bit mask in topology map */
 		tm->bus_act_mask = mv_ddr_bus_bit_mask_get();
@@ -187,7 +188,7 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 		/* update cs bit mask in topology map */
 		val = mv_ddr_spd_cs_bit_mask_get(&tm->spd_data);
 		for (i = 0; i < octets_per_if_num; i++)
-			tm->interface_params[0].as_bus_params[i].cs_bitmask = val;
+			iface_params->as_bus_params[i].cs_bitmask = val;
 
 		/* check dram module type */
 		val = mv_ddr_spd_module_type_get(&tm->spd_data);
@@ -207,16 +208,16 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 		/* update mirror bit mask in topology map */
 		val = mv_ddr_spd_mem_mirror_get(&tm->spd_data);
 		for (i = 0; i < octets_per_if_num; i++)
-			tm->interface_params[0].as_bus_params[i].mirror_enable_bitmask = val << 1;
+			iface_params->as_bus_params[i].mirror_enable_bitmask = val << 1;
 
-		tclk = 1000000 / freq_tbl[tm->interface_params[0].memory_freq];
+		tclk = 1000000 / freq_tbl[iface_params->memory_freq];
 		/* update cas write latency (cwl) */
 		val = mv_ddr_cwl_calc(tclk);
 		if (val == 0) {
 			printf("mv_ddr: unsupported cas write latency value found\n");
 			return NULL;
 		}
-		tm->interface_params[0].cas_wl = val;
+		iface_params->cas_wl = val;
 
 		/* update cas latency (cl) */
 		mv_ddr_spd_supported_cls_calc(&tm->spd_data);
@@ -225,18 +226,18 @@ struct mv_ddr_topology_map *mv_ddr_topology_map_update(void)
 			printf("mv_ddr: unsupported cas latency value found\n");
 			return NULL;
 		}
-		tm->interface_params[0].cas_l = val;
+		iface_params->cas_l = val;
 	} else if (tm->cfg_src == MV_DDR_CFG_DEFAULT) {
 		/* set cas and cas-write latencies per speed bin, if they unset */
-		speed_bin_index = tm->interface_params[0].speed_bin_index;
-		freq = tm->interface_params[0].memory_freq;
+		speed_bin_index = iface_params->speed_bin_index;
+		freq = iface_params->memory_freq;
 
-		if (tm->interface_params[0].cas_l == 0)
-			tm->interface_params[0].cas_l =
+		if (iface_params->cas_l == 0)
+			iface_params->cas_l =
 				cl_tbl[speed_bin_index].cl_val[freq];
 
-		if (tm->interface_params[0].cas_wl == 0)
-			tm->interface_params[0].cas_wl =
+		if (iface_params->cas_wl == 0)
+			iface_params->cas_wl =
 				cwl_tbl[speed_bin_index].cl_val[freq];
 	}
 
@@ -313,6 +314,7 @@ unsigned int mv_ddr_cs_num_get(void)
 	unsigned int cs_num = 0;
 	unsigned int cs, sphy;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 	unsigned int sphy_max = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 
 	for (sphy = 0; sphy < sphy_max; sphy++) {
@@ -321,7 +323,7 @@ unsigned int mv_ddr_cs_num_get(void)
 	}
 
 	for (cs = 0; cs < MAX_CS_NUM; cs++) {
-		VALIDATE_ACTIVE(tm->interface_params[0].as_bus_params[sphy].cs_bitmask, cs);
+		VALIDATE_ACTIVE(iface_params->as_bus_params[sphy].cs_bitmask, cs);
 		cs_num++;
 	}
 
@@ -356,6 +358,7 @@ unsigned long long mv_ddr_mem_sz_per_cs_get(void)
 	unsigned int i, sphys, sphys_per_dunit;
 	unsigned int sphy_max = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 
 	/* calc number of active subphys excl. ecc one */
 	for (i = 0, sphys = 0; i < sphy_max - 1; i++) {
@@ -364,9 +367,9 @@ unsigned long long mv_ddr_mem_sz_per_cs_get(void)
 	}
 
 	/* calc number of subphys per ddr unit */
-	if (tm->interface_params[0].bus_width == MV_DDR_DEV_WIDTH_8BIT)
+	if (iface_params->bus_width == MV_DDR_DEV_WIDTH_8BIT)
 		sphys_per_dunit = MV_DDR_ONE_SPHY_PER_DUNIT;
-	else if (tm->interface_params[0].bus_width == MV_DDR_DEV_WIDTH_16BIT)
+	else if (iface_params->bus_width == MV_DDR_DEV_WIDTH_16BIT)
 		sphys_per_dunit = MV_DDR_TWO_SPHY_PER_DUNIT;
 	else {
 		printf("mv_ddr: unsupported bus width type found\n");
@@ -374,7 +377,7 @@ unsigned long long mv_ddr_mem_sz_per_cs_get(void)
 	}
 
 	/* calc dram size per cs */
-	mem_sz_per_cs = (unsigned long long)mem_size[tm->interface_params[0].memory_size] *
+	mem_sz_per_cs = (unsigned long long)mem_size[iface_params->memory_size] *
 			(unsigned long long)sphys /
 			(unsigned long long)sphys_per_dunit;
 
