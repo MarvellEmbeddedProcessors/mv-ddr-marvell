@@ -149,15 +149,16 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct mv_ddr_page_element *page_param = mv_ddr_page_tbl_get();
 	unsigned int *rfc_tbl = mv_ddr_rfc_tbl_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 
 	/* get the spped bin index */
-	enum mv_ddr_speed_bin speed_bin_index = tm->interface_params[0].speed_bin_index;
+	enum mv_ddr_speed_bin speed_bin_index = iface_params->speed_bin_index;
 
 	/* calculate memory size */
-	enum mv_ddr_die_capacity memory_size = tm->interface_params[0].memory_size;
+	enum mv_ddr_die_capacity memory_size = iface_params->memory_size;
 
 	/* calculate page size */
-	page_size = tm->interface_params[0].bus_width == MV_DDR_DEV_WIDTH_8BIT ?
+	page_size = iface_params->bus_width == MV_DDR_DEV_WIDTH_8BIT ?
 		page_param[memory_size].page_size_8bit : page_param[memory_size].page_size_16bit;
 	/* printf("page_size = %d\n", page_size); */
 
@@ -166,7 +167,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	/* printf("t_ckclk = %d\n", mc6_timing.t_ckclk); */
 
 	/* calculate t_refi  */
-	mc6_timing.t_refi = (tm->interface_params[0].interface_temp == MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
+	mc6_timing.t_refi = (iface_params->interface_temp == MV_DDR_TEMP_HIGH) ? TREFI_HIGH : TREFI_LOW;
 
 	/* the t_refi is in nsec */
 	mc6_timing.t_refi = mc6_timing.t_refi / (MEGA / FCLK_KHZ);
@@ -411,8 +412,8 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	mc6_timing.t_ccd_ccs_ext_dly = TIMING_T_CCD_CCS_EXT_DLY;
 	/* printf("t_ccd_ccs_ext_dly = %d\n", mc6_timing.t_ccd_ccs_ext_dly); */
 
-	mc6_timing.cl = tm->interface_params[0].cas_l;
-	mc6_timing.cwl = tm->interface_params[0].cas_wl;
+	mc6_timing.cl = iface_params->cas_l;
+	mc6_timing.cwl = iface_params->cas_wl;
 
 	/* configure the timing registers */
 	reg_bit_clrset(mc6_base + MC6_CH0_DRAM_CFG1_REG,
@@ -627,9 +628,10 @@ void mv_ddr_mc6_and_dram_timing_set(unsigned int mc6_base)
 	u32 freq_mhz;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 
 	/* get the frequency form the topology */
-	freq_mhz = freq_tbl[tm->interface_params[0].memory_freq];
+	freq_mhz = freq_tbl[iface_params->memory_freq];
 
 	mv_ddr_mc6_timing_regs_cfg(mc6_base, freq_mhz);
 }
@@ -811,9 +813,10 @@ static void mv_ddr_mc6_dfi_config(unsigned int mc6_base)
 {
 	u32 val, mask, i, cl, cwl;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 
-	cl = tm->interface_params[0].cas_l;
-	cwl = tm->interface_params[0].cas_wl;
+	cl = iface_params->cas_l;
+	cwl = iface_params->cas_wl;
 
 	val = TRDDATA_EN(cl) << TRDDATA_EN_OFFS |
 	      TPHY_RDLAT_VAL << TPHY_RDLAT_OFFS |
@@ -840,7 +843,7 @@ static void mv_ddr_mc6_dfi_config(unsigned int mc6_base)
 	/* configure channel 0 and init dfi phy per cs */
 	reg_bit_clrset(mc6_base + MC6_DFI_PHY_USER_CMD_0_REG,
 		       DFI_USER_CMD_0_CH0_VAL << DFI_USER_CMD_0_CH_OFFS |
-		       tm->interface_params[0].as_bus_params[0].cs_bitmask << DFI_USER_CMD_0_CS_OFFS |
+		       iface_params->as_bus_params[0].cs_bitmask << DFI_USER_CMD_0_CS_OFFS |
 		       DFI_PHY_INIT_DDR_DONE_REQ_VAL << DFI_PHY_INIT_DDR_DONE_REQ_OFFS |
 		       DFI_PHY_INIT_REQ_VAL << DFI_PHY_INIT_REQ_OFFS,
 		       DFI_USER_CMD_0_CH_MASK << DFI_USER_CMD_0_CH_OFFS |
@@ -877,6 +880,7 @@ static void mv_ddr_mc6_dfi_config(unsigned int mc6_base)
 void mv_ddr_mc6_init(unsigned int mc6_base)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 
 #ifdef CONFIG_MC6P
 	/* configure dfi */
@@ -885,7 +889,7 @@ void mv_ddr_mc6_init(unsigned int mc6_base)
 	/* init appropriate cs */
 	reg_bit_clrset(mc6_base + MC6_USER_CMD0_REG,
 		       USER_CMD0_CH0_VAL << USER_CMD0_CH0_OFFS |
-		       (tm->interface_params[0].as_bus_params[0].cs_bitmask & USER_CMD0_CS_MASK)
+		       (iface_params->as_bus_params[0].cs_bitmask & USER_CMD0_CS_MASK)
 		       << USER_CMD0_CS_OFFS |
 		       SDRAM_INIT_REQ_VAL << SDRAM_INIT_REQ_OFFS,
 		       USER_CMD0_CH0_MASK << USER_CMD0_CH0_OFFS |
@@ -906,7 +910,7 @@ void mv_ddr_mc6_init(unsigned int mc6_base)
 	/* write buffer drain for appropriate cs */
 	reg_bit_clrset(mc6_base + MC6_USER_CMD0_REG,
 		       USER_CMD0_CH0_VAL << USER_CMD0_CH0_OFFS |
-		       (tm->interface_params[0].as_bus_params[0].cs_bitmask & USER_CMD0_CS_MASK)
+		       (iface_params->as_bus_params[0].cs_bitmask & USER_CMD0_CS_MASK)
 			<< USER_CMD0_CS_OFFS |
 		       WCP_DRAIN_REQ_VAL << WCP_DRAIN_REQ_OFFS,
 		       USER_CMD0_CH0_MASK << USER_CMD0_CH0_OFFS |
@@ -1322,14 +1326,15 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr)
 
 	struct mv_ddr_addr_table addr_tbl = {0};
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 	cs_num = mv_ddr_cs_num_get();
 
 	area_length_bytes = mv_ddr_mem_sz_per_cs_get();
 	are_length_mega_bytes = area_length_bytes / MV_DDR_MEGABYTE;
 
 	mv_ddr_addr_table_set(&addr_tbl,
-			      tm->interface_params[0].memory_size,
-			      tm->interface_params[0].bus_width);
+			      iface_params->memory_size,
+			      iface_params->bus_width);
 
 	/*
 	 * calculate bank address assignment boundary
@@ -1383,7 +1388,7 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr)
 			       RA_NUM_OFFS |
 			       mv_ddr_stack_addr_num_convert(SINGLE_STACK) <<
 			       SA_NUM_OFFS |
-			       mv_ddr_device_type_convert(tm->interface_params[0].bus_width) <<
+			       mv_ddr_device_type_convert(iface_params->bus_width) <<
 			       DEVICE_TYPE_OFFS |
 			       mv_ddr_bank_map_cfg_get(bm) <<
 			       MV_DDR_BANK_MAP_OFFS,
