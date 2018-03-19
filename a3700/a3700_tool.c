@@ -232,13 +232,15 @@ static int ddr_gen_output_item(char *buf, struct output_item *item)
 
 static int ddr_gen_pre_init(FILE *fp)
 {
+	struct if_params *iface_params = &(cfg.map.interface_params[0]);
+
 	if (cfg.type == DDR3) {
-		if (cfg.map.interface_params[0].as_bus_params[0].cs_bitmask == 1)
+		if (iface_params->as_bus_params[0].cs_bitmask == 1)
 			fputs(ddr3_1cs_tim_pre, fp);
 		else
 			fputs(ddr3_2cs_tim_pre, fp);
 	} else if (cfg.type == DDR4) {
-		if (cfg.map.interface_params[0].as_bus_params[0].cs_bitmask == 1)
+		if (iface_params->as_bus_params[0].cs_bitmask == 1)
 			fputs(ddr4_1cs_tim_pre, fp);
 		else
 			fputs(ddr4_2cs_tim_pre, fp);
@@ -252,13 +254,15 @@ static int ddr_gen_pre_init(FILE *fp)
 
 static int ddr_gen_post_init(FILE *fp)
 {
+	struct if_params *iface_params = &(cfg.map.interface_params[0]);
+
 	if (cfg.type == DDR3) {
-		if (cfg.map.interface_params[0].as_bus_params[0].cs_bitmask == 1)
+		if (iface_params->as_bus_params[0].cs_bitmask == 1)
 			fputs(ddr3_1cs_tim_post, fp);
 		else
 			fputs(ddr3_2cs_tim_post, fp);
 	} else if (cfg.type == DDR4) {
-		if (cfg.map.interface_params[0].as_bus_params[0].cs_bitmask == 1)
+		if (iface_params->as_bus_params[0].cs_bitmask == 1)
 			fputs(ddr4_1cs_tim_post, fp);
 		else
 			fputs(ddr4_2cs_tim_post, fp);
@@ -331,6 +335,7 @@ static int ddr_cfg_read(FILE *fp, struct config_item *cfg_list, int num)
 
 static int ddr_cfg_parse(struct config_item *clist, struct ddr_porting_cfg *cfg)
 {
+	struct if_params *iface_params = &(cfg->map.interface_params[0]);
 	u8 cs_bitmask;
 	u32 i;
 
@@ -340,32 +345,32 @@ static int ddr_cfg_parse(struct config_item *clist, struct ddr_porting_cfg *cfg)
 
 	cs_bitmask = strtol(clist[DDR_CS_MASK].value, (char **)NULL, 0);
 	for (i = 0; i < MAX_BUS_NUM; i++)
-		cfg->map.interface_params[0].as_bus_params[i].cs_bitmask = cs_bitmask;
+		iface_params->as_bus_params[i].cs_bitmask = cs_bitmask;
 
-	cfg->map.interface_params[0].speed_bin_index = strtol(clist[DDR_SPEEDBIN_INDEX].value, (char **)NULL, 0);
-	cfg->map.interface_params[0].bus_width = strtol(clist[DDR_BUS_WIDTH_INDEX].value, (char **)NULL, 0);
-	cfg->map.interface_params[0].memory_size = strtol(clist[DDR_MEM_SIZE_INDEX].value, (char **)NULL, 0);
-	cfg->map.interface_params[0].memory_freq = MV_DDR_FREQ_800;
+	iface_params->speed_bin_index = strtol(clist[DDR_SPEEDBIN_INDEX].value, (char **)NULL, 0);
+	iface_params->bus_width = strtol(clist[DDR_BUS_WIDTH_INDEX].value, (char **)NULL, 0);
+	iface_params->memory_size = strtol(clist[DDR_MEM_SIZE_INDEX].value, (char **)NULL, 0);
+	iface_params->memory_freq = MV_DDR_FREQ_800;
 
 	cfg->map.bus_act_mask = BUS_MASK_16BIT;
 
 	/* Parse CL/CWL settings from cfg items */
 	if (clist[DDR_CL].value[0] && clist[DDR_CWL].value[0]) {
-		cfg->map.interface_params[0].cas_l = strtol(clist[DDR_CL].value, (char **)NULL, 0);
-		cfg->map.interface_params[0].cas_wl = strtol(clist[DDR_CWL].value, (char **)NULL, 0);
+		iface_params->cas_l = strtol(clist[DDR_CL].value, (char **)NULL, 0);
+		iface_params->cas_wl = strtol(clist[DDR_CWL].value, (char **)NULL, 0);
 	}
 	/* Set to default value if items not found */
-	if (!(cfg->map.interface_params[0].cas_l && cfg->map.interface_params[0].cas_wl)) {
-		cfg->map.interface_params[0].cas_l = DDR_DFT_CL;
-		cfg->map.interface_params[0].cas_wl = DDR_DFT_CWL;
+	if (!(iface_params->cas_l && iface_params->cas_wl)) {
+		iface_params->cas_l = DDR_DFT_CL;
+		iface_params->cas_wl = DDR_DFT_CWL;
 	}
 
 	if ((cfg->type != DDR3 && cfg->type != DDR4) ||
-		(cfg->map.interface_params[0].as_bus_params[0].cs_bitmask != MV_DDR_CS_BITMASK_1CS
-			&& cfg->map.interface_params[0].as_bus_params[0].cs_bitmask != MV_DDR_CS_BITMASK_2CS) ||
-		(cfg->map.interface_params[0].bus_width != MV_DDR_DEV_WIDTH_8BIT
-			&& cfg->map.interface_params[0].bus_width != MV_DDR_DEV_WIDTH_16BIT) ||
-		cfg->map.interface_params[0].memory_size >= MV_DDR_DIE_CAP_LAST) {
+		(iface_params->as_bus_params[0].cs_bitmask != MV_DDR_CS_BITMASK_1CS
+			&& iface_params->as_bus_params[0].cs_bitmask != MV_DDR_CS_BITMASK_2CS) ||
+		(iface_params->bus_width != MV_DDR_DEV_WIDTH_8BIT
+			&& iface_params->bus_width != MV_DDR_DEV_WIDTH_16BIT) ||
+		iface_params->memory_size >= MV_DDR_DIE_CAP_LAST) {
 		ERROR("incorrect input ddr configuration found\n");
 		return -1;
 	}
@@ -384,13 +389,13 @@ static int ddr_cfg_parse(struct config_item *clist, struct ddr_porting_cfg *cfg)
 
 	INFO("Board info:\n");
 	INFO("\tBus width:\t16bit\n");
-	INFO("\tCS num:\t\t%s\n", cfg->map.interface_params[0].as_bus_params[0].cs_bitmask == MV_DDR_CS_BITMASK_2CS ?
-		"2CS" :	(cfg->map.interface_params[0].as_bus_params[0].cs_bitmask == MV_DDR_CS_BITMASK_1CS ?
+	INFO("\tCS num:\t\t%s\n", iface_params->as_bus_params[0].cs_bitmask == MV_DDR_CS_BITMASK_2CS ?
+		"2CS" :	(iface_params->as_bus_params[0].cs_bitmask == MV_DDR_CS_BITMASK_1CS ?
 			"1CS" : "unsupported cs number"));
 	INFO("\tChip:\t\t%s ", cfg->type == DDR3 ? "DDR3" : "DDR4");
-	INFO("%s ", cfg->map.interface_params[0].bus_width == MV_DDR_DEV_WIDTH_16BIT ? "16bit" :
-		(cfg->map.interface_params[0].bus_width == MV_DDR_DEV_WIDTH_8BIT ? "8bit" : "unsupported bus width"));
-	INFO("%dMBytes\n", 64<<(cfg->map.interface_params[0].memory_size));
+	INFO("%s ", iface_params->bus_width == MV_DDR_DEV_WIDTH_16BIT ? "16bit" :
+		(iface_params->bus_width == MV_DDR_DEV_WIDTH_8BIT ? "8bit" : "unsupported bus width"));
+	INFO("%dMBytes\n", 64<<(iface_params->memory_size));
 
 	return 0;
 }

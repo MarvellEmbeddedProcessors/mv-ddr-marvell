@@ -76,6 +76,7 @@ unsigned int mv_ddr_cs_num_get(void)
 	unsigned int cs_num = 0;
 	unsigned int cs, sphy;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 	unsigned int sphy_max = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 
 	for (sphy = 0; sphy < sphy_max; sphy++) {
@@ -84,7 +85,7 @@ unsigned int mv_ddr_cs_num_get(void)
 	}
 
 	for (cs = 0; cs < MAX_CS_NUM; cs++) {
-		VALIDATE_ACTIVE(tm->interface_params[0].as_bus_params[sphy].cs_bitmask, cs);
+		VALIDATE_ACTIVE(iface_params->as_bus_params[sphy].cs_bitmask, cs);
 		cs_num++;
 	}
 
@@ -110,6 +111,7 @@ uint64_t mv_ddr_mem_sz_per_cs_get(void)
 	u32 num_of_sub_phys_per_ddr_unit = 0;
 
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
 
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 
@@ -127,13 +129,13 @@ uint64_t mv_ddr_mem_sz_per_cs_get(void)
 	}
 
 	/* calculate number of sub-phys per ddr unit */
-	if (tm->interface_params[0].bus_width/* supports only single interface */ == MV_DDR_DEV_WIDTH_16BIT)
+	if (iface_params->bus_width/* supports only single interface */ == MV_DDR_DEV_WIDTH_16BIT)
 		num_of_sub_phys_per_ddr_unit = MV_DDR_TWO_SPHY_PER_DUNIT;
-	if (tm->interface_params[0].bus_width/* supports only single interface */ == MV_DDR_DEV_WIDTH_8BIT)
+	if (iface_params->bus_width/* supports only single interface */ == MV_DDR_DEV_WIDTH_8BIT)
 		num_of_sub_phys_per_ddr_unit = MV_DDR_ONE_SPHY_PER_DUNIT;
 
 	/* calculate dram size per cs */
-	memory_size_per_cs = (uint64_t)mem_size[tm->interface_params[0].memory_size] * (uint64_t)num_of_active_bus
+	memory_size_per_cs = (uint64_t)mem_size[iface_params->memory_size] * (uint64_t)num_of_active_bus
 		/ (uint64_t)num_of_sub_phys_per_ddr_unit;
 
 	return memory_size_per_cs;
