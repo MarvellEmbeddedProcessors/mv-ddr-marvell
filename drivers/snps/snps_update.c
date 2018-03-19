@@ -581,3 +581,29 @@ u16 dmem_1d_2d_en_dq_dis_dbyte_get(void)
 
 	return ret_val;
 }
+
+u16 dmem_1d_2d_gear_down_x16_present_get(void)
+{
+	u16 ret_val = 0;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	struct if_params *iface_params = &(tm->interface_params[0]);
+	u32 cs_num = mv_ddr_cs_num_get();
+	u8 x16_present_val;
+	debug_enter();
+
+	x16_present_val = (iface_params->bus_width == MV_DDR_DEV_WIDTH_8BIT) ?
+			   X16_NOT_PRESENT_VAL :
+			   X16_PRESENT_VAL;
+
+	if (cs_num == 1) /* single cs */
+		ret_val = (x16_present_val & X16_PRESENT_CS0_MASK) << X16_PRESENT_CS0_OFFS;
+	else /* dual cs */
+		ret_val = ((x16_present_val & X16_PRESENT_CS0_MASK) << X16_PRESENT_CS0_OFFS) |
+			   ((x16_present_val & X16_PRESENT_CS1_MASK) << X16_PRESENT_CS1_OFFS);
+	ret_val |= ((ZERO_VAL & X16_PRESENT_RSRV_MASK) << X16_PRESENT_RSRV_OFFS);
+	ret_val |= (CS_SETUP_GDDEC_REG_VAL << BYTE_OFFSET);
+
+	debug_exit();
+
+	return ret_val;
+}
