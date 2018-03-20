@@ -206,7 +206,6 @@ int ddr3_tip_configure_odpg(u32 dev_num, enum hws_access_type access_type,
 			    u32 tx_burst_size, u32 rx_phases,
 			    u32 delay_between_burst, u32 rd_mode, u32 cs_num,
 			    u32 addr_stress_jump, u32 single_pattern);
-int ddr3_tip_set_atr(u32 dev_num, u32 flag_id, u32 value);
 int ddr3_tip_write_mrs_cmd(u32 dev_num, u32 *cs_mask_arr, enum mr_number mr_num, u32 data, u32 mask);
 int ddr3_tip_write_cs_result(u32 dev_num, u32 offset);
 int ddr3_tip_reset_fifo_ptr(u32 dev_num);
