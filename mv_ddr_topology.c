@@ -155,7 +155,6 @@ int mv_ddr_topology_map_update(void)
 	unsigned int tclk;
 	unsigned char val = 0;
 	int i;
-	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 	struct mv_ddr_cl_val_per_freq *cl_tbl = mv_ddr_cl_tbl_get();
 	struct mv_ddr_cl_val_per_freq *cwl_tbl = mv_ddr_cwl_tbl_get();
 
@@ -210,7 +209,7 @@ int mv_ddr_topology_map_update(void)
 		for (i = 0; i < octets_per_if_num; i++)
 			iface_params->as_bus_params[i].mirror_enable_bitmask = val << 1;
 
-		tclk = 1000000 / freq_tbl[iface_params->memory_freq];
+		tclk = 1000000 / mv_ddr_freq_get(iface_params->memory_freq);
 		/* update cas write latency (cwl) */
 		val = mv_ddr_cwl_calc(tclk);
 		if (val == 0) {

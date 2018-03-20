@@ -627,11 +627,10 @@ void mv_ddr_mc6_and_dram_timing_set(unsigned int mc6_base)
 	/* get the frequency */
 	u32 freq_mhz;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 	struct if_params *iface_params = &(tm->interface_params[0]);
 
 	/* get the frequency form the topology */
-	freq_mhz = freq_tbl[iface_params->memory_freq];
+	freq_mhz = mv_ddr_freq_get(iface_params->memory_freq);
 
 	mv_ddr_mc6_timing_regs_cfg(mc6_base, freq_mhz);
 }

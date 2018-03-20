@@ -143,7 +143,6 @@ int mv_ddr4_mode_regs_init(u8 dev_num)
 	u32 vref = ((ron + rodt / 2) * 10000) / (ron + rodt);
 	u32 range = (vref >= 6000) ? 0 : 1; /* if vref is >= 60%, use upper range */
 	u32 tap;
-	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 
 	if (range == 0)
 		tap = (vref - 6000) / 65;
@@ -154,7 +153,7 @@ int mv_ddr4_mode_regs_init(u8 dev_num)
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 		cl = tm->interface_params[if_id].cas_l;
 		cwl = tm->interface_params[if_id].cas_wl;
-		t_ckclk = MEGA / freq_tbl[tm->interface_params[if_id].memory_freq];
+		t_ckclk = MEGA / mv_ddr_freq_get(tm->interface_params[if_id].memory_freq);
 		t_wr = time_to_nclk(mv_ddr_speed_bin_timing_get(tm->interface_params[if_id].speed_bin_index,
 					    SPEED_BIN_TWR), t_ckclk) - 1;
 

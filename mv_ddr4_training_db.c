@@ -133,6 +133,11 @@ unsigned int *mv_ddr_freq_tbl_get(void)
 	return &freq_val[0];
 }
 
+u32 mv_ddr_freq_get(enum mv_ddr_freq freq)
+{
+	return freq_val[freq];
+}
+
 /* non-dbi mode - table for cl values per frequency for each speed bin index */
 static struct mv_ddr_cl_val_per_freq cl_table[] = {
 	/* TODO: review 1600 and 1866 speed grades */
@@ -396,12 +401,11 @@ static int mv_ddr_tdllk_get(unsigned int freq, unsigned int *tdllk)
 unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_ddr_speed_bin_timing element)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 	unsigned int freq;
 	u32 result = 0;
 
 	/* get frequency in MHz */
-	freq = freq_tbl[tm->interface_params[0].memory_freq];
+	freq = mv_ddr_freq_get(tm->interface_params[0].memory_freq);
 
 	switch (element) {
 	case SPEED_BIN_TRCD:

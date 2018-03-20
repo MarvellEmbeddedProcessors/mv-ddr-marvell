@@ -448,11 +448,10 @@ u16 dmem_1d_2d_mr0_get(void)
 	u32 mr0_wr, mr0_cl;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct if_params *iface_params = &(tm->interface_params[0]);
-	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 	enum mv_ddr_speed_bin sb_idx = iface_params->speed_bin_index;
 
 	/* get frequency in MHz */
-	freq = freq_tbl[iface_params->memory_freq];
+	freq = mv_ddr_freq_get(iface_params->memory_freq);
 
 	/* calculate clock period in ps */
 	tclk = MEGA / freq;
@@ -507,13 +506,12 @@ u16 dmem_1d_2d_mr6_get(void)
 	u16 ret_val = 0;
 	u32 freq, tclk;
 	u32 tccdl, mr6_tccdl;
-	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct if_params *iface_params = &(tm->interface_params[0]);
 	enum mv_ddr_speed_bin sb_idx = iface_params->speed_bin_index;
 
 	/* get frequency in MHz */
-	freq = freq_tbl[iface_params->memory_freq];
+	freq = mv_ddr_freq_get(iface_params->memory_freq);
 
 	/* calculate clock period in ps */
 	tclk = MEGA / freq;

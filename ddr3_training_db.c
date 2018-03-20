@@ -242,6 +242,11 @@ unsigned int *mv_ddr_freq_tbl_get(void)
 	return &freq_val[0];
 }
 
+u32 mv_ddr_freq_get(enum mv_ddr_freq freq)
+{
+	return freq_val[freq];
+}
+
 /* cas latency values per frequency for each speed bin index */
 static struct mv_ddr_cl_val_per_freq cl_table[] = {
 	/*

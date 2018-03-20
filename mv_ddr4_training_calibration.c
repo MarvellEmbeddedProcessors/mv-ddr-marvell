@@ -1200,8 +1200,7 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 	int status = MV_OK;
 	int i;
 	u32 reg_val;
-	unsigned int *freq_tbl = mv_ddr_freq_tbl_get();
-	u32 freq = freq_tbl[tm->interface_params->memory_freq];
+	u32 freq = mv_ddr_freq_get(tm->interface_params->memory_freq);
 	/* calc adll tap in ps based on frequency */
 	int adll_tap = (ONE_MHZ / freq) / ADLL_TAPS_PER_PERIOD;
 	int dq_to_dqs_delta[MAX_BUS_NUM][BUS_WIDTH_IN_BITS]; /* skew b/w dq and dqs */
