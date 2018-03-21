@@ -155,7 +155,6 @@ int mv_ddr_topology_map_update(void)
 	unsigned int tclk;
 	unsigned char val = 0;
 	int i;
-	struct mv_ddr_cl_val_per_freq *cl_tbl = mv_ddr_cl_tbl_get();
 	struct mv_ddr_cl_val_per_freq *cwl_tbl = mv_ddr_cwl_tbl_get();
 
 	if (iface_params->memory_freq == MV_DDR_FREQ_SAR)
@@ -232,8 +231,7 @@ int mv_ddr_topology_map_update(void)
 		freq = iface_params->memory_freq;
 
 		if (iface_params->cas_l == 0)
-			iface_params->cas_l =
-				cl_tbl[speed_bin_index].cl_val[freq];
+			iface_params->cas_l = mv_ddr_cl_val_get(speed_bin_index, freq);
 
 		if (iface_params->cas_wl == 0)
 			iface_params->cas_wl =

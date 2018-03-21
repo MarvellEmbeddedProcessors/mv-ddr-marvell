@@ -1351,7 +1351,6 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	unsigned int tclk;
 	u32 freq = mv_ddr_freq_get(frequency);
-	struct mv_ddr_cl_val_per_freq *cl_tbl = mv_ddr_cl_tbl_get();
 	struct mv_ddr_cl_val_per_freq *cwl_tbl = mv_ddr_cwl_tbl_get();
 
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE,
@@ -1409,8 +1408,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 				return MV_FAIL;
 			}
 		} else {
-			cl_value =
-				cl_tbl[speed_bin_index].cl_val[frequency];
+			cl_value = mv_ddr_cl_val_get(speed_bin_index, frequency);
 			cwl_value =
 				cwl_tbl[speed_bin_index].
 				cl_val[frequency];
@@ -1423,9 +1421,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 
 		for (cnt_id = 0; cnt_id < MV_DDR_FREQ_LAST; cnt_id++) {
 			DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE,
-					  ("%d ",
-					   cl_tbl[speed_bin_index].
-					   cl_val[cnt_id]));
+					  ("%d ", mv_ddr_cl_val_get(speed_bin_index, cnt_id)));
 		}
 
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE, ("\n"));

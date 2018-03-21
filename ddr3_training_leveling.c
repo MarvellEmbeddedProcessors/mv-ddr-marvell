@@ -141,7 +141,6 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 	u16 *mask_results_pup_reg_map = ddr3_tip_get_mask_results_pup_reg_map();
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	struct mv_ddr_cl_val_per_freq *cl_tbl = mv_ddr_cl_tbl_get();
 
 	for (effective_cs = 0; effective_cs < MAX_CS_NUM; effective_cs++)
 		for (bus_num = 0; bus_num < MAX_BUS_NUM; bus_num++)
@@ -212,8 +211,7 @@ int ddr3_tip_dynamic_read_leveling(u32 dev_num, u32 freq)
 			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			speed_bin_index =
 				tm->interface_params[if_id].speed_bin_index;
-			cl_val =
-				cl_tbl[speed_bin_index].cl_val[freq];
+			cl_val = mv_ddr_cl_val_get(speed_bin_index, freq);
 			data = (cl_val << 17) | (0x3 << 25);
 			mask = (0xff << 9) | (0x1f << 17) | (0x3 << 25);
 			CHECK_STATUS(ddr3_tip_if_write
@@ -506,7 +504,6 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 	u16 *mask_results_dq_reg_map = ddr3_tip_get_mask_results_dq_reg();
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	struct mv_ddr_cl_val_per_freq *cl_tbl = mv_ddr_cl_tbl_get();
 
 	for (if_id = 0; if_id < MAX_INTERFACE_NUM; if_id++) {
 		VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
@@ -586,8 +583,7 @@ int ddr3_tip_dynamic_per_bit_read_leveling(u32 dev_num, u32 freq)
 			VALIDATE_IF_ACTIVE(tm->if_act_mask, if_id);
 			speed_bin_index =
 				tm->interface_params[if_id].speed_bin_index;
-			cl_val =
-				cl_tbl[speed_bin_index].cl_val[freq];
+			cl_val = mv_ddr_cl_val_get(speed_bin_index, freq);
 			data = (cl_val << 17) | (0x3 << 25);
 			mask = (0xff << 9) | (0x1f << 17) | (0x3 << 25);
 			CHECK_STATUS(ddr3_tip_if_write

@@ -157,9 +157,9 @@ static struct mv_ddr_cl_val_per_freq cl_table[] = {
 	{ {10,	10,	10,	12,	14,	16,	14,	16,	16,	18} }	/* SPEED_BIN_DDR_2400U */
 };
 
-struct mv_ddr_cl_val_per_freq *mv_ddr_cl_tbl_get(void)
+u32 mv_ddr_cl_val_get(u32 index, u32 freq)
 {
-	return &cl_table[0];
+	return cl_table[index].cl_val[freq];
 }
 
 /* dbi mode - table for cl values per frequency for each speed bin index */
