@@ -127,6 +127,6 @@ u32 mv_ddr_freq_get(enum mv_ddr_freq freq);
 struct mv_ddr_page_element *mv_ddr_page_tbl_get(void);
 unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_ddr_speed_bin_timing element);
 u32 mv_ddr_cl_val_get(u32 index, u32 freq);
-struct mv_ddr_cl_val_per_freq *mv_ddr_cwl_tbl_get(void);
+u32 mv_ddr_cwl_val_get(u32 index, u32 freq);
 
 #endif /* _MV_DDR_TRAINING_DB_H */

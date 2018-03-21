@@ -366,9 +366,9 @@ static struct mv_ddr_cl_val_per_freq cwl_table[] = {
 	{ {5, 5, 6, 7, 8, 9, 0, 5, 5, 6, 9, 7, 5, 9, 5, 9} },
 };
 
-struct mv_ddr_cl_val_per_freq *mv_ddr_cwl_tbl_get(void)
+u32 mv_ddr_cwl_val_get(u32 index, u32 freq)
 {
-	return &cwl_table[0];
+	return cwl_table[index].cl_val[freq];
 }
 
 u8 twr_mask_table[] = {

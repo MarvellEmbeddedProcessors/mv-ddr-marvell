@@ -198,9 +198,9 @@ static struct mv_ddr_cl_val_per_freq cwl_table[] = {
 	{ {9,	9,	9,	9,	10,	11,	10,	11,	10,	12} }	/* SPEED_BIN_DDR_2400U */
 };
 
-struct mv_ddr_cl_val_per_freq *mv_ddr_cwl_tbl_get(void)
+u32 mv_ddr_cwl_val_get(u32 index, u32 freq)
 {
-	return &cwl_table[0];
+	return cwl_table[index].cl_val[freq];
 }
 
 /*
