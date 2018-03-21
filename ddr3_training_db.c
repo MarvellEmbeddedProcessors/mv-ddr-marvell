@@ -442,9 +442,9 @@ static unsigned int rfc_table[] = {
 	0	/* TODO: placeholder for 24-Mbit dev width */
 };
 
-unsigned int *mv_ddr_rfc_tbl_get(void)
+u32 mv_ddr_rfc_get(u32 mem)
 {
-	return &rfc_table[0];
+	return rfc_table[mem];
 }
 
 u32 speed_bin_table_t_rc[] = {

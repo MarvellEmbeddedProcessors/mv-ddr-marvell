@@ -121,7 +121,7 @@ struct mv_ddr_cl_val_per_freq {
 	unsigned int cl_val[MV_DDR_FREQ_LAST];
 };
 
-unsigned int *mv_ddr_rfc_tbl_get(void);
+u32 mv_ddr_rfc_get(u32 mem);
 unsigned int *mv_ddr_freq_tbl_get(void);
 u32 mv_ddr_freq_get(enum mv_ddr_freq freq);
 struct mv_ddr_page_element *mv_ddr_page_tbl_get(void);

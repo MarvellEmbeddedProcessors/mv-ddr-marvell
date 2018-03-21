@@ -148,7 +148,6 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	unsigned int page_size;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct mv_ddr_page_element *page_param = mv_ddr_page_tbl_get();
-	unsigned int *rfc_tbl = mv_ddr_rfc_tbl_get();
 	struct if_params *iface_params = &(tm->interface_params[0]);
 
 	/* get the spped bin index */
@@ -305,7 +304,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	/* printf("t_rp = %d\n", mc6_timing.t_rp); */
 
 	/*calculate t_rfc */
-	mc6_timing.t_rfc = time_to_nclk(rfc_tbl[memory_size] * 1000, mc6_timing.t_ckclk);
+	mc6_timing.t_rfc = time_to_nclk(mv_ddr_rfc_get(memory_size) * 1000, mc6_timing.t_ckclk);
 	/* printf("t_rfc = %d\n", mc6_timing.t_rfc); */
 
 	/* calculate t_xs */

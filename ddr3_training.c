@@ -1793,7 +1793,6 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	enum mv_ddr_die_capacity memory_size = MV_DDR_DIE_CAP_2GBIT;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct mv_ddr_page_element *page_param = mv_ddr_page_tbl_get();
-	unsigned int *rfc_tbl = mv_ddr_rfc_tbl_get();
 	u32 freq = mv_ddr_freq_get(frequency);
 
 	speed_bin_index = tm->interface_params[if_id].speed_bin_index;
@@ -1855,7 +1854,7 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	t_wtr = time_to_nclk(t_wtr, t_ckclk);
 	t_rrd = time_to_nclk(t_rrd, t_ckclk);
 	t_rtp = time_to_nclk(t_rtp, t_ckclk);
-	t_rfc = time_to_nclk(rfc_tbl[memory_size] * 1000, t_ckclk);
+	t_rfc = time_to_nclk(mv_ddr_rfc_get(memory_size) * 1000, t_ckclk);
 	t_mod = time_to_nclk(t_mod, t_ckclk);
 
 	/* SDRAM Timing Low */
