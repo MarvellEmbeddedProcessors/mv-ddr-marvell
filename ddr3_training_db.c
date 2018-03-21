@@ -111,8 +111,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr3_training_ip_db.h"
 
 /* Device attributes structures */
-enum mv_ddr_dev_attribute ddr_dev_attributes[1][MV_ATTR_LAST];
-int ddr_dev_attr_init_done[1] = { 0 };
+enum mv_ddr_dev_attribute ddr_dev_attributes[MV_ATTR_LAST];
+int ddr_dev_attr_init_done = 0;
 
 static inline u32 pattern_table_get_killer_word16(u8 dqs, u8 index);
 static inline u32 pattern_table_get_sso_word(u8 sso, u8 index);
@@ -1219,23 +1219,23 @@ void ddr3_tip_dev_attr_init(u32 dev_num)
 	u32 attr_id;
 
 	for (attr_id = 0; attr_id < MV_ATTR_LAST; attr_id++)
-		ddr_dev_attributes[dev_num][attr_id] = 0xFF;
+		ddr_dev_attributes[attr_id] = 0xFF;
 
-	ddr_dev_attr_init_done[dev_num] = 1;
+	ddr_dev_attr_init_done = 1;
 }
 
 u32 ddr3_tip_dev_attr_get(u32 dev_num, enum mv_ddr_dev_attribute attr_id)
 {
-	if (ddr_dev_attr_init_done[dev_num] == 0)
+	if (ddr_dev_attr_init_done == 0)
 		ddr3_tip_dev_attr_init(dev_num);
 
-	return ddr_dev_attributes[dev_num][attr_id];
+	return ddr_dev_attributes[attr_id];
 }
 
 void ddr3_tip_dev_attr_set(u32 dev_num, enum mv_ddr_dev_attribute attr_id, u32 value)
 {
-	if (ddr_dev_attr_init_done[dev_num] == 0)
+	if (ddr_dev_attr_init_done == 0)
 		ddr3_tip_dev_attr_init(dev_num);
 
-	ddr_dev_attributes[dev_num][attr_id] = value;
+	ddr_dev_attributes[attr_id] = value;
 }
