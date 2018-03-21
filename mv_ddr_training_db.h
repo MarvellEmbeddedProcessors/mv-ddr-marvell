@@ -124,7 +124,7 @@ struct mv_ddr_cl_val_per_freq {
 u32 mv_ddr_rfc_get(u32 mem);
 unsigned int *mv_ddr_freq_tbl_get(void);
 u32 mv_ddr_freq_get(enum mv_ddr_freq freq);
-struct mv_ddr_page_element *mv_ddr_page_tbl_get(void);
+u32 mv_ddr_page_size_get(enum mv_ddr_dev_width bus_width, enum mv_ddr_die_capacity mem_size);
 unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_ddr_speed_bin_timing element);
 u32 mv_ddr_cl_val_get(u32 index, u32 freq);
 u32 mv_ddr_cwl_val_get(u32 index, u32 freq);

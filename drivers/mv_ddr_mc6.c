@@ -147,7 +147,6 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	struct mv_ddr_mc6_timing mc6_timing;
 	unsigned int page_size;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	struct mv_ddr_page_element *page_param = mv_ddr_page_tbl_get();
 	struct if_params *iface_params = &(tm->interface_params[0]);
 
 	/* get the spped bin index */
@@ -157,8 +156,7 @@ static void mv_ddr_mc6_timing_regs_cfg(unsigned int mc6_base, unsigned int freq_
 	enum mv_ddr_die_capacity memory_size = iface_params->memory_size;
 
 	/* calculate page size */
-	page_size = iface_params->bus_width == MV_DDR_DEV_WIDTH_8BIT ?
-		page_param[memory_size].page_size_8bit : page_param[memory_size].page_size_16bit;
+	page_size = mv_ddr_page_size_get(iface_params->bus_width, memory_size);
 	/* printf("page_size = %d\n", page_size); */
 
 	/* calculate t_clck */

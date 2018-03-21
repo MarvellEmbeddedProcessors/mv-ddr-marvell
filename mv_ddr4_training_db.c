@@ -358,9 +358,12 @@ static struct mv_ddr_page_element page_tbl[] = {
 	{0, 0}  /* TODO: placeholder for 24-Mbit die capacity */
 };
 
-struct mv_ddr_page_element *mv_ddr_page_tbl_get(void)
+u32 mv_ddr_page_size_get(enum mv_ddr_dev_width bus_width, enum mv_ddr_die_capacity mem_size)
 {
-	return &page_tbl[0];
+	if (bus_width == MV_DDR_DEV_WIDTH_8BIT)
+		return page_tbl[mem_size].page_size_8bit;
+	else
+		return page_tbl[mem_size].page_size_16bit;
 }
 
 /* DLL locking time, tDLLK */

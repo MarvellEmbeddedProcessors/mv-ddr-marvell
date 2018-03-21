@@ -1789,15 +1789,11 @@ static int ddr3_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	enum mv_ddr_speed_bin speed_bin_index;
 	enum mv_ddr_die_capacity memory_size = MV_DDR_DIE_CAP_2GBIT;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	struct mv_ddr_page_element *page_param = mv_ddr_page_tbl_get();
 	u32 freq = mv_ddr_freq_get(frequency);
 
 	speed_bin_index = tm->interface_params[if_id].speed_bin_index;
 	memory_size = tm->interface_params[if_id].memory_size;
-	page_size =
-		(tm->interface_params[if_id].bus_width ==
-		 MV_DDR_DEV_WIDTH_8BIT) ? page_param[memory_size].
-		page_size_8bit : page_param[memory_size].page_size_16bit;
+	page_size = mv_ddr_page_size_get(tm->interface_params[if_id].bus_width, memory_size);
 	t_ckclk = (MEGA / freq);
 	/* HCLK in[ps] */
 	t_hclk = MEGA / (freq / config_func_info[dev_num].tip_get_clock_ratio(frequency));
@@ -1939,14 +1935,11 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	enum mv_ddr_speed_bin speed_bin_index;
 	enum mv_ddr_die_capacity memory_size;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
-	struct mv_ddr_page_element *page_param = mv_ddr_page_tbl_get();
 	u32 freq = mv_ddr_freq_get(frequency);
 
 	speed_bin_index = tm->interface_params[if_id].speed_bin_index;
 	memory_size = tm->interface_params[if_id].memory_size;
-	page_size = (tm->interface_params[if_id].bus_width == MV_DDR_DEV_WIDTH_8BIT) ?
-		    page_param[memory_size].page_size_8bit :
-		    page_param[memory_size].page_size_16bit;
+	page_size = mv_ddr_page_size_get(tm->interface_params[if_id].bus_width, memory_size);
 
 	t_ckclk = (MEGA / freq);
 
