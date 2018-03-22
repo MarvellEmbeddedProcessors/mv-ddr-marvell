@@ -109,18 +109,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAX_BUS_NUM			9
 #define DDR_IF_CTRL_SUBPHYS_NUM		3
 
-#define MEM_TO_MC6_FREQ_RATIO		2
-
 #define NON_DRAM_MEM_RGN_START_ADDR	0xc0000000ULL
 #define NON_DRAM_MEM_RGN_END_ADDR	0x100000000ULL
 
-#define DSS_CR0_REG_ADDR		0x6f0100	/* TODO: put this register in ATF h file */
-#define IOMUX_SEL_OFFS			17
-#define IOMUX_SEL_MASK			0x7
-#define CONF_DCLK_CG_BYPASS_OFFS	1
-#define CONF_DCLK_CG_BYPASS_MASK	0x1
-#define CONF_DCLK_REG_CG_BYPASS_OFFS	0x2
-#define CONF_DCLK_REG_CG_BYPASS_MASK	0x1
 enum{
 	DSS_LPDDR4_64_DIMM = 0x0,
 	DSS_LPDDR4_32_BRD = 0x1,
@@ -183,9 +174,6 @@ enum{
 #define DFS_LOW_FREQ_VALUE		100
 #define SDRAM_CS_SIZE			0x7fffffffUL	/* FIXME: implement a function for cs size for each platform */
 
-/* Controler bus divider 1 for 32 bit, 2 for 64 bit */
-#define DDR_CONTROLLER_BUS_WIDTH_MULTIPLIER	1
-
 /* Tune internal training params values */
 #define TUNE_TRAINING_PARAMS_CK_DELAY		160
 
@@ -216,8 +204,6 @@ enum{
 #define TUNE_TRAINING_PARAMS_RTT_WR_1CS		0x0
 #define TUNE_TRAINING_PARAMS_RTT_WR_2CS		0x0
 #endif /* CONFIG_DDR4 */
-
-#define MARVELL_BOARD				MARVELL_BOARD_ID_BASE
 
 #define MAX_DQ_NUM				72
 
@@ -319,23 +305,6 @@ enum{
 #define RESULT_CONTROL_PUP_8_BIT_6_REG	0x1CFC
 #define RESULT_CONTROL_PUP_8_BIT_7_REG	0x1D30
 
-/* Matrix enables DRAM modes (bus width/ECC) per boardId */
-#define TOPOLOGY_UPDATE_32BIT			0
-#define TOPOLOGY_UPDATE_32BIT_ECC		1
-#define TOPOLOGY_UPDATE_16BIT			2
-#define TOPOLOGY_UPDATE_16BIT_ECC		3
-#define TOPOLOGY_UPDATE_16BIT_ECC_PUP3		4
-#define TOPOLOGY_UPDATE { \
-		/* 32Bit, 32bit ECC, 16bit, 16bit ECC PUP4, 16bit ECC PUP3 */ \
-		{1, 1, 1, 1, 1},	/* RD_NAS_68XX_ID */ \
-		{1, 1, 1, 1, 1},	/* DB_68XX_ID	  */ \
-		{1, 0, 1, 0, 1},	/* RD_AP_68XX_ID  */ \
-		{1, 0, 1, 0, 1},	/* DB_AP_68XX_ID  */ \
-		{1, 0, 1, 0, 1},	/* DB_GP_68XX_ID  */ \
-		{0, 0, 1, 1, 0},	/* DB_BP_6821_ID  */ \
-		{1, 1, 1, 1, 1}		/* DB_AMC_6820_ID */ \
-	};
-
 enum {
 	CPU_1066MHZ_DDR_400MHZ,
 	CPU_RESERVED_DDR_RESERVED0,
@@ -356,14 +325,6 @@ enum {
 	DDR3_BRD,
 	LAST_DDR_CFG_OPT
 };
-
-/* struct used for DLB configuration array */
-struct dlb_config {
-	u32 reg_addr;
-	u32 reg_data;
-};
-
-#define ACTIVE_INTERFACE_MASK			0x1
 
 extern u32 dmin_phy_reg_table[][2];
 extern u16 odt_slope[];
