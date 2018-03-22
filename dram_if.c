@@ -117,8 +117,3 @@ void dram_mmap_config(void)
 {
 	mv_ddr_mmap_config();
 }
-
-void dram_scrubbing(uint8_t ap_id, uint64_t start_addr, uint64_t dram_size)
-{
-	/* TODO: implement new api for dram scrubbing */
-}
