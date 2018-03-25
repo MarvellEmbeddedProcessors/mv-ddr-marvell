@@ -354,7 +354,7 @@ MV_DDR_PLAT = apn806
 MV_DDR_TIP = y
 MV_DDR_FLOW = y
 endif
-ifneq ($(findstring a3900,$(PLATFORM)),)
+ifneq ($(findstring a3900_z1,$(PLATFORM)),)
 CFLAGS += -DA70X0 -DA3900
 MV_DDR_PLAT = apn806
 MV_DDR_TIP = y
