@@ -593,7 +593,18 @@ u16 dmem_1d_2d_gear_down_x16_present_get(void)
 
 	x16_present_val = (iface_params->bus_width == MV_DDR_DEV_WIDTH_8BIT) ?
 			   X16_NOT_PRESENT_VAL :
+#ifdef APN807
+/*
+ * APN807 workaround for x16 devices
+ * In PDA mode, VREF is set per PHY.
+ * There are two PHYs per x16 device with possible different VREF values.
+ * The workaround overrides x16 to x8 device configuration to ensure
+ * the first connected PHY's VREF value is taken.
+ */
+			   X16_NOT_PRESENT_VAL;
+#else
 			   X16_PRESENT_VAL;
+#endif
 
 	if (cs_num == 1) /* single cs */
 		ret_val = (x16_present_val & X16_PRESENT_CS0_MASK) << X16_PRESENT_CS0_OFFS;
