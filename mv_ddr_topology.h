@@ -296,6 +296,52 @@ enum mv_ddr_electrical_data {
 	MV_DDR_EDATA_LAST
 };
 
+/* memory electrical configuration values */
+enum mv_ddr_rtt_nom_park_evalue {
+	MV_DDR_RTT_NOM_PARK_RZQ_DISABLE,
+	MV_DDR_RTT_NOM_PARK_RZQ_DIV4,	/* 60-Ohm; RZQ = 240-Ohm */
+	MV_DDR_RTT_NOM_PARK_RZQ_DIV2,	/* 120-Ohm; RZQ = 240-Ohm */
+	MV_DDR_RTT_NOM_PARK_RZQ_DIV6,	/* 40-Ohm; RZQ = 240-Ohm */
+	MV_DDR_RTT_NOM_PARK_RZQ_DIV1,	/* 240-Ohm; RZQ = 240-Ohm */
+	MV_DDR_RTT_NOM_PARK_RZQ_DIV5,	/* 48-Ohm; RZQ = 240-Ohm */
+	MV_DDR_RTT_NOM_PARK_RZQ_DIV3,	/* 80-Ohm; RZQ = 240-Ohm */
+	MV_DDR_RTT_NOM_PARK_RZQ_DIV7,	/* 34-Ohm; RZQ = 240-Ohm */
+	MV_DDR_RTT_NOM_PARK_RZQ_LAST
+};
+
+enum mv_ddr_rtt_wr_evalue {
+	MV_DDR_RTT_WR_DYN_ODT_OFF,
+	MV_DDR_RTT_WR_RZQ_DIV2,	/* 120-Ohm; RZQ = 240-Ohm */
+	MV_DDR_RTT_WR_RZQ_DIV1,	/* 240-Ohm; RZQ = 240-Ohm */
+	MV_DDR_RTT_WR_HIZ,
+	MV_DDR_RTT_WR_RZQ_DIV3,	/* 80-Ohm; RZQ = 240-Ohm */
+	MV_DDR_RTT_WR_RZQ_LAST
+};
+
+enum mv_ddr_dic_evalue {
+	MV_DDR_DIC_RZQ_DIV7,	/* 34-Ohm; RZQ = 240-Ohm */
+	MV_DDR_DIC_RZQ_DIV5,	/* 48-Ohm; RZQ = 240-Ohm */
+	MV_DDR_DIC_RZQ_LAST
+};
+
+/* phy electrical configuration values */
+enum mv_ddr_ohm_evalue {
+	MV_DDR_OHM_30 = 30,
+	MV_DDR_OHM_48 = 48,
+	MV_DDR_OHM_60 = 60,
+	MV_DDR_OHM_80 = 80,
+	MV_DDR_OHM_120 = 120,
+	MV_DDR_OHM_240 = 240,
+	MV_DDR_OHM_LAST
+};
+
+/* mac electrical configuration values */
+enum mv_ddr_odt_cfg_evalue {
+	MV_DDR_ODT_CFG_NORMAL,
+	MV_DDR_ODT_CFG_ALWAYS_ON,
+	MV_DDR_ODT_CFG_LAST
+};
+
 enum mv_ddr_dev_width { /* sdram device width */
 	MV_DDR_DEV_WIDTH_4BIT,
 	MV_DDR_DEV_WIDTH_8BIT,

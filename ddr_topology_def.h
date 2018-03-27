@@ -155,6 +155,37 @@ struct if_params {
 	enum mv_ddr_temperature interface_temp;
 };
 
+/* memory electrical configuration */
+struct mv_ddr_mem_edata {
+	enum mv_ddr_rtt_nom_park_evalue rtt_nom;
+	enum mv_ddr_rtt_nom_park_evalue rtt_park;
+	enum mv_ddr_rtt_wr_evalue rtt_wr;
+	enum mv_ddr_dic_evalue dic;
+};
+
+/* phy electrical configuration */
+struct mv_ddr_phy_edata {
+	enum mv_ddr_ohm_evalue drv_data_p;
+	enum mv_ddr_ohm_evalue drv_data_n;
+	enum mv_ddr_ohm_evalue drv_ctrl_p;
+	enum mv_ddr_ohm_evalue drv_ctrl_n;
+	enum mv_ddr_ohm_evalue odt_p;
+	enum mv_ddr_ohm_evalue odt_n;
+};
+
+/* mac electrical configuration */
+struct mv_ddr_mac_edata {
+	enum mv_ddr_odt_cfg_evalue odt_cfg_pat;
+	enum mv_ddr_odt_cfg_evalue odt_cfg_wr;
+	enum mv_ddr_odt_cfg_evalue odt_cfg_rd;
+};
+
+struct mv_ddr_edata {
+	struct mv_ddr_mem_edata mem_edata;
+	struct mv_ddr_phy_edata phy_edata;
+	struct mv_ddr_mac_edata mac_edata;
+};
+
 struct mv_ddr_topology_map {
 	/* debug level configuration */
 	enum mv_ddr_debug_level debug_level;
@@ -176,6 +207,9 @@ struct mv_ddr_topology_map {
 
 	/* timing parameters */
 	unsigned int timing_data[MV_DDR_TDATA_LAST];
+
+	/* electrical configuration */
+	struct mv_ddr_edata edata;
 
 	/* electrical parameters */
 	unsigned int electrical_data[MV_DDR_EDATA_LAST];
