@@ -372,27 +372,25 @@ u32 mv_ddr_page_size_get(enum mv_ddr_dev_width bus_width, enum mv_ddr_die_capaci
 #define MV_DDR_TDLLK_DDR4_2133	768
 #define MV_DDR_TDLLK_DDR4_2400	768
 #define MV_DDR_TDLLK_DDR4_2666	854
-#define MV_DDR_TDLLK_DDR4_2933	940	/* TODO: unsupported yet */
-#define MV_DDR_TDLLK_DDR4_3200	1024	/* TODO: unsupported yet */
+#define MV_DDR_TDLLK_DDR4_2933	940
+#define MV_DDR_TDLLK_DDR4_3200	1024
 static int mv_ddr_tdllk_get(unsigned int freq, unsigned int *tdllk)
 {
-	switch (freq) {
-	case 800:
-		*tdllk = MV_DDR_TDLLK_DDR4_1600;
-		break;
-	case 933:
-		*tdllk = MV_DDR_TDLLK_DDR4_1866;
-		break;
-	case 1066:
-		*tdllk = MV_DDR_TDLLK_DDR4_2133;
-		break;
-	case 1200:
-		*tdllk = MV_DDR_TDLLK_DDR4_2400;
-		break;
-	case 1333:
+	if (freq >= 1600)
+		*tdllk = MV_DDR_TDLLK_DDR4_3200;
+	else if (freq >= 1466)
+		*tdllk = MV_DDR_TDLLK_DDR4_2933;
+	else if (freq >= 1333)
 		*tdllk = MV_DDR_TDLLK_DDR4_2666;
-		break;
-	default:
+	else if (freq >= 1200)
+		*tdllk = MV_DDR_TDLLK_DDR4_2400;
+	else if (freq >= 1066)
+		*tdllk = MV_DDR_TDLLK_DDR4_2133;
+	else if (freq >= 933)
+		*tdllk = MV_DDR_TDLLK_DDR4_1866;
+	else if (freq >= 800)
+		*tdllk = MV_DDR_TDLLK_DDR4_1600;
+	else {
 		printf("error: %s: unsupported data rate found\n", __func__);
 		return -1;
 	}
