@@ -439,6 +439,11 @@ void ddr3_new_tip_ecc_scrub(void)
 	for (cs_c = 0; cs_c < max_cs; cs_c++)
 		cs_ena |= 1 << cs_c;
 
+#if defined(CONFIG_ARMADA_38X) || defined(CONFIG_ARMADA_39X)
+	/* all chip-selects are of same size */
+	ddr3_calc_mem_cs_size(0, &cs_mem_size);
+#endif
+
 	mv_sys_xor_init(max_cs, cs_ena, cs_mem_size, 0);
 	total_mem_size = max_cs * cs_mem_size;
 	mv_xor_mem_init(0, 0, total_mem_size, 0xdeadbeef, 0xdeadbeef);

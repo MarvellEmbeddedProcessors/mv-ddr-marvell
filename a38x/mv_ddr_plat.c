@@ -1214,7 +1214,7 @@ static u32 ddr3_get_device_size(u32 cs)
 	}
 }
 
-static int ddr3_calc_mem_cs_size(u32 cs, uint64_t *cs_size)
+int ddr3_calc_mem_cs_size(u32 cs, uint64_t *cs_size)
 {
 	u32 cs_mem_size;
 
