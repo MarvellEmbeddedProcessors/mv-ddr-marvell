@@ -107,6 +107,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mv_ddr_init.h"
 #include "mv_ddr_plat.h"
+#include "mv_ddr_topology.h"
 
 int dram_init(void)
 {
@@ -116,4 +117,15 @@ int dram_init(void)
 void dram_mmap_config(void)
 {
 	mv_ddr_mmap_config();
+}
+
+unsigned long long dram_iface_mem_sz_get(void)
+{
+	/*
+	 * call mv_ddr_pre_config to update topology
+	 * prior to mv_ddr_mem_sz_get call
+	 */
+	mv_ddr_pre_config();
+
+	return mv_ddr_mem_sz_get();
 }
