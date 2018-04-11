@@ -269,14 +269,6 @@ unsigned short mv_ddr_bus_bit_mask_get(void)
 			pri_and_ext_bus_width = 0x0;
 		}
 
-		/*
-		 * apn810 workaround to bypass ecc
-		 * TODO: remove when apn810 ecc support is in place
-		 */
-#if defined(CONFIG_APN810)
-		bus_width_ext = MV_DDR_BUS_WIDTH_EXT_0;
-#endif
-
 		if (bus_width_ext == MV_DDR_BUS_WIDTH_EXT_8)
 			pri_and_ext_bus_width |= 1 << (octets_per_if_num - 1);
 	}

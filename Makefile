@@ -368,8 +368,6 @@ MV_DDR_FLOW_V2 = y
 endif
 ifneq ($(findstring a8xx,$(PLATFORM)),)
 CFLAGS += -DCONFIG_MC6P
-# TODO: remove the following flag when apn810 ecc support is in place
-CFLAGS += -DCONFIG_APN810
 MV_DDR_PLAT = apn810
 MV_DDR_SNPS = y
 MV_DDR_FLOW_V2 = y
