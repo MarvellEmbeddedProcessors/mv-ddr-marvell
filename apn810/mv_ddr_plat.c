@@ -109,6 +109,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DDR_INTERFACES_NUM		1
 
 static unsigned int ap_regs_base;
+static int is_pre_configured;
 
 void mv_ddr_base_set(unsigned int base)
 {
@@ -175,7 +176,13 @@ static void mv_ddr_mem_scrubbing(void)
 
 int mv_ddr_pre_config(void)
 {
-	struct mv_ddr_iface *curr_iface = mv_ddr_iface_get();
+	struct mv_ddr_iface *curr_iface;
+
+	/* ensure the function is called once */
+	if (is_pre_configured)
+		return 0;
+
+	curr_iface = mv_ddr_iface_get();
 	mv_ddr_base_set(curr_iface->ap_base);
 
 	/* TODO: remove attribute mechanism */
@@ -186,6 +193,9 @@ int mv_ddr_pre_config(void)
 		printf("mv_ddr: failed to update topology\n");
 		return -1;
 	}
+
+	/* ensure the function is called once */
+	is_pre_configured = 1;
 
 	return 0;
 }
@@ -205,6 +215,9 @@ int mv_ddr_post_config(void)
 			printf("DRAM validation interface %d start address 0x%llx\n",
 				iface->id, iface->iface_base_addr);
 	}
+
+	/* unset is_pre_configured variable */
+	is_pre_configured = 0;
 
 	return 0;
 }
