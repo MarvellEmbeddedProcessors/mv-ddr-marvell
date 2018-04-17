@@ -159,7 +159,6 @@ static int dma_offs_config(uint64_t dma_src[][DBG_DMA_ENG_NUM],
 
 /* dma pattern */
 static uint64_t dma_pattern[] = {
-#if defined(CONFIG_64BIT)
 	0xf7f7f7f7f7f7f7f7,
 	0x0808080808080808,
 	0xf7f7f7f7f7f7f7f7,
@@ -229,42 +228,6 @@ static uint64_t dma_pattern[] = {
 	0x0808080808080808,
 	0x0404040404040404,
 	0xfbfbfbfbfbfbfbfb
-#else /* !CONFIG_64BIT */
-	0xf7f7f7f780808080,
-	0xf7f7f7f7fbfbfbfb,
-	0x404040407f7f7f7f,
-	0x8080808040404040,
-	0xbfbfbfbf40404040,
-	0x20202020dfdfdfdf,
-	0x2020202010101010,
-	0xefefefef10101010,
-	0x80808080f7f7f7f7,
-	0x8080808040404040,
-	0xfbfbfbfb40404040,
-	0x20202020fdfdfdfd,
-	0x2020202010101010,
-	0xfefefefe10101010,
-	0x808080807f7f7f7f,
-	0x8080808040404040,
-	0xbfbfbfbf40404040,
-	0x20202020dfdfdfdf,
-	0x2020202010101010,
-	0xefefefef10101010,
-	0x80808080f7f7f7f7,
-	0x8080808040404040,
-	0xfbfbfbfb40404040,
-	0x20202020fdfdfdfd,
-	0x2020202010101010,
-	0xfefefefe10101010,
-	0x808080807f7f7f7f,
-	0x8080808040404040,
-	0xbfbfbfbf40404040,
-	0x20202020dfdfdfdf,
-	0x2020202010101010,
-	0xefefefef10101010,
-	0x80808080f7f7f7f7,
-	0x8080808040404040
-#endif /* CONFIG_64BIT */
 };
 
 static void rx_validate_per_adll(u32 bit,
