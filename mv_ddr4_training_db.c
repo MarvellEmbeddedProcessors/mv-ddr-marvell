@@ -125,7 +125,9 @@ static unsigned int freq_val[MV_DDR_FREQ_LAST] = {
 	1000,	/* MV_DDR_FREQ_1000 */
 	1050,	/* MV_DDR_FREQ_1050 */
 	1200,	/* MV_DDR_FREQ_1200 */
-	1333	/* MV_DDR_FREQ_1333 */
+	1333,	/* MV_DDR_FREQ_1333 */
+	1466,	/* MV_DDR_FREQ_1466 */
+	1600	/* MV_DDR_FREQ_1600 */
 };
 
 unsigned int *mv_ddr_freq_tbl_get(void)
