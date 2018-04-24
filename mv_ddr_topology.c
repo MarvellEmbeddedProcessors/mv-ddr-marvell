@@ -392,3 +392,55 @@ unsigned long long mv_ddr_mem_sz_get(void)
 
 	return tot_mem_sz;
 }
+
+unsigned int mv_ddr_rtt_nom_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int rtt_nom = tm->edata.mem_edata.rtt_nom;
+
+	if (rtt_nom >= MV_DDR_RTT_NOM_PARK_RZQ_LAST) {
+		printf("error: %s: unsupported rtt_nom parameter found\n", __func__);
+		rtt_nom = PARAM_UNDEFINED;
+	}
+
+	return rtt_nom;
+}
+
+unsigned int mv_ddr_rtt_park_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int rtt_park = tm->edata.mem_edata.rtt_park;
+
+	if (rtt_park >= MV_DDR_RTT_NOM_PARK_RZQ_LAST) {
+		printf("error: %s: unsupported rtt_park parameter found\n", __func__);
+		rtt_park = PARAM_UNDEFINED;
+	}
+
+	return rtt_park;
+}
+
+unsigned int mv_ddr_rtt_wr_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int rtt_wr = tm->edata.mem_edata.rtt_wr;
+
+	if (rtt_wr >= MV_DDR_RTT_WR_RZQ_LAST) {
+		printf("error: %s: unsupported rtt_wr parameter found\n", __func__);
+		rtt_wr = PARAM_UNDEFINED;
+	}
+
+	return rtt_wr;
+}
+
+unsigned int mv_ddr_dic_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int dic = tm->edata.mem_edata.dic;
+
+	if (dic >= MV_DDR_DIC_RZQ_LAST) {
+		printf("error: %s: unsupported dic parameter found\n", __func__);
+		dic = PARAM_UNDEFINED;
+	}
+
+	return dic;
+}

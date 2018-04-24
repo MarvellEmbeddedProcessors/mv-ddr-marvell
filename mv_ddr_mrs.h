@@ -102,6 +102,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Based on Proposed DDR4 Full spec update (79-4B), Item No. 1716.78C
  */
 
+/* MR1 DIC, [2:1] bits */
+#define MV_DDR_MR1_DIC_OFFS		1
+
 /* MR1 RTT_NOM, [10:8] bits */
 #define MV_DDR_MR1_RTT_NOM_OFFS		8
 #define MV_DDR_MR1_RTT_NOM_MASK		0x7
