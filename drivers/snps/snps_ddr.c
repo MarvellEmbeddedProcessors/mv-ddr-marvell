@@ -95,8 +95,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include "snps.h"
 #include "snps_static.h"
+#include "snps.h"
 #include "snps_update.h"
 #include "snps_regs.h"
 
@@ -576,6 +576,8 @@ int snps_init(unsigned int base_address)
 {
 	int ret;
 	debug_enter();
+
+	printf("Synopsys DDR43 PHY Firmware version: 0.%x\n" , SNPS_DDR_PHY_FW_VERSION);
 
 	/* initialize global settings */
 	snps_global_settings_init(base_address);

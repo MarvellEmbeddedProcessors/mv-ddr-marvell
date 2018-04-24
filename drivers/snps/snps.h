@@ -110,21 +110,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define pr_debug(args...)
 #endif
 
-struct snps_seq_data {
-	int start_addr;
-	int end_addr;
-	int data_count;
-	const u16 *data;
-};
-
-/* Address-Data pair struct:
- * Static initialization sequence is done with these address-data pairs:
- * CPU runs over these entries and sequentially write address = data */
-struct snps_address_data {
-	int addr;
-	u16 data;
-};
-
 /* Dynamic update struct:
  * Dynamic initialization sequence is done with these adress & get_value API pairs:
  * CPU runs over these entries and sequentially calls get_update_value to derive
