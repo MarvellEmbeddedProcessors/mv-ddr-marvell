@@ -221,6 +221,9 @@ int mv_ddr_mr0_cl_get(unsigned int cl, unsigned int *mr0_cl)
 	case 20:
 		*mr0_cl = MV_DDR_MR0_CL20;
 		break;
+	case 22:
+		*mr0_cl = MV_DDR_MR0_CL22;
+		break;
 	case 24:
 		*mr0_cl = MV_DDR_MR0_CL24;
 		break;
