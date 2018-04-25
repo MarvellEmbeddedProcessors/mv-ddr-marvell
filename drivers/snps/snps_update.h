@@ -217,6 +217,7 @@ struct snps_address_data one_d_imem_static_update[] = {
 
 /* 1D DMEM static update*/
 struct snps_address_data one_d_dmem_static_update[] = {
+	{REG_54006_1D_2D_DRAM_TYPE_PHY_VREF, (DRAM_TYPE_REG_VAL << BYTE_OFFSET) | PHY_VREF_REG_VAL},
 	{REG_5400A_1D_2D_PHY_CFG_CSTEST_FAIL, PHY_CFG_REG_VAL << BYTE_OFFSET},
 	{REG_5400C_1D_2D_RESV19_HDT_CTRL, HDT_CTRL_REG_VAL},
 	{ -1	, -1 }
