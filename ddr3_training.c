@@ -2992,3 +2992,133 @@ int hws_ddr3_cs_base_adr_calc(u32 if_id, u32 cs, u32 *cs_base_addr)
 
 	return MV_OK;
 }
+
+/* TODO: consider to move to misl phy driver */
+enum {
+	MISL_PHY_DRV_OHM_30 = 0xf,
+	MISL_PHY_DRV_OHM_48 = 0xa,
+	MISL_PHY_DRV_OHM_80 = 0x6,
+	MISL_PHY_DRV_OHM_120 = 0x4
+};
+
+enum {
+	MISL_PHY_ODT_OHM_60 = 0x8,
+	MISL_PHY_ODT_OHM_80 = 0x6,
+	MISL_PHY_ODT_OHM_120 = 0x4,
+	MISL_PHY_ODT_OHM_240 = 0x2
+};
+
+static unsigned int mv_ddr_misl_phy_drv_calc(unsigned int cfg)
+{
+	unsigned int val;
+
+	switch (cfg) {
+	case MV_DDR_OHM_30:
+		val = MISL_PHY_DRV_OHM_30;
+		break;
+	case MV_DDR_OHM_48:
+		val = MISL_PHY_DRV_OHM_48;
+		break;
+	case MV_DDR_OHM_80:
+		val = MISL_PHY_DRV_OHM_80;
+		break;
+	case MV_DDR_OHM_120:
+		val = MISL_PHY_DRV_OHM_120;
+		break;
+	default:
+		val = PARAM_UNDEFINED;
+	}
+
+	return val;
+}
+
+static unsigned int mv_ddr_misl_phy_odt_calc(unsigned int cfg)
+{
+	unsigned int val;
+
+	switch (cfg) {
+	case MV_DDR_OHM_60:
+		val = MISL_PHY_ODT_OHM_60;
+		break;
+	case MV_DDR_OHM_80:
+		val = MISL_PHY_ODT_OHM_80;
+		break;
+	case MV_DDR_OHM_120:
+		val = MISL_PHY_ODT_OHM_120;
+		break;
+	case MV_DDR_OHM_240:
+		val = MISL_PHY_ODT_OHM_240;
+		break;
+	default:
+		val = PARAM_UNDEFINED;
+	}
+
+	return val;
+}
+
+unsigned int mv_ddr_misl_phy_drv_data_p_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int drv_data_p = mv_ddr_misl_phy_drv_calc(tm->edata.phy_edata.drv_data_p);
+
+	if (drv_data_p == PARAM_UNDEFINED)
+		printf("error: %s: unsupported drv_data_p parameter found\n", __func__);
+
+	return drv_data_p;
+}
+
+unsigned int mv_ddr_misl_phy_drv_data_n_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int drv_data_n = mv_ddr_misl_phy_drv_calc(tm->edata.phy_edata.drv_data_n);
+
+	if (drv_data_n == PARAM_UNDEFINED)
+		printf("error: %s: unsupported drv_data_n parameter found\n", __func__);
+
+	return drv_data_n;
+}
+
+unsigned int mv_ddr_misl_phy_drv_ctrl_p_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int drv_ctrl_p = mv_ddr_misl_phy_drv_calc(tm->edata.phy_edata.drv_ctrl_p);
+
+	if (drv_ctrl_p == PARAM_UNDEFINED)
+		printf("error: %s: unsupported drv_ctrl_p parameter found\n", __func__);
+
+	return drv_ctrl_p;
+}
+
+unsigned int mv_ddr_misl_phy_drv_ctrl_n_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int drv_ctrl_n = mv_ddr_misl_phy_drv_calc(tm->edata.phy_edata.drv_ctrl_n);
+
+	if (drv_ctrl_n == PARAM_UNDEFINED)
+		printf("error: %s: unsupported drv_ctrl_n parameter found\n", __func__);
+
+	return drv_ctrl_n;
+}
+
+unsigned int mv_ddr_misl_phy_odt_p_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int odt_p = mv_ddr_misl_phy_odt_calc(tm->edata.phy_edata.odt_p);
+
+	if (odt_p == PARAM_UNDEFINED)
+		printf("error: %s: unsupported odt_p parameter found\n", __func__);
+
+	return odt_p;
+}
+
+unsigned int mv_ddr_misl_phy_odt_n_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int odt_n = mv_ddr_misl_phy_odt_calc(tm->edata.phy_edata.odt_n);
+
+	if (odt_n == PARAM_UNDEFINED)
+		printf("error: %s: unsupported odt_n parameter found\n", __func__);
+
+	return odt_n;
+}
+

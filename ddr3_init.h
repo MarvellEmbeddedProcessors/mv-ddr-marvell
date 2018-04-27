@@ -142,6 +142,12 @@ enum log_level  {
 	MV_LOG_LEVEL_3
 };
 
+/* TODO: consider to move to misl phy driver */
+#define MISL_PHY_DRV_P_OFFS	0x7
+#define MISL_PHY_DRV_N_OFFS	0x0
+#define MISL_PHY_ODT_P_OFFS	0x6
+#define MISL_PHY_ODT_N_OFFS	0x0
+
 /* Globals */
 extern u8 debug_training, debug_calibration, debug_ddr4_centralization,
 	debug_tap_tuning, debug_dm_tuning;
@@ -289,4 +295,12 @@ int ddr3_tip_clean_pbs_result(u32 dev_num, enum pbs_dir pbs_mode);
 void mv_ddr_mc_config(void);
 int mv_ddr_mc_init(void);
 void mv_ddr_set_calib_controller(void);
+/* TODO: consider to move to misl phy driver */
+unsigned int mv_ddr_misl_phy_drv_data_p_get(void);
+unsigned int mv_ddr_misl_phy_drv_data_n_get(void);
+unsigned int mv_ddr_misl_phy_drv_ctrl_p_get(void);
+unsigned int mv_ddr_misl_phy_drv_ctrl_n_get(void);
+unsigned int mv_ddr_misl_phy_odt_p_get(void);
+unsigned int mv_ddr_misl_phy_odt_n_get(void);
+
 #endif /* _DDR3_INIT_H */
