@@ -99,6 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_common.h"
 #include "mv_ddr_training_db.h"
 #include "mv_ddr_regs.h"
+#include "mv_ddr_mrs.h"
 
 #define GET_CS_FROM_MASK(mask)	(cs_mask2_num[mask])
 #define CS_CBE_VALUE(cs_num)	(cs_cbe_reg[cs_num])
@@ -402,6 +403,24 @@ int ddr3_tip_tune_training_params(u32 dev_num,
 		g_znodt_ctrl = params->g_znodt_ctrl;
 	if (params->g_rtt_park != PARAM_UNDEFINED)
 		g_rtt_park = params->g_rtt_park;
+
+#if defined(A70X0) || defined(A80X0) || defined(A3900)
+	g_rtt_nom = mv_ddr_rtt_nom_get();
+	if (g_rtt_nom != PARAM_UNDEFINED)
+		g_rtt_nom <<= MV_DDR_MR1_RTT_NOM_OFFS;
+
+	g_rtt_park = mv_ddr_rtt_park_get();
+	if (g_rtt_park != PARAM_UNDEFINED)
+		g_rtt_park <<= MV_DDR_MR5_RTT_PARK_OFFS;
+
+	g_rtt_wr = mv_ddr_rtt_wr_get();
+	if (g_rtt_wr != PARAM_UNDEFINED)
+		g_rtt_wr <<= MV_DDR_MR2_RTT_WR_OFFS;
+
+	g_dic = mv_ddr_dic_get();
+	if (g_dic != PARAM_UNDEFINED)
+		g_dic <<= MV_DDR_MR1_DIC_OFFS;
+#endif
 
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_INFO,
 			  ("DGL parameters: 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X\n",
