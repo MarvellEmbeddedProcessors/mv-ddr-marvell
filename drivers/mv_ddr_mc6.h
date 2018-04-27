@@ -390,6 +390,12 @@ enum mv_ddr_mc6_dm {
 #define MC6_CH0_ODT_CTRL2_REG			0x344
 /* TODO: remove this hard-coded define after electrical infrastructure implementation */
 #define MC6_CH0_ODT_CTRL2_VAL			0x30000000
+#define MC6_ODT_WRITE_CS0_OFFS			28
+#define MC6_ODT_WRITE_CS1_OFFS			29
+#define MC6_ODT_WRITE_CS2_OFFS			30
+#define MC6_ODT_WRITE_CS3_OFFS			31
+
+#define MC6_ODT_READ_OFFS			24
 
 #define MC6_CH0_ECC_1BIT_ERR_COUNTER_REG	0x364
 
@@ -656,5 +662,8 @@ void mv_ddr_mc6_sizes_cfg(unsigned int mc6_base, unsigned long iface_base_addr);
 void mv_ddr_mc6_init(unsigned int mc6_base);
 uint64_t mv_ddr_mc6_mem_offs_get(u32 cs, unsigned int mc6_base);
 uint64_t mv_ddr_mc6_mem_size_get(unsigned int mc6_base);
+unsigned int mv_ddr_mc6_odt_cfg_pat_get(void);
+unsigned int mv_ddr_mc6_odt_cfg_wr_get(void);
+unsigned int mv_ddr_mc6_odt_cfg_rd_get(void);
 
 #endif	/* _MV_DDR_MC6_DRV_H */

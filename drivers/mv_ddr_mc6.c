@@ -1542,3 +1542,42 @@ uint64_t mv_ddr_mc6_mem_size_get(unsigned int mc6_base)
 		return 0;
 	}
 }
+
+unsigned int mv_ddr_mc6_odt_cfg_pat_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int odt_cfg_pat = tm->edata.mac_edata.odt_cfg_pat;
+
+	if (odt_cfg_pat >= MV_DDR_ODT_CFG_LAST) {
+		printf("error: %s: unsupported odt_cfg_pat parameter found\n", __func__);
+		odt_cfg_pat = PARAM_UNDEFINED;
+	}
+
+	return odt_cfg_pat;
+}
+
+unsigned int mv_ddr_mc6_odt_cfg_wr_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int odt_cfg_wr = tm->edata.mac_edata.odt_cfg_wr;
+
+	if (odt_cfg_wr >= MV_DDR_ODT_CFG_LAST) {
+		printf("error: %s: unsupported odt_cfg_wr parameter found\n", __func__);
+		odt_cfg_wr = PARAM_UNDEFINED;
+	}
+
+	return odt_cfg_wr;
+}
+
+unsigned int mv_ddr_mc6_odt_cfg_rd_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	unsigned int odt_cfg_rd = tm->edata.mac_edata.odt_cfg_rd;
+
+	if (odt_cfg_rd >= MV_DDR_ODT_CFG_LAST) {
+		printf("error: %s: unsupported odt_cfg_rd parameter found\n", __func__);
+		odt_cfg_rd = PARAM_UNDEFINED;
+	}
+
+	return odt_cfg_rd;
+}
