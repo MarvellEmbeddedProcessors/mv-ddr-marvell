@@ -218,9 +218,8 @@ typedef unsigned int u32;
 #define MV_DEBUG_WL_FULL
 #endif
 
-#ifndef ARRAY_SIZE
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-#endif
+/* ARRAY_SIZE, etc. */
+#include "../../../include/lib/utils_def.h"
 
 /* printf function */
 #include <stdio.h>
