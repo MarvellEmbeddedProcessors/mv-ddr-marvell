@@ -449,12 +449,15 @@ static int mv_ddr4_dynamic_pb_wl_supp(u32 dev_num, enum mv_wl_supp_mode ecc_mode
 						if (orig_phase > 1)
 							wr_data = (rd_data & ~0x1c0) | ((orig_phase - 2) << 6);
 						else if (orig_phase == 1)
-								wr_data = (rd_data & ~0x1df);
+							wr_data = (rd_data & ~0x1df);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized" /* Workaround for gcc not seeing wr_data being initialized above */
 						if (orig_phase >= 1)
 							ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 									   ACCESS_TYPE_UNICAST, subphy_num,
 									   DDR_PHY_DATA,
 									   WL_PHY_REG(effective_cs), wr_data);
+#pragma GCC diagnostic pop
 					} else if (step == 2) { /* shift phase to +1 */
 						if (orig_phase <= 5) {
 							wr_data = (rd_data & ~0x1c0) | ((orig_phase + 2) << 6);
