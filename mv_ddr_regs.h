@@ -226,6 +226,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SDRAM_OP_CMD_CS_BASE			8
 #define SDRAM_OP_CMD_CS_OFFS(cs)		(SDRAM_OP_CMD_CS_BASE + (cs))
 #define SDRAM_OP_CMD_CS_MASK			0x1
+#define SDRAM_OP_CMD_ALL_CS_MASK		0xf
 enum {
 	CMD_NORMAL,
 	CMD_PRECHARGE,
@@ -362,6 +363,10 @@ enum {
 #define ZQC_CFG_REG				0x15e4
 #define DRAM_PHY_CFG_REG			0x15ec
 #define ODPG_CTRL_CTRL_REG			0x1600
+#define ODPG_CTRL_AUTO_REFRESH_OFFS		21
+#define ODPG_CTRL_AUTO_REFRESH_MASK		0x1
+#define ODPG_CTRL_AUTO_REFRESH_DIS		1
+#define ODPG_CTRL_AUTO_REFRESH_ENA		0
 
 #define ODPG_DATA_CTRL_REG			0x1630
 #define ODPG_WRBUF_WR_CTRL_OFFS			0
@@ -471,10 +476,53 @@ enum {
 #define DDR4_MR1_REG				0x1904
 #define DDR4_MR2_REG				0x1908
 #define DDR4_MR3_REG				0x190c
+#define DDR4_MPR_PS_OFFS			0
+#define DDR4_MPR_PS_MASK			0x3
+enum mv_ddr_mpr_ps { /* DDR4 MPR Page Selection */
+	DDR4_MPR_PAGE0,
+	DDR4_MPR_PAGE1,
+	DDR4_MPR_PAGE2,
+	DDR4_MPR_PAGE3
+};
+#define DDR4_MPR_OP_OFFS			2
+#define DDR4_MPR_OP_MASK			0x1
+enum mv_ddr_mpr_op { /* DDR4 MPR Operation */
+	DDR4_MPR_OP_DIS, /* normal operation */
+	DDR4_MPR_OP_ENA  /* dataflow from mpr */
+};
+#define DDR4_MPR_RF_OFFS			11
+#define DDR4_MPR_RF_MASK			0x3
+enum mv_ddr_mpr_rd_frmt { /* DDR4 MPR Read Format */
+	DDR4_MPR_RF_SERIAL,
+	DDR4_MPR_RF_PARALLEL,
+	DDR4_MPR_RF_STAGGERED,
+	DDR4_MPR_RF_RSVD_TEMP
+
+};
+
 #define DDR4_MR4_REG				0x1910
+#define DDR4_RPT_OFFS				10
+#define DDR4_RPT_MASK				0x1
+enum { /* read preamble training mode */
+	DDR4_RPT_DIS,
+	DDR4_RPT_ENA
+};
+
 #define DDR4_MR5_REG				0x1914
 #define DDR4_MR6_REG				0x1918
 #define DDR4_MPR_WR_REG				0x19d0
+#define DDR4_MPR_LOC_OFFS			8
+#define DDR4_MPR_LOC_MASK			0x3
+/*
+ * MPR Location for MPR write and read accesses
+ * MPR Location 0..3 within the selected page (page selection in MR3 [1:0] bits)
+ */
+enum {
+	DDR4_MPR_LOC0,
+	DDR4_MPR_LOC1,
+	DDR4_MPR_LOC2,
+	DDR4_MPR_LOC3
+};
 #endif /* CONFIG_DDR4 */
 
 #define DRAM_PINS_MUX_REG			0x19d4
