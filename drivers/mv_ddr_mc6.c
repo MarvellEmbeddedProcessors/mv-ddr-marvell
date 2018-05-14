@@ -1437,10 +1437,9 @@ static void mv_ddr_mc6_ecc_enable(unsigned int mc6_base)
 /* FIXME: revise hard-coded values and remove platform dependent flags */
 int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int ecc_is_ena)
 {
-#ifndef CONFIG_MC6P
 	unsigned int cs_num;
 	unsigned int odt_cfg_wr, odt_cfg_rd;
-#endif
+
 	mv_ddr_mc6_and_dram_timing_set(mc6_base);
 
 	mv_ddr_mc6_sizes_cfg(mc6_base, iface_base_addr);
@@ -1460,11 +1459,10 @@ int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int 
 	if (mv_ddr_mc6_cfg_set(mc6_base))
 		return -1;
 
-	/* TODO: move the following four writes to electrical parameters settings */
+	/* TODO: move the following three writes to electrical parameters settings */
 	/* ODT_Control_1: ODT_write_en, ODT0_read_en */
 	reg_write(mc6_base + MC6_CH0_ODT_CTRL1_REG, MC6_CH0_ODT_CTRL1_VAL);
-	/* ODT_Control_2: force_odt - always 'on' for cs0 and cs1*/
-	reg_write(mc6_base + MC6_CH0_ODT_CTRL2_REG, MC6_CH0_ODT_CTRL2_VAL);
+
 	/* DRAM_Config_5 CS0: RTT_Park, RTT_WR */
 	reg_write(mc6_base + MC6_CH0_DRAM_CFG5_REG(0/* cs 0 */), MC6_CH0_DRAM_CFG5_VAL);
 	/* DRAM_Config_5 CS1: RTT_Park, RTT_WR  */
@@ -1477,19 +1475,6 @@ int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int 
 	reg_write(0x210c0, 0x81000001);	/* PHY_WL_RL_Control: bit 31 phy_rdq_sel_u_en for pod '1' phy_rl_enable = '1' */
 	reg_write(0x202c8, 0xfefe);	/* MC_Control_3: phy_in_ff_bypass, phy_out_ff_bypass */
 	reg_write(0x20340, 0x0);	/* ODT_Control_1: ODT_write_en, ODT0_read_en */
-
-	odt_cfg_wr = mv_ddr_mc6_odt_cfg_wr_get();
-	odt_cfg_rd = mv_ddr_mc6_odt_cfg_rd_get();
-	cs_num = mv_ddr_cs_num_get();
-	if (cs_num == 1)
-		reg_write(mc6_base + MC6_CH0_ODT_CTRL2_REG,
-			  odt_cfg_wr << MC6_ODT_WRITE_CS0_OFFS |
-			  odt_cfg_rd << MC6_ODT_READ_OFFS);
-	else /* dual cs */
-		reg_write(mc6_base + MC6_CH0_ODT_CTRL2_REG,
-			  odt_cfg_wr << MC6_ODT_WRITE_CS0_OFFS |
-			  odt_cfg_wr << MC6_ODT_WRITE_CS1_OFFS |
-			  odt_cfg_rd << MC6_ODT_READ_OFFS);
 
 	reg_write(0x20310, 0x21000000);	/* DRAM_Config_5 CS0: RTT_Park, RTT_WR */
 	reg_write(0x20318, 0x0);	/* DRAM_Config_5 CS2: RTT_Park, RTT_WR */
@@ -1515,6 +1500,21 @@ int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int 
 	reg_write(0x20054, 0x4c0);	/* MC_pwr_ctl - default */
 	reg_write(0x2030c, 0x90000);	/* DRAM_Config_4: vref training value, odt? - config */
 #endif	/* #ifdef CONFIG_MC6P */
+
+	/* ODT_Control_2: force_odt */
+	odt_cfg_wr = mv_ddr_mc6_odt_cfg_wr_get();
+	odt_cfg_rd = mv_ddr_mc6_odt_cfg_rd_get();
+	cs_num = mv_ddr_cs_num_get();
+	if (cs_num == 1)
+		reg_write(mc6_base + MC6_CH0_ODT_CTRL2_REG,
+			  odt_cfg_wr << MC6_ODT_WRITE_CS0_OFFS |
+			  odt_cfg_rd << MC6_ODT_READ_OFFS);
+	else /* dual cs */
+		reg_write(mc6_base + MC6_CH0_ODT_CTRL2_REG,
+			  odt_cfg_wr << MC6_ODT_WRITE_CS0_OFFS |
+			  odt_cfg_wr << MC6_ODT_WRITE_CS1_OFFS |
+			  odt_cfg_rd << MC6_ODT_READ_OFFS);
+
 	return 0;
 }
 
