@@ -158,8 +158,8 @@ struct if_params {
 /* memory electrical configuration */
 struct mv_ddr_mem_edata {
 	enum mv_ddr_rtt_nom_park_evalue rtt_nom;
-	enum mv_ddr_rtt_nom_park_evalue rtt_park;
-	enum mv_ddr_rtt_wr_evalue rtt_wr;
+	enum mv_ddr_rtt_nom_park_evalue rtt_park[MAX_CS_NUM];
+	enum mv_ddr_rtt_wr_evalue rtt_wr[MAX_CS_NUM];
 	enum mv_ddr_dic_evalue dic;
 };
 
@@ -169,8 +169,8 @@ struct mv_ddr_phy_edata {
 	enum mv_ddr_ohm_evalue drv_data_n;
 	enum mv_ddr_ohm_evalue drv_ctrl_p;
 	enum mv_ddr_ohm_evalue drv_ctrl_n;
-	enum mv_ddr_ohm_evalue odt_p;
-	enum mv_ddr_ohm_evalue odt_n;
+	enum mv_ddr_ohm_evalue odt_p[MAX_CS_NUM];
+	enum mv_ddr_ohm_evalue odt_n[MAX_CS_NUM];
 };
 
 /* mac electrical configuration */
