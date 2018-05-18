@@ -200,9 +200,6 @@ struct snps_address_dynamic_update init_phy_dynamic_update[] = {
 	{REG_2002E_PHY_ARDPTRINITVAL, init_phy_ardptrinitval_get},
 	{REG_20056_PHY_PROCODTTIMECTL, init_phy_procodttimectl_get},
 	{REG_20008_PHY_CALUCLKINFO, init_phy_caluclkinfo_get},
-	{REG_2000B_PHY_SEQ0BDLY0, init_phy_seq0bdly0_get},
-	{REG_2000C_PHY_SEQ0BDLY1, init_phy_seq0bdly1_get},
-	{REG_2000D_PHY_SEQ0BDLY2, init_phy_seq0bdly2_get},
 	{-1, NULL}
 };
 
@@ -217,6 +214,8 @@ struct snps_address_data one_d_imem_static_update[] = {
 
 /* 1D DMEM static update*/
 struct snps_address_data one_d_dmem_static_update[] = {
+	{REG_54000_1D_2D_MSGMISC, (SIMULATION_DIS << BYTE_OFFSET) |
+				   (TRAIN_VREFDAC0_DURING_1D_EN | ENABLE_HIGH_EFFORT_WRDQ1D_EN)},
 	{REG_54006_1D_2D_DRAM_TYPE_PHY_VREF, (DRAM_TYPE_REG_VAL << BYTE_OFFSET) | PHY_VREF_REG_VAL},
 	{REG_5400A_1D_2D_PHY_CFG_CSTEST_FAIL, PHY_CFG_REG_VAL << BYTE_OFFSET},
 	{REG_5400C_1D_2D_RESV19_HDT_CTRL, HDT_CTRL_REG_VAL},
@@ -253,6 +252,8 @@ struct snps_address_data two_d_imem_static_update[] = {
 
 /* 2D DMEM static update*/
 struct snps_address_data two_d_dmem_static_update[] = {
+	{REG_54000_1D_2D_MSGMISC, (SIMULATION_DIS << BYTE_OFFSET) |
+				   (TRAIN_VREFDAC0_DURING_1D_EN | ENABLE_HIGH_EFFORT_WRDQ1D_EN)},
 	{REG_54006_1D_2D_DRAM_TYPE_PHY_VREF, (DRAM_TYPE_REG_VAL << BYTE_OFFSET) | PHY_VREF_REG_VAL},
 	{REG_5400A_1D_2D_PHY_CFG_CSTEST_FAIL, PHY_CFG_REG_VAL << BYTE_OFFSET},
 	{REG_5400C_1D_2D_RESV19_HDT_CTRL, HDT_CTRL_REG_VAL | RX2D_TRAIN_OPT_REG_VAL},
@@ -277,5 +278,16 @@ struct snps_address_dynamic_update two_d_dmem_dynamic_update[] = {
 	{ -1	, NULL }
 };
 
+
+/* --------------------------- */
+/* pie static & dynamic updates */
+/* --------------------------- */
+/* 2D DMEM dynamic update*/
+struct snps_address_dynamic_update pie_dynamic_update[] = {
+	{REG_2000B_PHY_SEQ0BDLY0, init_phy_seq0bdly0_get},
+	{REG_2000C_PHY_SEQ0BDLY1, init_phy_seq0bdly1_get},
+	{REG_2000D_PHY_SEQ0BDLY2, init_phy_seq0bdly2_get},
+	{ -1	, NULL }
+};
 
 #endif	/* _SNPS_UPDATE_H_ */

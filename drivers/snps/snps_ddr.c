@@ -152,7 +152,7 @@ static struct snps_section_content snps_sections[] = {
 	 .load_type = LOAD_RANDOM,
 	 .load_static.random = pie_static,
 	 .load_static_update = NULL,
-	 .load_dynamic_update = NULL
+	 .load_dynamic_update = pie_dynamic_update
 	},
 };
 
@@ -583,7 +583,7 @@ int snps_init(unsigned int base_address)
 	int ret;
 	debug_enter();
 
-	printf("Synopsys DDR43 PHY Firmware version: 0.%x\n" , SNPS_DDR_PHY_FW_VERSION);
+	printf("Synopsys DDR43 PHY Firmware version: %s\n" , SNPS_DDR_PHY_FW_VERSION);
 
 	/* initialize global settings */
 	snps_global_settings_init(base_address);
