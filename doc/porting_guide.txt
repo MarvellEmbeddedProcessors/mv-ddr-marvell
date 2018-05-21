@@ -261,3 +261,18 @@ Porting procedure
 				- MC6_4PHY_REGS_NUM
 
 	- Use the "print" option(s) to generate an appropriate static configuration
+
+8. DRAM Remapping
+
+	ARMADA 7/8K DRAM memory controller has DRAM translation unit with the remapping capability.
+	It is used to remap the DRAM region overlapping with the I/O configuration space providing
+	with an access to the entire DRAM memory.
+
+	To remap ARMADA 7/8K DRAM overlapping region, one should specify the start and end physical
+	addresses of the contiguous non-DRAM memory region (the overlapping I/O configuration space).
+	It is done using the following preprocessor macros in
+
+		path/to/mv_ddr/apn806/mv_ddr_plat.h file:
+
+			#define NON_DRAM_MEM_RGN_START_ADDR	0xc0000000ULL
+			#define NON_DRAM_MEM_RGN_END_ADDR	0x100000000ULL
