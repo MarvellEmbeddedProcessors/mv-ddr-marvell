@@ -505,12 +505,14 @@ u16 dmem_1d_2d_mr2_get(void)
 	debug_enter();
 
 	u16 ret_val = 0;
-	u32 mr2_cwl;
+	u32 mr2_cwl, rtt_wr;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	struct if_params *iface_params = &(tm->interface_params[0]);
 
-	if (!mv_ddr_mr2_cwl_get(iface_params->cas_wl, &mr2_cwl))
-		ret_val = mr2_cwl | tm->electrical_data[MV_DDR_RTT_WR];
+	rtt_wr = mv_ddr_rtt_wr_get();
+
+	if (rtt_wr != PARAM_UNDEFINED && (!mv_ddr_mr2_cwl_get(iface_params->cas_wl, &mr2_cwl)))
+		ret_val = mr2_cwl | (rtt_wr << MV_DDR_MR2_RTT_WR_OFFS);
 
 	debug_exit();
 	return ret_val;
@@ -520,12 +522,14 @@ u16 dmem_1d_2d_mr5_get(void)
 {
 	debug_enter();
 
-	u16 ret_val;
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	u16 ret_val = 0;
+	u32 rtt_park;
 
-	ret_val = (MV_DDR_MR5_PD_ODT_IBUF_DIS << MV_DDR_MR5_PD_ODT_IBUF_OFFS) |
-		  (MV_DDR_MR5_DM_ENA << MV_DDR_MR5_DM_OFFS) |
-		  tm->electrical_data[MV_DDR_RTT_PARK];
+	rtt_park = mv_ddr_rtt_park_get();
+	if (rtt_park != PARAM_UNDEFINED)
+		ret_val = (MV_DDR_MR5_PD_ODT_IBUF_DIS << MV_DDR_MR5_PD_ODT_IBUF_OFFS) |
+			(MV_DDR_MR5_DM_ENA << MV_DDR_MR5_DM_OFFS) |
+			(rtt_park << MV_DDR_MR5_RTT_PARK_OFFS);
 
 	debug_exit();
 	return ret_val;
@@ -567,18 +571,18 @@ u16 dmem_1d_2d_rtt_nom_wr_park_get(void)
 {
 	debug_enter();
 
-	u16 ret_val;
+	u16 ret_val = 0;
 	u16 rtt_park, rtt_nom, rtt_wr;
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 
-	rtt_nom = (tm->electrical_data[MV_DDR_RTT_NOM] >> MV_DDR_MR1_RTT_NOM_OFFS) & MV_DDR_MR1_RTT_NOM_MASK;
-	rtt_park = (tm->electrical_data[MV_DDR_RTT_PARK] >> MV_DDR_MR5_RTT_PARK_OFFS) & MV_DDR_MR5_RTT_PARK_MASK;
-	rtt_wr = (tm->electrical_data[MV_DDR_RTT_WR] >> MV_DDR_MR2_RTT_WR_OFFS) & MV_DDR_MR2_RTT_WR_MASK;
-
-	ret_val = (rtt_nom & RTT_NOM_WR_PARK0_RTT_NOM_MR1_MASK) << RTT_NOM_WR_PARK0_RTT_NOM_MR1_OFFS;
-	ret_val |= (rtt_park & RTT_NOM_WR_PARK0_RTT_PARK_MR5_MASK) << RTT_NOM_WR_PARK0_RTT_PARK_MR5_OFFS;
-	ret_val |= (rtt_wr & RTT_NOM_WR_PARK0_RTT_WR_MR2_MASK) << RTT_NOM_WR_PARK0_RTT_WR_MR2_OFFS;
-	ret_val |= RTT_NOM_WR_PARK0_EN_VAL;
+	rtt_nom = mv_ddr_rtt_nom_get();
+	rtt_park = mv_ddr_rtt_park_get();
+	rtt_wr = mv_ddr_rtt_wr_get();
+	if (rtt_nom != PARAM_UNDEFINED && rtt_park != PARAM_UNDEFINED && rtt_wr != PARAM_UNDEFINED) {
+		ret_val = (rtt_nom & RTT_NOM_WR_PARK0_RTT_NOM_MR1_MASK) << RTT_NOM_WR_PARK0_RTT_NOM_MR1_OFFS;
+		ret_val |= (rtt_park & RTT_NOM_WR_PARK0_RTT_PARK_MR5_MASK) << RTT_NOM_WR_PARK0_RTT_PARK_MR5_OFFS;
+		ret_val |= (rtt_wr & RTT_NOM_WR_PARK0_RTT_WR_MR2_MASK) << RTT_NOM_WR_PARK0_RTT_WR_MR2_OFFS;
+		ret_val |= RTT_NOM_WR_PARK0_EN_VAL;
+	}
 
 	debug_exit();
 
