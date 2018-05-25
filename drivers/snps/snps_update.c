@@ -389,6 +389,52 @@ u16 init_odt_ctrl_get(void)
 	return ret_val;
 }
 
+static u32 mv_ddr_snps_phy_drv_odt_calc(u32 cfg)
+{
+	u32 val;
+
+	switch (cfg) {
+	case MV_DDR_OHM_30:
+	case MV_DDR_OHM_48:
+	case MV_DDR_OHM_60:
+	case MV_DDR_OHM_80:
+	case MV_DDR_OHM_120:
+	case MV_DDR_OHM_240:
+		val = cfg;
+		break;
+	default:
+		val = PARAM_UNDEFINED;
+	}
+
+	return val;
+}
+
+u32 mv_ddr_snps_phy_drv_data_p_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	u32 drv_data_p = mv_ddr_snps_phy_drv_odt_calc(tm->edata.phy_edata.drv_data_p);
+
+	if (drv_data_p == PARAM_UNDEFINED)
+		printf("error: %s: unsupported drv_data_p parameter found\n", __func__);
+
+	return drv_data_p;
+}
+
+u32 mv_ddr_snps_phy_odt_p_get(void)
+{
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	u32 cs_num = mv_ddr_cs_num_get();
+	u32 odt_p = PARAM_UNDEFINED;
+
+	if (cs_num > 0 && cs_num <= MAX_CS_NUM)
+		odt_p = mv_ddr_snps_phy_drv_odt_calc(tm->edata.phy_edata.odt_p[cs_num - 1]);
+
+	if (odt_p == PARAM_UNDEFINED)
+		printf("error: %s: unsupported odt_p parameter found\n", __func__);
+
+	return odt_p;
+}
+
 u16 dmem_1d_2d_dram_freq_get(void)
 {
 	debug_enter();
