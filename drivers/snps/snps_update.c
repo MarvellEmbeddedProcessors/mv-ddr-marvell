@@ -409,7 +409,7 @@ static u32 mv_ddr_snps_phy_drv_odt_calc(u32 cfg)
 	return val;
 }
 
-u32 mv_ddr_snps_phy_drv_data_p_get(void)
+static u32 mv_ddr_snps_phy_drv_data_p_get(void)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 drv_data_p = mv_ddr_snps_phy_drv_odt_calc(tm->edata.phy_edata.drv_data_p);
@@ -420,7 +420,7 @@ u32 mv_ddr_snps_phy_drv_data_p_get(void)
 	return drv_data_p;
 }
 
-u32 mv_ddr_snps_phy_odt_p_get(void)
+static u32 mv_ddr_snps_phy_odt_p_get(void)
 {
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 cs_num = mv_ddr_cs_num_get();
@@ -465,14 +465,13 @@ u16 dmem_1d_2d_drv_imp_phy_odt_imp_get(void)
 	debug_enter();
 
 	u16 ret_val = 0;
-	u32 cs_num = mv_ddr_cs_num_get();
+	u32 drv_data_p, odt_p;
 
-	if (cs_num == 1)
-		ret_val = (DRV_IMP_VAL << BYTE_OFFSET) | ODT_IMP_OHMS_60;
-	else if (cs_num == 2)
-		ret_val = (DRV_IMP_VAL << BYTE_OFFSET) | ODT_IMP_OHMS_120;
-	else
-		printf("error: %s: unsupported cs number found\n", __func__);
+	drv_data_p = mv_ddr_snps_phy_drv_data_p_get();
+	odt_p = mv_ddr_snps_phy_odt_p_get();
+
+	if (drv_data_p != PARAM_UNDEFINED && odt_p != PARAM_UNDEFINED)
+		ret_val = (drv_data_p << BYTE_OFFSET) | odt_p;
 
 	debug_exit();
 
