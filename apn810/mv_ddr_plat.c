@@ -150,6 +150,11 @@ void mmio_write2_32(u32 val, u32 addr)
 	mmio_write_32(addr, val);
 }
 
+u32 *snps_ext_swizzle_cfg_get(void)
+{
+	return NULL;
+}
+
 static void mv_ddr_mem_scrubbing(void)
 {
 	uint64_t val = 0;

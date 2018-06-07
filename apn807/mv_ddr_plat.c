@@ -97,6 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mv_ddr_atf_wrapper.h"
 #include "snps_if.h"
+#include "snps_regs.h"
 #include "mv_ddr_mc6.h"
 #include "mv_ddr_xor_v2.h"
 #include "mv_ddr_plat.h"
@@ -104,6 +105,41 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_common.h"
 /* TODO: remove this include when removing attribute mechanism */
 #include "ddr3_training_ip_db.h"
+
+/*
+ * SNPS address lines' PHY to IO mapping configuration.
+ * APN807 address lines' PHY to IO routing is swizzled;
+ * not connected in ascending order, which is SNPS default configuration.
+ */
+static u32 snps_swizzle_cfg[HWT_SWIZZLE_HWT_REGS_NUM] = {
+	0x0018,		/* addr0 */
+	0x0004,		/* addr1 */
+	0x0005,		/* addr2 */
+	0x0014,		/* addr3 */
+	0x0013,		/* addr4 */
+	0x0001,		/* addr5 */
+	0x0007,		/* addr6 */
+	0x0006,		/* addr7 */
+	0x0002,		/* addr8 */
+	0x0008,		/* addr9 */
+	0x0019,		/* addr10 */
+	0x0009,		/* addr11 */
+	0x0003,		/* addr12 */
+	0x0017,		/* addr13 */
+	0x0,		/* addr14 */
+	0x0,		/* addr15 */
+	0x0,		/* addr17 */
+	0x000a,		/* actn */
+	0x000b,		/* bank0 */
+	0x000d,		/* bank1 */
+	0x0,		/* bank2 */
+	0x000e,		/* bg0 */
+	0x000c,		/* bg1 */
+	0x001a,		/* casn */
+	0x0012,		/* rasn */
+	0x0016,		/* wen */
+	0x0		/* parityin */
+};
 
 static unsigned int ap_regs_base;
 
@@ -177,6 +213,11 @@ int mv_ddr_mc_remap(void)
 void mv_ddr_base_set(unsigned int base)
 {
 	ap_regs_base = base;
+}
+
+u32 *snps_ext_swizzle_cfg_get(void)
+{
+	return snps_swizzle_cfg;
 }
 
 /* TODO: relocate to wrapper file */

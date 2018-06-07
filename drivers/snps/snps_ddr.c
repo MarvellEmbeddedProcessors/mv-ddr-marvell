@@ -351,6 +351,39 @@ fail:
 	return ret;
 }
 
+/* snps_load_ext_swizzle_cfg:
+ * This routine will override the default static swizzle configuration
+ * with the platform's one.
+ */
+static int snps_load_ext_swizzle_cfg(void)
+{
+	u32 *swizzle_cfg = NULL;
+	u32 i;
+
+	debug_enter();
+
+	pr_debug("%s Load external swizzle configuration\n", __func__);
+
+	swizzle_cfg = snps_ext_swizzle_cfg_get();
+
+	/* complete if nothing to do */
+	if (!swizzle_cfg)
+		goto finish;
+
+	/* configure the swizzle registers */
+	for (i = 0; i < HWT_SWIZZLE_HWT_REGS_NUM; i++)
+		snps_fw_write(
+			PHY_REG_ADDR_MAP(P_STATE_0,
+					 BLK_TYPE_MASTER,
+					 INST_NUM_0,
+					 (REG_120_HWT_SWIZZLE_HWT_ADDR0_BASE + i)),
+			*(swizzle_cfg + i));
+
+finish:
+	debug_exit();
+	return 0;
+}
+
 /* snps_load_dynamic:
  * This routine will overide the pre-loaded static sections, with topology
  * settings updates, and run-time updates (depends on the training step).
@@ -592,6 +625,10 @@ int snps_init(unsigned int base_address)
 	/* load PHY config static section, with no static update */
 	snps_set_state(PHY_CONFIG);
 	ret = snps_load_static(SECTION_PHY_CONFIG, STATIC_UPDATE_YES);
+	if (ret != 0)
+		goto fail;
+
+	ret = snps_load_ext_swizzle_cfg();
 	if (ret != 0)
 		goto fail;
 

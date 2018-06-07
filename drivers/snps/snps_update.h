@@ -101,6 +101,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 u16 sar_get_ddr_freq(void);
 u16 snps_get_hdtctrl(void);
+/* per platform function providing SNPS driver with non-default
+ * configuration of address lines' PHY to IO mapping
+ */
+u32 *snps_ext_swizzle_cfg_get(void);
 u16 init_phy_pllctrl2_get(void);
 u16 init_phy_ardptrinitval_get(void);
 u16 init_phy_procodttimectl_get(void);
@@ -126,35 +130,6 @@ struct snps_address_data init_phy_static_update[] = {
 	 CAL_RATE_VAL},
 	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_MASTER, INST_NUM_0, REG_B2_VREF_IN_GLOBAL),
 	 VREF_IN_GLOBAL_VAL},
-/*
- * Configures the address lines PHY to IO mapping
- * APN807 address lines PHY to IO routing are swizzled;
- * not connected in ascending order, which is snps default configuration
- */
-#ifdef APN807
-	{0x20120, 0x0018},
-	{0x20121, 0x0004},
-	{0x20122, 0x0005},
-	{0x20123, 0x0014},
-	{0x20124, 0x0013},
-	{0x20125, 0x0001},
-	{0x20126, 0x0007},
-	{0x20127, 0x0006},
-	{0x20128, 0x0002},
-	{0x20129, 0x0008},
-	{0x2012a, 0x0019},
-	{0x2012b, 0x0009},
-	{0x2012c, 0x0003},
-	{0x2012d, 0x0017},
-	{0x20131, 0x000a},
-	{0x20132, 0x000b},
-	{0x20133, 0x000d},
-	{0x20135, 0x000e},
-	{0x20136, 0x000c},
-	{0x20137, 0x001a},
-	{0x20138, 0x0012},
-	{0x20139, 0x0016},
-#endif
 	{ -1	, -1  }
 };
 
