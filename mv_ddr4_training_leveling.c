@@ -249,7 +249,7 @@ static u8 mv_ddr4_xsb_comp_test(u32 dev_num, u32 subphy_num, u32 if_id,
 
 		DEBUG_LEVELING(DEBUG_LEVEL_INFO, ("xsb comp: if %d bus id %d\n", 0, subphy_num));
 		for (edge = 0; edge < 8; edge++)
-			DEBUG_LEVELING(DEBUG_LEVEL_INFO, ("0x%16jx\n", read_pattern_64[edge]));
+			DEBUG_LEVELING(DEBUG_LEVEL_INFO, ("0x%16llx\n", read_pattern_64[edge]));
 		DEBUG_LEVELING(DEBUG_LEVEL_INFO, ("\n"));
 	} else if (MV_DDR_IS_32BIT_IN_64BIT_DRAM_MODE(tm->bus_act_mask, subphy_max)) {
 		status = ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, ODPG_DATA_CTRL_REG,
