@@ -40,6 +40,8 @@ Porting procedure
 			union mv_ddr_spd_data spd_data; /* raw spd data */
 
 			unsigned int timing_data[MV_DDR_TDATA_LAST]; /* timing parameters */
+
+			struct mv_ddr_edata edata; /* electrical configuration */
 		};
 
 	The detailed explanation of mv_ddr_topology_map structure:
@@ -160,27 +162,120 @@ Porting procedure
 		- cas_wl - specifies CAS write latency
 		- cas_l - specifies CAS latency
 		- interface_temp - specifies interface operation temperature
-		- bus_act_mask - specifies active buses in an interface; defined as a bitwise mask for active busses
-		- cfg_src - specifies DDR configuration data source; the parameter is of enum mv_ddr_cfg_src type
+	- bus_act_mask - specifies active buses in an interface; defined as a bitwise mask for active busses
+	- cfg_src - specifies DDR configuration data source; the parameter is of enum mv_ddr_cfg_src type
 
-			- MV_DDR_CFG_DEFAULT - default configuration, mainly based on data provided in mv_ddr topology_map structure
-			- MV_DDR_CFG_SPD - configuration, which is based on data in a DDR module's SPD
+		- MV_DDR_CFG_DEFAULT - default configuration, mainly based on data provided in mv_ddr topology_map structure
+		- MV_DDR_CFG_SPD - configuration, which is based on data in a DDR module's SPD
 
-				.. note::
-					A DDR module's SPD is accessible via an I2C bus, while an I2C bus itself is accessible via application processor (AP) or "south bridge" (CP).
-					The DDR code requires appropriate configuration in the porting layer to access corresponding I2C bus.
-					This configuration is done in 2 functions in ``dram_port.c`` file:
-						- mpp_config(), where appropriate MPPs configured for I2C functionality
-						- update_dram_info(), where I2C initialization and read functions with appropriate parameters are called
-					Refer to the platform's ``dram_port.c`` file for a working example.
-			- MV_DDR_CFG_USER - a configuration, which is based on data from user
-			- MV_DDR_CFG_STATIC - as previous, but in register-value format
-		- spd_data - contains raw spd data read from a DDR module with spd
-		- timing_data - contains timing parameters
+			.. note::
+				A DDR module's SPD is accessible via an I2C bus, while an I2C bus itself is accessible via application processor (AP) or "south bridge" (CP).
+				The DDR code requires appropriate configuration in the porting layer to access corresponding I2C bus.
+				This configuration is done in 2 functions in ``dram_port.c`` file:
+					- mpp_config(), where appropriate MPPs configured for I2C functionality
+					- update_dram_info(), where I2C initialization and read functions with appropriate parameters are called
+				Refer to the platform's ``dram_port.c`` file for a working example.
+		- MV_DDR_CFG_USER - a configuration, which is based on data from user
+		- MV_DDR_CFG_STATIC - as previous, but in register-value format
+	- spd_data - contains raw spd data read from a DDR module with spd
+	- timing_data - contains timing parameters
+	- edata - contains electrical configuration parameters
 
-3. Electrical parameters
+		.. note::
+			The new electrical configuration infrastructure doesn't support A38x.
 
-4. Porting example::
+		- The definition of mv_ddr_edata structure is given in ``/path/to/mv_ddr/ddr_topology_def.h`` file::
+
+			struct mv_ddr_edata {
+				struct mv_ddr_mem_edata mem_edata; /* memory electrical configuration */
+				struct mv_ddr_phy_edata phy_edata; /* phy electrical configuration */
+				struct mv_ddr_mac_edata mac_edata; /* mac electrical configuration */
+			};
+
+			struct mv_ddr_mem_edata {
+				enum mv_ddr_rtt_nom_park_evalue rtt_nom;
+				enum mv_ddr_rtt_nom_park_evalue rtt_park[MAX_CS_NUM];
+				enum mv_ddr_rtt_wr_evalue rtt_wr[MAX_CS_NUM];
+				enum mv_ddr_dic_evalue dic;
+			};
+
+			struct mv_ddr_phy_edata {
+				enum mv_ddr_ohm_evalue drv_data_p;
+				enum mv_ddr_ohm_evalue drv_data_n;
+				enum mv_ddr_ohm_evalue drv_ctrl_p;
+				enum mv_ddr_ohm_evalue drv_ctrl_n;
+				enum mv_ddr_ohm_evalue odt_p[MAX_CS_NUM];
+				enum mv_ddr_ohm_evalue odt_n[MAX_CS_NUM];
+			};
+
+			struct mv_ddr_mac_edata {
+				enum mv_ddr_odt_cfg_evalue odt_cfg_pat;
+				enum mv_ddr_odt_cfg_evalue odt_cfg_wr;
+				enum mv_ddr_odt_cfg_evalue odt_cfg_rd;
+			};
+
+		The detailed explanation of mv_ddr_edata structure:
+
+		- rtt_nomr, rtt_park - specify RTT_NOM and RTT_PARK values per the JEDEC standard
+
+			A list of the supported RTT_NOM and RTT_PARK values:
+
+				- MV_DDR_RTT_NOM_PARK_RZQ_DISABLE
+				- MV_DDR_RTT_NOM_PARK_RZQ_DIV4	/* 60-Ohm; RZQ = 240-Ohm */
+				- MV_DDR_RTT_NOM_PARK_RZQ_DIV2	/* 120-Ohm; RZQ = 240-Ohm */
+				- MV_DDR_RTT_NOM_PARK_RZQ_DIV6	/* 40-Ohm; RZQ = 240-Ohm */
+				- MV_DDR_RTT_NOM_PARK_RZQ_DIV1	/* 240-Ohm; RZQ = 240-Ohm */
+				- MV_DDR_RTT_NOM_PARK_RZQ_DIV5	/* 48-Ohm; RZQ = 240-Ohm */
+				- MV_DDR_RTT_NOM_PARK_RZQ_DIV3	/* 80-Ohm; RZQ = 240-Ohm */
+				- MV_DDR_RTT_NOM_PARK_RZQ_DIV7	/* 34-Ohm; RZQ = 240-Ohm */
+
+			.. note::
+				RTT_PARK, RTT_WR, ODT_P, and ODT_N parameters depend on a number of chip-selects in a
+				system. Therefore, their values should be provided in an array structure with indices
+				corresponding to this number. As an example, rtt_park[0] will include RTT_PARK value
+				for a system with one chip-select, rtt_park[1] - with two chip-selects, and so on.
+
+		- rtt_wr - specifies RTT_WR value per the JEDEC standard
+
+			A list of the supported RTT_WR values:
+
+				- MV_DDR_RTT_WR_DYN_ODT_OFF
+				- MV_DDR_RTT_WR_RZQ_DIV2	/* 120-Ohm; RZQ = 240-Ohm */
+				- MV_DDR_RTT_WR_RZQ_DIV1	/* 240-Ohm; RZQ = 240-Ohm */
+				- MV_DDR_RTT_WR_HIZ
+				- MV_DDR_RTT_WR_RZQ_DIV3	/* 80-Ohm; RZQ = 240-Ohm */
+
+		- dic - specifies Output Driver Impedance Control value per the JEDEC standard
+
+			A list of the supported DIC values:
+
+				- MV_DDR_DIC_RZQ_DIV7	/* 34-Ohm; RZQ = 240-Ohm */
+				- MV_DDR_DIC_RZQ_DIV5	/* 48-Ohm; RZQ = 240-Ohm */
+
+		- drv_data_p/n, drv_ctrl_p/n, odt_p/n - specify DATA, CONTROL, and ODT P/N drivers' strengths
+
+			A list of their supported values (see the note below) is as follows:
+
+				- MV_DDR_OHM_30
+				- MV_DDR_OHM_48
+				- MV_DDR_OHM_60
+				- MV_DDR_OHM_80
+				- MV_DDR_OHM_120
+				- MV_DDR_OHM_240
+
+			.. note::
+				This list contains the values shared between all the mentioned drivers' strengths.
+				Therefore, some drivers do not support all the values in the list. An attempt to
+				set an unsupported value to such a parameter results in an error message print.
+
+		- odt_cfg_pat/wr/rd - specify ODT pattern, write, and read configurations
+
+			A list of their supported values is as follows:
+
+				- MV_DDR_ODT_CFG_NORMAL
+				- MV_DDR_ODT_CFG_ALWAYS_ON
+
+3. Porting example::
 
 		static struct mv_ddr_topology_map board_topology_map = {
 			DEBUG_LEVEL_ERROR,
@@ -204,10 +299,43 @@ Porting procedure
 			MV_DDR_64BIT_ECC_PUP8_BUS_MASK, /* active busses */
 			MV_DDR_CFG_SPD,			/* ddr configuration data source */
 			{ {0} },			/* raw spd data */
-			{0}				/* timing parameters */
+			{0},				/* timing parameters */
+			{					/* electrical configuration */
+				{				/* memory electrical configuration */
+					MV_DDR_RTT_NOM_PARK_RZQ_DISABLE,	/* rtt_nom */
+					{
+						MV_DDR_RTT_NOM_PARK_RZQ_DIV4,	/* rtt_park 1cs */
+						MV_DDR_RTT_NOM_PARK_RZQ_DIV1	/* rtt_park 2cs */
+					},
+					{
+						MV_DDR_RTT_WR_DYN_ODT_OFF,	/* rtt_wr 1cs */
+						MV_DDR_RTT_WR_RZQ_DIV2		/* rtt_wr 2cs */
+					},
+					MV_DDR_DIC_RZQ_DIV7	/* dic */
+				},
+				{				/* phy electrical configuration */
+					MV_DDR_OHM_30,	/* data_drv_p */
+					MV_DDR_OHM_30,	/* data_drv_n */
+					MV_DDR_OHM_30,	/* ctrl_drv_p */
+					MV_DDR_OHM_30,	/* ctrl_drv_n */
+					{
+						MV_DDR_OHM_60,	/* odt_p 1cs */
+						MV_DDR_OHM_120	/* odt_p 2cs */
+					},
+					{
+						MV_DDR_OHM_60,	/* odt_n 1cs */
+						MV_DDR_OHM_120	/* odt_n 2cs */
+					},
+				},
+				{				/* mac electrical configuration */
+					MV_DDR_ODT_CFG_NORMAL,	/* odt_cfg_pat */
+					MV_DDR_ODT_CFG_ALWAYS_ON,	/* odt_cfg_wr */
+					MV_DDR_ODT_CFG_NORMAL,	/* odt_cfg_rd */
+				},
+			},
 		};
 
-5. Logging options
+4. Logging options
 
 	mv_ddr_debug_level - this parameter defines the ddr debug level options:
 
@@ -215,9 +343,9 @@ Porting procedure
 		- LOG_LEVEL_TRACE - prints training algorithm data and errors
 		- LOG_LEVEL_INFO - prints training detailed information trace and errors
 
-6. Compiler options
+5. Compiler options
 
-7. Static configuration options
+6. Static configuration options
 
 	The current static PHY and MC configuration options are available for APN806, A80x0 project with single chip select.
 
@@ -262,7 +390,7 @@ Porting procedure
 
 	- Use the "print" option(s) to generate an appropriate static configuration
 
-8. DRAM Remapping
+7. DRAM Remapping
 
 	ARMADA 7/8K DRAM memory controller has DRAM translation unit with the remapping capability.
 	It is used to remap the DRAM region overlapping with the I/O configuration space providing
