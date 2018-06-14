@@ -1474,7 +1474,6 @@ int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int 
 	reg_write(0x21000, 0x60);	/* phy_rfifo_rptr_dly_val */
 	reg_write(0x210c0, 0x81000001);	/* PHY_WL_RL_Control: bit 31 phy_rdq_sel_u_en for pod '1' phy_rl_enable = '1' */
 	reg_write(0x202c8, 0xfefe);	/* MC_Control_3: phy_in_ff_bypass, phy_out_ff_bypass */
-	reg_write(0x20340, 0x0);	/* ODT_Control_1: ODT_write_en, ODT0_read_en */
 
 	reg_write(0x20310, 0x21000000);	/* DRAM_Config_5 CS0: RTT_Park, RTT_WR */
 	reg_write(0x20318, 0x0);	/* DRAM_Config_5 CS2: RTT_Park, RTT_WR */
