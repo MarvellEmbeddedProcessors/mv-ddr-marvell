@@ -238,12 +238,6 @@ int mv_ddr_topology_map_update(void)
 			iface_params->cas_wl = mv_ddr_cwl_val_get(speed_bin_index, freq);
 	}
 
-	val = mv_ddr_cs_num_get();
-	if (mv_ddr_electrical_data_set(tm->electrical_data, val)) {
-		printf("error: %s: failed to update electrical data\n", __func__);
-		return -1;
-	}
-
 	return 0;
 }
 

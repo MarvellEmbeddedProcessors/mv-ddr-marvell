@@ -148,7 +148,6 @@ int mv_ddr_mc_config(void);
 int mv_ddr_mc_ena(void);
 int mv_ddr_phy_config(void);
 unsigned int mv_ddr_init_freq_get(void);
-int mv_ddr_electrical_data_set(unsigned int edata[], unsigned int cs_num);
 int mv_ddr_mc_remap(void);
 void mv_ddr_mmap_config(void);
 
