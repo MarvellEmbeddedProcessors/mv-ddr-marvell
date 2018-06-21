@@ -119,37 +119,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define SDRAM_CS_SIZE			0x7fffffffUL	/* TODO: implement function for cs size per platform */
 
-/* electrical parameters */
-#define MV_DDR_PLAT_CK_DLY	160
-#define MV_DDR_PLAT_PHY_REG3	0xa
-#define MV_DDR_PLAT_ZPRI_DATA	123
-#define MV_DDR_PLAT_ZNRI_DATA	123
-#define MV_DDR_PLAT_ZPRI_CTRL	74
-#define MV_DDR_PLAT_ZNRI_CTRL	74
-#define MV_DDR_PLAT_ZNODT_DATA	45
-#define MV_DDR_PLAT_ZPODT_CTRL	45
-#define MV_DDR_PLAT_ZNODT_CTRL	45
-
-#if defined(CONFIG_DDR4)
-#define MV_DDR_PLAT_ZPODT_DATA		0xd
-#define MV_DDR_PLAT_DIC			0x0
-#define MV_DDR_PLAT_ODT_CFG_1CS		0x330012	/* not used when park is on */
-#define MV_DDR_PLAT_ODT_CFG_2CS		0x330012	/* not used when park is on */
-#define MV_DDR_PLAT_RTT_NOM		MV_DDR_MR1_RTT_NOM_DISABLE
-#define MV_DDR_PLAT_RTT_WR_1CS		MV_DDR_MR2_RTT_WR_DYN_ODT_OFF
-#define MV_DDR_PLAT_RTT_WR_2CS		MV_DDR_MR2_RTT_WR_RZQ_DIV2
-#define MV_DDR_PLAT_RTT_PARK_1CS	MV_DDR_MR5_RTT_PARK_RZQ_DIV4
-#define MV_DDR_PLAT_RTT_PARK_2CS	MV_DDR_MR5_RTT_PARK_RZQ_DIV1
-#else /* CONFIG_DDR3 */
-#define MV_DDR_PLAT_ZPODT_DATA	45
-#define MV_DDR_PLAT_DIC		0x2
-#define MV_DDR_PLAT_ODT_CFG_1CS	0x10000
-#define MV_DDR_PLAT_ODT_CFG_2CS	0x120012
-#define MV_DDR_PLAT_RTT_NOM	0x44
-#define MV_DDR_PLAT_RTT_WR_1CS	0x0
-#define MV_DDR_PLAT_RTT_WR_2CS	0x0
-#endif /* CONFIG_DDR4 */
-
 /* functions declaration */
 int mv_ddr_pre_config(void);
 int mv_ddr_post_config(void);
