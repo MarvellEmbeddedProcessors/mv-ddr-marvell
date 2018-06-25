@@ -370,6 +370,7 @@ static int snps_load_ext_swizzle_cfg(void)
 	if (!swizzle_cfg)
 		goto finish;
 
+	snps_csr_access_set(MICRO_CONT_MUX_SEL_ENABLE);
 	/* configure the swizzle registers */
 	for (i = 0; i < HWT_SWIZZLE_HWT_REGS_NUM; i++)
 		snps_fw_write(
@@ -378,6 +379,7 @@ static int snps_load_ext_swizzle_cfg(void)
 					 INST_NUM_0,
 					 (REG_120_HWT_SWIZZLE_HWT_ADDR0_BASE + i)),
 			*(swizzle_cfg + i));
+	snps_csr_access_set(MICRO_CONT_MUX_SEL_ISOLATE);
 
 finish:
 	debug_exit();
