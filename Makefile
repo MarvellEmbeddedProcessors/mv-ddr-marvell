@@ -337,10 +337,13 @@ CFLAGS += -march=armv8-a -fpie
 
 # PLATFORM is set in ble/ble.mk
 ifneq ($(findstring a80x0,$(PLATFORM)),)
-CFLAGS += -DA80X0 -DCONFIG_64BIT
+CFLAGS += -DA80X0
 MV_DDR_PLAT = apn806
 MV_DDR_TIP = y
 MV_DDR_FLOW = y
+ifeq ($(findstring 32bit_ddr,$(PLATFORM)),)
+CFLAGS += -DCONFIG_64BIT
+endif
 endif
 ifneq ($(findstring a70x0,$(PLATFORM)),)
 CFLAGS += -DA70X0
