@@ -97,7 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if (__GNUC__ == 5  && __GNUC_MINOR__ == 3 && __GNUC_PATCHLEVEL__ == 1)
 #include "snps_static-gcc-5.h"
-#elif (__GNUC__ == 7  && __GNUC_MINOR__ == 2 && __GNUC_PATCHLEVEL__ == 1)
+#elif (__GNUC__ == 7  && __GNUC_MINOR__ == 3 && __GNUC_PATCHLEVEL__ == 1)
 #include "snps_static-gcc-7.h"
 #else
 #error "Unsupported GCC version! Please rebuild your SNPS FW image."
