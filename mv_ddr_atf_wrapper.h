@@ -219,17 +219,17 @@ typedef unsigned int u32;
 #endif
 
 /* ARRAY_SIZE, etc. */
-#include "../../../include/lib/utils_def.h"
+#include "utils_def.h"
 
 /* printf function */
 #include <stdio.h>
 #include <string.h>
 
 /* mdelay function */
-#include "../../../include/drivers/delay_timer.h"
+#include "delay_timer.h"
 
 /* memcpy function */
-#include "../../../include/lib/mmio.h"
+#include "mmio.h"
 
 /*
  * Accessor functions for the registers
