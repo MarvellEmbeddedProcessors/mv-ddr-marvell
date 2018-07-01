@@ -1398,6 +1398,7 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 									 reg_val));
 					}
 				}
+				dq_to_dqs_min_delta = dq_to_dqs_min_delta_threshold * 2;
 			}
 		}
 	}

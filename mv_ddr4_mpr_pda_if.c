@@ -227,7 +227,7 @@ int mv_ddr4_mode_regs_init(u8 dev_num)
 		 * set mpd, 0x1910[1] to 0x0
 		 */
 		mask = (0x1 << 12) | (0x1 << 11) | (0x1 << 10) | (0x1 << 9) | (0x7 << 6) | (0x1 << 1);
-		val = (0x0 << 12) | (0x0 << 11) | (0x0 << 10) | (0x0 << 9) | (0x0 << 6) | (0x0 << 1);
+		val = (0x0 << 12) | (0x1 << 11) | (0x0 << 10) | (0x0 << 9) | (0x0 << 6) | (0x0 << 1);
 		status = ddr3_tip_if_write(dev_num, access_type, if_id, DDR4_MR4_REG,
 					   val, mask);
 		if (status != MV_OK)
