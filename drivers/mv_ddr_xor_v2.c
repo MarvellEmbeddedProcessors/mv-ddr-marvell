@@ -298,6 +298,9 @@ static void mv_xor_v2_init(u32 xor_id)
 	reg_val |= GLOB_PAUSE_AXI_TIME_DIS_VAL;
 	reg_write(xor_base + GLOB_PAUSE, reg_val);
 
+	/* clear all previous pending interrupt indications, prior to using engine */
+	reg_write(xor_base + GLOB_SYS_INT_CAUSE, 0);
+
 	/* enable dma engine */
 	reg_write(xor_base + DMA_DESQ_STOP_OFF, DMA_DESQ_STOP_QUEUE_DIS_ENA << DMA_DESQ_STOP_QUEUE_DIS_OFFS);
 }
@@ -363,6 +366,9 @@ static void mv_xor_v2_finish(u32 xor_id)
 
 	/* reset dma engine */
 	reg_write(xor_base + DMA_DESQ_STOP_OFF, DMA_DESQ_STOP_QUEUE_RESET_ENA << DMA_DESQ_STOP_QUEUE_RESET_OFFS);
+
+	/* clear all pending interrupt indications, to release DMA engine in a clean state */
+	reg_write(xor_base + GLOB_SYS_INT_CAUSE, 0);
 
 	/*
 	 * disable secure mode in dma engine xorg secure reg to return dma
