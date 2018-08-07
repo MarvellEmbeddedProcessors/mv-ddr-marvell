@@ -132,6 +132,116 @@ extern u8 dq_vref_vec[MAX_BUS_NUM];	/* stability support */
 extern u8 rx_eye_hi_lvl[MAX_BUS_NUM];	/* vertical adjustment support */
 extern u8 rx_eye_lo_lvl[MAX_BUS_NUM];	/* vertical adjustment support */
 
+/* dma pattern */
+uint64_t dma_pattern[] = {
+#if defined(CONFIG_64BIT)
+	0xf7f7f7f7f7f7f7f7,
+	0x0808080808080808,
+	0xf7f7f7f7f7f7f7f7,
+	0xfbfbfbfbfbfbfbfb,
+	0x0404040404040404,
+	0x7f7f7f7f7f7f7f7f,
+	0x8080808080808080,
+	0x4040404040404040,
+	0xbfbfbfbfbfbfbfbf,
+	0x4040404040404040,
+	0x2020202020202020,
+	0xdfdfdfdfdfdfdfdf,
+	0x2020202020202020,
+	0x1010101010101010,
+	0xefefefefefefefef,
+	0x1010101010101010,
+	0x0808080808080808,
+	0xf7f7f7f7f7f7f7f7,
+	0x0808080808080808,
+	0x0404040404040404,
+	0xfbfbfbfbfbfbfbfb,
+	0x0404040404040404,
+	0x0202020202020202,
+	0xfdfdfdfdfdfdfdfd,
+	0x0202020202020202,
+	0x0101010101010101,
+	0xfefefefefefefefe,
+	0x0101010101010101,
+	0x8080808080808080,
+	0x7f7f7f7f7f7f7f7f,
+	0x8080808080808080,
+	0x4040404040404040,
+	0xbfbfbfbfbfbfbfbf,
+	0x4040404040404040,
+	0x2020202020202020,
+	0xdfdfdfdfdfdfdfdf,
+	0x2020202020202020,
+	0x1010101010101010,
+	0xefefefefefefefef,
+	0x1010101010101010,
+	0x0808080808080808,
+	0xf7f7f7f7f7f7f7f7,
+	0x0808080808080808,
+	0x0404040404040404,
+	0xfbfbfbfbfbfbfbfb,
+	0x0404040404040404,
+	0x0202020202020202,
+	0xfdfdfdfdfdfdfdfd,
+	0x0202020202020202,
+	0x0101010101010101,
+	0xfefefefefefefefe,
+	0x0101010101010101,
+	0x8080808080808080,
+	0x7f7f7f7f7f7f7f7f,
+	0x8080808080808080,
+	0x4040404040404040,
+	0xbfbfbfbfbfbfbfbf,
+	0x4040404040404040,
+	0x2020202020202020,
+	0xdfdfdfdfdfdfdfdf,
+	0x2020202020202020,
+	0x1010101010101010,
+	0xefefefefefefefef,
+	0x1010101010101010,
+	0x0808080808080808,
+	0xf7f7f7f7f7f7f7f7,
+	0x0808080808080808,
+	0x0404040404040404,
+	0xfbfbfbfbfbfbfbfb
+#else /* !CONFIG_64BIT */
+	0xf7f7f7f780808080,
+	0xf7f7f7f7fbfbfbfb,
+	0x404040407f7f7f7f,
+	0x8080808040404040,
+	0xbfbfbfbf40404040,
+	0x20202020dfdfdfdf,
+	0x2020202010101010,
+	0xefefefef10101010,
+	0x80808080f7f7f7f7,
+	0x8080808040404040,
+	0xfbfbfbfb40404040,
+	0x20202020fdfdfdfd,
+	0x2020202010101010,
+	0xfefefefe10101010,
+	0x808080807f7f7f7f,
+	0x8080808040404040,
+	0xbfbfbfbf40404040,
+	0x20202020dfdfdfdf,
+	0x2020202010101010,
+	0xefefefef10101010,
+	0x80808080f7f7f7f7,
+	0x8080808040404040,
+	0xfbfbfbfb40404040,
+	0x20202020fdfdfdfd,
+	0x2020202010101010,
+	0xfefefefe10101010,
+	0x808080807f7f7f7f,
+	0x8080808040404040,
+	0xbfbfbfbf40404040,
+	0x20202020dfdfdfdf,
+	0x2020202010101010,
+	0xefefefef10101010,
+	0x80808080f7f7f7f7,
+	0x8080808040404040
+#endif /* CONFIG_64BIT */
+};
+
 static int new_vref_calc(u8 vref_low, u8 vref_hi, u32 *new_vref)
 {
 	u32 curr_vref;
@@ -283,7 +393,7 @@ static int xor_search_1d_1e(enum hws_edge_compare edge, enum hws_search_dir sear
 			 * continue to search for the leftmost fail if pass found in pass-to-fail case or
 			 * for the leftmost pass if fail found in fail-to-pass case
 			 */
-			if ((result == 0 && edge == EDGE_PF) |
+			if ((result == 0 && edge == EDGE_PF) ||
 			    (result != 0 && edge == EDGE_FP))
 				bs_left = bs_middle + 1;
 
@@ -291,7 +401,7 @@ static int xor_search_1d_1e(enum hws_edge_compare edge, enum hws_search_dir sear
 			 * save recently found fail in pass-to-fail case or
 			 * recently found pass in fail-to-pass case
 			 */
-			if ((result != 0 && edge == EDGE_PF) |
+			if ((result != 0 && edge == EDGE_PF) ||
 			    (result == 0 && edge == EDGE_FP)) {
 				bs_found = bs_middle;
 				bs_right = bs_middle - 1;
@@ -328,7 +438,7 @@ static int xor_search_1d_1e(enum hws_edge_compare edge, enum hws_search_dir sear
 			 * continue to search for the leftmost fail if pass found in pass-to-fail case or
 			 * for the leftmost pass if fail found in fail-to-pass case
 			 */
-			if ((result == 0 && edge == EDGE_PF) |
+			if ((result == 0 && edge == EDGE_PF) ||
 			    (result != 0 && edge == EDGE_FP))
 				bs_left = bs_middle - 1;
 
@@ -336,7 +446,7 @@ static int xor_search_1d_1e(enum hws_edge_compare edge, enum hws_search_dir sear
 			 * save recently found fail in pass-to-fail case or
 			 * recently found pass in fail-to-pass case
 			 */
-			if ((result != 0 && edge == EDGE_PF) |
+			if ((result != 0 && edge == EDGE_PF) ||
 			    (result == 0 && edge == EDGE_FP)) {
 				bs_found = bs_middle;
 				bs_right = bs_middle + 1;
@@ -348,6 +458,7 @@ static int xor_search_1d_1e(enum hws_edge_compare edge, enum hws_search_dir sear
 		result = bs_found;
 	else if (edge == EDGE_PF)
 		result = bs_right;
+
 	else
 		result = 255;
 
@@ -381,10 +492,24 @@ static int xor_search_1d_2e(enum hws_edge_compare search_concept, u32 step, u32 
 	if (search_concept == EDGE_FP) {
 		vw_vector[0] = xor_search_1d_1e(EDGE_FP, HWS_LOW2HIGH, step, init_val, end_val,
 						byte_num, element);
-	vw_vector[0] = (vw_vector[0] == reg_data) ? 255 : vw_vector[0];
+
 	vw_vector[1] = xor_search_1d_1e(EDGE_FP, HWS_HIGH2LOW, step, end_val, init_val,
 					byte_num, element);
-	vw_vector[1] = (vw_vector[1] == reg_data) ? 255 : vw_vector[1];
+
+		if (element == CRX) {
+			if (vw_vector[0] == 255) {
+				vw_vector[0] = xor_search_1d_1e(EDGE_PF, HWS_HIGH2LOW, step,
+								(vw_vector[1] * 2 - 4),
+								init_val, byte_num, element);
+
+			} else {
+				vw_vector[1] = xor_search_1d_1e(EDGE_PF, HWS_LOW2HIGH, step,
+								(vw_vector[0] -
+								(end_val - vw_vector[0]) + 4),
+								end_val, byte_num, element);
+			}
+
+		}
 	} else {
 		vw_vector[1] = xor_search_1d_1e(EDGE_PF, HWS_LOW2HIGH, step, reg_data, end_val,
 						byte_num, element);
@@ -725,6 +850,10 @@ static int vertical_adjust(int ena_mask, u8 byte_num)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 	uint64_t xor_byte_mask = 0;
+	uint64_t curr_dst;
+	uint64_t val;
+	int i, j;
+
 
 	if (byte_num == 0xf) { /* 0xf - all bytes */
 		start_sphy = 0;
@@ -740,9 +869,10 @@ static int vertical_adjust(int ena_mask, u8 byte_num)
 
 	for (sphy = start_sphy; sphy < end_sphy; sphy++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
-		if (print_ena == 1) {
 			ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
 					  VREF_BCAST_PHY_REG(effective_cs), &reg_data);
+		if (print_ena == 1) {
+
 #ifdef DBG_PRINT
 			printf("cs[%d]: byte %d rc %d [%d,%d] ->",
 			       effective_cs, sphy, reg_data, rx_eye_lo_lvl[sphy], rx_eye_hi_lvl[sphy]);
@@ -759,6 +889,18 @@ static int vertical_adjust(int ena_mask, u8 byte_num)
 			xor_byte_mask = (unsigned long long)0x0 | ((unsigned long long)0x1 << (sphy * 8));
 			xor_byte_mask = ~xor_byte_mask;
 		}
+
+
+		for (j = 0; j < DBG_DMA_ENG_NUM; j++) {
+			/* build dma data unit from dma pattern and write to dram */
+			for (i = 0, curr_dst = dma_src[effective_cs][j];
+				 i < DBG_DMA_DATA_SIZE / sizeof(dma_pattern[0]);
+				 i++, curr_dst += sizeof(dma_pattern[0])) {
+				val = dma_pattern[i % (sizeof(dma_pattern) / sizeof(dma_pattern[0]))];
+				writeq(curr_dst, (val | xor_byte_mask));
+			}
+		}
+
 
 		if (byte_num == 8)
 			reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
@@ -827,6 +969,9 @@ static int horizontal_adjust(int ena_mask, u8 byte_num, u8 *valid_crx_matrix)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 	uint64_t xor_byte_mask = 0;
+	uint64_t curr_dst;
+	uint64_t val;
+	int i, j;
 
 	if (byte_num == 0xf) { /* 0xf - all bytes */
 		start_sphy = 0;
@@ -842,9 +987,10 @@ static int horizontal_adjust(int ena_mask, u8 byte_num, u8 *valid_crx_matrix)
 
 	for (sphy = start_sphy; sphy < end_sphy; sphy++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
-		if (print_ena == 1) {
 			ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
 					  CRX_PHY_REG(effective_cs), &reg_data);
+		if (print_ena == 1) {
+
 #ifdef DBG_PRINT
 			printf("cs[%d]: byte %d crx %d ->", effective_cs, sphy, reg_data);
 #endif
@@ -860,6 +1006,16 @@ static int horizontal_adjust(int ena_mask, u8 byte_num, u8 *valid_crx_matrix)
 		} else if (ena_mask == PER_DQ0) { /* only dq0 toggles */
 			xor_byte_mask = (unsigned long long)0x0 | ((unsigned long long)0x01 << (sphy * 8));
 			xor_byte_mask = ~xor_byte_mask;
+		}
+
+		for (j = 0; j < DBG_DMA_ENG_NUM; j++) {
+			/* build dma data unit from dma pattern and write to dram */
+			for (i = 0, curr_dst = dma_src[effective_cs][j];
+				 i < DBG_DMA_DATA_SIZE / sizeof(dma_pattern[0]);
+				 i++, curr_dst += sizeof(dma_pattern[0])) {
+				val = dma_pattern[i % (sizeof(dma_pattern) / sizeof(dma_pattern[0]))];
+				writeq(curr_dst, (val | xor_byte_mask));
+			}
 		}
 
 		if (sphy == 8)
@@ -894,7 +1050,7 @@ static int horizontal_adjust(int ena_mask, u8 byte_num, u8 *valid_crx_matrix)
 		}
 
 #ifdef DBG_PRINT
-		printf("%s: opt crx %d, vw0 %d, vw1 %d\n", opt_crx, vw[0], vw[1]);
+		printf("%s: opt crx %d, vw0 %d, vw1 %d\n", __func__, opt_crx, vw[0], vw[1]);
 #endif
 		ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, sphy_access, sphy, DDR_PHY_DATA,
 				   CRX_PHY_REG(effective_cs), opt_crx);
@@ -1069,7 +1225,6 @@ static int rx_adjust(u8 *valid_crx_matrix)
 {
 	int dbg_flag = 1;
 	enum mask_def ena_mask = PER_BYTE_RES1;
-	enum mask_def start_mask = PER_IF;
 	enum search_type search = VERTICAL;
 	int result = 1;
 	int alg_loop = 0;
@@ -1078,14 +1233,11 @@ static int rx_adjust(u8 *valid_crx_matrix)
 	int end_byte = octets_per_if_num;
 	int byte;
 
+	reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
+	reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 	result = dma_test(dma_src, dma_dst, effective_cs);
 
-	if (result == 0)
-		start_mask = PER_IF;
-	else
-		start_mask = PER_BYTE_RES1;
 
-	if (result != 0) {
 #ifdef DBG_PRINT
 		printf("%s: going to v-h first level search\n", __func__);
 #endif
@@ -1095,7 +1247,6 @@ static int rx_adjust(u8 *valid_crx_matrix)
 						0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
 			search = VERTICAL;
-			ena_mask = start_mask;
 			for (alg_loop = 0; alg_loop < 4; alg_loop++) {
 				if (search == VERTICAL)
 					result = vertical_adjust(ena_mask, byte);
@@ -1127,6 +1278,7 @@ static int rx_adjust(u8 *valid_crx_matrix)
 				case 1:
 					if (result == 0) { /* pass; go to horizontal search */
 						search = HORIZONTAL;
+						ena_mask = PER_BYTE_RES1;
 						if (dbg_flag == 2) {
 #ifdef DBG_PRINT
 							printf("%s: byte %d, alg loop %d: pass\n",
@@ -1184,7 +1336,7 @@ static int rx_adjust(u8 *valid_crx_matrix)
 				reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG,
 						0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 		} /* end of byte_num loop */
-	}
+
 #ifdef DBG_PRINT
 	printf("%s: going to v-h second level search\n", __func__);
 #endif
@@ -1235,115 +1387,7 @@ static int rx_adjust(u8 *valid_crx_matrix)
 	return 0;
 }
 
-/* dma pattern */
-uint64_t dma_pattern[] = {
-#if defined(CONFIG_64BIT)
-	0xf7f7f7f7f7f7f7f7,
-	0x0808080808080808,
-	0xf7f7f7f7f7f7f7f7,
-	0xfbfbfbfbfbfbfbfb,
-	0x0404040404040404,
-	0x7f7f7f7f7f7f7f7f,
-	0x8080808080808080,
-	0x4040404040404040,
-	0xbfbfbfbfbfbfbfbf,
-	0x4040404040404040,
-	0x2020202020202020,
-	0xdfdfdfdfdfdfdfdf,
-	0x2020202020202020,
-	0x1010101010101010,
-	0xefefefefefefefef,
-	0x1010101010101010,
-	0x0808080808080808,
-	0xf7f7f7f7f7f7f7f7,
-	0x0808080808080808,
-	0x0404040404040404,
-	0xfbfbfbfbfbfbfbfb,
-	0x0404040404040404,
-	0x0202020202020202,
-	0xfdfdfdfdfdfdfdfd,
-	0x0202020202020202,
-	0x0101010101010101,
-	0xfefefefefefefefe,
-	0x0101010101010101,
-	0x8080808080808080,
-	0x7f7f7f7f7f7f7f7f,
-	0x8080808080808080,
-	0x4040404040404040,
-	0xbfbfbfbfbfbfbfbf,
-	0x4040404040404040,
-	0x2020202020202020,
-	0xdfdfdfdfdfdfdfdf,
-	0x2020202020202020,
-	0x1010101010101010,
-	0xefefefefefefefef,
-	0x1010101010101010,
-	0x0808080808080808,
-	0xf7f7f7f7f7f7f7f7,
-	0x0808080808080808,
-	0x0404040404040404,
-	0xfbfbfbfbfbfbfbfb,
-	0x0404040404040404,
-	0x0202020202020202,
-	0xfdfdfdfdfdfdfdfd,
-	0x0202020202020202,
-	0x0101010101010101,
-	0xfefefefefefefefe,
-	0x0101010101010101,
-	0x8080808080808080,
-	0x7f7f7f7f7f7f7f7f,
-	0x8080808080808080,
-	0x4040404040404040,
-	0xbfbfbfbfbfbfbfbf,
-	0x4040404040404040,
-	0x2020202020202020,
-	0xdfdfdfdfdfdfdfdf,
-	0x2020202020202020,
-	0x1010101010101010,
-	0xefefefefefefefef,
-	0x1010101010101010,
-	0x0808080808080808,
-	0xf7f7f7f7f7f7f7f7,
-	0x0808080808080808,
-	0x0404040404040404,
-	0xfbfbfbfbfbfbfbfb
-#else /* !CONFIG_64BIT */
-	0xf7f7f7f780808080,
-	0xf7f7f7f7fbfbfbfb,
-	0x404040407f7f7f7f,
-	0x8080808040404040,
-	0xbfbfbfbf40404040,
-	0x20202020dfdfdfdf,
-	0x2020202010101010,
-	0xefefefef10101010,
-	0x80808080f7f7f7f7,
-	0x8080808040404040,
-	0xfbfbfbfb40404040,
-	0x20202020fdfdfdfd,
-	0x2020202010101010,
-	0xfefefefe10101010,
-	0x808080807f7f7f7f,
-	0x8080808040404040,
-	0xbfbfbfbf40404040,
-	0x20202020dfdfdfdf,
-	0x2020202010101010,
-	0xefefefef10101010,
-	0x80808080f7f7f7f7,
-	0x8080808040404040,
-	0xfbfbfbfb40404040,
-	0x20202020fdfdfdfd,
-	0x2020202010101010,
-	0xfefefefe10101010,
-	0x808080807f7f7f7f,
-	0x8080808040404040,
-	0xbfbfbfbf40404040,
-	0x20202020dfdfdfdf,
-	0x2020202010101010,
-	0xefefefef10101010,
-	0x80808080f7f7f7f7,
-	0x8080808040404040
-#endif /* CONFIG_64BIT */
-};
+
 
 int mv_ddr_validate(void)
 {
