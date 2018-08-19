@@ -23,3 +23,5 @@ SYNOPSYS FIRMWARE INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, LOSS OF USE,
 LOSS OF GOODWILL, OR INTERRUPTION OF BUSINESS, EVEN IF MARVELL OR RECIPIENTS
 IS ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
+Any software which integrates this code or any part of it thereof, should
+include in its header the above license.
