@@ -130,6 +130,7 @@ struct snps_address_data init_phy_static_update[] = {
 	 CAL_RATE_VAL},
 	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_MASTER, INST_NUM_0, REG_B2_VREF_IN_GLOBAL),
 	 VREF_IN_GLOBAL_VAL},
+	{REG_20019_TRISTATE_MODE_CA_TG0, REG_20019_TRISTATE_MODE_CA_VAL},
 	{ -1	, -1  }
 };
 
