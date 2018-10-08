@@ -971,6 +971,12 @@ int mv_ddr_early_init2(void)
 int mv_ddr_pre_training_fixup(void)
 {
 	u32 reg_val, avs_val;
+	int soc_ver_id;
+
+	soc_ver_id = mv_ddr_get_soc_revision_id();
+
+	if (soc_ver_id == CHIP_VER_7K_B0 || soc_ver_id == CHIP_VER_8K_B0)
+		return 0;
 
 	/* read and save avs voltage to restore it later */
 	nominal_avs = reg_read(AVS_ENABLED_CTRL_REG);
@@ -998,9 +1004,13 @@ int mv_ddr_pre_training_fixup(void)
 
 int mv_ddr_post_training_fixup(void)
 {
+	int soc_ver_id;
+	soc_ver_id = mv_ddr_get_soc_revision_id();
+
 	mv_ddr_validate();
 
-	reg_write(AVS_ENABLED_CTRL_REG, nominal_avs);
+	if (soc_ver_id != CHIP_VER_7K_B0 && soc_ver_id != CHIP_VER_8K_B0)
+		reg_write(AVS_ENABLED_CTRL_REG, nominal_avs);
 
 	return 0;
 }
@@ -1590,4 +1600,15 @@ int mv_ddr_manual_cal_do(void)
 	return 1;
 #endif
 	return 0;
+}
+
+int mv_ddr_get_soc_revision_id(void)
+{
+	unsigned int chip_rev_id;
+
+	chip_rev_id = reg_read(CP_DEV_ID_STATUS_REG);
+	chip_rev_id = ((chip_rev_id & DEVICE_ID_STATUS_MASK) >> SW_REV_STATUS_OFFSET);
+
+	return chip_rev_id;
+
 }
