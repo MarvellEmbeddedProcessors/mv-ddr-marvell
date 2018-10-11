@@ -103,6 +103,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_regs.h"
 #include "../../drivers/marvell/thermal.h"
 
+#undef DBG_CPU_SWEEP_TEST
+#undef DBG_CPU_SWEEP_TEST_TX
+
 /* temperature correction steps */
 #define VREF_TEMP_CORR_STEP1	20
 #define VREF_TEMP_CORR_STEP2	10
@@ -310,7 +313,6 @@ static int new_vref_calc(u8 vref_low, u8 vref_hi, u32 *new_vref)
 
 	return 0;
 }
-
 static u32 vref_temp_corr_calc(int cdeg)
 {
 	u32 corr;
@@ -758,7 +760,7 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 	enum hws_access_type sphy_access;
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 	u32 adll_reg_val, vtap_reg_val;
-	int mux_reg;
+	u32 mux_reg[MAX_INTERFACE_NUM];
 
 	if (mode == 0xff) {
 		/* per sphy */
@@ -784,7 +786,9 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 			  effective_cs << ODPG_DATA_CS_OFFS,
 			  ODPG_DATA_CS_MASK << ODPG_DATA_CS_OFFS);
 
-	mux_reg = mmio_read_32(0xf00116d8);
+	ddr3_tip_if_read(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DUAL_DUNIT_CFG_REG,
+				mux_reg, MASK_ALL_BITS);
+
 	for (sphy = start_sphy; sphy < end_sphy; sphy++) {
 		if (dir == 1) { /* dir 0 saved in dq_vref_vec array */
 			ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
@@ -799,7 +803,9 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 		       sphy, adll_reg_val, vtap_reg_val);
 		for (duty_cycle = 0; duty_cycle < max_v; duty_cycle += step) {
 			if (dir == 0) {
-				mmio_write_32(0xf00116d8, 0x3cc);
+				/*set mux to d-unit*/
+				ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DUAL_DUNIT_CFG_REG,
+						1 << 6, 1 << 6);
 				duty_cycle_idx = duty_cycle;
 				/* insert dram to vref training mode */
 				mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, 1);
@@ -810,7 +816,9 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 				mv_ddr4_vref_tap_set(0, 0, ACCESS_TYPE_MULTICAST, duty_cycle_idx,
 						     MV_DDR4_VREF_TAP_END);
 				/* set mux to mc6 */
-				mmio_write_32(0xf00116d8, mux_reg);
+				ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DUAL_DUNIT_CFG_REG,
+						mux_reg[0], MASK_ALL_BITS);
+
 			} else {
 				/* set new receiver dc training value in dram */
 				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, sphy_access, sphy, DDR_PHY_DATA,
@@ -861,16 +869,24 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, sphy_access, sphy, DDR_PHY_DATA,
 					   VREF_PHY_REG(effective_cs, 5), vector_vtap[sphy]);
 		} else {
+			/*set mux to d-unit*/
+			ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DUAL_DUNIT_CFG_REG,
+					1 << 6, 1 << 6);
 			duty_cycle_idx = duty_cycle;
 			/* insert dram to vref training mode */
-			mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, 0);
+			mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, 1);
 			/* set new vref training value in dram */
 			mv_ddr4_vref_tap_set(0, 0, ACCESS_TYPE_MULTICAST, dq_vref_vec[sphy], MV_DDR4_VREF_TAP_START);
 			/* close vref range*/
 			mv_ddr4_vref_tap_set(0, 0, ACCESS_TYPE_MULTICAST, dq_vref_vec[sphy],  MV_DDR4_VREF_TAP_END);
+			/* insert dram to vref training mode */
+			mv_ddr4_vref_training_mode_ctrl(0, 0, ACCESS_TYPE_MULTICAST, 0);
+			/* set mux to mc6 */
+			ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE, DUAL_DUNIT_CFG_REG,
+						 mux_reg[0], MASK_ALL_BITS);
 		}
 		ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, sphy_access, sphy, DDR_PHY_DATA,
-				   reg + effective_cs * 0x4, adll_reg_val);
+				  reg + effective_cs * 0x4, adll_reg_val);
 	}
 
 	/* rewrite adll and voltage nominal values */
@@ -880,6 +896,7 @@ static int cpu_sweep_test(u32 repeat, u32 dir, u32 mode)
 		reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 
 	ddr3_tip_reset_fifo_ptr(0);
+
 
 	return 0;
 }
@@ -1447,14 +1464,17 @@ int mv_ddr_validate(void)
 	unsigned int max_cs = mv_ddr_cs_num_get();
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(0, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	int soc_ver_id;
+	u8 valid_crx_matrix[DBG_MAX_CS_NUM * MAX_BUS_NUM * 2] = {0};
+	u32 new_vref = 0;
 	struct tsen_config *tsen = marvell_thermal_config_get();
 	int cdeg; /* temperature in celsius degrees */
 	u32 corr;
 	u32 curr_vref = 0;
-	u32 new_vref = 0;
 	u32 curr_crx = 0;
 	u32 new_crx = 0;
-	u8 valid_crx_matrix[DBG_MAX_CS_NUM * MAX_BUS_NUM * 2] = {0};
+
+	soc_ver_id = mv_ddr_get_soc_revision_id();
 
 	if (max_cs > DBG_MAX_CS_NUM) {
 		printf("mv_ddr: error: DBG_MAX_CS_NUM limit (%d) reached\n",
@@ -1497,46 +1517,48 @@ int mv_ddr_validate(void)
 		/* rx adjust depends on effective_cs global var */
 		rx_adjust(valid_crx_matrix);
 
-		/* temperature adjustment stage after rx_adjust call */
-		marvell_thermal_init(tsen);
+		if (soc_ver_id != CHIP_VER_7K_B0 && soc_ver_id != CHIP_VER_8K_B0) {
+			/* temperature adjustment stage after rx_adjust call */
+			marvell_thermal_init(tsen);
 
-		if (marvell_thermal_read(tsen, &cdeg)) {
-			printf("temperature read failed\n");
-			return 1; /* fail */
-		}
+			if (marvell_thermal_read(tsen, &cdeg)) {
+				printf("temperature read failed\n");
+				return 1; /* fail */
+			}
 
 #ifdef DBG_PRINT
-		printf("%s: tsen val %d\n", __func__, cdeg);
+			printf("%s: tsen val %d\n", __func__, cdeg);
 #endif
 
-		/* apply vertical and horizontal fix to the post rx_adjust sampling point */
-		for (sphy = 0; sphy < octets_per_if_num; sphy++) {
-			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
-			/* vref correction */
-			ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
-					  VREF_BCAST_PHY_REG(effective_cs), &curr_vref);
-			corr = vref_temp_corr_calc(cdeg);
-			new_vref = (curr_vref >= corr) ? (curr_vref - corr) : 0;
+			/* apply vertical and horizontal fix to the post rx_adjust sampling point */
+			for (sphy = 0; sphy < octets_per_if_num; sphy++) {
+				VALIDATE_BUS_ACTIVE(tm->bus_act_mask, sphy);
+				/* vref correction */
+				ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
+						  VREF_BCAST_PHY_REG(effective_cs), &curr_vref);
+				corr = vref_temp_corr_calc(cdeg);
+				new_vref = (curr_vref >= corr) ? (curr_vref - corr) : 0;
 
-			/* write new value to register */
-			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
-					   DDR_PHY_DATA, VREF_BCAST_PHY_REG(effective_cs), new_vref);
-			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
-					   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 4), new_vref);
-			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
-					   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 5), new_vref);
+				/* write new value to register */
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
+						   DDR_PHY_DATA, VREF_BCAST_PHY_REG(effective_cs), new_vref);
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
+						   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 4), new_vref);
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy,
+						   DDR_PHY_DATA, VREF_PHY_REG(effective_cs, 5), new_vref);
 
-			/* crx correction */
-			ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
-					  CRX_PHY_REG(effective_cs), &curr_crx);
-			corr = crx_temp_corr_calc(cdeg);
-			if ((curr_crx + corr) < MAX_ADLL_RANGE)
-				new_crx = curr_crx + corr;
-			else
-				new_crx = MAX_ADLL_RANGE - 1;
-			ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
-					   CRX_PHY_REG(effective_cs), new_crx);
-		}
+				/* crx correction */
+				ddr3_tip_bus_read(0, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
+						  CRX_PHY_REG(effective_cs), &curr_crx);
+				corr = crx_temp_corr_calc(cdeg);
+				if ((curr_crx + corr) < MAX_ADLL_RANGE)
+					new_crx = curr_crx + corr;
+				else
+					new_crx = MAX_ADLL_RANGE - 1;
+				ddr3_tip_bus_write(0, ACCESS_TYPE_UNICAST, 0, ACCESS_TYPE_UNICAST, sphy, DDR_PHY_DATA,
+						   CRX_PHY_REG(effective_cs), new_crx);
+			}
+		} /*end soc version id*/
 	}
 
 #if defined(DBG_CPU_SWEEP_TEST)
@@ -1566,6 +1588,5 @@ int mv_ddr_validate(void)
 			printf("dma memcmp pass\n");
 	}
 #endif /* DBG_DMA_TEST */
-
 	return 0;
 }
