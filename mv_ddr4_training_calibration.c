@@ -1951,25 +1951,11 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 
 		for (subphy_num = 0; subphy_num < subphy_max; subphy_num++) {
 			VALIDATE_BUS_ACTIVE(tm->bus_act_mask, subphy_num);
-			const_pbs = 0;
-			if (rx_vw_pos[if_id][subphy_num] == 0) {
-				const_pbs = 0xa;
-				mv_ddr4_dqs_reposition(RX_DIR, lambda_per_dq[if_id][subphy_num],
-						       pbs_res_per_bus[if_id][subphy_num], 0xa,
-						       &center_adll[if_id][subphy_num], &dqs_pbs);
-			}
 
-			if (rx_vw_pos[if_id][subphy_num] == 1) {
-				mv_ddr4_dqs_reposition(RX_DIR, lambda_per_dq[if_id][subphy_num],
-						       pbs_res_per_bus[if_id][subphy_num], 0x0,
-						       &center_adll[if_id][subphy_num], &dqs_pbs);
-			}
-
-			if (rx_vw_pos[if_id][subphy_num] == 2) {
-				mv_ddr4_dqs_reposition(RX_DIR, lambda_per_dq[if_id][subphy_num],
-						       pbs_res_per_bus[if_id][subphy_num], -0xa,
-						       &center_adll[if_id][subphy_num], &dqs_pbs);
-			}
+			const_pbs = 0xa;
+			mv_ddr4_dqs_reposition(RX_DIR, lambda_per_dq[if_id][subphy_num],
+					       pbs_res_per_bus[if_id][subphy_num], 0xa,
+					       &center_adll[if_id][subphy_num], &dqs_pbs);
 
 			/* dq pbs update */
 			for (dq_idx = 0; dq_idx < 8 ; dq_idx++) {
