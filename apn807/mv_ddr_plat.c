@@ -105,6 +105,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_common.h"
 /* TODO: remove this include when removing attribute mechanism */
 #include "ddr3_training_ip_db.h"
+#include "mv_ddr_validate.h"
 
 /*
  * SNPS address lines' PHY to IO mapping configuration.
@@ -296,6 +297,12 @@ int mv_ddr_post_config(void)
 
 	/* Update the size of the iface in bytes */
 	iface->iface_byte_size = mv_ddr_mem_sz_get();
+
+	if (iface->validation != MV_DDR_VAL_DIS) {
+		if (mv_ddr_validate())
+			printf("DRAM validation interface %d start address 0x%llx\n",
+				iface->id, iface->iface_base_addr);
+	}
 
 	return 0;
 }
