@@ -308,6 +308,7 @@ int mv_ddr_post_config(void)
 }
 
 /* return ddr frequency from sar */
+#define CPU_2000_DDR_1200_RCLK_1200	0x0
 #define CPU_1600_DDR_1200_RCLK_1200	0xd
 #define CPU_1300_DDR_800_RCLK_800	0x14
 static enum mv_ddr_freq mv_ddr_sar_freq_get(void)
@@ -322,13 +323,14 @@ static enum mv_ddr_freq mv_ddr_sar_freq_get(void)
 
 	switch (ddr_clk_config) {
 	case CPU_1600_DDR_1200_RCLK_1200:
+	case CPU_2000_DDR_1200_RCLK_1200:
 		freq = MV_DDR_FREQ_1200;
 		break;
 	case CPU_1300_DDR_800_RCLK_800:
 		freq = MV_DDR_FREQ_800;
 		break;
 	default:
-		printf("mv_ddr: ddr freq unsupported\n");
+		printf("mv_ddr: ddr freq %x unsupported\n", ddr_clk_config);
 		freq = 0;
 	}
 
