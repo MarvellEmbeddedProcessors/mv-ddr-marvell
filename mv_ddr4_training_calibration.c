@@ -1954,7 +1954,7 @@ int mv_ddr4_receiver_calibration(u8 dev_num)
 
 			const_pbs = 0xa;
 			mv_ddr4_dqs_reposition(RX_DIR, lambda_per_dq[if_id][subphy_num],
-					       pbs_res_per_bus[if_id][subphy_num], 0xa,
+					       pbs_res_per_bus[if_id][subphy_num], 0x0,
 					       &center_adll[if_id][subphy_num], &dqs_pbs);
 
 			/* dq pbs update */
