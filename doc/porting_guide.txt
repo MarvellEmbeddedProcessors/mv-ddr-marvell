@@ -20,7 +20,7 @@ Porting procedure
 -----------------
 1. Files location
 
-	- For A7/8K, refer to ``/path/to/atf/docs/marvell/porting.txt`` for the detailed description of ATF files location
+	- For A7/8K, refer to ``/path/to/atf/docs/marvell/armada/porting.txt`` for the detailed description of ATF files location
 	- For A38x, update ``/path/to/mv_ddr/a38x/mv_ddr_a38x_brd.c`` file
 
 2. DDR topology map description
