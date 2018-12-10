@@ -1591,14 +1591,6 @@ int mv_ddr_dq_mapping_detect(u32 dev_num)
 
 int mv_ddr_manual_cal_do(void)
 {
-#if defined(A3900)
-	reg_write(0x114cc, 0x1200d);
-	reg_write(0x114c8, 0x28e0008);
-	reg_write(0x117c8, 0x16c60008);
-	reg_write(0x11dc8, 0x24f0008);
-	reg_write(0x11ec8, 0x16860008);
-	return 1;
-#endif
 	return 0;
 }
 

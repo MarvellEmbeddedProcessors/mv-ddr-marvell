@@ -333,7 +333,7 @@ static int ddr3_tip_pad_inv(void)
 						       DDR_PHY_CONTROL,
 						       PHY_CTRL_PHY_REG,
 						       data, data);
-#elif defined(A70X0) || defined(A80X0) || defined(A3900)
+#elif defined(A70X0) || defined(A80X0)
 			/* clock swap for ck0 (cs0) */
 			data = (INVERT_PAD << INV_PAD4_OFFS |
 				INVERT_PAD << INV_PAD5_OFFS);
@@ -356,7 +356,7 @@ static int ddr3_tip_pad_inv(void)
 						       DDR_PHY_CONTROL,
 						       PHY_CTRL_PHY_REG,
 						       data, data);
-#else /* !CONFIG_ARMADA_38X && !CONFIG_ARMADA_39X && !A70X0 && !A80X0 && !A3900 */
+#else /* !CONFIG_ARMADA_38X && !CONFIG_ARMADA_39X && !A70X0 && !A80X0 */
 #pragma message "unknown platform to configure ddr clock swap"
 #endif
 		}
@@ -404,7 +404,7 @@ int ddr3_tip_tune_training_params(u32 dev_num,
 	if (params->g_rtt_park != PARAM_UNDEFINED)
 		g_rtt_park = params->g_rtt_park;
 
-#if defined(A70X0) || defined(A80X0) || defined(A3900)
+#if defined(A70X0) || defined(A80X0)
 	g_rtt_nom = mv_ddr_rtt_nom_get();
 	if (g_rtt_nom != PARAM_UNDEFINED)
 		g_rtt_nom <<= MV_DDR_MR1_RTT_NOM_OFFS;
