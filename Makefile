@@ -363,6 +363,15 @@ MV_DDR_PLAT = apn807
 MV_DDR_SNPS = y
 MV_DDR_FLOW_V2 = y
 endif
+
+ifneq ($(findstring t9130, $(PLATFORM)),)
+CFLAGS += -DCONFIG_64BIT -DCONFIG_MC6P -DAPN807
+CFLAGS += -DT9130
+MV_DDR_PLAT = apn807
+MV_DDR_SNPS = y
+MV_DDR_FLOW_V2 = y
+endif
+
 ifneq ($(findstring a8xx,$(PLATFORM)),)
 CFLAGS += -DCONFIG_MC6P
 MV_DDR_PLAT = apn810

@@ -1480,7 +1480,7 @@ int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int 
 	reg_write(0x2031c, 0x0);	/* DRAM_Config_5 CS3: RTT_Park, RTT_WR */
 	reg_write(0x20304, 0x400);	/* DRAM_Config_2 */
 	reg_write(0x20308, 0x1);	/* DRAM_Config_3 DLL_reset */
-#if defined(A80X0)
+#if defined(A80X0) || defined(T9130)
 	reg_write(0x20314, 0x0);	/* DRAM_Config_5 CS1: RTT_Park, RTT_WR - Diff1 */
 #if defined(CONFIG_64BIT)
 	reg_write(0x20044, 0x30400);	/* MC_Control_0 - bust length, data width need to configure - diff4 - config */
