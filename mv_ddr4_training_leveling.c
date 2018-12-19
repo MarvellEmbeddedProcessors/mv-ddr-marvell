@@ -368,7 +368,7 @@ static int mv_ddr4_dynamic_pb_wl_supp(u32 dev_num, enum mv_wl_supp_mode ecc_mode
 	u32 subphy_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	u8 compare_result = 0;
 	u32 orig_phase;
-	u32 rd_data, wr_data;
+	u32 rd_data, wr_data = 0;
 	u32 flag, step;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 ecc_phy_access_id;
