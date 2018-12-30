@@ -99,6 +99,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "snps_static-gcc-5.h"
 #elif (__GNUC__ == 7  && __GNUC_MINOR__ == 3 && __GNUC_PATCHLEVEL__ == 1)
 #include "snps_static-gcc-7.h"
+#elif (__GNUC__ == 7  && __GNUC_MINOR__ == 3 && __GNUC_PATCHLEVEL__ == 0)
+#include "snps_static-mrv-7.h"
 #else
 #error "Unsupported GCC version! Please rebuild your SNPS FW image."
 #endif
