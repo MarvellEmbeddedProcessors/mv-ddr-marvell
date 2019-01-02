@@ -123,6 +123,10 @@ int mv_ddr_init(void)
 		return -1;
 	}
 
+	/* remap overlapping dram region to the top */
+	if (mv_ddr_mc_remap() != 0)
+		return -1;
+
 #if defined(CONFIG_MC_STATIC)
 	/* TODO: implement for apn810 */
 	if (mv_ddr_mc_static_config()) {
