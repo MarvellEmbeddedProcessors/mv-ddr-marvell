@@ -158,6 +158,9 @@ int mv_ddr_init(void)
 #else
 	if (mv_ddr_phy_config()) {
 		printf("error: %s failed\n", __func__);
+#if defined(T9130)
+		reg_write(0x6f0084, 0x0);
+#endif
 		return -1;
 	}
 

@@ -638,10 +638,14 @@ int mv_ddr_validate(void)
 				  DBG_DMA_DATA_SIZE, DBG_DMA_ENG_NUM, DBG_DMA_DESC_NUM);
 		/* compare src to dst */
 		if (mv_ddr_dma_memcmp(dma_src[cs], dma_dst[cs],
-				      DBG_DMA_DATA_SIZE, DBG_DMA_ENG_NUM, DBG_DMA_DESC_NUM))
+				      DBG_DMA_DATA_SIZE, DBG_DMA_ENG_NUM, DBG_DMA_DESC_NUM)){
 			printf("dma memcmp fail\n");
-		else
+#if defined(T9130)
+			reg_write(0x6f0084, 0x0);
+#endif
+		} else {
 			printf("dma memcmp pass\n");
+		}
 	}
 
 	snps_csr_access_set(MICRO_CONT_MUX_SEL_ENABLE);

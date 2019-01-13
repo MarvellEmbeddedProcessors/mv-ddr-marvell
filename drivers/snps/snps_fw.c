@@ -469,6 +469,9 @@ static void snps_mail_box_print_stream_msg(int msg_id, int msg_log_index)
 		/* else, in case msg_id wasn't found in 'stream' messages database */
 		printf("SNPS ERROR: invalid %s 'stream' message id from Mail Box (0x%x)\n",
 			snps_get_state() == TRAINING_2D ? "2D" : "1D", msg_id);
+#if defined(T9130)
+		reg_write(0x6f0084, 0x0);
+#endif
 		return;
 	}
 
