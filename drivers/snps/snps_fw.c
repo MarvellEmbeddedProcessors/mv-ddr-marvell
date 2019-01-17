@@ -348,15 +348,11 @@ int snps_mail_box_read(void)
 	int i, argument_count, message_id, message_arg, stream_message_id, ret = 0;
 	debug_enter();
 
-	if (gd.message_log_index >= MAILBOX_MSG_MAX_COUNT) {
-		printf("Error: Mail Box overflow (too many messages, max is %d)\n", MAILBOX_MSG_MAX_COUNT);
-		ret = MAIL_BOX_ERROR;
-		goto fail;
-	}
+
 
 	/* first read 'MAJOR' type of message */
 	message_id = snps_mail_box_get_message(MB_MSG_TYPE_MAJOR);
-	if (message_id == -1) {
+	if (message_id == MAIL_BOX_ERROR) {
 		ret = MAIL_BOX_ERROR;
 		goto fail;
 	}
@@ -366,7 +362,7 @@ int snps_mail_box_read(void)
 	/* if message type is 'stream', read message content and arguments (if exists) */
 	if (message_id == MB_MAJOR_ID_STREAM_MSG) {
 		stream_message_id = snps_mail_box_get_message(MB_MSG_TYPE_STREAM);
-		if (stream_message_id == -1) {
+		if (stream_message_id == MAIL_BOX_ERROR) {
 			ret = MAIL_BOX_ERROR;
 			goto fail;
 		}
@@ -388,10 +384,12 @@ int snps_mail_box_read(void)
 		for (i = 0; i < argument_count; i++) {
 			message_arg = snps_mail_box_get_message(MB_MSG_TYPE_STREAM);
 			/* pr_debug("arg#%d = 0x%x\n" , i, message_arg); */
-			if (message_arg == -1) {
+			if (message_arg == MAIL_BOX_ERROR) {
+
 				ret = MAIL_BOX_ERROR;
 				goto fail;
 			}
+			pr_debug("0x%x\n", message_arg);
 			gd.messages[gd.message_log_index][i + 2] = message_arg;
 		}
 		 /* Mark 'stream' type in cell#1 of messages log */
@@ -469,9 +467,6 @@ static void snps_mail_box_print_stream_msg(int msg_id, int msg_log_index)
 		/* else, in case msg_id wasn't found in 'stream' messages database */
 		printf("SNPS ERROR: invalid %s 'stream' message id from Mail Box (0x%x)\n",
 			snps_get_state() == TRAINING_2D ? "2D" : "1D", msg_id);
-#if defined(T9130)
-		reg_write(0x6f0084, 0x0);
-#endif
 		return;
 	}
 

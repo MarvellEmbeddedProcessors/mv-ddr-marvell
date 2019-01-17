@@ -235,7 +235,7 @@ struct snps_msg_block_result_log {
 
 /* ************ Mail Box definitions ************ */
 /* TODO: update maximum supported mailbox according to actual message count */
-#define MAILBOX_MSG_MAX_COUNT	100
+#define MAILBOX_MSG_MAX_COUNT	1000
 /* Maximum supported arguments is 32, so we'll take some buffer */
 #define MAILBOX_MSG_ARGUMENT_MAX_COUNT 36
 
@@ -252,8 +252,8 @@ enum snps_mailbox_msg_type {
 };
 
 /* TODO: update retry count & polling delay according to actual requirements */
-#define MAIL_BOX_ERROR		-1
-#define MAILBOX_RETRY_COUNT	20000
+#define MAIL_BOX_ERROR		-100
+#define MAILBOX_RETRY_COUNT		20000
 #define MAILBOX_POLLING_DELAY	500	/* 300ms between reads */
 
 /* mail_box_major_message: describe 'Major' type of messages with it's ID and string content */

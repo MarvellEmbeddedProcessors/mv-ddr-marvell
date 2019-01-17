@@ -182,10 +182,11 @@ static int snps_mail_box_poll_completion(void)
 		ret = snps_mail_box_read();
 	} while (ret != MB_MAJOR_ID_TRAINING_SUCCESS &&	ret != MB_MAJOR_ID_TRAINING_FAILED
 			&& ret != MAIL_BOX_ERROR);
-
+#if !defined(T9130) && !defined(T9030)
 	/* Once step completed, dump mail box messages according to log level */
+	/* On 9130 and 9030 the SRAM is too small, therefore it can not compile with this function */
 	snps_mail_box_log_dump();
-
+#endif
 	debug_exit();
 	return ret;
 }
