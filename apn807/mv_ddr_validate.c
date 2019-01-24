@@ -227,7 +227,39 @@ static uint64_t dma_pattern[] = {
 	0xf7f7f7f7f7f7f7f7,
 	0x0808080808080808,
 	0x0404040404040404,
-	0xfbfbfbfbfbfbfbfb
+	0xfbfbfbfbfbfbfbfb,
+	0xffffffffffffffff,
+	0x0000000000000000,
+	0xffffffffffffffff,
+	0x0000000000000000,
+	0xffffffffffffffff,
+	0x0000000000000000,
+	0xffffffffffffffff,
+	0x0000000000000000,
+	0x0000000000000000,
+	0xffffffffffffffff,
+	0x0000000000000000,
+	0xffffffffffffffff,
+	0x0000000000000000,
+	0xffffffffffffffff,
+	0x0000000000000000,
+	0xffffffffffffffff,
+	0xaaaaaaaaaaaaaaaa,
+	0x5555555555555555,
+	0xaaaaaaaaaaaaaaaa,
+	0x5555555555555555,
+	0xaaaaaaaaaaaaaaaa,
+	0x5555555555555555,
+	0xaaaaaaaaaaaaaaaa,
+	0x5555555555555555,
+	0x5555555555555555,
+	0xaaaaaaaaaaaaaaaa,
+	0x5555555555555555,
+	0xaaaaaaaaaaaaaaaa,
+	0x5555555555555555,
+	0xaaaaaaaaaaaaaaaa,
+	0x5555555555555555,
+	0xaaaaaaaaaaaaaaaa
 };
 
 static void rx_validate_per_adll(u32 bit,
@@ -253,6 +285,9 @@ static void rx_validate_per_adll(u32 bit,
 				      REG_1018D_RX_CLK_DLY_TG1_NIBBLE1_BASE) +
 				      (dbyte << DBYTE_INSTANCE_OFFSET)), rx_adll);
 
+		if (dbyte == 8)
+			reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
+
 		/* copy from src to dst */
 		mv_ddr_dma_memcpy(dma_src[cs],
 				  dma_dst[cs],
@@ -265,6 +300,10 @@ static void rx_validate_per_adll(u32 bit,
 					DBG_DMA_DATA_SIZE,
 					DBG_DMA_ENG_NUM,
 					DBG_DMA_DESC_NUM);
+
+		if (dbyte == 8)
+			res = reg_read(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
+
 		if (bit < NIBBLE) {
 			if ((current_adll_val_nibble0 == rx_adll) &&
 			    ((current_vref <= vref) &&
@@ -357,13 +396,17 @@ static void rx_validate_per_dbyte(u32 cs,
 				  u32 max_bit_in_byte)
 {
 	u32 dbyte;
-	u32 subphys_num = DDR_INTERFACE_OCTETS_NUM - 1; /* FIXME: remove when ecc is supported */
+	u32 subphys_num = DDR_INTERFACE_OCTETS_NUM;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 current_adll_val_nibble0;
 	u32 current_adll_val_nibble1;
 
 	for (dbyte = 0; dbyte < subphys_num; dbyte++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, dbyte);
+
+		if (mv_ddr_is_ecc_ena() && (dbyte != 8))
+			reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
+
 		printf("############# dbyte: %d ###################\n", dbyte);
 		current_adll_val_nibble0 =
 			snps_read((((cs == 0) ?
@@ -379,6 +422,8 @@ static void rx_validate_per_dbyte(u32 cs,
 				    max_bit_in_byte,
 				    dbyte,
 				    cs);
+		if (mv_ddr_is_ecc_ena() && (dbyte != 8))
+			reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 	}
 }
 
@@ -421,6 +466,8 @@ static void tx_validate_per_adll(u32 bit,
 			      (dbyte << DBYTE_INSTANCE_OFFSET) +
 			      (bit << DBYTE_BIT_OFFSET)),
 			      (coarse << TX_COARSE_DELAY_OFFS) | tx_adll);
+		if (dbyte == 8)
+			reg_write(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG, 0x0);
 
 		/* copy from src to dst */
 		mv_ddr_dma_memcpy(dma_src[cs],
@@ -434,6 +481,9 @@ static void tx_validate_per_adll(u32 bit,
 					DBG_DMA_DATA_SIZE,
 					DBG_DMA_ENG_NUM,
 					DBG_DMA_DESC_NUM);
+
+		if (dbyte == 8)
+			res = reg_read(MC6_BASE + MC6_CH0_ECC_1BIT_ERR_COUNTER_REG);
 
 		if ((range == current_range) &&
 		    (abs_current_adll_val == tx_adll) &&
@@ -568,12 +618,16 @@ static void tx_validate_per_dbyte(u32 cs,
 				  u32 iface_id)
 {
 	u32 dbyte;
-	u32 subphys_num = DDR_INTERFACE_OCTETS_NUM - 1; /* FIXME: remove when ecc is supported */
+	u32 subphys_num = DDR_INTERFACE_OCTETS_NUM;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 current_vref_and_range, current_vref, current_range;
 
 	for (dbyte = 0; dbyte < subphys_num; dbyte++) {
 		VALIDATE_BUS_ACTIVE(tm->bus_act_mask, dbyte);
+
+		if (mv_ddr_is_ecc_ena() && (dbyte != 8))
+			reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x0 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
+
 		printf("############# dbyte: %d ###################\n", dbyte);
 		current_vref_and_range =
 			snps_read(((cs == 0) ?
@@ -588,6 +642,9 @@ static void tx_validate_per_dbyte(u32 cs,
 				    current_vref,
 				    current_range,
 				    iface_id);
+
+		if (mv_ddr_is_ecc_ena() && (dbyte != 8))
+			reg_bit_clrset(MC6_BASE + MC6_RAS_CTRL_REG, 0x1 << ECC_EN_OFFS, ECC_EN_MASK << ECC_EN_OFFS);
 	}
 }
 
