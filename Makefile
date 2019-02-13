@@ -151,6 +151,7 @@ TOOL_PATH = $(MV_DDR_ROOT)/tools/$(TOOL)
 TOOL_CSRC = $(foreach DIR,$(TOOL_PATH),$(wildcard $(DIR)/*.c))
 TOOL_COBJ = $(patsubst %.c,%.o,$(TOOL_CSRC))
 
+.NOTPARALLEL:
 .SILENT:
 all: header $(TOOL)
 
