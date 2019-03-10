@@ -651,6 +651,12 @@ u16 dmem_1d_2d_en_dq_dis_dbyte_get(void)
 	else
 		return -1;
 
+	/* in order to train the last byte(the ecc byte)
+	 * need to configure the number of DQ to 64.
+	 */
+	if (tm->if_act_mask == MV_DDR_32BIT_ECC_PUP8_BUS_MASK)
+		tot_dq_bits_en = 64;
+
 	/* get ddr device width in case ecc en */
 	if (mv_ddr_is_ecc_ena())
 		tot_dq_bits_en +=
