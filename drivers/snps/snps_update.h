@@ -113,6 +113,7 @@ u16 init_phy_seq0bdly0_get(void);
 u16 init_phy_seq0bdly1_get(void);
 u16 init_phy_seq0bdly2_get(void);
 u16 init_odt_ctrl_get(void);
+u16 atx_impedance_ctrl_get(void);
 u16 dmem_1d_2d_dram_freq_get(void);
 u16 dmem_1d_2d_drv_imp_phy_odt_imp_get(void);
 u16 dmem_1d_2d_cs_present_get(void);
@@ -172,6 +173,27 @@ struct snps_address_dynamic_update init_phy_dynamic_update[] = {
 	 init_odt_ctrl_get},
 	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_DBYTE, INST_NUM_8, REG_X4D_PHY_TX_ODT_DRV_STREN(UP_NIBL)),
 	 init_odt_ctrl_get},
+	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_ANIB, INST_NUM_0, REG_43_ATX_IMPEDANCE),
+	 atx_impedance_ctrl_get},
+	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_ANIB, INST_NUM_1, REG_43_ATX_IMPEDANCE),
+	 atx_impedance_ctrl_get},
+	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_ANIB, INST_NUM_2, REG_43_ATX_IMPEDANCE),
+	 atx_impedance_ctrl_get},
+	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_ANIB, INST_NUM_3, REG_43_ATX_IMPEDANCE),
+	 atx_impedance_ctrl_get},
+	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_ANIB, INST_NUM_4, REG_43_ATX_IMPEDANCE),
+	 atx_impedance_ctrl_get},
+	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_ANIB, INST_NUM_5, REG_43_ATX_IMPEDANCE),
+	 atx_impedance_ctrl_get},
+	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_ANIB, INST_NUM_6, REG_43_ATX_IMPEDANCE),
+	  atx_impedance_ctrl_get},
+	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_ANIB, INST_NUM_7, REG_43_ATX_IMPEDANCE),
+	 atx_impedance_ctrl_get},
+	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_ANIB, INST_NUM_8, REG_43_ATX_IMPEDANCE),
+	 atx_impedance_ctrl_get},
+	{PHY_REG_ADDR_MAP(P_STATE_0, BLK_TYPE_ANIB, INST_NUM_9, REG_43_ATX_IMPEDANCE),
+	 atx_impedance_ctrl_get},
+
 	{REG_200C5_PHY_PLLCTRL2, init_phy_pllctrl2_get},
 	{REG_2002E_PHY_ARDPTRINITVAL, init_phy_ardptrinitval_get},
 	{REG_20056_PHY_PROCODTTIMECTL, init_phy_procodttimectl_get},

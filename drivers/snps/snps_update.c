@@ -267,6 +267,7 @@ u16 init_phy_procodttimectl_get(void)
 		printf("error: %s: unsupported frequency found\n", __func__);
 
 	debug_exit();
+
 	return ret_val;
 }
 
@@ -387,6 +388,40 @@ u16 init_odt_ctrl_get(void)
 	debug_exit();
 
 	return ret_val;
+}
+u32 atx_impedance_ctrl_get(void)
+{
+	debug_enter();
+
+	u32 ret_val = 0;
+
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	u32 drv_ctrl_p = tm->edata.phy_edata.drv_ctrl_p;
+
+	switch (drv_ctrl_p) {
+	case MV_DDR_OHM_20:
+		ret_val = 0x3FF;
+		break;
+	case MV_DDR_OHM_30:
+		ret_val = 0xE7;
+		break;
+	case MV_DDR_OHM_40:
+		ret_val = 0x63;
+		break;
+	case MV_DDR_OHM_60:
+		ret_val = 0x21;
+		break;
+	case MV_DDR_OHM_120:
+		ret_val = 0x0;
+		break;
+	default:
+		ret_val = PARAM_UNDEFINED;
+	}
+
+	debug_exit();
+
+	return ret_val;
+
 }
 
 static u32 mv_ddr_snps_phy_drv_odt_calc(u32 cfg)
