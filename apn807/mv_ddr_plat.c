@@ -280,6 +280,12 @@ int mv_ddr_pre_config(void)
 	ddr3_tip_dev_attr_init(0);
 	ddr3_tip_dev_attr_set(0, MV_ATTR_OCTET_PER_INTERFACE, DDR_INTERFACE_OCTETS_NUM);
 
+	if (curr_iface->sscg == SSCG_EN) {
+		printf("SSCG_EN\n");
+		reg_write(0x6F41B0, 0x13e5E000);
+		reg_write(0x6F41B4, 0x3);
+	}
+
 	if (mv_ddr_topology_map_update()) {
 		printf("mv_ddr: failed to update topology\n");
 		return -1;

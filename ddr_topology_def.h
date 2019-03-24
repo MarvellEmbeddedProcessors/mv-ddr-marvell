@@ -235,6 +235,11 @@ enum mv_ddr_validation {
 	MV_DDR_MEMORY_CHECK
 };
 
+enum mv_ddr_sscg {
+	SSCG_EN,
+	SSCG_DIS,
+};
+
 struct mv_ddr_iface {
 	/* base addr of ap ddr interface belongs to */
 	unsigned int ap_base;
@@ -262,6 +267,9 @@ struct mv_ddr_iface {
 
 	/* ddr interface validation mode */
 	enum mv_ddr_validation validation;
+
+	/* ddr interface validation mode */
+	enum mv_ddr_sscg sscg;
 
 	/* ddr interface topology map */
 	struct mv_ddr_topology_map tm;
