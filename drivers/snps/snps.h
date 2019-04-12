@@ -110,6 +110,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define pr_debug(args...)
 #endif
 
+/*#define SNPS_DEBUG_MSG*/
+#if defined(SNPS_DEBUG_MSG) || defined(SNPS_DEBUG)
+#define pr_debug_msg(args...)	printf(args)
+#else
+#define pr_debug_msg(args...)
+#endif
+
+
 /* Dynamic update struct:
  * Dynamic initialization sequence is done with these adress & get_value API pairs:
  * CPU runs over these entries and sequentially calls get_update_value to derive

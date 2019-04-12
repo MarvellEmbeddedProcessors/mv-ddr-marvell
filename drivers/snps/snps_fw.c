@@ -371,7 +371,7 @@ int snps_mail_box_read(void)
 		 * - Lower byte of message ID is the argument count of the message
 		 */
 		argument_count =  stream_message_id & MAILBOX_STREAM_MSG_ARG_COUNT_MASK;
-			pr_debug("message is 'stream' type: 'stream' ID=0x%x, arg_count=%d\n"
+			pr_debug_msg("message is 'stream' type: 'stream' ID=0x%x, arg_count=%d\n"
 					, stream_message_id, argument_count);
 		if (argument_count >= MAILBOX_MSG_ARGUMENT_MAX_COUNT) {
 			printf("Error: Mail Box message with too many arguments (%d, supported %d)\n"
@@ -389,14 +389,14 @@ int snps_mail_box_read(void)
 				ret = MAIL_BOX_ERROR;
 				goto fail;
 			}
-			pr_debug("0x%x\n", message_arg);
+			pr_debug_msg("message_arg = 0x%x\n", message_arg);
 			gd.messages[gd.message_log_index][i + 2] = message_arg;
 		}
 		 /* Mark 'stream' type in cell#1 of messages log */
 		gd.messages[gd.message_log_index][1] = MB_MSG_TYPE_STREAM;
 		message_id = (stream_message_id >> MAILBOX_STREAM_MSG_ID_OFFSET);
 	} else {
-		pr_debug("message is 'major' type (MSG ID = 0x%x)\n", message_id);
+		pr_debug_msg("message is 'major' type (MSG ID = 0x%x)\n", message_id);
 		/* else message type is 'major', with no arguments,
 		 * so mark 'major' type in cell#1 of messages log
 		 * NOTE: this mark will be used in snps_mail_box_log_dump(),
