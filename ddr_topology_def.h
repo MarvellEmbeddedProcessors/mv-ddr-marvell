@@ -216,6 +216,9 @@ struct mv_ddr_topology_map {
 
 	/* ODT configuration */
 	u32 odt_config;
+
+	/* Clock enable mask */
+	u32 clk_enable;
 };
 
 enum mv_ddr_iface_mode {
