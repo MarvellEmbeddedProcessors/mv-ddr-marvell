@@ -213,6 +213,9 @@ struct mv_ddr_topology_map {
 
 	/* electrical parameters */
 	unsigned int electrical_data[MV_DDR_EDATA_LAST];
+
+	/* ODT configuration */
+	u32 odt_config;
 };
 
 enum mv_ddr_iface_mode {

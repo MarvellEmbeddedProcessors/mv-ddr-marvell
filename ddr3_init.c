@@ -220,6 +220,7 @@ int ddr3_init(void)
 static int mv_ddr_training_params_set(u8 dev_num)
 {
 	struct tune_train_params params;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	int status;
 	u32 cs_num;
 
@@ -260,6 +261,10 @@ static int mv_ddr_training_params_set(u8 dev_num)
 		params.g_odt_config = TUNE_TRAINING_PARAMS_ODT_CONFIG_2CS;
 	}
 #endif /* CONFIG_DDR4 */
+
+	/* Use platform specific override ODT value */
+	if (tm->odt_config)
+		params.g_odt_config = tm->odt_config;
 
 	status = ddr3_tip_tune_training_params(dev_num, &params);
 	if (MV_OK != status) {
