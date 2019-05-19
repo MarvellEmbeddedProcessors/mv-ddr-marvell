@@ -1,13 +1,15 @@
-Armada-70x0/80x0/38x DDR Porting Guide
+DDR Porting Guide
 =================
 
 This document provides with instructions for porting Marvell mv_ddr package to a customer board.
 
 Relevant Devices
 ----------------
-	- Armada-80x0
-	- Armada-70x0
-	- Armada-38x
+- ARMADA 38x
+- ARMADA 80x0
+- ARMADA 70x0
+- ARMADA 3900
+- Octeon-TX2 CN913x
 
 Introduction
 ------------
