@@ -303,5 +303,5 @@ unsigned int mv_ddr_misl_phy_drv_ctrl_n_get(void);
 unsigned int mv_ddr_misl_phy_odt_p_get(void);
 unsigned int mv_ddr_misl_phy_odt_n_get(void);
 int mv_ddr_get_soc_revision_id(void);
-
+void refresh(void);
 #endif /* _DDR3_INIT_H */

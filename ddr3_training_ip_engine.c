@@ -791,6 +791,9 @@ int ddr3_tip_ip_training(u32 dev_num, enum hws_access_type access_type,
 	ddr3_tip_if_write(0, ACCESS_TYPE_MULTICAST, PARAM_NOT_CARE,
 			  ODPG_DATA_CTRL_REG, 0, MASK_ALL_BITS);
 
+	if (tm->debug_level != DEBUG_LEVEL_ERROR)
+		refresh();
+
 	return MV_OK;
 }
 
@@ -1066,6 +1069,8 @@ int ddr3_tip_read_training_result(u32 dev_num, u32 if_id,
 			}
 		}
 	}
+	if (tm->debug_level != DEBUG_LEVEL_ERROR)
+		refresh();
 
 	return MV_OK;
 }

@@ -2409,4 +2409,24 @@ int mv_ddr4_dm_tuning(u32 cs, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WIDTH_IN_BI
 
 	return MV_OK;
 }
+void refresh(void)
+{
+	u32 data_read[MAX_INTERFACE_NUM];
+	ddr3_tip_if_read(0, ACCESS_TYPE_UNICAST, 0, ODPG_DATA_CTRL_REG, data_read, MASK_ALL_BITS);
+
+	/* Refresh Command for CS0*/
+	ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_DATA_CTRL_REG, (0 << 26), (3 << 26));
+	ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, SDRAM_OP_REG, 0xe02, 0xf1f);
+	if (ddr3_tip_if_polling(0, ACCESS_TYPE_UNICAST, 0, 0, 0x1f, SDRAM_OP_REG, MAX_POLLING_ITERATIONS) != MV_OK)
+			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("DDR3 poll failed"));
+
+	/* Refresh Command for CS1*/
+	ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_DATA_CTRL_REG, (1 << 26), (3 << 26));
+	ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, SDRAM_OP_REG, 0xd02, 0xf1f);
+	if (ddr3_tip_if_polling(0, ACCESS_TYPE_UNICAST, 0, 0, 0x1f, SDRAM_OP_REG, MAX_POLLING_ITERATIONS) != MV_OK)
+			DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("DDR3 poll failed"));
+
+	/* Restore Register*/
+	ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_DATA_CTRL_REG, data_read[0] , MASK_ALL_BITS);
+}
 #endif /* CONFIG_DDR4 */
