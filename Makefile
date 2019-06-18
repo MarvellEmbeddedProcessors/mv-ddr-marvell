@@ -343,7 +343,9 @@ MV_DDR_PLAT = apn806
 MV_DDR_TIP = y
 MV_DDR_FLOW = y
 ifeq ($(findstring 32bit_ddr,$(PLATFORM)),)
+ifndef DDR32
 CFLAGS += -DCONFIG_64BIT
+endif
 endif
 endif
 ifneq ($(findstring a70x0,$(PLATFORM)),)
