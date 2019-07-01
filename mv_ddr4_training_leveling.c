@@ -368,7 +368,7 @@ static int mv_ddr4_dynamic_pb_wl_supp(u32 dev_num, enum mv_wl_supp_mode ecc_mode
 	u32 subphy_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	u8 compare_result = 0;
 	u32 orig_phase;
-	u32 rd_data, wr_data;
+	u32 rd_data, wr_data = 0;
 	u32 flag, step;
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u32 ecc_phy_access_id;
@@ -450,7 +450,7 @@ static int mv_ddr4_dynamic_pb_wl_supp(u32 dev_num, enum mv_wl_supp_mode ecc_mode
 						if (orig_phase > 1)
 							wr_data = (rd_data & ~0x1c0) | ((orig_phase - 2) << 6);
 						else if (orig_phase == 1)
-								wr_data = (rd_data & ~0x1df);
+							wr_data = (rd_data & ~0x1df);
 						if (orig_phase >= 1)
 							ddr3_tip_bus_write(dev_num, ACCESS_TYPE_UNICAST, if_id,
 									   ACCESS_TYPE_UNICAST, subphy_num,
