@@ -104,9 +104,6 @@ MV_DDR_VER_CSRC=$2
 
 # get mv_ddr git commit id
 MV_DDR_COMMIT_ID=`git -C $MV_DDR_ROOT rev-parse --verify --quiet --short HEAD 2> /dev/null`
-if [ "$MV_DDR_COMMIT_ID" = "" ]; then
-	MV_DDR_COMMIT_ID="???"
-fi
 
 # check for uncommitted changes in mv_ddr git
 MV_DDR_DIRTY_CHK=`git -C $MV_DDR_ROOT diff-index --name-only HEAD 2> /dev/null`
@@ -117,11 +114,15 @@ fi
 # get mv_ddr version from localversion file in mv_ddr directory
 MV_DDR_VERSION=`awk '{$1=$1;print}' $MV_DDR_ROOT/localversion 2> /dev/null`
 if [ "$MV_DDR_VERSION" = "" ]; then
-	MV_DDR_VERSION="???"
+	MV_DDR_VERSION="unknown"
 fi
 
 # set mv_ddr version string to be printed out
+if [ "$MV_DDR_COMMIT_ID" = "" ]; then
+MV_DDR_VERSION_STRING="mv_ddr: Marvell-${MV_DDR_VERSION} (release)"
+else
 MV_DDR_VERSION_STRING="mv_ddr: ${MV_DDR_VERSION}-g${MV_DDR_COMMIT_ID}"
+fi
 
 # get date and time to set mv_ddr build message
 MONTH=`LC_TIME=en_US date +%b`
