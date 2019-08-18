@@ -1160,6 +1160,9 @@ static unsigned int mv_ddr_row_num_convert(unsigned int row_addr)
 	case 16:
 		row_addr_map = 0x6;
 		break;
+	case 17:
+		row_addr_map = 0x7;
+		break;
 	default:
 		printf("%s: number of rows %d is not supported\n", __func__,
 		       row_addr);
