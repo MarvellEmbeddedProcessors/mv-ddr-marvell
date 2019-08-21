@@ -1998,7 +1998,12 @@ static int ddr4_tip_set_timing(u32 dev_num, enum hws_access_type access_type,
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
 				       SDRAM_TIMING_HIGH_REG, val, mask));
 
-	t_ccd = 4; /* per t_ccd_s value in DDR4 JEDEC Standard */
+#ifdef CONFIG_ARMADA_38X
+	t_ccd = 6;
+#else
+	t_ccd = 4;
+#endif
+
 	CHECK_STATUS(ddr3_tip_if_write(dev_num, access_type, if_id,
 				       DDR_TIMING_REG,
 				       ((t_ccd - 1) & DDR_TIMING_TCCD_MASK) << DDR_TIMING_TCCD_OFFS,
