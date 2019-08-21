@@ -451,6 +451,7 @@ MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
 MV_DDR_VER_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_VER_CSRC))
 MV_DDR_COBJ += $(MV_DDR_VER_COBJ)
 
+.NOTPARALLEL:
 .SILENT:
 
 all: check_env header create_dir $(MV_DDR_LIB)
