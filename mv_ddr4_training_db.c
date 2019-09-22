@@ -142,21 +142,33 @@ u32 mv_ddr_freq_get(enum mv_ddr_freq freq)
 
 /* non-dbi mode - table for cl values per frequency for each speed bin index */
 static struct mv_ddr_cl_val_per_freq cl_table[] = {
-	/* TODO: review 1600 and 1866 speed grades */
-	/* 130M	650M	667M	800M	933M	1067M	900	1000	1050	1200 */
-	{ {10,	10,	10,	0,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600J */
-	{ {10,	11,	11,	0,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600K */
-	{ {10,	12,	12,	0,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600L */
-	{ {10,	12,	12,	12,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1866L */
-	{ {10,	12,	12,	13,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1866M */
-	{ {10,	12,	12,	14,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1866N */
-	{ {10,	10,	10,	12,	14,	14,	14,	14,	14,	0} },	/* SPEED_BIN_DDR_2133N */
-	{ {10,	9,	9,	12,	14,	15,	14,	15,	15,	0} },	/* SPEED_BIN_DDR_2133P */
-	{ {10,	10,	10,	12,	14,	16,	14,	16,	16,	0} },	/* SPEED_BIN_DDR_2133R */
-	{ {10,	10,	10,	12,	14,	16,	14,	16,	16,	18} },	/* SPEED_BIN_DDR_2400P */
-	{ {10,	9,	9,	11,	13,	15,	13,	15,	15,	18} },	/* SPEED_BIN_DDR_2400R */
-	{ {10,	9,	9,	11,	13,	15,	13,	15,	15,	17} },	/* SPEED_BIN_DDR_2400T */
-	{ {10,	10,	10,	12,	14,	16,	14,	16,	16,	18} }	/* SPEED_BIN_DDR_2400U */
+/*   130   650   667   800   933   1067   900   1000   1050   1200   1333   1466   1600 FREQ(MHz)*/
+/*   7.69  1.53  1.5   1.25  1.07  0.937  1.11	1	   0.95   0.83	 0.75	0.68   0.625 TCK(ns)*/
+	{{10,  10,	 10,   0,	 0,    0,	  0,	0,	   0,	  0,	 0,	    0,	   0} },/* SPEED_BIN_DDR_1600J */
+	{{10,  11,	 11,   0,	 0,    0,	  0,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1600K */
+	{{10,  12,	 12,   0,	 0,    0,	  0,	0,	   0,	  0,	 0,	    0,	   0} },/* SPEED_BIN_DDR_1600L */
+	{{10,  12,	 12,   12,	 0,    0,	  0,	0,	   0,	  0,	 0,	    0,	   0} },/* SPEED_BIN_DDR_1866L */
+	{{10,  12,	 12,   13,	 0,    0,	  0,	0,	   0,	  0,	 0,	    0,	   0} },/* SPEED_BIN_DDR_1866M */
+	{{10,  12,	 12,   14,	 0,    0,	  0,	0,	   0,	  0,	 0,	    0,	   0} },/* SPEED_BIN_DDR_1866N */
+	{{10,  10,	 10,   12,	 14,   14,	  14,	14,	   14,	  0,	 0,	    0,	   0} },/* SPEED_BIN_DDR_2133N */
+	{{10,  9,	 9,    12,	 14,   15,	  14,	15,	   15,	  0,	 0,	    0,	   0} },/* SPEED_BIN_DDR_2133P */
+	{{10,  10,	 10,   12,	 14,   16,	  14,	16,	   16,	  0,	 0,	    0,	   0} },/* SPEED_BIN_DDR_2133R */
+	{{10,  10,	 10,   12,	 14,   16,	  14,	16,	   16,	  18,	 0,	    0,	   0} },/* SPEED_BIN_DDR_2400P */
+	{{10,  9,	 9,    11,	 13,   15,	  13,	15,	   15,	  18,	 0,	    0,	   0} },/* SPEED_BIN_DDR_2400R */
+	{{10,  9,	 9,    11,	 13,   15,	  13,	15,	   15,	  17,	 0,	    0,	   0} },/* SPEED_BIN_DDR_2400T */
+	{{10,  10,	 10,   12,	 14,   16,	  14,	16,	   16,	  18,	 0,	    0,	   0} },/* SPEED_BIN_DDR_2400U */
+	{{10,  10,   10,   11,   13,   15,    13,   15,    15,    16,    17,    0,     0} },/* SPEED_BIN_DDR_2666T */
+	{{10,  9,    10,   11,   13,   15,    13,   15,    15,    17,    18,    0,     0} },/* SPEED_BIN_DDR_2666U */
+	{{10,  9,    10,   12,   14,   16,    14,   16,    16,    18,    19,    0,     0} },/* SPEED_BIN_DDR_2666V */
+	{{10,  10,   10,   12,   14,   16,    14,   16,    16,    18,    20,    0,     0} },/* SPEED_BIN_DDR_2666W */
+	{{10,  10,   9,    11,   13,   15,    13,   15,    15,    16,    18,    19,    0} },/* SPEED_BIN_DDR_2933V */
+	{{10,  9,    10,   11,   13,   15,    13,   15,    15,    17,    19,    20,    0} },/* SPEED_BIN_DDR_2933W */
+	{{10,  9,    10,   12,   14,   16,    14,   16,    16,    18,    20,    21,    0} },/* SPEED_BIN_DDR_2933Y */
+	{{10,  10,   10,   12,   14,   16,    14,   16,    16,    18,    20,    22,    0} },/* SPEED_BIN_DDR_2933AA*/
+	{{10,  10,   9,    11,   13,   15,    13,   15,    15,    16,    18,    20,    20} },/* SPEED_BIN_DDR_3200W */
+	{{10,  9,    0,    11,   13,   15,    13,   15,    15,    17,    19,    22,    22} },/* SPEED_BIN_DDR_3200AA*/
+	{{10,  9,    10,   12,   14,   16,    14,   16,    16,    18,    20,    24,    24} } /* SPEED_BIN_DDR_3200AC*/
+
 };
 
 u32 mv_ddr_cl_val_get(u32 index, u32 freq)
@@ -166,38 +178,62 @@ u32 mv_ddr_cl_val_get(u32 index, u32 freq)
 
 /* dbi mode - table for cl values per frequency for each speed bin index */
 struct mv_ddr_cl_val_per_freq cas_latency_table_dbi[] = {
-	/* 130M	650M	667M	800M	933M	1067M	900	1000 */
-	{ {0,	12,	12,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600J */
-	{ {0,	13,	13,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600K */
-	{ {0,	14,	14,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600L */
-	{ {0,	14,	14,	14,	0,	0,	14,	0} },	/* SPEED_BIN_DDR_1866L */
-	{ {0,	14,	14,	15,	0,	0,	15,	0} },	/* SPEED_BIN_DDR_1866M */
-	{ {0,	14,	14,	16,	0,	0,	16,	0} },	/* SPEED_BIN_DDR_1866N */
-	{ {0,	12,	12,	14,	16,	17,	14,	17} },	/* SPEED_BIN_DDR_2133N */
-	{ {0,	11,	11,	14,	16,	18,	14,	18} },	/* SPEED_BIN_DDR_2133P */
-	{ {0,	12,	12,	14,	16,	19,	14,	19} },	/* SPEED_BIN_DDR_2133R */
-	{ {0,	12,	12,	14,	16,	19,	14,	19} },	/* SPEED_BIN_DDR_2400P */
-	{ {0,	11,	11,	13,	15,	18,	13,	18} },	/* SPEED_BIN_DDR_2400R */
-	{ {0,	11,	11,	13,	15,	18,	13,	18} },	/* SPEED_BIN_DDR_2400T */
-	{ {0,	12,	12,	14,	16,	19,	14,	19} }	/* SPEED_BIN_DDR_2400U */
+/*	 130   650   667   800   933   1067   900   1000   1050   1200   1333   1466   1600 FREQ(MHz)*/
+/*	 7.69  1.53  1.5   1.25  1.07  0.937  1.11  1      0.95   0.83   0.75   0.68   0.625 TCK(ns)*/
+	{{0,   12,	 12,   0,	 0,	   0,	  0,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1600J */
+	{{0,   13,	 13,   0,	 0,	   0,	  0,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1600K */
+	{{0,   14,	 14,   0,	 0,	   0,	  0,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1600L */
+	{{0,   14,	 14,   14,	 0,	   0,	  14,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1866L */
+	{{0,   14,	 14,   15,	 0,	   0,	  15,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1866M */
+	{{0,   14,	 14,   16,	 0,	   0,	  16,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1866N */
+	{{0,   12,	 12,   14,	 16,	  17,	  14,	17,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_2133N */
+	{{0,   11,	 11,   14,	 16,	  18,	  14,	18,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_2133P */
+	{{0,   12,	 12,   14,	 16,	  19,	  14,	19,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_2133R */
+	{{0,   12,	 12,   14,	 16,	  19,	  14,	19,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_2400P */
+	{{0,   11,	 11,   13,	 15,	  18,	  13,	18,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_2400R */
+	{{0,   11,	 11,   13,	 15,	  18,	  13,	18,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_2400T */
+	{{0,   12,	 12,   14,	 16,	  19,	  14,	19,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_2400U */
+	{{10,  10,   11,   13,   15,   18,    13,   18,    18,    19,    20,    0,     0} },/* SPEED_BIN_DDR_2666T */
+	{{10,  9,    11,   13,   15,   18,    13,   18,    18,    20,    21,    0,     0} },/* SPEED_BIN_DDR_2666U */
+	{{10,  9,    12,   14,   16,   19,    14,   19,    19,    21,    22,    0,     0} },/* SPEED_BIN_DDR_2666V */
+	{{10,  10,   12,   14,   16,   19,    14,   19,    19,    21,    23,    0,     0} },/* SPEED_BIN_DDR_2666W */
+	{{10,  10,   11,   13,   15,   18,    15,   18,    18,    19,    21,    23,    0} },/* SPEED_BIN_DDR_2933V */
+	{{10,  9,    12,   13,   15,   18,    15,   18,    18,    20,    22,    24,    0} },/* SPEED_BIN_DDR_2933W */
+	{{10,  9,    12,   14,   16,   19,    16,   19,    19,    21,    23,    26,    0} },/* SPEED_BIN_DDR_2933Y */
+	{{10,  10,   12,   14,   16,   19,    16,   19,    19,    21,    23,    26,    0} },/* SPEED_BIN_DDR_2933AA*/
+	{{10,  10,   11,   13,   15,   18,    15,   18,    18,    19,    21,    24,    24} },/* SPEED_BIN_DDR_3200W */
+	{{10,  9,    0,    13,   15,   18,    15,   18,    18,    20,    22,    26,    26} },/* SPEED_BIN_DDR_3200AA*/
+	{{10,  9,    12,   14,   16,   19,    16,   19,    19,    21,    23,    28,    28} } /* SPEED_BIN_DDR_3200AC*/
 };
 
 /* table for cwl values per speed bin index */
 static struct mv_ddr_cl_val_per_freq cwl_table[] = {
-	/* 130M	650M	667M	800M	933M	1067M	900	1000	1050	1200 */
-	{ {9,	9,	9,	0,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600J */
-	{ {9,	9,	9,	0,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600K */
-	{ {9,	9,	9,	0,	0,	0,	0,	0,	0,	0} },	/* SPEED_BIN_DDR_1600L */
-	{ {9,	9,	9,	10,	0,	0,	10,	0,	0,	0} },	/* SPEED_BIN_DDR_1866L */
-	{ {9,	9,	9,	10,	0,	0,	10,	0,	0,	0} },	/* SPEED_BIN_DDR_1866M */
-	{ {9,	9,	9,	10,	0,	0,	10,	0,	0,	0} },	/* SPEED_BIN_DDR_1866N */
-	{ {9,	9,	9,	9,	10,	11,	10,	11,	10,	11} },	/* SPEED_BIN_DDR_2133N */
-	{ {9,	9,	9,	9,	10,	11,	10,	11,	10,	11} },	/* SPEED_BIN_DDR_2133P */
-	{ {9,	9,	9,	10,	10,	11,	10,	11,	10,	11} },	/* SPEED_BIN_DDR_2133R */
-	{ {9,	9,	9,	9,	10,	11,	10,	11,	10,	12} },	/* SPEED_BIN_DDR_2400P */
-	{ {9,	9,	9,	9,	10,	11,	10,	11,	10,	12} },	/* SPEED_BIN_DDR_2400R */
-	{ {9,	9,	9,	9,	10,	11,	10,	11,	10,	12} },	/* SPEED_BIN_DDR_2400T */
-	{ {9,	9,	9,	9,	10,	11,	10,	11,	10,	12} }	/* SPEED_BIN_DDR_2400U */
+/*	 130   650   667   800   933   1067   900   1000   1050   1200   1333  1466   1600 FREQ(MHz)*/
+/*	7.69   1.53  1.5   1.25  1.07  0.937  1.11  1      0.95   0.83   0.75  0.68   0.625 TCK(ns)*/
+	{{9,   9,	 9,	   0,	 0,    0,	  0,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1600J */
+	{{9,   9,	 9,	   0,	 0,    0,	  0,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1600K */
+	{{9,   9,	 9,	   0,	 0,    0,	  0,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1600L */
+	{{9,   9,	 9,	   10,	 0,    0,	  10,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1866L */
+	{{9,   9,	 9,	   10,	 0,    0,	  10,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1866M */
+	{{9,   9,	 9,	   10,	 0,    0,	  10,	0,	   0,	  0,	 0,	    0,     0} },/* SPEED_BIN_DDR_1866N */
+	{{9,   9,	 9,	   9,	 10,   11,	  10,	11,	   10,	  11,	 0,	    0,     0} },/* SPEED_BIN_DDR_2133N */
+	{{9,   9,	 9,	   9,	 10,   11,	  10,	11,	   10,	  11,	 0,	    0,     0} },/* SPEED_BIN_DDR_2133P */
+	{{9,   9,	 9,	   10,	 10,   11,	  10,	11,	   10,	  11,	 0,	    0,     0} },/* SPEED_BIN_DDR_2133R */
+	{{9,   9,	 9,	   9,	 10,   11,	  10,	11,	   10,	  12,	 0,	    0,     0} },/* SPEED_BIN_DDR_2400P */
+	{{9,   9,	 9,	   9,	 10,   11,	  10,	11,	   10,	  12,	 0,	    0,     0} },/* SPEED_BIN_DDR_2400R */
+	{{9,   9,	 9,	   9,	 10,   11,	  10,	11,	   10,	  12,	 0,	    0,     0} },/* SPEED_BIN_DDR_2400T */
+	{{9,   9,	 9,	   9,	 10,   11,	  10,	11,	   10,	  12,	 0,	    0,     0} },/* SPEED_BIN_DDR_2400U */
+	{{10,  10,   9,    9,    10,   11,    10,   11,    11,    12,    14,    0,     0} },/* SPEED_BIN_DDR_2666T */
+	{{10,  9,    9,    9,    10,   11,    10,   11,    11,    12,    14,    0,     0} },/* SPEED_BIN_DDR_2666U */
+	{{10,  9,    9,    9,    10,   11,    10,   11,    11,    12,    14,    0,     0} },/* SPEED_BIN_DDR_2666V */
+	{{10,  10,   9,    9,    10,   11,    10,   11,    11,    12,    14,    0,     0} },/* SPEED_BIN_DDR_2666W */
+	{{10,  10,   9,    9,    10,   11,    10,   11,    11,    12,    14,    16,    0} },/* SPEED_BIN_DDR_2933V */
+	{{10,  9,    9,    9,    10,   11,    10,   11,    11,    12,    14,    16,    0} },/* SPEED_BIN_DDR_2933W */
+	{{10,  9,    9,    9,    10,   11,    10,   11,    11,    12,    14,    16,    0} },/* SPEED_BIN_DDR_2933Y */
+	{{10,  10,   9,    9,    10,   11,    10,   11,    11,    12,    14,    16,    0} },/* SPEED_BIN_DDR_2933AA*/
+	{{10,  10,   9,    9,    10,   11,    10,   11,    11,    12,    14,    16,    16} },/* SPEED_BIN_DDR_3200W */
+	{{10,  9,    9,    9,    10,   11,    10,   11,    11,    12,    14,    16,    16} },/* SPEED_BIN_DDR_3200AA*/
+	{{10,  9,    9,    9,    10,   11,    10,   11,    11,    12,    14,    16,    16} } /* SPEED_BIN_DDR_3200AC*/
 };
 
 u32 mv_ddr_cwl_val_get(u32 index, u32 freq)
@@ -328,6 +364,17 @@ u32 speed_bin_table_t_rcd_t_rp[] = {
 	12500,
 	13320,
 	14160,
+	15000,
+	12750,
+	13500,
+	14250,
+	15000,
+	12960,
+	13640,
+	14320,
+	15000,
+	12500,
+	13750,
 	15000
 };
 
@@ -344,6 +391,17 @@ u32 speed_bin_table_t_rc[] = {
 	44500,
 	45320,
 	46160,
+	47000,
+	44750,
+	45500,
+	46250,
+	47000,
+	44960,
+	45640,
+	46320,
+	47000,
+	44500,
+	45750,
 	47000
 };
 
@@ -422,10 +480,14 @@ unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_dd
 		if (tm->cfg_src == MV_DDR_CFG_SPD)
 			result = tm->timing_data[MV_DDR_TRAS_MIN];
 		else {
-			if (index <= SPEED_BIN_DDR_1600L) result = 35000;
-			else if (index <= SPEED_BIN_DDR_1866N) result = 34000;
-			else if (index <= SPEED_BIN_DDR_2133R) result = 33000;
-			else result = 32000;
+			if (index <= SPEED_BIN_DDR_1600L)
+				result = 35000;
+			else if (index <= SPEED_BIN_DDR_1866N)
+				result = 34000;
+			else if (index <= SPEED_BIN_DDR_2133R)
+				result = 33000;
+			else
+				result = 32000;
 		}
 		break;
 	case SPEED_BIN_TRC:
@@ -439,18 +501,28 @@ unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_dd
 		if (tm->cfg_src == MV_DDR_CFG_SPD)
 			result = tm->timing_data[MV_DDR_TRRD_S_MIN];
 		else {
-			if (index <= SPEED_BIN_DDR_1600L) result = 5000;
-			else if (index <= SPEED_BIN_DDR_1866N) result = 4200;
-			else if (index <= SPEED_BIN_DDR_2133R) result = 3700;
-			else result = 3300;
+			if (index <= SPEED_BIN_DDR_1600L)
+				result = 5000;
+			else if (index <= SPEED_BIN_DDR_1866N)
+				result = 4200;
+			else if (index <= SPEED_BIN_DDR_2133R)
+				result = 3700;
+			else if (index <= SPEED_BIN_DDR_2400P)
+				result = 3000;
+			else if (index <= SPEED_BIN_DDR_2933V)
+				result = 2700;
+			else
+				result = 2500;
 		}
 	        break;
 	case SPEED_BIN_TRRD2K:
 		if (tm->cfg_src == MV_DDR_CFG_SPD)
 			result = tm->timing_data[MV_DDR_TRRD_S_MIN];
 		else {
-			if (index <= SPEED_BIN_DDR_1600L) result = 6000;
-			else result = 5300;
+			if (index <= SPEED_BIN_DDR_1600L)
+				result = 6000;
+			else
+				result = 5300;
 		}
 
 		break;
@@ -459,17 +531,22 @@ unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_dd
 		if (tm->cfg_src == MV_DDR_CFG_SPD)
 			result = tm->timing_data[MV_DDR_TRRD_L_MIN];
 		else {
-			if (index <= SPEED_BIN_DDR_1600L) result = 6000;
-			else if (index <= SPEED_BIN_DDR_2133R) result = 5300;
-			else result = 4900;
+			if (index <= SPEED_BIN_DDR_1600L)
+				result = 6000;
+			else if (index <= SPEED_BIN_DDR_2133R)
+				result = 5300;
+			else
+				result = 4900;
 		}
 		break;
 	case SPEED_BIN_TRRDL2K:
 		if (tm->cfg_src == MV_DDR_CFG_SPD)
 			result = tm->timing_data[MV_DDR_TRRD_L_MIN];
 		else {
-			if (index <= SPEED_BIN_DDR_1600L) result = 7500;
-			else result = 6400;
+			if (index <= SPEED_BIN_DDR_1600L)
+				result = 7500;
+			else
+				result = 6400;
 		}
 	        break;
 	case SPEED_BIN_TPD:
@@ -479,27 +556,42 @@ unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_dd
 		if (tm->cfg_src == MV_DDR_CFG_SPD)
 			result = tm->timing_data[MV_DDR_TFAW_MIN];
 		else {
-			if (index <= SPEED_BIN_DDR_1600L) result = 20000;
-			else if (index <= SPEED_BIN_DDR_1866N) result = 17000;
-			else if (index <= SPEED_BIN_DDR_2133R) result = 15000;
-			else result = 13000;
+			if (index <= SPEED_BIN_DDR_1600L)
+				result = 20000;
+			else if (index <= SPEED_BIN_DDR_1866N)
+				result = 17000;
+			else if (index <= SPEED_BIN_DDR_2133R)
+				result = 15000;
+			else if (index <= SPEED_BIN_DDR_2400P)
+				result = 13000;
+			else if (index <= SPEED_BIN_DDR_2666T)
+				result = 12000;
+			else if (index <= SPEED_BIN_DDR_2933V)
+				result = 10875;
+			else
+				result = 10000;
 		}
 	        break;
 	case SPEED_BIN_TFAW1K:
 		if (tm->cfg_src == MV_DDR_CFG_SPD)
 			result = tm->timing_data[MV_DDR_TFAW_MIN];
 		else {
-			if (index <= SPEED_BIN_DDR_1600L) result = 25000;
-			else if (index <= SPEED_BIN_DDR_1866N) result = 23000;
-			else result = 21000;
+			if (index <= SPEED_BIN_DDR_1600L)
+				result = 25000;
+			else if (index <= SPEED_BIN_DDR_1866N)
+				result = 23000;
+			else
+				result = 21000;
 		}
 	        break;
 	case SPEED_BIN_TFAW2K:
 		if (tm->cfg_src == MV_DDR_CFG_SPD)
 			result = tm->timing_data[MV_DDR_TFAW_MIN];
 		else {
-			if (index <= SPEED_BIN_DDR_1600L) result = 35000;
-			else result = 30000;
+			if (index <= SPEED_BIN_DDR_1600L)
+				result = 35000;
+			else
+				result = 30000;
 		}
 		break;
 	case SPEED_BIN_TWTR:
