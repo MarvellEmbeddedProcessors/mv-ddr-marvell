@@ -8,7 +8,6 @@ Relevant Devices
 - ARMADA 38x
 - ARMADA 80x0
 - ARMADA 70x0
-- ARMADA 3900
 - Octeon-TX2 CN913x
 
 Introduction
@@ -22,7 +21,7 @@ Porting procedure
 -----------------
 1. Files location
 
-	- For A7/8K, refer to ``/path/to/atf/docs/marvell/armada/porting.txt`` for the detailed description of ATF files location
+	- For A7/8K, CN913x, refer to ``/path/to/atf/docs/marvell/armada/porting.txt`` for the detailed description of ATF files location
 	- For A38x, update ``/path/to/mv_ddr/a38x/mv_ddr_a38x_brd.c`` file
 
 2. DDR topology map description
@@ -394,11 +393,11 @@ Porting procedure
 
 7. DRAM Remapping
 
-	ARMADA 7/8K DRAM memory controller has DRAM translation unit with the remapping capability.
+	ARMADA 7/8K, CN913x DRAM memory controller has DRAM translation unit with the remapping capability.
 	It is used to remap the DRAM region overlapping with the I/O configuration space providing
 	with an access to the entire DRAM memory.
 
-	To remap ARMADA 7/8K DRAM overlapping region, one should specify the start and end physical
+	To remap ARMADA 7/8K, CN913x DRAM overlapping region, one should specify the start and end physical
 	addresses of the contiguous non-DRAM memory region (the overlapping I/O configuration space).
 	It is done using the following preprocessor macros in
 
