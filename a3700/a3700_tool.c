@@ -70,6 +70,7 @@ enum ddr_config_index {
 	DDR_SPEEDBIN_INDEX,
 	DDR_BUS_WIDTH_INDEX,
 	DDR_MEM_SIZE_INDEX,
+	DDR_TWIN_DIE_INDEX,
 	DDR_MEM_FREQ_INDEX,
 	DDR_BUS_ACT_MASK,
 	DDR_CL,
@@ -117,6 +118,7 @@ static struct config_item cfg_list[] = {
 	{DDR_SPEEDBIN_INDEX,	"ddr_speedbin_index",	{} },
 	{DDR_BUS_WIDTH_INDEX,	"ddr_bus_width_index",	{} },
 	{DDR_MEM_SIZE_INDEX,	"ddr_mem_size_index",	{} },
+	{DDR_TWIN_DIE_INDEX,	"ddr_twin_die_index",	{} },
 	{DDR_MEM_FREQ_INDEX,	"ddr_mem_freq_index",	{} },
 	{DDR_BUS_ACT_MASK,	"ddr_bus_act_mask",	{} },
 	{DDR_CL,		"ddr_cas_latency",	{} },
@@ -211,7 +213,6 @@ static int ddr_gen_output_item(char *buf, struct output_item *item)
 
 	if (item == NULL)
 		return -1;
-
 	switch (item->op) {
 	case DDR_OP_WRITE:
 		for (i = 0; replacelist[i].op && i < MAX_TIM_ITEMS; i++) {
@@ -350,7 +351,13 @@ static int ddr_cfg_parse(struct config_item *clist, struct ddr_porting_cfg *cfg)
 	iface_params->speed_bin_index = strtol(clist[DDR_SPEEDBIN_INDEX].value, (char **)NULL, 0);
 	iface_params->bus_width = strtol(clist[DDR_BUS_WIDTH_INDEX].value, (char **)NULL, 0);
 	iface_params->memory_size = strtol(clist[DDR_MEM_SIZE_INDEX].value, (char **)NULL, 0);
+	iface_params->twin_die_combined = strtol(clist[DDR_TWIN_DIE_INDEX].value, (char **)NULL, 0);
 	iface_params->memory_freq = MV_DDR_FREQ_800;
+
+	if (iface_params->twin_die_combined == COMBINED) {
+		iface_params->bus_width = MV_DDR_DEV_WIDTH_8BIT;
+		iface_params->memory_size -= 1;
+	}
 
 	cfg->map.bus_act_mask = BUS_MASK_16BIT;
 
@@ -470,7 +477,6 @@ int main(int argc, char **argv)
 		usage();
 		return 0;
 	}
-
 	/* get reg settings */
 	ddr_controller_init(&cfg.map);
 
