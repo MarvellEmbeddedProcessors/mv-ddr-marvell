@@ -38,6 +38,8 @@ Porting procedure
 
 			enum mv_ddr_cfg_src cfg_src; /* ddr configuration data source */
 
+			enum mv_ddr_twin_die twin_die_combined; /* ddr twin-die combined */
+
 			union mv_ddr_spd_data spd_data; /* raw spd data */
 
 			unsigned int timing_data[MV_DDR_TDATA_LAST]; /* timing parameters */
@@ -178,6 +180,10 @@ Porting procedure
 				Refer to the platform's ``dram_port.c`` file for a working example.
 		- MV_DDR_CFG_USER - a configuration, which is based on data from user
 		- MV_DDR_CFG_STATIC - as previous, but in register-value format
+	- twin_die_combined - specifies memory arrangement type, whether it single die or two x8s combined to make one x16:
+		- COMBINED - two x8s combined to make one x16 (for example see memory p/n : Micron MT40A1G16)
+		When using this kind of device, we should treat it as X8 device and not X16 device and also it’s density should be half.
+		- NOT_COMBINED - single die
 	- spd_data - contains raw spd data read from a DDR module with spd
 	- timing_data - contains timing parameters
 	- edata - contains electrical configuration parameters
