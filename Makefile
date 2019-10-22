@@ -450,6 +450,9 @@ MV_DDR_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_CSRC))
 # add mv_ddr build message and version string object
 MV_DDR_VER_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_VER_CSRC))
 MV_DDR_COBJ += $(MV_DDR_VER_COBJ)
+ifeq ($(MV_DDR_SNPS),y)
+MV_DDR_COBJ += $(MV_DDR_SNPSPATH)/fw/snps_static.o
+endif
 
 .NOTPARALLEL:
 .SILENT:
