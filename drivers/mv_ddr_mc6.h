@@ -377,6 +377,10 @@ enum mv_ddr_mc6_dm {
 #define VREF_TRAINING_RANGE_DQ_MASK		0x1
 #define VREF_TRAINING_RANGE_1			0x0
 #define VREF_TRAINING_RANGE_2			0x1
+#define READ_PREAMBLE_OFFS			0
+#define READ_PREAMBLE_VAL			1
+#define READ_PREAMBLE_MASK			0x1
+
 
 #define MC6_CH0_DRAM_CFG5_BASE			0x310
 #define MC6_CH0_DRAM_CFG5_REG(cs)		(MC6_CH0_DRAM_CFG5_BASE + (cs) * 0x4)
