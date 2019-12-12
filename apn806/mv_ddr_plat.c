@@ -896,6 +896,9 @@ static int mv_ddr_training_mask_set(void)
 			  WL_PHASE_CORRECTION_MASK_BIT |
 			  RL_DQS_BURST_MASK_BIT |
 			  RECEIVER_CALIBRATION_MASK_BIT |
+#ifndef NO_DM_TUNING
+			  DM_TUNING_MASK_BIT |
+#endif
 			  DQ_VREF_CALIBRATION_MASK_BIT);
 	rl_mid_freq_wa = 0;
 #else /* CONFIG_DDR4 */
