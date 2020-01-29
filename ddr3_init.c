@@ -223,8 +223,10 @@ static int mv_ddr_training_params_set(u8 dev_num)
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	int status;
 	u32 cs_num;
+	int ck_delay;
 
 	cs_num = mv_ddr_cs_num_get();
+	ck_delay = mv_ddr_ck_delay_get();
 
 	/* NOTE: do not remove any field initilization */
 	params.ck_delay = TUNE_TRAINING_PARAMS_CK_DELAY;
@@ -261,6 +263,9 @@ static int mv_ddr_training_params_set(u8 dev_num)
 		params.g_odt_config = TUNE_TRAINING_PARAMS_ODT_CONFIG_2CS;
 	}
 #endif /* CONFIG_DDR4 */
+
+	if (ck_delay > 0)
+		params.ck_delay = ck_delay;
 
 	/* Use platform specific override ODT value */
 	if (tm->odt_config)
