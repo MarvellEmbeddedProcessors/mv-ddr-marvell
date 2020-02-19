@@ -316,6 +316,7 @@ enum {
 #define MODE_2T_MASK				0x1
 #define ADDR_MIRROR_EN_OFFS			16
 enum mv_ddr_mc6_mirror {
+	CS1_NON_MIRROR = 0x0,
 	CS0_MIRROR = 0x1,
 	CS1_MIRROR = 0x2
 };

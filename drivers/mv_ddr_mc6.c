@@ -752,21 +752,6 @@ static int mv_ddr_mc6_cfg_set(unsigned int mc6_base)
 	/* printf("MC6_CH0_DRAM_CFG3_REG addr 0x%x, data 0x%x\n", mc6_base + MC6_CH0_DRAM_CFG3_REG,
 		  reg_read(mc6_base + MC6_CH0_DRAM_CFG3_REG)); */
 
-	/*
-	 * configure dram type, mirror enable, 2t mode  rdimm support
-	 * TODO: get mirror configuration from topology; currently set to cs1 always mirrored
-	 * TODO: add proper configuration while working with rdimm
-	 */
-	reg_bit_clrset(mc6_base + MC6_CH0_MC_CTRL2_REG,
-		       MODE_2T_VAL << MODE_2T_OFFS |
-		       CS1_MIRROR << ADDR_MIRROR_EN_OFFS |
-		       DDR4_TYPE << SDRAM_TYPE_OFFS,
-		       MODE_2T_MASK << SDRAM_TYPE_OFFS |
-		       ADDR_MIRROR_EN_MASK << ADDR_MIRROR_EN_OFFS |
-		       SDRAM_TYPE_MASK << SDRAM_TYPE_OFFS);
-	/* printf("MC6_CH0_MC_CTRL2_REG addr 0x%x, data 0x%x\n", mc6_base + MC6_CH0_MC_CTRL2_REG,
-		  reg_read(mc6_base + MC6_CH0_MC_CTRL2_REG)); */
-
 	/* configure rpp starvation parameters */
 	reg_bit_clrset(mc6_base + MC6_RPP_STARVATION_CTRL_REG,
 		       BW_ALLOC_MODE_SEL_VAL << BW_ALLOC_MODE_SEL_OFFS |
@@ -1444,6 +1429,8 @@ int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int 
 {
 	unsigned int cs_num;
 	unsigned int odt_cfg_wr, odt_cfg_rd;
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_mc6_mirror cs_mirror;
 
 	mv_ddr_mc6_and_dram_timing_set(mc6_base);
 
@@ -1498,12 +1485,32 @@ int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int 
 	reg_write(0x20044, 0x30300);
 #endif	/* #if defined(A70X0) */
 	reg_write(0x202c0, 0x6000);	/* MC_Control_1 - tw2r_dis? , acs_exit_dly timing???, config?? */
-	reg_write(0x202c4, 0x120030);	/* MC_Control_2 - sdram typ, mode 2t, mirror en, rdimm mode - config */
+	/*reg_write(0x202c4, 0x120030);    MC_Control_2 - sdram typ, mode 2t, mirror en, rdimm mode - config */
 	reg_write(0x20180, 0x30200);	/* RPP_Starvation_Control - default */
 	reg_write(0x20050, 0xff);	/* Spool_Control default */
 	reg_write(0x20054, 0x4c0);	/* MC_pwr_ctl - default */
 	reg_write(0x2030c, 0x90000);	/* DRAM_Config_4: vref training value, odt? - config */
 #endif	/* #ifdef CONFIG_MC6P */
+
+	/*
+	 * configure dram type, mirror enable, 2t mode  rdimm support
+	 * TODO: get mirror configuration from topology;
+	 * TODO: add proper configuration while working with rdimm
+	 */
+	if (tm->interface_params[0].as_bus_params[0].mirror_enable_bitmask == 0x2)
+		cs_mirror = CS1_MIRROR;
+	else
+		cs_mirror = CS1_NON_MIRROR;
+
+	reg_bit_clrset(mc6_base + MC6_CH0_MC_CTRL2_REG,
+		       MODE_2T_VAL << MODE_2T_OFFS |
+		       cs_mirror << ADDR_MIRROR_EN_OFFS |
+		       DDR4_TYPE << SDRAM_TYPE_OFFS,
+		       MODE_2T_MASK << SDRAM_TYPE_OFFS |
+		       ADDR_MIRROR_EN_MASK << ADDR_MIRROR_EN_OFFS |
+		       SDRAM_TYPE_MASK << SDRAM_TYPE_OFFS);
+	/*printf("MC6_CH0_MC_CTRL2_REG addr 0x%x, data 0x%x\n", mc6_base + MC6_CH0_MC_CTRL2_REG,
+		  reg_read(mc6_base + MC6_CH0_MC_CTRL2_REG));*/
 
 	/* ODT_Control_2: force_odt */
 	odt_cfg_wr = mv_ddr_mc6_odt_cfg_wr_get();
