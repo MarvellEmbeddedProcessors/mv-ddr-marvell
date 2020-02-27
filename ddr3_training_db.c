@@ -1211,6 +1211,9 @@ u32 pattern_table_get_word(u32 dev_num, enum hws_pattern type, u8 index)
 			break;
 #endif /* CONFIG_DDR4 */
 		default:
+			if (((int)type == 29) || ((int)type == 30))
+				break;
+
 			printf("error: %s: unsupported pattern type [%d] found\n",
 			       __func__, (int)type);
 			pattern = 0;

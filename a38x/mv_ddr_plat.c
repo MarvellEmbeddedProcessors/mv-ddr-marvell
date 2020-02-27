@@ -878,6 +878,7 @@ static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 
 static int mv_ddr_training_mask_set(void)
 {
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 #if defined(CONFIG_DDR4)
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |
 			  LOAD_PATTERN_MASK_BIT |
@@ -896,6 +897,9 @@ static int mv_ddr_training_mask_set(void)
 		printf("vref_calibration_wa is disabled\n");
 		vref_calibration_wa = 0;
 	}
+
+	if (DDR3_IS_16BIT_DRAM_MODE(tm->bus_act_mask) == 1)
+		mask_tune_func &= ~WL_PHASE_CORRECTION_MASK_BIT;
 
 #else /* CONFIG_DDR4 */
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
