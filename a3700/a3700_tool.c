@@ -337,6 +337,7 @@ static int ddr_cfg_read(FILE *fp, struct config_item *cfg_list, int num)
 static int ddr_cfg_parse(struct config_item *clist, struct ddr_porting_cfg *cfg)
 {
 	struct if_params *iface_params = &(cfg->map.interface_params[0]);
+	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	u8 cs_bitmask;
 	u32 i;
 
@@ -351,10 +352,10 @@ static int ddr_cfg_parse(struct config_item *clist, struct ddr_porting_cfg *cfg)
 	iface_params->speed_bin_index = strtol(clist[DDR_SPEEDBIN_INDEX].value, (char **)NULL, 0);
 	iface_params->bus_width = strtol(clist[DDR_BUS_WIDTH_INDEX].value, (char **)NULL, 0);
 	iface_params->memory_size = strtol(clist[DDR_MEM_SIZE_INDEX].value, (char **)NULL, 0);
-	iface_params->twin_die_combined = strtol(clist[DDR_TWIN_DIE_INDEX].value, (char **)NULL, 0);
+	tm->twin_die_combined = strtol(clist[DDR_TWIN_DIE_INDEX].value, (char **)NULL, 0);
 	iface_params->memory_freq = MV_DDR_FREQ_800;
 
-	if (iface_params->twin_die_combined == COMBINED) {
+	if (tm->twin_die_combined == COMBINED) {
 		iface_params->bus_width = MV_DDR_DEV_WIDTH_8BIT;
 		iface_params->memory_size -= 1;
 	}
