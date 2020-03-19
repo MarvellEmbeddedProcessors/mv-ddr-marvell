@@ -1502,6 +1502,9 @@ int mv_ddr_mc6_config(unsigned int mc6_base, unsigned long iface_base_addr, int 
 	else
 		cs_mirror = CS1_NON_MIRROR;
 
+	if (tm->interface_params[0].bus_width == MV_DDR_DEV_WIDTH_16BIT)
+		cs_mirror = CS1_NON_MIRROR;
+
 	reg_bit_clrset(mc6_base + MC6_CH0_MC_CTRL2_REG,
 		       MODE_2T_VAL << MODE_2T_OFFS |
 		       cs_mirror << ADDR_MIRROR_EN_OFFS |
