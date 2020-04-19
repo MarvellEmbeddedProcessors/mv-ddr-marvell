@@ -1239,7 +1239,7 @@ int ddr3_calc_mem_cs_size(u32 cs, uint64_t *cs_size)
 		return MV_BAD_VALUE;
 	}
 
-	*cs_size = cs_mem_size << 20; /* write cs size in bytes */
+	*cs_size = cs_mem_size;
 
 	return MV_OK;
 }
@@ -1248,8 +1248,10 @@ static int ddr3_fast_path_dynamic_cs_size_config(u32 cs_ena)
 {
 	u32 reg, cs;
 	uint64_t mem_total_size = 0;
+	uint64_t cs_mem_size_mb = 0;
 	uint64_t cs_mem_size = 0;
 	uint64_t mem_total_size_c, cs_mem_size_c;
+
 
 #ifdef DEVICE_MAX_DRAM_ADDRESS_SIZE
 	u32 physical_mem_size;
@@ -1261,8 +1263,9 @@ static int ddr3_fast_path_dynamic_cs_size_config(u32 cs_ena)
 	for (cs = 0; cs < MAX_CS_NUM; cs++) {
 		if (cs_ena & (1 << cs)) {
 			/* get CS size */
-			if (ddr3_calc_mem_cs_size(cs, &cs_mem_size) != MV_OK)
+			if (ddr3_calc_mem_cs_size(cs, &cs_mem_size_mb) != MV_OK)
 				return MV_FAIL;
+			cs_mem_size = cs_mem_size_mb * _1M;
 
 #ifdef DEVICE_MAX_DRAM_ADDRESS_SIZE
 			/*
@@ -1311,6 +1314,7 @@ static int ddr3_fast_path_dynamic_cs_size_config(u32 cs_ena)
 			 */
 			mem_total_size_c = (mem_total_size >> 16) & 0xffffffffffff;
 			cs_mem_size_c = (cs_mem_size >> 16) & 0xffffffffffff;
+
 			/* if the sum less than 2 G - calculate the value */
 			if (mem_total_size_c + cs_mem_size_c < 0x10000)
 				mem_total_size += cs_mem_size;
