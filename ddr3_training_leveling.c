@@ -1766,15 +1766,21 @@ static int mpr_rd_frmt_config(
 	enum mv_ddr_mpr_ps ps,
 	enum mv_ddr_mpr_op op,
 	enum mv_ddr_mpr_rd_frmt rd_frmt,
-	u8 cs_bitmask)
+	u8 cs_bitmask, u8 dis_auto_refresh)
 {
 	u32 val, mask;
 	u8 cs_bitmask_inv;
 
-	/* disable auto refresh; TODO: check if required */
-	ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_CTRL_CTRL_REG,
+
+	if (dis_auto_refresh == 1) {
+		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_CTRL_CTRL_REG,
 			  ODPG_CTRL_AUTO_REFRESH_DIS << ODPG_CTRL_AUTO_REFRESH_OFFS,
 			  ODPG_CTRL_AUTO_REFRESH_MASK << ODPG_CTRL_AUTO_REFRESH_OFFS);
+	} else {
+		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, ODPG_CTRL_CTRL_REG,
+			  ODPG_CTRL_AUTO_REFRESH_ENA << ODPG_CTRL_AUTO_REFRESH_OFFS,
+			  ODPG_CTRL_AUTO_REFRESH_MASK << ODPG_CTRL_AUTO_REFRESH_OFFS);
+	}
 
 	/* configure MPR Location for MPR write and read accesses within the selected page */
 	ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, DDR4_MPR_WR_REG,
@@ -1840,7 +1846,7 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 	status = mpr_rd_frmt_config(DDR4_MPR_PAGE0,
 				    DDR4_MPR_OP_ENA,
 				    DDR4_MPR_RF_SERIAL,
-				    cs_bitmask);
+				    cs_bitmask, 1);
 	if (status)
 		return status;
 #endif /* CONFIG_DDR4 */
@@ -2167,7 +2173,7 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 	status = mpr_rd_frmt_config(DDR4_MPR_PAGE0,
 				    DDR4_MPR_OP_DIS,
 				    DDR4_MPR_RF_SERIAL,
-				    cs_bitmask);
+				    cs_bitmask, 0);
 	if (status)
 		return status;
 #endif /* CONFIG_DDR4 */

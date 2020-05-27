@@ -143,6 +143,7 @@ int mv_ddr4_mode_regs_init(u8 dev_num)
 	u32 vref = ((ron + rodt / 2) * 10000) / (ron + rodt);
 	u32 range = (vref >= 6000) ? 0 : 1; /* if vref is >= 60%, use upper range */
 	u32 tap;
+	u32 refresh_mode;
 
 	if (range == 0)
 		tap = (vref - 6000) / 65;
@@ -210,7 +211,9 @@ int mv_ddr4_mode_regs_init(u8 dev_num)
 		/* DDR4 MR3 */
 		/* set fgrm, 0x190C[8:6] to 0x0 */
 		/* set gd, 0x190C[3] to 0x0 */
-		val = (0x0 << 6) | (0x0 << 3);
+		refresh_mode = (tm->interface_params[if_id].interface_temp == MV_DDR_TEMP_HIGH) ? 1 : 0;
+
+		val = (refresh_mode << 6) | (0x0 << 3);
 		mask = (0x7 << 6) | (0x1 << 3);
 		status = ddr3_tip_if_write(dev_num, access_type, if_id, DDR4_MR3_REG,
 					   val, mask);
@@ -227,7 +230,8 @@ int mv_ddr4_mode_regs_init(u8 dev_num)
 		 * set mpd, 0x1910[1] to 0x0
 		 */
 		mask = (0x1 << 12) | (0x1 << 11) | (0x1 << 10) | (0x1 << 9) | (0x7 << 6) | (0x1 << 1);
-		val = (0x0 << 12) | (0x1 << 11) | (0x0 << 10) | (0x0 << 9) | (0x0 << 6) | (0x0 << 1);
+		val =  (0x0 << 12) | (0x1 << 11) | (0x0 << 10) | (0x0 << 9) | (0x0 << 6) | (0x0 << 1);
+
 		status = ddr3_tip_if_write(dev_num, access_type, if_id, DDR4_MR4_REG,
 					   val, mask);
 		if (status != MV_OK)
@@ -284,12 +288,6 @@ static int mv_ddr4_mpr_read_mode_enable(u8 dev_num, u32 mpr_num, u32 page_num,
 		read_format = MV_DDR4_MPR_READ_SERIAL;
 	}
 
-	/* disable refresh - TODO: check why it is the must */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CTRL_REG,
-				   0x1 << 21, 0x1 << 21);
-	if (status != MV_OK)
-		return status;
-
 	val = (page_num << 0) | (0x1 << 2) | (read_format << 11);
 	mask = (0x3 << 0) | (0x1 << 2) | (0x3 << 11);
 
@@ -337,12 +335,6 @@ static int mv_ddr4_mpr_mode_disable(u8 dev_num)
 				MAX_POLLING_ITERATIONS) != MV_OK) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_mpr_mode_disable: DDR3 poll failed(MPR3)\n"));
 	}
-
-	/* enable refresh; see TODO in mv_ddr4_mpr_read_mode_enable() */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CTRL_REG,
-				   0x0 << 21, 0x1 << 21);
-	if (status != MV_OK)
-		return status;
 
 	return MV_OK;
 }
@@ -431,12 +423,6 @@ static int mv_ddr4_mpr_write_mode_enable(u8 dev_num, u32 mpr_location, u32 page_
 	 */
 	int status;
 	u32 if_id = 0, val = 0, mask;
-
-	/* disable refresh - TODO: check why it is the must */
-	status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CTRL_REG,
-				   0x1 << 21, 0x1 << 21);
-	if (status != MV_OK)
-		return status;
 
 	val = (page_num << 0) | (0x1 << 2);
 	mask = (0x3 << 0) | (0x1 << 2);
@@ -550,13 +536,6 @@ int mv_ddr4_vref_training_mode_ctrl(u8 dev_num, u8 if_id, enum hws_access_type a
 	 * set vdq tv, 0x1918[5:0] to vref training value
 	 */
 
-	if (enable == 1) { /* disable refresh */
-		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_CTRL_CTRL_REG,
-					   0x1 << 21, 0x1 << 21);
-		if (status != MV_OK)
-			return status;
-	}
-
 	val = (((enable == 1) ? 1 : 0) << 7);
 	mask = (0x1 << 7);
 	status = ddr3_tip_if_write(dev_num, access_type, if_id, DDR4_MR6_REG, val, mask);
@@ -579,13 +558,6 @@ int mv_ddr4_vref_training_mode_ctrl(u8 dev_num, u8 if_id, enum hws_access_type a
 	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id,  0, 0x1f, SDRAM_OP_REG,
 				MAX_POLLING_ITERATIONS) != MV_OK) {
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_vref_training_mode_ctrl: Polling command failed\n"));
-	}
-
-	if (enable == 0) { /* enable refresh */
-		status = ddr3_tip_if_write(dev_num, access_type, if_id, ODPG_CTRL_CTRL_REG,
-					   0x0 << 21, 0x1 << 21);
-		if (status != MV_OK)
-			return status;
 	}
 
 	return MV_OK;
@@ -758,13 +730,6 @@ int mv_ddr4_pda_ctrl(u8 dev_num, u8 if_id, u8 cs_num, int enable)
 	enum hws_access_type access_type = ACCESS_TYPE_UNICAST;
 	u32 val, mask;
 
-	if (enable == 1) { /* disable refresh */
-		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CTRL_REG,
-					   0x1 << 21, 0x1 << 21);
-		if (status != MV_OK)
-			return status;
-	}
-
 	/* per dram addressability enable */
 	val = ((enable == 1) ? 1 : 0);
 	val <<= 4;
@@ -795,13 +760,6 @@ int mv_ddr4_pda_ctrl(u8 dev_num, u8 if_id, u8 cs_num, int enable)
 	if (ddr3_tip_if_polling(dev_num, ACCESS_TYPE_UNICAST, if_id, 0, 0x1f, SDRAM_OP_REG,
 				MAX_POLLING_ITERATIONS) != MV_OK)
 		DEBUG_TRAINING_IP(DEBUG_LEVEL_ERROR, ("mv_ddr4_pda_ctrl: Polling command failed\n"));
-
-	if (enable == 0) {/* enable refresh */
-		status = ddr3_tip_if_write(dev_num, ACCESS_TYPE_UNICAST, if_id, ODPG_CTRL_CTRL_REG,
-					   0x0 << 21, 0x1 << 21);
-		if (status != MV_OK)
-			return status;
-	}
 
 	return MV_OK;
 }
