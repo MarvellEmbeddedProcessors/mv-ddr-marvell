@@ -507,9 +507,11 @@ unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_dd
 				result = 4200;
 			else if (index <= SPEED_BIN_DDR_2133R)
 				result = 3700;
-			else if (index <= SPEED_BIN_DDR_2400P)
+			else if (index <= SPEED_BIN_DDR_2400U)
+				result = 3500;
+			else if (index <= SPEED_BIN_DDR_2666W)
 				result = 3000;
-			else if (index <= SPEED_BIN_DDR_2933V)
+			else if (index <= SPEED_BIN_DDR_2933AA)
 				result = 2700;
 			else
 				result = 2500;
@@ -562,11 +564,11 @@ unsigned int mv_ddr_speed_bin_timing_get(enum mv_ddr_speed_bin index, enum mv_dd
 				result = 17000;
 			else if (index <= SPEED_BIN_DDR_2133R)
 				result = 15000;
-			else if (index <= SPEED_BIN_DDR_2400P)
+			else if (index <= SPEED_BIN_DDR_2400U)
 				result = 13000;
-			else if (index <= SPEED_BIN_DDR_2666T)
+			else if (index <= SPEED_BIN_DDR_2666W)
 				result = 12000;
-			else if (index <= SPEED_BIN_DDR_2933V)
+			else if (index <= SPEED_BIN_DDR_2933AA)
 				result = 10875;
 			else
 				result = 10000;
