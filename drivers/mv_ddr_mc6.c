@@ -794,13 +794,11 @@ static int mv_ddr_mc6_cfg_set(unsigned int mc6_base)
 	 * TODO: double-check this write with design
 	 */
 	reg_bit_clrset(mc6_base + MC6_CH0_DRAM_CFG4_REG,
-			VREF_TRAINING_VALUE_DQ_VAL << VREF_TRAINING_VALUE_DQ_OFFS |
-			READ_PREAMBLE_VAL << READ_PREAMBLE_OFFS,
-			VREF_TRAINING_VALUE_DQ_MASK << VREF_TRAINING_VALUE_DQ_OFFS |
-			READ_PREAMBLE_MASK << READ_PREAMBLE_OFFS);
-
+		       VREF_TRAINING_VALUE_DQ_VAL << VREF_TRAINING_VALUE_DQ_OFFS,
+		       VREF_TRAINING_VALUE_DQ_MASK << VREF_TRAINING_VALUE_DQ_OFFS);
 	/* printf("MC6_CH0_DRAM_CFG4_REG addr 0x%x, data 0x%x\n", mc6_base + MC6_CH0_DRAM_CFG4_REG,
 		  reg_read(mc6_base + MC6_CH0_DRAM_CFG4_REG)); */
+
 	return 0;
 }
 #endif /* CONFIG_MC6P */
