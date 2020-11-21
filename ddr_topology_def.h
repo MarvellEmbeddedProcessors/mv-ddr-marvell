@@ -107,8 +107,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_DDR_MAX_IFACE_NUM	1
 
 enum mv_ddr_twin_die {
-	COMBINED,
 	NOT_COMBINED,
+	COMBINED,
 };
 
 struct bus_params {
