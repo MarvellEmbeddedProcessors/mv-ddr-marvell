@@ -101,6 +101,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ddr_topology_def.h"
 #include "ddr3_training_ip_db.h"
 
+struct snps_global_data gd;
+
 struct mail_box_major_message mb_major_messages[] = {
 /*	ID,					Message string	*/
 	{MB_MAJOR_ID_END_INIT,			"End of initialization"},
@@ -450,8 +452,13 @@ static void snps_mail_box_print_stream_msg(int msg_id, int msg_log_index)
 	debug_enter();
 
 	/* 1D and 2D have different mail box dictionary database */
-	mb_stream_database = (snps_get_state() == TRAINING_2D ? two_d_messages : one_d_messages);
-	stream_msg_count = sizeof(mb_stream_database) / sizeof(mb_stream_database[0]);
+	if (snps_get_state() == TRAINING_2D) {
+		mb_stream_database = two_d_messages;
+		stream_msg_count = ARRAY_SIZE(two_d_messages);
+	} else {
+		mb_stream_database = one_d_messages;
+		stream_msg_count = ARRAY_SIZE(one_d_messages);
+	}
 
 	/* Most of the dictionary msg_id's are continuous, so first check database if
 	 * msg_id cell holds this msg_id */

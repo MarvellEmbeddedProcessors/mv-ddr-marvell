@@ -322,7 +322,7 @@ struct snps_global_data {
 	int current_run_num;
 };
 
-struct snps_global_data gd;
+extern struct snps_global_data gd;
 
 
 extern int static_section_completed;
