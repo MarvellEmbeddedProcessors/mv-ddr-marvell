@@ -96,6 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "../ddr3_init.h"
+#include "../mv_ddr_common.h"
 #include "../mv_ddr_training_db.h"
 #include "../mv_ddr_regs.h"
 #include "mv_ddr_sys_env_lib.h"
@@ -897,7 +898,6 @@ static int mv_ddr_training_mask_set(void)
 		mask_tune_func &= ~WL_PHASE_CORRECTION_MASK_BIT;
 
 #else /* CONFIG_DDR4 */
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	enum mv_ddr_freq ddr_freq = tm->interface_params[0].memory_freq;
 
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |

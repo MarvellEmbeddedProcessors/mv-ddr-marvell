@@ -98,7 +98,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MV_DDR_PLAT_H
 #define _MV_DDR_PLAT_H
 
+#include <linux/delay.h>
+#if defined(CONFIG_MC_STATIC) || defined(CONFIG_PHY_STATIC)
 #include "mv_ddr_static.h"
+#endif
 
 #define MAX_DEVICE_NUM			1
 #define MAX_INTERFACE_NUM		1
