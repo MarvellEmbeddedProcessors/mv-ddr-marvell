@@ -111,7 +111,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DFS_LOW_FREQ_VALUE		120
 #define SDRAM_CS_SIZE			0xfffffff	/* FIXME: implement a function for cs size for each platform */
 
-#define INTER_REGS_BASE			0xd0000000
+#define INTER_REGS_BASE			SOC_REGS_PHY_BASE
 #define AP_INT_REG_START_ADDR		0xd0000000
 #define AP_INT_REG_END_ADDR		0xd0100000
 
