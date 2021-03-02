@@ -302,6 +302,11 @@ unsigned int mv_ddr_misl_phy_drv_ctrl_p_get(void);
 unsigned int mv_ddr_misl_phy_drv_ctrl_n_get(void);
 unsigned int mv_ddr_misl_phy_odt_p_get(void);
 unsigned int mv_ddr_misl_phy_odt_n_get(void);
+#if defined(A70X0) || defined(A80X0)
 int mv_ddr_get_soc_revision_id(void);
+#endif
+#if defined(CONFIG_DDR4)
 void refresh(void);
+#endif
+
 #endif /* _DDR3_INIT_H */

@@ -270,6 +270,12 @@ enum mv_ddr_temperature {
 	MV_DDR_TEMP_HIGH
 };
 
+enum mv_ddr_timing {
+	MV_DDR_TIM_DEFAULT,
+	MV_DDR_TIM_1T,
+	MV_DDR_TIM_2T
+};
+
 enum mv_ddr_timing_data {
 	MV_DDR_TCK_AVG_MIN, /* sdram min cycle time (t ck avg min) */
 	MV_DDR_TAA_MIN, /* min cas latency time (t aa min) */
@@ -479,6 +485,7 @@ unsigned short mv_ddr_bus_bit_mask_get(void);
 unsigned int mv_ddr_if_bus_width_get(void);
 unsigned int mv_ddr_cs_num_get(void);
 int mv_ddr_is_ecc_ena(void);
+int mv_ddr_ck_delay_get(void);
 unsigned long long mv_ddr_mem_sz_per_cs_get(void);
 unsigned long long mv_ddr_mem_sz_get(void);
 unsigned int mv_ddr_rtt_nom_get(void);

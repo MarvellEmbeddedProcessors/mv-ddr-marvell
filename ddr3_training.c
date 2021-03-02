@@ -99,7 +99,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv_ddr_common.h"
 #include "mv_ddr_training_db.h"
 #include "mv_ddr_regs.h"
+#if defined(A70X0) || defined(A80X0)
 #include "mv_ddr_mrs.h"
+#endif
 
 #define GET_CS_FROM_MASK(mask)	(cs_mask2_num[mask])
 #define CS_CBE_VALUE(cs_num)	(cs_cbe_reg[cs_num])
@@ -511,6 +513,7 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 	u32 data_read[MAX_INTERFACE_NUM];
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
+	enum mv_ddr_timing timing;
 	enum mv_ddr_freq freq = tm->interface_params[0].memory_freq;
 
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE,
@@ -750,8 +753,12 @@ int hws_ddr3_tip_init_controller(u32 dev_num, struct init_cntr_param *init_cntr_
 				      DUNIT_CTRL_HIGH_REG,
 				      (init_cntr_prm->msys_init << 7), (1 << 7)));
 
+			timing = tm->interface_params[if_id].timing;
+
 			if (mode_2t != 0xff) {
 				t2t = mode_2t;
+			} else if (timing != MV_DDR_TIM_DEFAULT) {
+				t2t = (timing == MV_DDR_TIM_2T) ? 1 : 0;
 			} else {
 				/* calculate number of CS (per interface) */
 				cs_num = mv_ddr_cs_num_get();
@@ -1376,6 +1383,7 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 	u32 octets_per_if_num = ddr3_tip_dev_attr_get(dev_num, MV_ATTR_OCTET_PER_INTERFACE);
 	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	unsigned int tclk;
+	enum mv_ddr_timing timing = tm->interface_params[if_id].timing;
 	u32 freq = mv_ddr_freq_get(frequency);
 
 	DEBUG_TRAINING_IP(DEBUG_LEVEL_TRACE,
@@ -1529,6 +1537,8 @@ int ddr3_tip_freq_set(u32 dev_num, enum hws_access_type access_type,
 		/* Calculate 2T mode */
 		if (mode_2t != 0xff) {
 			t2t = mode_2t;
+		} else if (timing != MV_DDR_TIM_DEFAULT) {
+			t2t = (timing == MV_DDR_TIM_2T) ? 1 : 0;
 		} else {
 			/* Calculate number of CS per interface */
 			cs_num = mv_ddr_cs_num_get();

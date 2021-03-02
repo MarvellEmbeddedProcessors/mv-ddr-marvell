@@ -96,6 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "../ddr3_init.h"
+#include "../mv_ddr_common.h"
 #include "../mv_ddr_training_db.h"
 #include "../mv_ddr_regs.h"
 #include "mv_ddr_sys_env_lib.h"
@@ -864,11 +865,6 @@ static int mv_ddr_sw_db_init(u32 dev_num, u32 board_id)
 	dfs_low_freq = DFS_LOW_FREQ_VALUE;
 	calibration_update_control = 1;
 
-#ifdef CONFIG_ARMADA_38X
-	/* For a38x only, change to 2T mode to resolve low freq instability */
-	mode_2t = 1;
-#endif
-
 #if !defined(CONFIG_DDR4)
 	ddr3_tip_a38x_get_medium_freq(dev_num, &medium_freq);
 #endif /* CONFIG_DDR4 */
@@ -902,7 +898,6 @@ static int mv_ddr_training_mask_set(void)
 		mask_tune_func &= ~WL_PHASE_CORRECTION_MASK_BIT;
 
 #else /* CONFIG_DDR4 */
-	struct mv_ddr_topology_map *tm = mv_ddr_topology_map_get();
 	enum mv_ddr_freq ddr_freq = tm->interface_params[0].memory_freq;
 
 	mask_tune_func = (SET_LOW_FREQ_MASK_BIT |

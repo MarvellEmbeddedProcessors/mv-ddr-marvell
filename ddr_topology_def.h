@@ -158,6 +158,9 @@ struct if_params {
 
 	/* operation temperature */
 	enum mv_ddr_temperature interface_temp;
+
+	/* 2T vs 1T mode (by default computed from number of CSs) */
+	enum mv_ddr_timing timing;
 };
 
 /* memory electrical configuration */
@@ -227,6 +230,9 @@ struct mv_ddr_topology_map {
 
 	/* Clock enable mask */
 	u32 clk_enable;
+
+	/* Clock delay */
+	int ck_delay;
 };
 
 enum mv_ddr_iface_mode {
