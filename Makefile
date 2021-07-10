@@ -282,7 +282,7 @@ MV_DDR_VER_COBJ = $(patsubst %.c,$(OBJ_DIR)/%.o,$(MV_DDR_VER_CSRC))
 MV_DDR_COBJ += $(MV_DDR_VER_COBJ)
 
 .SILENT:
-all: check_env header a3700_tool
+all: header a3700_tool
 
 $(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/a3700_ddr_type
 	$(ECHO) "  CC      $<"
@@ -297,11 +297,6 @@ $(MV_DDR_VER_COBJ): $(OBJ_DIR)/a3700_ddr_type
 
 header:
 	$(ECHO) "\nBuilding a3700 tool"
-
-check_env:
-ifndef DDR_TYPE
-	$(error DDR_TYPE is undefined; set DDR_TYPE to DDR3 or DDR4)
-endif
 
 clean:
 	$(ECHO) "Cleaning a3700 tool"
