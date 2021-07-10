@@ -266,7 +266,7 @@ CFLAGS += -DCONFIG_DDR4
 else
 $(error set DDR_TYPE to DDR3 or DDR4)
 endif
-$(shell test "`cat a3700_ddr_type 2>/dev/null`" = "$(DDR_TYPE)" || echo $(DDR_TYPE) > a3700_ddr_type)
+$(shell test "`cat $(OBJ_DIR)/a3700_ddr_type 2>/dev/null`" = "$(DDR_TYPE)" || echo $(DDR_TYPE) > $(OBJ_DIR)/a3700_ddr_type)
 
 CFLAGS += -DCONFIG_A3700 -DSILENT_LIB
 
@@ -284,14 +284,14 @@ MV_DDR_COBJ += $(MV_DDR_VER_COBJ)
 .SILENT:
 all: check_env header a3700_tool
 
-$(OBJ_DIR)/%.o: %.c a3700_ddr_type
+$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/a3700_ddr_type
 	$(ECHO) "  CC      $<"
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 a3700_tool: $(MV_DDR_COBJ)
 	$(CC) -o a3700_tool $(MV_DDR_COBJ)
 
-$(MV_DDR_VER_COBJ): a3700_ddr_type
+$(MV_DDR_VER_COBJ): $(OBJ_DIR)/a3700_ddr_type
 	$(ECHO) "  CC      $(MV_DDR_VER_CSRC)"
 	$(CC) -c $(CFLAGS) -o $@ $(MV_DDR_VER_CSRC)
 
@@ -305,7 +305,7 @@ endif
 
 clean:
 	$(ECHO) "Cleaning a3700 tool"
-	@$(RM) $(MV_DDR_COBJ) a3700_tool a3700_ddr_type
+	@$(RM) $(MV_DDR_COBJ) a3700_tool $(OBJ_DIR)/a3700_ddr_type
 
 # *******************
 # MARVELL ATF SUPPORT
