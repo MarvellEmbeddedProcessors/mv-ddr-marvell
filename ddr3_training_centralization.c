@@ -278,7 +278,8 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 							       [bit_id],
 							       EDGE_1);
 					if (current_byte_status &
-					    BYTE_SPLIT_OUT_MIX) {
+					    (BYTE_SPLIT_OUT_MIX |
+					     BYTE_HOMOGENEOUS_SPLIT_OUT)) {
 						if (cur_start_win[bit_id] >= 64)
 							cur_start_win[bit_id] -= 64;
 						else
@@ -295,7 +296,8 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 							       EDGE_1);
 					if (cur_end_win[bit_id] >= 64 &&
 					    (current_byte_status &
-					     BYTE_SPLIT_OUT_MIX)) {
+					     (BYTE_SPLIT_OUT_MIX |
+					      BYTE_HOMOGENEOUS_SPLIT_OUT))) {
 						cur_end_win[bit_id] -= 64;
 						DEBUG_CENTRALIZATION_ENGINE
 							(DEBUG_LEVEL_INFO,
