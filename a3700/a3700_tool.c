@@ -327,7 +327,7 @@ static int ddr_cfg_read(FILE *fp, struct config_item *cfg_list, int num)
 				if (strcmp(key, cfg_list[i].key) == 0)
 					strcpy(cfg_list[i].value, value);
 			}
-			memset(key, 0, MAX_CFG_LINE_LEN);
+			memset(key, 0, MAX_CFG_NAME_LEN);
 		}
 	}
 
