@@ -806,7 +806,7 @@ static int mv_ddr4_copt_get(u8 dir, u16 *lambda, u8 *vw_l, u8 *vw_h, u8 *pbs_res
 	/* lambda calculated as D * PBS_VALUE_FACTOR / d */
 	//printf("Copt::Debug::\t");
 	for (dq_idx = 0; dq_idx < 8; dq_idx++) {
-		center_per_dq[dq_idx] = 0.5 * (vw_h[dq_idx] + vw_l[dq_idx]);
+		center_per_dq[dq_idx] = (vw_h[dq_idx] + vw_l[dq_idx]) / 2;
 		vw_per_dq[dq_idx] = 1 + (vw_h[dq_idx] - vw_l[dq_idx]);
 		if (min_vw > vw_per_dq[dq_idx])
 			min_vw = vw_per_dq[dq_idx];
@@ -846,9 +846,9 @@ static int mv_ddr4_copt_get(u8 dir, u16 *lambda, u8 *vw_l, u8 *vw_h, u8 *pbs_res
 		return MV_OK;
 	} else { /* not center zone visib */
 		for (dq_idx = 0; dq_idx < 8; dq_idx++) {
-			if ((center_zone_low[dq_idx] + 1) > (0.5 * vw_per_dq[dq_idx] + vw_per_dq[dq_idx] % 2)) {
+			if ((center_zone_low[dq_idx] + 1) > (vw_per_dq[dq_idx] / 2  + vw_per_dq[dq_idx] % 2)) {
 				vw_zone_low[dq_idx] = (center_zone_low[dq_idx] + 1) -
-						      (0.5 * vw_per_dq[dq_idx] + vw_per_dq[dq_idx] % 2);
+						      (vw_per_dq[dq_idx] / 2 + vw_per_dq[dq_idx] % 2);
 			} else {
 				vw_zone_low[dq_idx] = 0;
 				DEBUG_CALIBRATION(DEBUG_LEVEL_INFO,
@@ -859,7 +859,7 @@ static int mv_ddr4_copt_get(u8 dir, u16 *lambda, u8 *vw_l, u8 *vw_h, u8 *pbs_res
 						   vw_l[dq_idx], vw_h[dq_idx], lambda[dq_idx]));
 			}
 
-			vw_zone_high[dq_idx] = center_zone_high[dq_idx] + 0.5 * vw_per_dq[dq_idx];
+			vw_zone_high[dq_idx] = center_zone_high[dq_idx] + vw_per_dq[dq_idx] / 2;
 
 			if (vw_zone_max_low < vw_zone_low[dq_idx])
 				vw_zone_max_low = vw_zone_low[dq_idx];
@@ -1213,7 +1213,7 @@ static int mv_ddr4_tap_tuning(u8 dev, u16 (*pbs_tap_factor)[MAX_BUS_NUM][BUS_WID
 	int dq_to_dqs_min_delta = dq_to_dqs_min_delta_threshold * 2;
 	u32 pbs_tap_factor0 = PBS_VAL_FACTOR * NOMINAL_PBS_DLY / adll_tap; /* init lambda */
 	/* adapt pbs to frequency */
-	u32 new_pbs = (18100 - (3.45 * freq)) / 1000;
+	u32 new_pbs = (1810000 - (345 * freq)) / 100000;
 	int stage_num, loop;
 	int wl_tap, new_wl_tap;
 	int pbs_tap_factor_avg;
