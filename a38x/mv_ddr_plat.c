@@ -1676,12 +1676,12 @@ int ddr3_tip_configure_phy(u32 dev_num)
  * this function validates the calibration values
  * the function is per soc due to the different processes the calibration values are different
  */
-MV_STATUS mv_ddr4_calibration_validate(MV_U32 dev_num)
+int mv_ddr4_calibration_validate(u32 dev_num)
 {
-	MV_STATUS status = MV_OK;
-	MV_U8 if_id = 0;
-	MV_U32 read_data[MAX_INTERFACE_NUM];
-	MV_U32 cal_n = 0, cal_p = 0;
+	int status = MV_OK;
+	u8 if_id = 0;
+	u32 read_data[MAX_INTERFACE_NUM];
+	u32 cal_n = 0, cal_p = 0;
 
 	/*
 	 * Pad calibration control enable: during training set the calibration to be internal
