@@ -108,6 +108,10 @@ MV_DDR_VER_CSRC = mv_ddr_build_message.c
 # create mv_ddr build message and version string source file
 $(shell $(MV_DDR_ROOT)/scripts/localversion.sh $(MV_DDR_ROOT) $(MV_DDR_VER_CSRC) 2> /dev/null)
 
+define cc_option
+	$(shell if $(CC) $(1) -c -x c /dev/null -o /dev/null >/dev/null 2>&1; then echo $(1); fi )
+endef
+
 # ******************
 # U-BOOT SPL SUPPORT
 # ******************
@@ -331,6 +335,7 @@ OBJ_DIR ?= $(MV_DDR_ROOT)
 CFLAGS = -DMV_DDR_ATF -DCONFIG_DDR4
 CFLAGS += -Wall -Werror -Os -ffreestanding -mlittle-endian -g -gdwarf-2 -nostdinc
 CFLAGS += -march=armv8-a -fpie
+CFLAGS += $(call cc_option, --param=min-pagesize=0)
 
 # PLATFORM is set in ble/ble.mk
 ifneq ($(findstring a80x0,$(PLATFORM)),)
