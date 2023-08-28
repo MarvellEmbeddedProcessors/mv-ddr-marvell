@@ -112,7 +112,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "a38x/mv_ddr_plat.h"
 #endif
 
-#include "seq_exec.h"
 #include "ddr3_logging_def.h"
 #include "ddr3_training_hw_algo.h"
 #include "ddr3_training_ip.h"
