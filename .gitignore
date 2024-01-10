@@ -1,0 +1,4 @@
+a3700_ddr_type
+a3700_tool
+*.o
+mv_ddr_build_message.c
