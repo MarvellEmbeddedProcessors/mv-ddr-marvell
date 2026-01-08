@@ -127,7 +127,7 @@ static u8 vdq_tv; /* vref value for dq vref calibration */
 static u8 duty_cycle; /* duty cycle value for receiver calibration */
 static u8 rx_vw_pos[MAX_INTERFACE_NUM][MAX_BUS_NUM];
 static u8 patterns_byte_status[MAX_INTERFACE_NUM][MAX_BUS_NUM];
-static const char *str_dir[MAX_DIR_TYPES] = {"read", "write"};
+static const char __attribute__((unused)) *str_dir[MAX_DIR_TYPES] = {"read", "write"};
 
 static u8 center_low_element_get(u8 dir, u8 pbs_element, u16 lambda, u8 pbs_max_val)
 {
@@ -634,6 +634,10 @@ static int mv_ddr4_centralization(u8 dev_num, u16 (*lambda)[MAX_BUS_NUM][BUS_WID
 					ddr3_tip_get_buf_min(curr_start_win);
 				end_win_skew = ddr3_tip_get_buf_max(curr_end_win) -
 					ddr3_tip_get_buf_min(curr_end_win);
+				/* suppress unused variable warnings when debug is disabled */
+				(void)waste_win;
+				(void)start_win_skew;
+				(void)end_win_skew;
 
 				/* min/max updated with pattern change */
 				curr_end_win_min = ddr3_tip_get_buf_min(curr_end_win);
@@ -1081,6 +1085,8 @@ static int mv_ddr4_center_of_mass_calc(u8 dev_num, u8 if_id, u8 subphy_num, u8 m
 	r_sq = s0 * (s0 / s1);
 	r_sq /= (s2 / 1000);
 	slope = s0 / s1;
+	/* suppress unused variable warning when debug is disabled */
+	(void)slope;
 
 	/* idx n is equal to idx 0 */
 	edge_t[vw_num * 2] = vw_l[0];

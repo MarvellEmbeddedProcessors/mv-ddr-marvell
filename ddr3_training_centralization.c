@@ -401,6 +401,10 @@ static int ddr3_tip_centralization(u32 dev_num, u32 mode)
 						cur_end_win) -
 					ddr3_tip_get_buf_min(
 						cur_end_win);
+				/* suppress unused variable warnings when debug is disabled */
+				(void)waste_window;
+				(void)start_window_skew;
+				(void)end_window_skew;
 				/* min/max updated with pattern change */
 				cur_end_win_min =
 					ddr3_tip_get_buf_min(

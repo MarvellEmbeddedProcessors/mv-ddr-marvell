@@ -2114,6 +2114,11 @@ int mv_ddr_rl_dqs_burst(u32 dev_num, u32 if_id, u32 freq)
 		max_phase = (rl_max_val[effective_cs] - (sdr_cycle_incr * TAPS_PER_RD_SAMPLE)) % MAX_RD_SAMPLES;
 		final_rd_sample = rd_sample;
 		final_rd_ready = rd_ready;
+		/* suppress unused variable warnings when debug is disabled */
+		(void)min_phase;
+		(void)max_phase;
+		(void)final_rd_sample;
+		(void)final_rd_ready;
 
 		ddr3_tip_if_write(0, ACCESS_TYPE_UNICAST, 0, RD_DATA_SMPL_DLYS_REG,
 				  rd_sample << RD_SMPL_DLY_CS_OFFS(effective_cs),

@@ -110,6 +110,11 @@ void ddr3_hws_set_log_level(enum ddr_lib_debug_block block, u8 level)
 {
 	/* do nothing */
 }
+
+void mv_ddr_user_log_level_set(enum ddr_lib_debug_block block)
+{
+	/* do nothing */
+}
 #else /* SILENT_LIB */
 /* Debug flags for other Training modules */
 u8 debug_training_static = DEBUG_LEVEL_ERROR;
